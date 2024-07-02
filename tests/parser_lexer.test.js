@@ -34,21 +34,21 @@ outside
 
 */
 void main(){
-	/**\
+    /*
   
-  /*****\
+  /**
 
-/********\
-	many
+/********
+    many
   
    
-	spaces
-
-   	*/
-	int i = 10;/* This is a multiline
-	comment */
-	i += 1;/**/
-	/* multiline and */ // endline
+    spaces*/
+    
+    int i = 10;/* This is a multiline
+    comment */
+    i += 1;/**/
+    /* multiline and */// endline
+	return;
 }
 /* outsi
 
