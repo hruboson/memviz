@@ -14,7 +14,15 @@ void count();
 %}
 
 %%
-"/*"			{ comment(); }
+"/*"			{ 
+					var curr, prev;
+					curr = this.input();
+
+					while(!(curr == '/' && prev == '*') && this._input.length > 1){
+						prev = curr;
+						curr = this.input();
+					} 
+				}
 "//"[^\n]*      { /* skip until end of line//-comment */ }
 
 "auto"			{ count(); return 'AUTO'; }
