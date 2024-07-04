@@ -165,7 +165,7 @@ void main(){
 	f = !t;
 	t = !1;
 	f = !0;
-	int x; // fix
+	int x;
 	x = t && f;
 	x = t || f;
 	x = 1 && 0;
@@ -180,10 +180,176 @@ test('logical', () => {
 	expect(() => parse(logical)).not.toThrow(Error);
 });
 
-/* COMPARISON */
+/* CONDITIONS */
 
+const conditions = `
+void main(){
+	int i = 1;
+	if    (i == 1)
+	{
+		if(
+			i != 1
+		){
+			return;
+		}else{
+			return;
+		}
+	}else{
+		int i = 10;
+		int x = 11;
+		int res_1 = (i >= 0) ? 1 : 0;
+		int res_2 = (i <= 0) ? i*2 : (x + i);
+	}
+	
+	if(i > 0 && i < 2 && i == 1 || i != 1 || i != 2){
+		return;
+	}
+
+	if (i) return; else printf("Hello world");
+	if (i)
+		if(i && 0xFF)
+			return;
+		else // matches closest if (no dangling else problem)
+			return;
+}
+`;
+
+test('conditions + comparisons', () => {
+	expect(() => parse(conditions)).not.toThrow(Error);
+});
+
+/* TYPES (BASIC + DEFINITION) */
 
 /* DECLARATION + DEFINITION */
+
+const declarations = `
+typedef struct {
+	int x;
+	int y;
+} COORDINATES;
+
+signed char global_char;
+long long global_int;
+
+int main(){
+	int* pi;
+	float* pf;
+	double* df;
+	COORDINATES coord;
+	COORDINATES* coord_ptr;	
+	
+	signed char sc;
+	unsigned char uc;
+	char c;
+	short s;
+	short int si;
+
+	int i;
+	long l;
+	long int li;
+	long long ll;
+	long long int;
+
+	unsigned int ui;
+	unsigned long ul;
+	unsigned long long ull;
+	unsigned long long int ulli;
+	unsigned long int uli;
+
+	float f;
+	double d;
+	long double ld;
+
+	_Bool b;
+}
+`;
+
+test('Declarations', () => {
+	expect(() => parse(declarations)).not.toThrow(Error);
+});
+
+const definitions = `
+// todo IMAGINARY and COMPLEX
+typedef struct {
+	int x;
+	int y;
+} COORDINATES;
+
+signed char global_char;
+long long global_int;
+
+int main(){
+	COORDINATES coord;
+	coord.x = 10;
+	coord.y = 20;
+	COORDINATES* coord_ptr = &coord;
+
+	signed char sc = 'a';
+	unsigned char uc = '♤';
+	char c = '\u6c42';
+	short s = -4242;
+	short int si = 0xFA;
+
+	int i = 42;
+	long l = 011;
+	long int li = 0b010101110;
+	long long ll = 0B01100100; // FIX BIT VALUES in lexer
+	long long int = 999999999;
+
+	unsigned int ui = 123;
+	unsigned long ul = 0424224;
+	unsigned long long ull = 0xFFFFFFF;
+	unsigned long long int ulli = 0xFFFFFF;
+	unsigned long int uli = -424242;
+
+	float f = 1.0;
+	float f1 = .1;
+	float f2 = .0042;
+	float f3 = 1e0;
+	float f4 = 1.00000e0;
+	float f5 = 42.f;
+	float f6 = 0.42e-2;
+	double d = 42E3F;
+	long double ld;
+
+	_Bool bt = true;
+	_Bool bf = false;
+
+	int* pi = &i;
+	float* pf = &f;
+	double* df = &d;
+}
+`;
+
+test('Definitions', () => {
+	expect(() => parse(definitions)).not.toThrow(Error);
+});
+
+const function_definition_declaration = `
+void life(_Bool a, float f, int* ptr, char** array_2d, double ***what){
+	return;
+}
+
+int addition(int a, int b){
+	return a + b;
+}
+
+void nop(){
+	return;
+}
+
+float pi(){
+	return 3.14;
+}
+
+int main(){
+	return 0;
+}
+`;
+
+test('Function definition and declaration', () => {
+	expect(() => parse(function_definition_declaration)).not.toThrow(Error);
+});
 
 /* SIMPLE PROGRAMS */
 
