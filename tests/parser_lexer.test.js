@@ -259,7 +259,7 @@ in(B),t=c*h*g-f*        e;int x=40+30*D*
 
 /*test('donut', () => {
 	expect(() => parse(donut)).not.toThrow(Error);
-}); lets not do that for now :-) */
+}); lets not do that for now :-) gcc is crazy */
 
 
 /*

@@ -1,10 +1,18 @@
-D			[0-9]
-L			[a-zA-Z_]
-H			[a-fA-F0-9]
-E			[Ee][+-]?{D}+
-FS			[fFlL]
-IS			[uUlL]*
-P           ([Pp][+-]?{D}+)
+O   [0-7]
+D   [0-9]
+NZ  [1-9]
+L   [a-zA-Z_]
+A   [a-zA-Z_0-9]
+H   [a-fA-F0-9]
+HP  ("0"[xX])
+E   ([Ee][+-]?{D}+)
+P   ([Pp][+-]?{D}+)
+FS  [fFlL]
+IS  [uUlL]*
+CP 	[uUL] 
+SP  ("u8"|[uUL])
+ES  (\\(['"?\abfnrtv]|[0-7]{1,3}|"x"[a-fA-F0-9]+))
+WS  [\s\t\v\n\f]
 
 %{
 //#include <stdio.h>
@@ -57,19 +65,33 @@ void count();
 "void"			{ count(); return 'VOID'; }
 "volatile"		{ count(); return 'VOLATILE'; }
 "while"			{ count(); return 'WHILE'; }
+"_Alignas"		{ return 'ALIGNAS'; }
+"_Alignof"      	{ return 'ALIGNOF'; }
+"_Atomic"       	{ return 'ATOMIC'; }
+"_Bool"         	{ return 'BOOL'; }
+"_Complex"      	{ return 'COMPLEX'; }
+"_Generic"      	{ return 'GENERIC'; }
+"_Imaginary"    	{ return 'IMAGINARY'; }
+"_Noreturn"     	{ return 'NORETURN'; }
+"_Static_assert" 	{ return 'STATIC_ASSERT'; }
+"_Thread_local"  	{ return 'THREAD_LOCAL'; }
+"__func__"       	{ return 'FUNC_NAME'; }
 
-{L}({L}|{D})*		{ count(); return check_type(); }
+{L}({L}|{D})*		{ count(); return check_type(yytext); }
 
-"0"[xX]{H}+{IS}?			{ count(); return 'CONSTANT'; }
-"0"{D}+{IS}?				{ count(); return 'CONSTANT'; }
-{D}+{IS}?					{ count(); return 'CONSTANT'; }
-"L"?"'"('\\'.|[^\\'])+"'"	{ count(); return 'CONSTANT'; }
+{HP}{H}+{IS}?					{ return 'I_CONSTANT'; }
+{NZ}{D}*{IS}?					{ return 'I_CONSTANT'; }
+"0"{O}*{IS}?					{ return 'I_CONSTANT'; }
+{CP}?"'"([^'\\\n]|{ES})+"'"		{ return 'I_CONSTANT'; }
 
-{D}+{E}{FS}?			{ count(); return 'CONSTANT'; }
-{D}*"."{D}+({E})?{FS}?	{ count(); return 'CONSTANT'; }
-{D}+"."{D}*({E})?{FS}?	{ count(); return 'CONSTANT'; }
+{D}+{E}{FS}?					{ return 'F_CONSTANT'; }
+{D}*"."{D}+{E}?{FS}?			{ return 'F_CONSTANT'; }
+{D}+"."{E}?{FS}?				{ return 'F_CONSTANT'; }
+{HP}{H}+{P}{FS}?				{ return 'F_CONSTANT'; }
+{HP}{H}*"."{H}+{P}{FS}?			{ return 'F_CONSTANT'; }
+{HP}{H}+"."{P}{FS}?				{ return 'F_CONSTANT'; }
 
-"L"?'"'('\"'|[^"])*'"'	{ count(); return 'STRING_LITERAL'; }
+({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return 'STRING_LITERAL'; }
 
 "..."			{ count(); return 'ELLIPSIS'; }
 ">>="			{ count(); return 'RIGHT_ASSIGN'; }
@@ -123,8 +145,8 @@ void count();
 
 %%
 
-function check_type(){
-	return 'IDENTIFIER'; // change this to the actual identifier
+function check_type(yytext){
+	return 'IDENTIFIER'; // TODO add sym table
 }
 
 function comment(){
