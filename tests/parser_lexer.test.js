@@ -264,7 +264,7 @@ int main(){
 }
 `;
 
-test('Declarations', () => {
+test('declarations', () => {
 	expect(() => parse(declarations)).not.toThrow(Error);
 });
 
@@ -321,7 +321,7 @@ int main(){
 }
 `;
 
-test('Definitions', () => {
+test('definitions', () => {
 	expect(() => parse(definitions)).not.toThrow(Error);
 });
 
@@ -347,7 +347,7 @@ int main(){
 }
 `;
 
-test('Function definition and declaration', () => {
+test('function definition and declaration', () => {
 	expect(() => parse(function_definition_declaration)).not.toThrow(Error);
 });
 
