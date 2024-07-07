@@ -5,6 +5,7 @@ L   [a-zA-Z_]
 A   [a-zA-Z_0-9]
 H   [a-fA-F0-9]
 HP  ("0"[xX])
+B	("0"[bB])
 E   ([Ee][+-]?{D}+)
 P   ([Pp][+-]?{D}+)
 FS  [fFlL]
@@ -77,13 +78,6 @@ void count();
 "_Thread_local"  	{ return 'THREAD_LOCAL'; }
 "__func__"       	{ return 'FUNC_NAME'; }
 
-{L}({L}|{D})*		{ count(); return check_type(yytext); }
-
-{HP}{H}+{IS}?					{ return 'I_CONSTANT'; }
-{NZ}{D}*{IS}?					{ return 'I_CONSTANT'; }
-"0"{O}*{IS}?					{ return 'I_CONSTANT'; }
-{CP}?"'"([^'\\\n]|{ES})+"'"		{ return 'I_CONSTANT'; }
-
 {D}+{E}{FS}?					{ return 'F_CONSTANT'; }
 {D}*"."{D}+{E}?{FS}?			{ return 'F_CONSTANT'; }
 {D}+"."{E}?{FS}?				{ return 'F_CONSTANT'; }
@@ -91,7 +85,15 @@ void count();
 {HP}{H}*"."{H}+{P}{FS}?			{ return 'F_CONSTANT'; }
 {HP}{H}+"."{P}{FS}?				{ return 'F_CONSTANT'; }
 
+{B}[01]+						{ return 'I_CONSTANT'; }
+{HP}{H}+{IS}?					{ return 'I_CONSTANT'; }
+{NZ}{D}*{IS}?					{ return 'I_CONSTANT'; }
+"0"{O}*{IS}?					{ return 'I_CONSTANT'; }
+{CP}?"'"([^'\\\n]|{ES})+"'"		{ return 'I_CONSTANT'; }
+
 ({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return 'STRING_LITERAL'; }
+
+{L}({L}|{D})*		{ count(); return check_type(yytext); }
 
 "..."			{ count(); return 'ELLIPSIS'; }
 ">>="			{ count(); return 'RIGHT_ASSIGN'; }
@@ -146,6 +148,9 @@ void count();
 %%
 
 function check_type(yytext){
+	if(yytext.startsWith("0b")){
+		console.log(yytext);
+	}
 	return 'IDENTIFIER'; // TODO add sym table
 }
 

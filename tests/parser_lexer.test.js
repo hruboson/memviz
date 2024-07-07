@@ -235,8 +235,8 @@ int main(){
 	int* pi;
 	float* pf;
 	double* df;
-	COORDINATES coord;
-	COORDINATES* coord_ptr;	
+	//COORDINATES coord;
+	//COORDINATES* coord_ptr;	
 	
 	signed char sc;
 	unsigned char uc;
@@ -279,10 +279,10 @@ signed char global_char;
 long long global_int;
 
 int main(){
-	COORDINATES coord;
+	//COORDINATES coord;
 	coord.x = 10;
 	coord.y = 20;
-	COORDINATES* coord_ptr = &coord;
+	//COORDINATES* coord_ptr = &coord;
 
 	signed char sc = 'a';
 	unsigned char uc = '♤';
@@ -293,8 +293,8 @@ int main(){
 	int i = 42;
 	long l = 011;
 	long int li = 0b010101110;
-	long long ll = 0B01100100; // FIX BIT VALUES in lexer
-	long long int = 999999999;
+	long long ll = 0B01100100;
+	long long int lli = 999999999;
 
 	unsigned int ui = 123;
 	unsigned long ul = 0424224;
@@ -302,7 +302,7 @@ int main(){
 	unsigned long long int ulli = 0xFFFFFF;
 	unsigned long int uli = -424242;
 
-	float f = 1.0;
+	float f = 1.1;
 	float f1 = .1;
 	float f2 = .0042;
 	float f3 = 1e0;
