@@ -15,6 +15,13 @@
 
 %token ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
 
+%{
+	const Symtable = require('../symtable');
+	var symtable = new Symtable();
+
+	//console.log(symtable);
+%}
+
 %start translation_unit
 %%
 
@@ -196,7 +203,7 @@ declaration
 
 declaration_specifiers
 	: storage_class_specifier declaration_specifiers
-	| storage_class_specifier
+	| storage_class_specifier -> [$1]
 	| type_specifier declaration_specifiers
 	| type_specifier
 	| type_qualifier declaration_specifiers
@@ -505,7 +512,7 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration
+	: external_declaration { $$=[...$1]; }
 	| translation_unit external_declaration
 	;
 

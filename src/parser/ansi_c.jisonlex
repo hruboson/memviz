@@ -86,7 +86,10 @@ WS  [\s\t\v\n\f]
 
 ({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return 'STRING_LITERAL'; }
 
-{L}({L}|{D})*		{ return check_type(yytext); }
+{L}({L}|{D})*		{ 
+						symtable.insert(yytext, 'IDENTIFIER'); 
+						return symtable.get_type(yytext);
+					}
 
 "..."			{ return 'ELLIPSIS'; }
 ">>="			{ return 'RIGHT_ASSIGN'; }
@@ -139,10 +142,3 @@ WS  [\s\t\v\n\f]
 .				{ /* ignore bad characters */ }
 
 %%
-
-function check_type(yytext){
-	if(yytext.startsWith("0b")){
-		console.log(yytext);
-	}
-	return 'IDENTIFIER'; // TODO add sym table
-}

@@ -17,6 +17,7 @@ void main(){ // comment after code;
 	// ᎦᎴᎦᏕᏗᏗᎶᏗᏕᎴᎶᏗᏕᎴᎦᏝᏠůᏝ
 	// ⛵👊  ᵃ𝐬ᵈ𝕗𝐆ʰｋĴ𝐤ℓ+ěš+ěščýáíéřčžéý  💙♤
 	// -漫~*'¨¯¨'*·舞~   🎀  𝒶𝓈𝒹𝒻𝑔𝒽𝓀𝒿𝓀𝓁+ěš+ěščýáíéřčžéý  🎀   ~舞·*'¨¯¨'*~漫-
+	// printf()
 	int i; // declare i
 	while(i > 1) printf("a"); // loop
 }   // comment after code
@@ -235,8 +236,8 @@ int main(){
 	int* pi;
 	float* pf;
 	double* df;
-	//COORDINATES coord;
-	//COORDINATES* coord_ptr;	
+	COORDINATES coord;
+	COORDINATES* coord_ptr;	
 	
 	signed char sc;
 	unsigned char uc;
@@ -261,6 +262,11 @@ int main(){
 	long double ld;
 
 	_Bool b;
+
+	int arr2d[10][10];
+	int arr2d_big[1000000000][1000000000];
+	float arr2d_f[2][2];
+	unsigned long long arr2d_ull[1][+1];
 }
 `;
 
@@ -279,10 +285,10 @@ signed char global_char;
 long long global_int;
 
 int main(){
-	//COORDINATES coord;
+	COORDINATES coord;
 	coord.x = 10;
 	coord.y = 20;
-	//COORDINATES* coord_ptr = &coord;
+	COORDINATES* coord_ptr = &coord;
 
 	signed char sc = 'a';
 	unsigned char uc = '♤';
@@ -343,7 +349,16 @@ float pi(){
 }
 
 int main(){
-	return 0;
+	int a;
+	int field[3][4];
+	double d;
+	double* dd = &d;
+	double** ddd = &dd;
+	double*** dddd = &ddd;
+	life(true, 3.14, &a, field, dddd);
+	nop();
+	float pi = pi();
+	return addition(-1, 1);
 }
 `;
 
@@ -395,38 +410,6 @@ int main() {
 test('simple for', () => {
 	expect(() => parse(for_loop_simple)).not.toThrow(Error);
 });
-
-/* WEIRD */
-
-/* source: https://www.a1k0n.net/2006/09/15/obfuscated-c-donut.html */
-const donut = `
-            k;double sin()
-         ,cos();main(){float A=
-       0,B=0,i,j,z[1760];char b[
-     1760];printf("\x1b[2J");for(;;
-  ){memset(b,32,1760);memset(z,0,7040)
-  ;for(j=0;6.28>j;j+=0.07)for(i=0;6.28
- >i;i+=0.02){float c=sin(i),d=cos(j),e=
- sin(A),f=sin(j),g=cos(A),h=d+2,D=1/(c*
- h*e+f*g+5),l=cos      (i),m=cos(B),n=s\
-in(B),t=c*h*g-f*        e;int x=40+30*D*
-(l*h*m-t*n),y=            12+15*D*(l*h*n
-+t*m),o=x+80*y,          N=8*((f*e-c*d*g
- )*m-c*d*e-f*g-l        *d*n);if(22>y&&
- y>0&&x>0&&80>x&&D>z[o]){z[o]=D;;;b[o]=
- ".,-~:;=!*#$@"[N>0?N:0];}}/*#****!!-*/
-  printf("\x1b[H");for(k=0;1761>k;k++)
-   putchar(k%80?b[k]:10);A+=0.04;B+=
-     0.02;}}/*****####*******!!=;:~
-       ~::==!!!**********!!!==::-
-         .,~~;;;========;;;:~-.
-             ..,--------,*/
-`;
-
-/*test('donut', () => {
-	expect(() => parse(donut)).not.toThrow(Error);
-}); lets not do that for now :-) gcc is crazy */
-
 
 /*
 INCORRECT SNIPPETS - EXPECT ERROR
