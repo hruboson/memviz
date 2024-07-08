@@ -87,8 +87,10 @@ WS  [\s\t\v\n\f]
 ({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return 'STRING_LITERAL'; }
 
 {L}({L}|{D})*		{ 
-						symtable.insert(yytext, 'IDENTIFIER'); 
-						return symtable.get_type(yytext);
+						if (parser.yy.types.includes(yytext)){
+							return 'TYPE_NAME';
+						}
+						return 'IDENTIFIER';
 					}
 
 "..."			{ return 'ELLIPSIS'; }
