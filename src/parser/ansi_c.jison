@@ -23,16 +23,16 @@
 %%
 
 primary_expression
-	: IDENTIFIER
-	| constant
-	| string
+	: IDENTIFIER { $$ = $1; }
+	| constant { $$ = $1; }
+	| string { $$ = $1; }
 	| '(' expression ')'
 	| generic_selection
 	;
 
 constant
-	: I_CONSTANT
-	| F_CONSTANT
+	: I_CONSTANT { $$ = { type: "integer", value: $1 }; }
+	| F_CONSTANT { $$ = { type: "float", value: $1 };}
 	| ENUMERATION_CONSTANT	
 	;
 
@@ -41,7 +41,7 @@ enumeration_constant
 	;
 
 string
-	: STRING_LITERAL
+	: STRING_LITERAL { $$ = { type: "string", value: $1 }}
 	| FUNC_NAME
 	;
 
@@ -171,7 +171,7 @@ assignment_expression
 
 assignment_operator
 	: '='
-	| MUL_ASSIGN
+	| MUL_ASSIGN 
 	| DIV_ASSIGN
 	| MOD_ASSIGN
 	| ADD_ASSIGN
@@ -189,26 +189,26 @@ expression
 	;
 
 constant_expression
-	: conditional_expression	/* with constraints */
+	: conditional_expression { $$ = $1; }
 	;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';' 
+	: declaration_specifiers ';' { $$ = { statement_type: "declaration", declaration_specifiers: [...$1] }; }
+	| declaration_specifiers init_declarator_list ';' { $$ = { statement_type: "declaration", declaration_specifiers: [...$1], name: $2 }; }
 	| static_assert_declaration
 	;
 
 declaration_specifiers
-	: storage_class_specifier declaration_specifiers
-	| storage_class_specifier 
-	| type_specifier declaration_specifiers
-	| type_specifier
-	| type_qualifier declaration_specifiers
-	| type_qualifier
-	| function_specifier declaration_specifiers
-	| function_specifier
-	| alignment_specifier declaration_specifiers
-	| alignment_specifier
+	: storage_class_specifier declaration_specifiers { $$ = [$1, ...$2]; }
+	| storage_class_specifier { $$ = [$1]; }
+	| type_specifier declaration_specifiers { $$ = [$1, ...$2]; }
+	| type_specifier { $$ = [$1]; }
+	| type_qualifier declaration_specifiers { $$ = [$1, ...$2]; }
+	| type_qualifier { $$ = [$1]; }
+	| function_specifier declaration_specifiers { $$ = [$1, ...$2]; }
+	| function_specifier { $$ = [$1]; } 
+	| alignment_specifier declaration_specifiers { $$ = [$1, ...$2]; }
+	| alignment_specifier { $$ = [$1]; }
 	;
 
 init_declarator_list
@@ -467,12 +467,12 @@ labeled_statement
 
 compound_statement
 	: '{' '}'
-	| '{'  block_item_list '}'
+	| '{'  block_item_list '}' { $$ = [$2] }
 	;
 
 block_item_list
-	: block_item
-	| block_item_list block_item
+	: block_item { $$ = [$1]; }
+	| block_item_list block_item { $$ = $1.concat($2); }
 	;
 
 block_item
@@ -509,18 +509,21 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration { $$=[...$1]; }
-	| translation_unit external_declaration
+	: translation_unit external_declaration EOF { return $1.concat($2); }
+	| external_declaration EOF { return [$1]; }
+	| translation_unit external_declaration { $$ = $1.concat($2); }
+	| external_declaration { $$ = [$1]; }
 	;
 
 external_declaration
-	: function_definition
-	| declaration
+	: function_definition { $$ = { statement_type: "function_definition", function_definition: $1 }; }
+	| declaration { $$ = { statement_type: "declaration", declaration: $1 }; }
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
+	: declaration_specifiers declarator compound_statement { $$ = { return_type: $1, name: $2 , body: $3 }; }
+ 	| declaration_specifiers declarator declaration_list compound_statement 
+	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;
 
 declaration_list

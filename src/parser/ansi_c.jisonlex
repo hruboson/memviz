@@ -140,7 +140,9 @@ WS  [\s\t\v\n\f]
 "|"				{ return '|'; }
 "?"				{ return '?'; }
 
+<<EOF>>         { return 'EOF'; }
 [ \t\v\n\f]		{ /* ignore whitespace */ }
 .				{ /* ignore bad characters */ }
+
 
 %%
