@@ -24,8 +24,10 @@ void main(){ // comment after code;
 // comment after main
 `;
 
-test('end line comments', () => {
-	expect(() => parse(endln_comments)).not.toThrow(Error);
+describe('correct', () => {
+	test('end line comments', () => {
+		expect(() => parse(endln_comments)).not.toThrow(Error);
+	});
 });
 
 const multiline_comments = `
@@ -58,8 +60,10 @@ de
 
 */
 `;
-test('multiline comments', () => {
-	expect(() => parse(multiline_comments)).not.toThrow(Error);
+describe('correct', () => {
+	test('multiline comments', () => {
+		expect(() => parse(multiline_comments)).not.toThrow(Error);
+	});
 });
 
 /* ARITHMETIC */
@@ -75,8 +79,10 @@ void main(){
 }
 `;
 
-test('addition', () => {
-	expect(() => parse(addition_all)).not.toThrow(Error);
+describe('correct', () => {
+	test('addition', () => {
+		expect(() => parse(addition_all)).not.toThrow(Error);
+	});
 });
 
 const substraction_all = `
@@ -91,8 +97,10 @@ void main(){
 }
 `;
 
-test('substraction', () => {
-	expect(() => parse(substraction_all)).not.toThrow(Error);
+describe('correct', () => {
+	test('substraction', () => {
+		expect(() => parse(substraction_all)).not.toThrow(Error);
+	});
 });
 
 const multiplication_all = `
@@ -105,8 +113,10 @@ void main(){
 }
 `;
 
-test('multiplication', () => {
-	expect(() => parse(multiplication_all)).not.toThrow(Error);
+describe('correct', () => {
+	test('multiplication', () => {
+		expect(() => parse(multiplication_all)).not.toThrow(Error);
+	});
 });
 
 const division_all = `
@@ -119,8 +129,10 @@ void main(){
 }
 `;
 
-test('division', () => {
-	expect(() => parse(division_all)).not.toThrow(Error);
+describe('correct', () => {
+	test('division', () => {
+		expect(() => parse(division_all)).not.toThrow(Error);
+	});
 });
 
 const modulo = `
@@ -130,8 +142,10 @@ void main(){
 }
 `;
 
-test('modulo', () => {
-	expect(() => parse(modulo)).not.toThrow(Error);
+describe('correct', () => {
+	test('modulo', () => {
+		expect(() => parse(modulo)).not.toThrow(Error);
+	});
 });
 
 /* BITWISE + LOGICAL */
@@ -154,8 +168,10 @@ void main(){
 }
 `;
 
-test('bitwise', () => {
-	expect(() => parse(bitwise)).not.toThrow(Error);
+describe('correct', () => {
+	test('bitwise', () => {
+		expect(() => parse(bitwise)).not.toThrow(Error);
+	});
 });
 
 const logical = `
@@ -177,8 +193,10 @@ void main(){
 }
 `;
 
-test('logical', () => {
-	expect(() => parse(logical)).not.toThrow(Error);
+describe('correct', () => {
+	test('logical', () => {
+		expect(() => parse(logical)).not.toThrow(Error);
+	});
 });
 
 /* CONDITIONS */
@@ -195,6 +213,8 @@ void main(){
 		}else{
 			return;
 		}
+	}else if(i != 1){
+		return;
 	}else{
 		int i = 10;
 		int x = 11;
@@ -215,19 +235,22 @@ void main(){
 }
 `;
 
-test('conditions + comparisons', () => {
-	expect(() => parse(conditions)).not.toThrow(Error);
+describe('correct', () => {
+	test('conditions + comparisons + ternary op', () => {
+		expect(() => parse(conditions)).not.toThrow(Error);
+	});
 });
-
-/* TYPES (BASIC + DEFINITION) */
 
 /* DECLARATION + DEFINITION */
 
 const declarations = `
-typedef struct {
+struct coordinates {
 	int x;
 	int y;
-} COORDINATES;
+};
+
+enum weekdays { MONDAY = 1, TUESDAY = 2, WEDNESDAY = 3, THURSDAY = 4, FRIDAY = 5, SATURDAY = 6, SUNDAY = 7 };
+enum year{Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
 
 signed char global_char;
 long long global_int;
@@ -236,8 +259,8 @@ int main(){
 	int* pi;
 	float* pf;
 	double* df;
-	COORDINATES coord;
-	COORDINATES* coord_ptr;	
+	struct coordinates coord;
+	struct coordinates* coord_ptr;	
 	
 	signed char sc;
 	unsigned char uc;
@@ -266,29 +289,36 @@ int main(){
 	int arr2d[10][10];
 	int arr2d_big[1000000000][1000000000];
 	float arr2d_f[2][2];
-	unsigned long long arr2d_ull[1][+1];
+	unsigned long long arr2d_ull[MONDAY][+1];
 }
 `;
 
-test('declarations', () => {
-	expect(() => parse(declarations)).not.toThrow(Error);
+describe('correct', () => {
+	test('declarations', () => {
+		expect(() => parse(declarations)).not.toThrow(Error);
+	});
 });
 
 const definitions = `
 // todo IMAGINARY and COMPLEX
-typedef struct {
+struct coordinates {
 	int x;
 	int y;
-} COORDINATES;
+};
+
+enum weekdays { MONDAY = 1, TUESDAY = 2, WEDNESDAY = 3, THURSDAY = 4, FRIDAY = 5, SATURDAY = 6, SUNDAY = 7 };
+enum year{Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
 
 signed char global_char;
 long long global_int;
 
 int main(){
-	COORDINATES coord;
+	struct coordinates coord;
 	coord.x = 10;
 	coord.y = 20;
-	COORDINATES* coord_ptr = &coord;
+	struct coordinates* coord_ptr = &coord;
+	enum weekday monday = MONDAY;
+	enum year january = JANUARY;
 
 	signed char sc = 'a';
 	unsigned char uc = '♤';
@@ -327,8 +357,38 @@ int main(){
 }
 `;
 
-test('definitions', () => {
-	expect(() => parse(definitions)).not.toThrow(Error);
+describe('correct', () => {
+	test('definitions', () => {
+		expect(() => parse(definitions)).not.toThrow(Error);
+	});
+});
+
+const typedef_declaration_definition = `
+typedef int i;
+typedef long long ll;
+
+typedef struct coordinates {
+	int x;
+	int y;
+} COORDINATES;
+
+int main(){
+	i a = 1;
+	ll b = 4242424242;
+
+	COORDINATES xy;
+	xy.x = 1;
+	xy.y = 0;
+	COORDINATES* xy_p = &xy;
+
+	return xy.x;
+}
+`;
+
+describe('correct', () => {
+	test('typdef', () => {
+		expect(() => parse(typedef_declaration_definition)).not.toThrow(Error);
+	});
 });
 
 const function_definition_declaration = `
@@ -362,22 +422,13 @@ int main(){
 }
 `;
 
-test('function definition and declaration', () => {
-	expect(() => parse(function_definition_declaration)).not.toThrow(Error);
+describe('correct', () => {
+	test('function definition, declaration, calls', () => {
+		expect(() => parse(function_definition_declaration)).not.toThrow(Error);
+	})
 });
 
-/* SIMPLE PROGRAMS */
-
-const hello_world = `
-int main(){
-	printf("Hello world");
-	return 0;
-}
-`;
-
-test('hello world', () => {
-	expect(() => parse(hello_world)).not.toThrow(Error);
-});
+/* SIMPLE CF STATEMENTS */
 
 const while_loop_simple = `
 int main() {
@@ -393,8 +444,27 @@ int main() {
 }
 `;
 
-test('simple while', () => {
-	expect(() => parse(while_loop_simple)).not.toThrow(Error);
+describe('correct', () => {
+	test('while loop', () => {
+		expect(() => parse(while_loop_simple)).not.toThrow(Error);
+	});
+});
+
+const do_while_loop_simple = `
+void main()       {
+	int count = 0;
+	do {
+		count++;
+	}while(
+		count <= 5
+	);
+}
+`;
+
+describe('correct', () => {
+	test('do while loop', () => {
+		expect(() => parse(do_while_loop_simple)).not.toThrow(Error);
+	});
 });
 
 const for_loop_simple = `
@@ -407,10 +477,125 @@ int main() {
 }
 `;
 
-test('simple for', () => {
-	expect(() => parse(for_loop_simple)).not.toThrow(Error);
+describe('correct', () => {
+	test('for loop', () => {
+		expect(() => parse(for_loop_simple)).not.toThrow(Error);
+	});
+});
+
+const switch_case_simple = `
+void main(){
+	int a = 1;
+	switch(a){
+		case 1:
+			return;
+		case 2:
+			break;
+		default:
+			break;
+	}
+}
+`;
+
+describe('correct', () => {
+	test('switch', () => {
+		expect(() => parse(switch_case_simple)).not.toThrow(Error);
+	});
+});
+
+const goto_simple = `
+int main(){
+	int num = 20;
+	if (num % 2 == 0) 
+		goto even_label; 
+    else
+		goto odd_label;
+
+even_label:
+	return 2;
+odd_label:
+	return 3;
+return 1;
+}
+`;
+
+describe('correct', () => {
+	test('goto', () => {
+		expect(() => parse(goto_simple)).not.toThrow(Error);
+	});
+});
+
+const continue_break_simple = `
+void main(){
+	int a = 10;
+	while(a > 0){
+		if(a == 5) continue;
+		if(a == 1) break;
+		a--;
+	}
+}
+`;
+
+describe('correct', () => {
+	test('continue + break', () => {
+		expect(() => parse(continue_break_simple)).not.toThrow(Error);
+	});
+});
+
+/* SIMPLE PROGRAMS */
+
+const hello_world = `
+int main(){
+	printf("Hello world");
+	return 0;
+}
+`;
+
+describe('correct', () => {
+	test('hello world', () => {
+		expect(() => parse(hello_world)).not.toThrow(Error);
+	});
 });
 
 /*
 INCORRECT SNIPPETS - EXPECT ERROR
 */
+
+const no_function = `
+int a = 1;
+int i = a++;
+return;
+`;
+
+describe('incorrect', () => {
+	test('no function', () => {
+		expect(() => parse(no_function)).toThrow(Error);
+	});
+});
+
+const comment_not_ended = `
+int main(){ /*
+	return;
+}
+`;
+
+describe('incorrect', () => {
+	test('multiline comment not ended', () => {
+		expect(() => parse(comment_not_ended)).toThrow(Error);
+	});
+});
+
+const wrong_type = `
+int main(){
+	imt i;
+	triple t;
+	sinking s;
+	return 1;
+}
+`;
+
+describe('incorrect', () => {
+	test('wrong types', () => {
+		expect(() => parse(wrong_type)).toThrow(Error);
+	});
+});
