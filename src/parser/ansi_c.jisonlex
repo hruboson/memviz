@@ -88,7 +88,7 @@ WS  [\s\t\v\n\f]
 
 {L}({L}|{D})*		{ 
 						if (parser.yy.types.includes(yytext)){
-							return 'TYPE_NAME';
+							return 'TYPEDEF_NAME';
 						}else{
 							return 'IDENTIFIER';
 						}
