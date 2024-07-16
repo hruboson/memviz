@@ -17,6 +17,7 @@
 
 %{
 	parser.yy.types = []; // typedef types
+	parser.yy.last_types = []; // typedefs of last parsing (get cached)
 %}
 
 %start translation_unit
@@ -31,8 +32,8 @@ primary_expression
 	;
 
 constant
-	: I_CONSTANT { $$ = { type: "integer", value: $1 }; }
-	| F_CONSTANT { $$ = { type: "float", value: $1 };}
+	: I_CONSTANT { $$ = { type: "int_constant", value: $1 }; }
+	| F_CONSTANT { $$ = { type: "float_constant", value: $1 }; }
 	| ENUMERATION_CONSTANT	
 	;
 
@@ -41,8 +42,8 @@ enumeration_constant
 	;
 
 string
-	: STRING_LITERAL { $$ = { type: "string", value: $1 }}
-	| FUNC_NAME
+	: STRING_LITERAL { $$ = { type: "string_constant", value: $1 }; }
+	| FUNC_NAME { $$ = $1; }
 	;
 
 generic_selection
@@ -193,8 +194,24 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ';' { $$ = { statement_type: "declaration", declaration_specifiers: [...$1] }; }
-	| declaration_specifiers init_declarator_list ';' { $$ = { statement_type: "declaration", declaration_specifiers: [...$1], name: $2 }; }
+	: declaration_specifiers ';'
+	{
+
+	}
+	| declaration_specifiers init_declarator_list ';' 
+	{
+		$$ = [];
+		for(var declarator of $2){
+			if($1.includes("typedef")){
+				$$.push({statement_type: "typedef", type: $1.filter(function (without) {
+					return without !== "typedef"; // remove "typedef" as that is not needed in the types
+				}), declarator: declarator });
+				parser.yy.types.push(declarator.name);
+			}else{
+				$$.push({statement_type: "declaration", type: $1, declarator: declarator});
+			}
+		}
+	}
 	| static_assert_declaration
 	;
 
@@ -212,13 +229,13 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator { $$ = [$1]; }
+	| init_declarator_list ',' init_declarator { $$ = [...$1, $3]; }
 	;
 
 init_declarator
-	: declarator '=' initializer
-	| declarator
+	: declarator '=' initializer { $$ = { name: $1.name, initializer: $3}; }
+	| declarator { $$ = { name: $1.name, initializer: null }; }
 	;
 
 storage_class_specifier
@@ -329,8 +346,8 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator
-	| direct_declarator
+	: pointer direct_declarator { $$ = { pointer: $1, name: $2 }; }
+	| direct_declarator { $$ = { name: $1 }; }
 	;
 
 direct_declarator
@@ -358,8 +375,8 @@ pointer
 	;
 
 type_qualifier_list
-	: type_qualifier
-	| type_qualifier_list type_qualifier
+	: type_qualifier { $$ = [$1]; }
+	| type_qualifier_list type_qualifier { $$ = [...$1, $2]; }
 	;
 
 
@@ -420,9 +437,9 @@ direct_abstract_declarator
 	;
 
 initializer
-	: '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
-	| assignment_expression
+	: '{' initializer_list '}' { $$ = $2; }
+	| '{' initializer_list ',' '}' { $$ = $2; }
+	| assignment_expression { $$ = $1; }
 	;
 
 initializer_list
@@ -509,8 +526,8 @@ jump_statement
 	;
 
 translation_unit
-	: translation_unit external_declaration EOF { return $1.concat($2); }
-	| external_declaration EOF { return [$1]; }
+	: translation_unit external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return $1.concat($2); } // clear types because they get cached by JS
+	| external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return [$1]; } // clear types because they get cached by JS
 	| translation_unit external_declaration { $$ = $1.concat($2); }
 	| external_declaration { $$ = [$1]; }
 	;
@@ -521,7 +538,7 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement { $$ = { return_type: $1, name: $2 , body: $3 }; }
+	: declaration_specifiers declarator compound_statement { $$ = { return_type: $1, name: $2.name, body: $3 }; }
  	| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;
