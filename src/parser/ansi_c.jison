@@ -16,7 +16,7 @@
 %token ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
 
 %{
-	parser.yy.types = [];
+	parser.yy.types = []; // typedef types
 %}
 
 %start translation_unit
@@ -467,11 +467,11 @@ labeled_statement
 
 compound_statement
 	: '{' '}'
-	| '{'  block_item_list '}' { $$ = [$2] }
+	| '{'  block_item_list '}' { $$ = $2 }
 	;
 
 block_item_list
-	: block_item { $$ = [$1]; }
+	: block_item { $$ = $1; }
 	| block_item_list block_item { $$ = $1.concat($2); }
 	;
 
@@ -516,8 +516,8 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition { $$ = { statement_type: "function_definition", function_definition: $1 }; }
-	| declaration { $$ = { statement_type: "declaration", declaration: $1 }; }
+	: function_definition { $$ = { statement_type: "function_definition", function_definition: $1 }; } // function definition
+	| declaration { $$ = { statement_type: "declaration", declaration: $1 }; } // global declaration
 	;
 
 function_definition
