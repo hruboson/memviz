@@ -386,7 +386,7 @@ int main(){
 `;
 
 describe('correct', () => {
-	test('typdef', () => {
+	test('typedef', () => {
 		expect(() => parse(typedef_declaration_definition)).not.toThrow(Error);
 	});
 });
