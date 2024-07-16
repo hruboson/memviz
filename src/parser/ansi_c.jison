@@ -441,16 +441,16 @@ direct_abstract_declarator
 	;
 
 initializer
-	: '{' initializer_list '}' { $$ = $2; }
-	| '{' initializer_list ',' '}' { $$ = $2; }
+	: '{' initializer_list '}' { $$ = { type: "array_initializer", values: $2 }; }
+	| '{' initializer_list ',' '}' { $$ = { type: "array_initializer", values: $2 }; }
 	| assignment_expression { $$ = $1; }
 	;
 
 initializer_list
 	: designation initializer
-	| initializer
+	| initializer { $$ = [$1]; }
 	| initializer_list ',' designation initializer
-	| initializer_list ',' initializer
+	| initializer_list ',' initializer { $$ = [...$1, $3]; }
 	;
 
 designation

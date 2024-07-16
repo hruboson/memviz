@@ -89,7 +89,7 @@ break;
 case 2: case 3: case 89: case 166: case 167: case 218:
  this.$ = $$[$0]; 
 break;
-case 4: case 169: case 216:
+case 4: case 169:
  this.$ = $$[$0-1]; 
 break;
 case 6:
@@ -131,10 +131,10 @@ break;
 case 93: case 95: case 97: case 99: case 101:
  this.$ = [$$[$0-1], ...$$[$0]]; 
 break;
-case 94: case 96: case 98: case 100: case 102: case 103: case 179: case 240: case 263:
+case 94: case 96: case 98: case 100: case 102: case 103: case 179: case 220: case 240: case 263:
  this.$ = [$$[$0]]; 
 break;
-case 104:
+case 104: case 222:
  this.$ = [...$$[$0-2], $$[$0]]; 
 break;
 case 105:
@@ -152,14 +152,17 @@ break;
 case 172: case 174:
  this.$ = $$[$0-3]; 
 break;
-case 173: case 217:
+case 173:
  this.$ = $$[$0-2]; 
 break;
 case 180: case 241: case 262:
  this.$ = [...$$[$0-1], $$[$0]]; 
 break;
-case 222:
- this.$ = { initializer_type: "array_initializer", values: [...$$[$0-2], $$[$0]] }; 
+case 216:
+ this.$ = { type: "array_initializer", values: $$[$0-1] }; 
+break;
+case 217:
+ this.$ = { type: "array_initializer", values: $$[$0-2] }; 
 break;
 case 239:
  this.$ = $$[$0-1] 
