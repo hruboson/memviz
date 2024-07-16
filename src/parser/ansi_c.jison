@@ -24,16 +24,16 @@
 %%
 
 primary_expression
-	: IDENTIFIER { $$ = $1; }
+	: IDENTIFIER { $$ = { type: "identifier", value: $1 }; }
 	| constant { $$ = $1; }
 	| string { $$ = $1; }
-	| '(' expression ')'
+	| '(' expression ')' { $$ = $2; }
 	| generic_selection
 	;
 
 constant
-	: I_CONSTANT { $$ = { type: "int_constant", value: $1 }; }
-	| F_CONSTANT { $$ = { type: "float_constant", value: $1 }; }
+	: I_CONSTANT { $$ = { type: "i_constant", value: $1 }; }
+	| F_CONSTANT { $$ = { type: "f_constant", value: $1 }; }
 	| ENUMERATION_CONSTANT	
 	;
 
@@ -43,7 +43,7 @@ enumeration_constant
 
 string
 	: STRING_LITERAL { $$ = { type: "string_constant", value: $1 }; }
-	| FUNC_NAME { $$ = $1; }
+	| FUNC_NAME { $$ = { type: "func_name", value: $1 }; }
 	;
 
 generic_selection
@@ -203,10 +203,14 @@ declaration
 		$$ = [];
 		for(var declarator of $2){
 			if($1.includes("typedef")){
-				$$.push({statement_type: "typedef", type: $1.filter(function (without) {
-					return without !== "typedef"; // remove "typedef" as that is not needed in the types
-				}), declarator: declarator });
-				parser.yy.types.push(declarator.name);
+				$$.push({
+					statement_type: "typedef", type: 
+					$1.filter(function (without) {
+						return without !== "typedef"; // remove "typedef" as that is not needed in the types
+					}), 
+					declarator: declarator 
+				});
+				parser.yy.types.push(declarator.value);
 			}else{
 				$$.push({statement_type: "declaration", type: $1, declarator: declarator});
 			}
@@ -234,8 +238,8 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator '=' initializer { $$ = { name: $1.name, initializer: $3}; }
-	| declarator { $$ = { name: $1.name, initializer: null }; }
+	: declarator '=' initializer { $$ = { ...$1, initializer: $3 }; }
+	| declarator { $$ = { ...$1, initializer: null }; }
 	;
 
 storage_class_specifier
@@ -346,25 +350,25 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator { $$ = { pointer: $1, name: $2 }; }
-	| direct_declarator { $$ = { name: $1 }; }
+	: pointer direct_declarator { $$ = $2; } //todo add pointer definition to the json structure
+	| direct_declarator { $$ = $1; }
 	;
 
 direct_declarator
-	: IDENTIFIER
-	| '(' declarator ')'
-	| direct_declarator '[' ']'
-	| direct_declarator '[' '*' ']'
-	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list '*' ']'
-	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list ']'
-	| direct_declarator '[' assignment_expression ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' ')'
-	| direct_declarator '(' identifier_list ')'
+	: IDENTIFIER { $$ = { type: "identifier", value: $1 }; }
+	| '(' declarator ')' { $$ = $2; }
+	| direct_declarator '[' ']' { $$ = { ...$1, declarator_type: "array", array: { size: null } }; }
+	/*| direct_declarator '[' '*' ']' { $$ = { ...$1, declarator_type: "array", size: null }; } // fix these later
+	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$ = { ...$1, declarator_type: "array"}; }
+	| direct_declarator '[' STATIC assignment_expression ']' { $$ = $1; }
+	| direct_declarator '[' type_qualifier_list '*' ']' { $$ = $1; }
+	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$ = $1; }
+	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
+	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
+	| direct_declarator '[' assignment_expression ']' { $$ = { ...$1, declarator_type: "array", array: { size: $3 } }; }
+	| direct_declarator '(' parameter_type_list ')' { $$ = $1; }
+	| direct_declarator '(' ')' { $$ = $1; }
+	| direct_declarator '(' identifier_list ')' { $$ = $1; }
 	;
 
 pointer
@@ -488,8 +492,8 @@ compound_statement
 	;
 
 block_item_list
-	: block_item { $$ = $1; }
-	| block_item_list block_item { $$ = $1.concat($2); }
+	: block_item { $$ = [$1]; }
+	| block_item_list block_item { $$ = [...$1, $2]; }
 	;
 
 block_item
@@ -526,9 +530,9 @@ jump_statement
 	;
 
 translation_unit
-	: translation_unit external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return $1.concat($2); } // clear types because they get cached by JS
+	: translation_unit external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return [...$1, $2]; } // clear types because they get cached by JS
 	| external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return [$1]; } // clear types because they get cached by JS
-	| translation_unit external_declaration { $$ = $1.concat($2); }
+	| translation_unit external_declaration { $$ = [...$1, $2]; }
 	| external_declaration { $$ = [$1]; }
 	;
 
@@ -538,7 +542,7 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement { $$ = { return_type: $1, name: $2.name, body: $3 }; }
+	: declaration_specifiers declarator compound_statement { $$ = { return_type: $1, declarator: $2, body: $3 }; }
  	| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;

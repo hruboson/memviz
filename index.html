@@ -30,7 +30,7 @@
 			<div class="col-4">
 				<div id="editor">typedef int integer;
 long long main(){
-	int a = 0;
+	int a[] = 0;
 	int b,c = 1, d= 2;
 	extern static long long int u = 0;
 
@@ -42,8 +42,15 @@ long long main(){
 }</div>
 			</div>
 			<div class="col-8">
-				<button class="btn btn-primary" onclick="execute(editor.getValue())">Run</button>
-				<pre id="output"></pre>
+				<div class="row">
+					<div class="col-8">
+					<button class="btn btn-primary" onclick="execute(editor.getValue())">Run</button>
+					<pre id="output"></pre>
+					</div>
+					<div class="col-4">
+						<pre id="typedefs"></pre>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -65,6 +72,8 @@ long long main(){
 		try{
 			var result = ansi_c.parse(input);
 			document.getElementById("output").innerHTML = JSON.stringify(result, null, 4);
+			console.log(ansi_c.Parser.prototype.yy.last_types);
+			document.getElementById("typedefs").innerHTML = JSON.stringify(ansi_c.Parser.prototype.yy.last_types, null, 4);
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}
