@@ -17,7 +17,7 @@
 
 %{
 	parser.yy.types = []; // typedef types
-	parser.yy.last_types = []; // typedefs of last parsing (get cached)
+	parser.yy.last_types = []; // typedefs of last parsing (gets cached)
 %}
 
 %start translation_unit
