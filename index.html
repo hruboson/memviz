@@ -9,10 +9,13 @@
 
 	<!-- Bootstrap 5.3.3 -->
 	<link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-	<script src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="lib/bootstrap/js/bootstrap.bundle.js"></script>
 
 	<!-- Ace9 editor -->
 	<script src="lib/ace9/ace.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Boxicons -->
+	<link href="lib/boxicons/css/boxicons.min.css" rel="stylesheet">
 
 	<!-- PARSER -->
 	<script src="src/parser/ansi_c.js" type="text/javascript" charset="utf-8"></script>
@@ -24,12 +27,21 @@
 		    display: flex;
 			position: relative;
 		}
+
 		.fullscreen{
-			height: 100vh;
+			height: 92vh;
 		}
+
+		.btn{
+			text-align: center;
+			vertical-align: middle;
+			padding: 4px 6px 2px 6px;
+		}
+
 		body{
 			background-color: #272822;
 		}
+
 		div{
 			color: white;
 		}
@@ -37,6 +49,34 @@
 </head>
 <body>
 	<div class="container-fluid h-100 w-100 ps-0">
+		<div class="row pb-2 pt-1">
+			<div class="col-8">
+				<div style="left: 10px;"> </div>
+				<button class="btn btn-primary" onclick="execute(editor.getValue())"><i class='bx bx-sm bx-play'></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-chevron-left'></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-chevron-right'></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-chevrons-right'></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-chevrons-left'></i></button>
+			</div>
+			<div class="col-4 text-end">
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-info-circle'></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-cog'></i></button>
+				<div class="btn-group">
+					<button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+						Examples	
+					</button>
+					<ul class="dropdown-menu">
+						<button class="dropdown-item" type="button">variables</button>
+						<button class="dropdown-item" type="button">arrays</button>
+						<div class="dropdown-divider"></div>
+						<button class="dropdown-item" type="button">malloc</button>
+						<button class="dropdown-item" type="button">free</button>
+						<div class="dropdown-divider"></div>
+						<button class="dropdown-item" type="button">while loop</button>
+						<button class="dropdown-item" type="button">for loop</button>					</ul>
+				</div>
+			</div>
+		</div>
 		<div class="row fullscreen">
 			<div class="col-4">
 				<div id="editor">typedef int integer;
@@ -53,8 +93,7 @@ void main(){
 			<div class="col-8">
 				<div class="row">
 					<div class="col-8">
-					<button class="btn btn-primary" onclick="execute(editor.getValue())">Run</button>
-					<pre id="output"></pre>
+						<pre id="output"></pre>
 					</div>
 					<div class="col-4">
 						<pre id="typedefs"></pre>
