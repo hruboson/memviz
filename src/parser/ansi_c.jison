@@ -364,7 +364,7 @@ direct_declarator
 	| direct_declarator '[' type_qualifier_list '*' ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
-	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
+	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } !NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
 	| direct_declarator '[' assignment_expression ']' { $$ = { ...$1, declarator_type: "array", array: { size: $3 } }; }
 	| direct_declarator '(' parameter_type_list ')' { $$ = $1; }
 	| direct_declarator '(' ')' { $$ = $1; }
@@ -488,17 +488,17 @@ labeled_statement
 
 compound_statement
 	: '{' '}'
-	| '{'  block_item_list '}' { $$ = $2 }
+	| '{'  block_item_list '}' { $$ = $2; }
 	;
 
 block_item_list
-	: block_item { $$ = [$1]; }
-	| block_item_list block_item { $$ = [...$1, $2]; }
+	: block_item { $$ = $1; }
+	| block_item_list block_item { $$ = [...$1, ...$2]; }
 	;
 
 block_item
-	: declaration
-	| statement
+	: declaration { $$ = $1; } // V-- declaration always returns array (because there could be multiple declarations on single line)
+	| statement { $$ = [$1]; } // TODO: check this later, I don't like it returning array (it was needed because of declaration)
 	;
 
 expression_statement
@@ -538,12 +538,12 @@ translation_unit
 
 external_declaration
 	: function_definition { $$ = { statement_type: "function_definition", function_definition: $1 }; } // function definition
-	| declaration { $$ = { statement_type: "declaration", declaration: $1 }; } // global declaration
+	| declaration { $$ = { declaration_type: "global_declaration", declaration: $1 }; } // global declaration
 	;
 
 function_definition
 	: declaration_specifiers declarator compound_statement { $$ = { return_type: $1, declarator: $2, body: $3 }; }
- 	| declaration_specifiers declarator declaration_list compound_statement 
+ 	//| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;
 
