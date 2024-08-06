@@ -19,6 +19,7 @@
 
 	<!-- PARSER -->
 	<script src="src/parser/ansi_c.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 
 	<style type="text/css" media="screen">
 		#editor { 
@@ -117,10 +118,9 @@ void main(){
 <script>
 	function execute(input){
 		try{
-			var result = ansi_c.parse(input);
-			document.getElementById("output").innerHTML = JSON.stringify(result, null, 4);
-			console.log(ansi_c.Parser.prototype.yy.last_types);
-			document.getElementById("typedefs").innerHTML = JSON.stringify(ansi_c.Parser.prototype.yy.last_types, null, 4);
+			interpreter.parse(input);
+			document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
+			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.types, null, 4);
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}
