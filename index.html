@@ -120,7 +120,7 @@ void main(){
 		try{
 			interpreter.parse(input);
 			document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
-			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.types, null, 4);
+			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.user_types, null, 4);
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}

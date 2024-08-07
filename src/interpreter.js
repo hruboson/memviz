@@ -1,29 +1,29 @@
 class Interpreter {
-
 	/* ATTRIBUTES */
 	#parser = ansi_c;
 	#ast;
 
-	#current_instruction = 0;
+	#pc = 0; // program counter
 	
 	/* GETTERS */
 	get ast(){
 		return this.#ast;
 	}
 
-	get current_instruction(){
-		const instr = this.#current_instruction;
-		this.#current_instruction += 1;
+	get pc(){
+		const instr = this.#pc;
+		this.#pc += 1;
 		return instr;
 	}
 
-	get types(){
+	get user_types(){
 		return this.#parser.Parser.prototype.yy.last_types;
 	}
 
 	/* FUNCTIONS */
 	parse(text){
 		this.#ast = this.#parser.parse(text);
+		return this.#ast;
 	}
 
 	interpret_single(){
