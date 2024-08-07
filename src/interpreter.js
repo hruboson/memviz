@@ -1,21 +1,19 @@
 class Interpreter {
 	/* ATTRIBUTES */
 	#parser = ansi_c;
-	#ast;
-
-	#pc = 0; // program counter
-	
-	/* GETTERS */
+	#ast; // abstract syntax tree
 	get ast(){
 		return this.#ast;
 	}
 
+	#pc = 0; // program counter
 	get pc(){
 		const instr = this.#pc;
 		this.#pc += 1;
 		return instr;
 	}
 
+	/* GETTERS */
 	get user_types(){
 		return this.#parser.Parser.prototype.yy.last_types;
 	}
