@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark"> <!-- remove data-bs-theme for Bootstrap default light mode -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +17,15 @@
 	<!-- Boxicons -->
 	<link href="lib/boxicons/css/boxicons.min.css" rel="stylesheet">
 
-	<!-- PARSER -->
+	<!-- SRC -->
+	<script src="src/util.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="src/ast/ast.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/stmt.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/decl_init.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/expr.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/func.js" type="text/javascript" charset="utf-8"></script>
+
 	<script src="src/parser/ansi_c.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 
@@ -42,10 +50,6 @@
 		body{
 			background-color: #272822;
 		}
-
-		div{
-			color: white;
-		}
 	</style>
 </head>
 <body>
@@ -60,7 +64,7 @@
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-arrow-to-left'></i></button>
 			</div>
 			<div class="col-4 text-end">
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-info-circle'></i></button>
+				<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#infoModal" type="button"><i class='bx bx-sm bx-info-circle'></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-cog'></i></button>
 				<div class="btn-group">
 					<button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -83,7 +87,7 @@
 			<div class="col-4">
 				<div id="editor">typedef int integer;
 void main(){
-	int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	integer a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 	while(i < 5){
 		i++;
@@ -105,6 +109,27 @@ void main(){
 		</div>
 	</div>
 
+	<!-- infoModal -->
+	<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="fs-5" id="infoModalLabel">Info</h3>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<ul>
+						<li><a href="https://github.com/hruboson/MEMVIZ">GitHub</a></li>
+						<li><a href="doc.html">Documentation</a></li>
+					</ul>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 <script>
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
@@ -118,6 +143,7 @@ void main(){
 <script>
 	function execute(input){
 		try{
+			var c = new Interpreter();
 			interpreter.parse(input);
 			document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
 			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.user_types, null, 4);
