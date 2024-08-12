@@ -3,6 +3,9 @@ include .env
 run:
 	firefox index.html
 
+parser:
+	cd src/parser/ && jison ansi_c.jison ansi_c.jisonlex
+
 tests: test
 test:
 	jest tests/parser_lexer.test.js --config tests/jest.config.json 
