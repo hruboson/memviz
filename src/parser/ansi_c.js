@@ -83,26 +83,26 @@ performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* actio
 
 var $0 = $$.length - 1;
 switch (yystate) {
-case 1: case 168:
- this.$ = { type: "identifier", value: $$[$0] }; 
+case 1: case 9: case 168:
+ this.$ = new Identifier($$[$0]); 
 break;
-case 2: case 3: case 89: case 166: case 167: case 218: case 240: case 242:
+case 2: case 3: case 89: case 166: case 167: case 218: case 240: case 242: case 264: case 265:
  this.$ = $$[$0]; 
 break;
 case 4: case 169: case 239:
  this.$ = $$[$0-1]; 
 break;
 case 6:
- this.$ = { type: "i_constant", value: $$[$0] }; 
+ this.$ = new Literal("i_literal", $$[$0]); 
 break;
 case 7:
- this.$ = { type: "f_constant", value: $$[$0] }; 
+ this.$ = new Literal("f_literal", $$[$0]); 
 break;
 case 10:
- this.$ = { type: "string_constant", value: $$[$0] }; 
+ this.$ =  new Literal("s_literal", $$[$0]); 
 break;
 case 11:
- this.$ = { type: "func_name", value: $$[$0] }; 
+ this.$ = new Literal("func_name", $$[$0]); 
 break;
 case 90:
 
@@ -121,7 +121,7 @@ case 91:
 					}), 
 					declarator: declarator 
 				});
-				parser.yy.types.push(declarator.value);
+				parser.yy.types.push(declarator.name);
 			}else{
 				this.$.push({statement_type: "declaration", type: $$[$0-2], declarator: declarator});
 			}
@@ -173,14 +173,8 @@ break;
 case 261:
  parser.yy.last_types = parser.yy.types; parser.yy.types = []; return [$$[$0-1]]; 
 break;
-case 264:
- this.$ = { statement_type: "function_definition", function_definition: $$[$0] }; 
-break;
-case 265:
- this.$ = { declaration_type: "global_declaration", declaration: $$[$0] }; 
-break;
 case 266:
- this.$ = { return_type: $$[$0-2], declarator: $$[$0-1], body: $$[$0] }; 
+ this.$ = new Func($$[$0-1], $$[$0-2], $$[$0]); 
 break;
 }
 },

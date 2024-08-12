@@ -71,6 +71,7 @@ class Interpreter {
 	/**
 	* @todo implement
 	*/
+	//TODO
 	interpret_single(){
 		return 1;
 	}
@@ -78,6 +79,7 @@ class Interpreter {
 	/**
 	* @todo implement
 	*/
+	//TODO
 	interpret(){
 		return 0;
 	}

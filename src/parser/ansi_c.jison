@@ -24,7 +24,7 @@
 %%
 
 primary_expression
-	: IDENTIFIER { $$ = { type: "identifier", value: $1 }; }
+	: IDENTIFIER { $$ = new Identifier($1); }
 	| constant { $$ = $1; }
 	| string { $$ = $1; }
 	| '(' expression ')' { $$ = $2; }
@@ -32,18 +32,18 @@ primary_expression
 	;
 
 constant
-	: I_CONSTANT { $$ = { type: "i_constant", value: $1 }; }
-	| F_CONSTANT { $$ = { type: "f_constant", value: $1 }; }
+	: I_CONSTANT { $$ = new Literal("i_literal", $1); }
+	| F_CONSTANT { $$ = new Literal("f_literal", $1); }
 	| ENUMERATION_CONSTANT	
 	;
 
 enumeration_constant
-	: IDENTIFIER
+	: IDENTIFIER { $$ = new Identifier($1); }
 	;
 
 string
-	: STRING_LITERAL { $$ = { type: "string_constant", value: $1 }; }
-	| FUNC_NAME { $$ = { type: "func_name", value: $1 }; }
+	: STRING_LITERAL { $$ =  new Literal("s_literal", $1); }
+	| FUNC_NAME { $$ = new Literal("func_name", $1); }
 	;
 
 generic_selection
@@ -210,7 +210,7 @@ declaration
 					}), 
 					declarator: declarator 
 				});
-				parser.yy.types.push(declarator.value);
+				parser.yy.types.push(declarator.name);
 			}else{
 				$$.push({statement_type: "declaration", type: $1, declarator: declarator});
 			}
@@ -350,15 +350,15 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator { $$ = $2; } //todo add pointer definition to the json structure
+	: pointer direct_declarator { $$ = $2; } // TODO: add pointer definition to the class structure
 	| direct_declarator { $$ = $1; }
 	;
 
 direct_declarator
-	: IDENTIFIER { $$ = { type: "identifier", value: $1 }; }
+	: IDENTIFIER { $$ = new Identifier($1); }
 	| '(' declarator ')' { $$ = $2; }
 	| direct_declarator '[' ']' { $$ = { ...$1, declarator_type: "array", array: { size: null } }; }
-	/*| direct_declarator '[' '*' ']' { $$ = { ...$1, declarator_type: "array", size: null }; } // fix these later
+	/* NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW | direct_declarator '[' '*' ']' { $$ = { ...$1, declarator_type: "array", size: null }; } // fix these later
 	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$ = { ...$1, declarator_type: "array"}; }
 	| direct_declarator '[' STATIC assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list '*' ']' { $$ = $1; }
@@ -366,9 +366,9 @@ direct_declarator
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } !NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
 	| direct_declarator '[' assignment_expression ']' { $$ = { ...$1, declarator_type: "array", array: { size: $3 } }; }
-	| direct_declarator '(' parameter_type_list ')' { $$ = $1; }
-	| direct_declarator '(' ')' { $$ = $1; }
-	| direct_declarator '(' identifier_list ')' { $$ = $1; }
+	| direct_declarator '(' parameter_type_list ')' { $$ = $1; } // function parameters
+	| direct_declarator '(' ')' { $$ = $1; } // function call without parameters
+	| direct_declarator '(' identifier_list ')' { $$ = $1; } // function arguments? I guess
 	;
 
 pointer
@@ -537,12 +537,12 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition { $$ = { statement_type: "function_definition", function_definition: $1 }; } // function definition
-	| declaration { $$ = { declaration_type: "global_declaration", declaration: $1 }; } // global declaration
+	: function_definition { $$ = $1; } // function definition
+	| declaration { $$ = $1; } // global declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement { $$ = { return_type: $1, declarator: $2, body: $3 }; }
+	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, $3); }
  	//| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;
