@@ -1,7 +1,5 @@
-var parser = require('../src/parser/ansi_c.js').parser;
-
 function parse(input){
-	parser.parse(input);
+	interpreter.parse(input);
 }
 
 /*
@@ -23,12 +21,6 @@ void main(){ // comment after code;
 }   // comment after code
 // comment after main
 `;
-
-describe('correct', () => {
-	test('end line comments', () => {
-		expect(() => parse(endln_comments)).not.toThrow(Error);
-	});
-});
 
 const multiline_comments = `
 /*
@@ -60,11 +52,6 @@ de
 
 */
 `;
-describe('correct', () => {
-	test('multiline comments', () => {
-		expect(() => parse(multiline_comments)).not.toThrow(Error);
-	});
-});
 
 /* ARITHMETIC */
 const addition_all = `
@@ -79,12 +66,6 @@ void main(){
 }
 `;
 
-describe('correct', () => {
-	test('addition', () => {
-		expect(() => parse(addition_all)).not.toThrow(Error);
-	});
-});
-
 const substraction_all = `
 void main(){
 	int i;
@@ -97,12 +78,6 @@ void main(){
 }
 `;
 
-describe('correct', () => {
-	test('substraction', () => {
-		expect(() => parse(substraction_all)).not.toThrow(Error);
-	});
-});
-
 const multiplication_all = `
 void main(){
 	int i;
@@ -112,12 +87,6 @@ void main(){
 	i = i * (10 * (i * 20));
 }
 `;
-
-describe('correct', () => {
-	test('multiplication', () => {
-		expect(() => parse(multiplication_all)).not.toThrow(Error);
-	});
-});
 
 const division_all = `
 void main(){
@@ -129,12 +98,6 @@ void main(){
 }
 `;
 
-describe('correct', () => {
-	test('division', () => {
-		expect(() => parse(division_all)).not.toThrow(Error);
-	});
-});
-
 const modulo = `
 void main(){
 	int i = 20;
@@ -142,11 +105,6 @@ void main(){
 }
 `;
 
-describe('correct', () => {
-	test('modulo', () => {
-		expect(() => parse(modulo)).not.toThrow(Error);
-	});
-});
 
 /* BITWISE + LOGICAL */
 
@@ -168,12 +126,6 @@ void main(){
 }
 `;
 
-describe('correct', () => {
-	test('bitwise', () => {
-		expect(() => parse(bitwise)).not.toThrow(Error);
-	});
-});
-
 const logical = `
 void main(){
 	int t = 1;
@@ -192,12 +144,6 @@ void main(){
 	x = t && (f || (t && 1));
 }
 `;
-
-describe('correct', () => {
-	test('logical', () => {
-		expect(() => parse(logical)).not.toThrow(Error);
-	});
-});
 
 /* CONDITIONS */
 
@@ -234,12 +180,6 @@ void main(){
 			return;
 }
 `;
-
-describe('correct', () => {
-	test('conditions + comparisons + ternary op', () => {
-		expect(() => parse(conditions)).not.toThrow(Error);
-	});
-});
 
 /* DECLARATION + DEFINITION */
 
@@ -292,12 +232,6 @@ int main(){
 	unsigned long long arr2d_ull[MONDAY][+1];
 }
 `;
-
-describe('correct', () => {
-	test('declarations', () => {
-		expect(() => parse(declarations)).not.toThrow(Error);
-	});
-});
 
 const definitions = `
 // todo IMAGINARY and COMPLEX
@@ -357,12 +291,6 @@ int main(){
 }
 `;
 
-describe('correct', () => {
-	test('definitions', () => {
-		expect(() => parse(definitions)).not.toThrow(Error);
-	});
-});
-
 const typedef_declaration_definition = `
 typedef int i;
 typedef long long ll;
@@ -384,12 +312,6 @@ int main(){
 	return xy.x;
 }
 `;
-
-describe('correct', () => {
-	test('typedef', () => {
-		expect(() => parse(typedef_declaration_definition)).not.toThrow(Error);
-	});
-});
 
 const function_definition_declaration = `
 void life(_Bool a, float f, int* ptr, char** array_2d, double ***what){
@@ -422,12 +344,6 @@ int main(){
 }
 `;
 
-describe('correct', () => {
-	test('function definition, declaration, calls', () => {
-		expect(() => parse(function_definition_declaration)).not.toThrow(Error);
-	})
-});
-
 /* SIMPLE CF STATEMENTS */
 
 const while_loop_simple = `
@@ -444,12 +360,6 @@ int main() {
 }
 `;
 
-describe('correct', () => {
-	test('while loop', () => {
-		expect(() => parse(while_loop_simple)).not.toThrow(Error);
-	});
-});
-
 const do_while_loop_simple = `
 void main()       {
 	int count = 0;
@@ -461,12 +371,6 @@ void main()       {
 }
 `;
 
-describe('correct', () => {
-	test('do while loop', () => {
-		expect(() => parse(do_while_loop_simple)).not.toThrow(Error);
-	});
-});
-
 const for_loop_simple = `
 int main() {
 	for (int i = 0; i < 10; ++i){
@@ -476,12 +380,6 @@ int main() {
 	return 0;
 }
 `;
-
-describe('correct', () => {
-	test('for loop', () => {
-		expect(() => parse(for_loop_simple)).not.toThrow(Error);
-	});
-});
 
 const switch_case_simple = `
 void main(){
@@ -496,12 +394,6 @@ void main(){
 	}
 }
 `;
-
-describe('correct', () => {
-	test('switch', () => {
-		expect(() => parse(switch_case_simple)).not.toThrow(Error);
-	});
-});
 
 const goto_simple = `
 int main(){
@@ -519,12 +411,6 @@ return 1;
 }
 `;
 
-describe('correct', () => {
-	test('goto', () => {
-		expect(() => parse(goto_simple)).not.toThrow(Error);
-	});
-});
-
 const continue_break_simple = `
 void main(){
 	int a = 10;
@@ -536,12 +422,6 @@ void main(){
 }
 `;
 
-describe('correct', () => {
-	test('continue + break', () => {
-		expect(() => parse(continue_break_simple)).not.toThrow(Error);
-	});
-});
-
 /* SIMPLE PROGRAMS */
 
 const hello_world = `
@@ -551,9 +431,69 @@ int main(){
 }
 `;
 
-describe('correct', () => {
-	test('hello world', () => {
-		expect(() => parse(hello_world)).not.toThrow(Error);
+describe('parser correct', () => {
+	it('multiline comments', () => {
+		chai.expect(function() { parse(multiline_comments); }).to.not.throw()
+	});
+	it('addition', () => {
+		chai.expect(function() { parse(addition_all); }).to.not.throw()
+	});
+	it('substraction', () => {
+		chai.expect(function() { parse(substraction_all); }).to.not.throw()
+	});
+	it('multiplication', () => {
+		chai.expect(function() { parse(multiplication_all); }).to.not.throw()
+	});
+	it('division', () => {
+		chai.expect(function() { parse(division_all); }).to.not.throw()
+	});
+	it('modulo', () => {
+		chai.expect(function() { parse(modulo); }).to.not.throw()
+	});
+	it('bitwise', () => {
+		chai.expect(function() { parse(bitwise); }).to.not.throw()
+	});
+	it('logical', () => {
+		chai.expect(function() { parse(logical); }).to.not.throw()
+	});
+	it('conditions + comparisons + ternary op', () => {
+		chai.expect(function() { parse(logical); }).to.not.throw()
+	});
+	it('declarations', () => {
+		chai.expect(function() { parse(declarations); }).to.not.throw()
+	});
+	it('definitions', () => {
+		chai.expect(function() { parse(definitions); }).to.not.throw()
+	});
+	it('typedef', () => {
+		chai.expect(function() { parse(typedef_declaration_definition); }).to.not.throw()
+	});
+	it('function definition, declaration, calls', () => {
+		chai.expect(function() { parse(function_definition_declaration); }).to.not.throw()
+	})
+	it('while loop', () => {
+		chai.expect(function() { parse(while_loop_simple); }).to.not.throw()
+	});
+	it('do while loop', () => {
+		chai.expect(function() { parse(do_while_loop_simple); }).to.not.throw()
+	});
+	it('for loop', () => {
+		chai.expect(function() { parse(for_loop_simple); }).to.not.throw()
+	});
+	it('switch', () => {
+		chai.expect(function() { parse(switch_case_simple); }).to.not.throw()
+	});
+	it('end line comments', () => {
+		chai.expect(function() { parse(endln_comments); }).to.not.throw();
+	});
+	it('continue + break', () => {
+		chai.expect(function() { parse(continue_break_simple); }).to.not.throw()
+	});
+	it('goto', () => {
+		chai.expect(function() { parse(goto_simple); }).to.not.throw()
+	});
+	it('hello world', () => {
+		chai.expect(function() { parse(hello_world); }).to.not.throw()
 	});
 });
 
@@ -567,23 +507,11 @@ int i = a++;
 return;
 `;
 
-describe('incorrect', () => {
-	test('no function', () => {
-		expect(() => parse(no_function)).toThrow(Error);
-	});
-});
-
 const comment_not_ended = `
 int main(){ /*
 	return;
 }
 `;
-
-describe('incorrect', () => {
-	test('multiline comment not ended', () => {
-		expect(() => parse(comment_not_ended)).toThrow(Error);
-	});
-});
 
 const wrong_type = `
 int main(){
@@ -594,8 +522,14 @@ int main(){
 }
 `;
 
-describe('incorrect', () => {
-	test('wrong types', () => {
-		expect(() => parse(wrong_type)).toThrow(Error);
+describe('parser incorrect', () => {
+	it('no function', () => {
+		chai.expect(function() { parse(no_function); }).to.throw()
+	});
+	it('multiline comment not ended', () => {
+		chai.expect(function() { parse(comment_not_ended); }).to.throw()
+	});
+	it('wrong types', () => {
+		chai.expect(function() { parse(wrong_type); }).to.throw()
 	});
 });

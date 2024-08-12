@@ -1,0 +1,38 @@
+<!-- source: https://mochajs.org/#running-mocha-in-the-browser -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Mocha Tests</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+
+	<!-- ./SRC/* -->
+	<script src="src/util.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="src/ast/ast.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/stmt.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/declaration.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/expr.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/func.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/array.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="src/parser/ansi_c.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+	<div id="mocha" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/8.0.1/mocha.min.js"></script> <!-- newer versions unfortunately dont work as a standalone (without node) -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.2.0/chai.min.js"></script>
+	
+	<script class="mocha-init">
+		mocha.setup('bdd');
+		mocha.checkLeaks();
+	</script>
+	<script src="tests/test.parser_lexer.js"></script>
+	<script src="tests/test.example.js"></script>
+	<script class="mocha-exec">
+		mocha.run();
+	</script>
+</body>
+</html>
