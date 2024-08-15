@@ -13,7 +13,6 @@ run_doc: doc
 	firefox doc.html
 
 clean_doc:
-	rm -f -r doc/doxy/html/
-	rm -f -r doc/doxy/latex/
+	rm -f -r doc/gen/
 
 .PHONY: tests
