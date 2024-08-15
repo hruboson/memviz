@@ -6,10 +6,6 @@ run:
 parser:
 	cd src/parser/ && jison ansi_c.jison ansi_c.jisonlex
 
-tests: test
-test:
-	jest tests/parser_lexer.test.js --config tests/jest.config.json 
-
 doc: clean_doc
 	jsdoc -r src/ -t ${TEMPLATE_PATH} -d doc/gen/ --readme README.md
 
