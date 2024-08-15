@@ -34,7 +34,7 @@ primary_expression
 constant
 	: I_CONSTANT { $$ = new Literal("i_literal", $1); }
 	| F_CONSTANT { $$ = new Literal("f_literal", $1); }
-	| ENUMERATION_CONSTANT	
+	| ENUMERATION_CONSTANT	//TODO
 	;
 
 enumeration_constant
@@ -43,7 +43,7 @@ enumeration_constant
 
 string
 	: STRING_LITERAL { $$ =  new Literal("s_literal", $1); }
-	| FUNC_NAME { $$ = new Literal("func_name", $1); }
+	| FUNC_NAME { $$ = $1 }
 	;
 
 generic_selection
@@ -201,18 +201,21 @@ declaration
 	| declaration_specifiers init_declarator_list ';' 
 	{
 		$$ = [];
-		for(var declarator of $2){
+		const type = new Type($1);
+		for(var decl_init of $2){
+			var declarator = decl_init.declarator;
+			var initializer = decl_init.initializer;
+
 			if($1.includes("typedef")){
-				$$.push({
-					statement_type: "typedef", type: 
-					$1.filter(function (without) {
-						return without !== "typedef"; // remove "typedef" as that is not needed in the types
-					}), 
-					declarator: declarator 
-				});
-				parser.yy.types.push(declarator.name);
+				$$.push(new Typedef(type, declarator));
+				// get to the bottom of declarator
+				var decl_tmp = declarator;
+				while(decl_tmp.kind != DECLTYPE.ID && decl_tmp.child != null){
+					decl_tmp = decl_tmp.child;
+				}
+				parser.yy.types.push(decl_tmp.identifier.name);
 			}else{
-				$$.push({statement_type: "declaration", type: $1, declarator: declarator});
+				$$.push(new Declaration(type, declarator, initializer));
 			}
 		}
 	}
@@ -238,8 +241,8 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator '=' initializer { $$ = { ...$1, initializer: $3 }; }
-	| declarator { $$ = { ...$1, initializer: null }; }
+	: declarator '=' initializer { $$ = { declarator: $1, initializer: $3 }; }
+	| declarator { $$ = { declarator: $1, initializer: null }; }
 	;
 
 storage_class_specifier
@@ -262,8 +265,8 @@ type_specifier
 	| SIGNED
 	| UNSIGNED
 	| BOOL
-	| COMPLEX
-	| IMAGINARY	
+	//| COMPLEX skip for now
+	//| IMAGINARY	
 	| atomic_type_specifier
 	| struct_or_union_specifier
 	| enum_specifier
@@ -350,14 +353,14 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator { $$ = $2; } // TODO: add pointer definition to the class structure
+	: pointer direct_declarator { $$ = new Declarator(DECLTYPE.PTR, $2, $1); } //TODO get more data about pointer ($1)
 	| direct_declarator { $$ = $1; }
 	;
 
-direct_declarator
-	: IDENTIFIER { $$ = new Identifier($1); }
+direct_declarator // must always return typeof Declarator
+	: IDENTIFIER { $$ = new Declarator(DECLTYPE.ID, null, new Identifier($1)); }
 	| '(' declarator ')' { $$ = $2; }
-	| direct_declarator '[' ']' { $$ = { ...$1, declarator_type: "array", array: { size: null } }; }
+	| direct_declarator '[' ']' { $$ = new Declarator(DECLTYPE.ARR, $1); }
 	/* NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW | direct_declarator '[' '*' ']' { $$ = { ...$1, declarator_type: "array", size: null }; } // fix these later
 	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$ = { ...$1, declarator_type: "array"}; }
 	| direct_declarator '[' STATIC assignment_expression ']' { $$ = $1; }
@@ -365,17 +368,17 @@ direct_declarator
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } !NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
-	| direct_declarator '[' assignment_expression ']' { $$ = { ...$1, declarator_type: "array", array: { size: $3 } }; }
-	| direct_declarator '(' parameter_type_list ')' { $$ = $1; } // function parameters
-	| direct_declarator '(' ')' { $$ = $1; } // function call without parameters
-	| direct_declarator '(' identifier_list ')' { $$ = $1; } // function arguments? I guess
+	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1); }
+	| direct_declarator '(' parameter_type_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1); } //TODO function parameters
+	| direct_declarator '(' ')' { $$ = new Declarator(DECLTYPE.FNC, $1.identifier); } //TODO function call without parameters
+	| direct_declarator '(' identifier_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1); } // function arguments? I guess
 	;
 
 pointer
-	: '*' type_qualifier_list pointer
-	| '*' type_qualifier_list
-	| '*' pointer
-	| '*'
+	: '*' type_qualifier_list pointer { $$ = new Pointer($3, $2); }
+	| '*' type_qualifier_list { $$ = new Pointer(null, $2); } //TODO add qualifiers to the pointer
+	| '*' pointer { $$ = new Pointer($2); }
+	| '*' { $$ = new Pointer(null); }
 	;
 
 type_qualifier_list
@@ -538,11 +541,11 @@ translation_unit
 
 external_declaration
 	: function_definition { $$ = $1; } // function definition
-	| declaration { $$ = $1; } // global declaration
+	| declaration { $$ = $1; } // global declaration //TODO: FIX DECLARATION NESTED ARRAY
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, $3); }
+	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, new CStmt($3)); }
  	//| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;

@@ -63,9 +63,9 @@ WS  [\s\t\v\n\f]
 "_Alignof"      	{ return 'ALIGNOF'; }
 "_Atomic"       	{ return 'ATOMIC'; }
 "_Bool"         	{ return 'BOOL'; }
-"_Complex"      	{ return 'COMPLEX'; }
+// "_Complex"      	{ return 'COMPLEX'; } skip for now
 "_Generic"      	{ return 'GENERIC'; }
-"_Imaginary"    	{ return 'IMAGINARY'; }
+// "_Imaginary"    	{ return 'IMAGINARY'; }
 "_Noreturn"     	{ return 'NORETURN'; }
 "_Static_assert" 	{ return 'STATIC_ASSERT'; }
 "_Thread_local"  	{ return 'THREAD_LOCAL'; }

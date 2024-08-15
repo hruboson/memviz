@@ -16,12 +16,14 @@ class Stmt extends Construct {
 }
 
 /**
- * Compound statement (block/block statement)
+ * Compound statement (block/block statement). 
+ * @description It is a sequence of *statements* and *declarations*. Each CStmt creates new block scope.
  * @class CStmt
  */
 class CStmt extends Stmt {
-	constructor(){
+	constructor(sequence){
 		super();
+		this.sequence = sequence;
 	}
 
 	accept(visitor){

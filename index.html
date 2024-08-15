@@ -24,6 +24,8 @@
 	<script src="src/ast/expr.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/func.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/array.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/pointer.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/typedef.js" type="text/javascript" charset="utf-8"></script>
 
 	<script src="src/parser/ansi_c.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
@@ -84,16 +86,7 @@
 		</div>
 		<div class="row fullscreen">
 			<div class="col-4">
-				<div id="editor">typedef int integer;
-void main(){
-	integer a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
-	while(i < 5){
-		i++;
-	}
-
-	return 0;
-}</div>
+				<div id="editor">typedef long long int *const *volatile *_Atomic lli[][][][][][][][2];</div>
 			</div>
 			<div class="col-8">
 				<div class="row">
