@@ -19,7 +19,7 @@ class Type {
 /**
  * Initializer type enumeration (helper constant)
  * @constant
- * @type {enum}
+ * @typedef INITTYPE 
  * @global
  * @todo add all necessary types
  */
@@ -48,7 +48,7 @@ class Initializer {
 /**
  * Declaration type enumeration (helper constant)
  * @constant
- * @type {enum}
+ * @typedef DECLTYPE
  * @global
  */
 const DECLTYPE = {
@@ -65,7 +65,7 @@ const DECLTYPE = {
  * @class Declarator
  * @param {DECLTYPE} kind Type of declarator. Described in [class description]{@link Declarator#description}.
  * @param {Declarator} child Child declarator
- * @param {Identifier|Pointer|null|...} data Idk whatever is needed just put it here
+ * @param {Identifier|Pointer|null} data Idk whatever is needed just put it here
  */
 class Declarator {
 	//TODO Refactor + docu
