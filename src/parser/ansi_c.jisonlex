@@ -61,10 +61,10 @@ WS  [\s\t\v\n\f]
 "while"			{ return 'WHILE'; }
 "_Alignas"		{ return 'ALIGNAS'; }
 "_Alignof"      	{ return 'ALIGNOF'; }
-"_Atomic"       	{ return 'ATOMIC'; }
+// "_Atomic"       	{ return 'ATOMIC'; } // thread related stuff - not needed for now
 "_Bool"         	{ return 'BOOL'; }
 // "_Complex"      	{ return 'COMPLEX'; } skip for now
-"_Generic"      	{ return 'GENERIC'; }
+// "_Generic"      	{ return 'GENERIC'; }
 // "_Imaginary"    	{ return 'IMAGINARY'; }
 "_Noreturn"     	{ return 'NORETURN'; }
 "_Static_assert" 	{ return 'STATIC_ASSERT'; }
