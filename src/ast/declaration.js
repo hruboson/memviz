@@ -3,8 +3,18 @@
  */
 
 /**
+ * @class Unnamed
+ */
+class Unnamed { 
+	constructor(){
+		this.unnamed = true; // only for AST representation
+	}
+}
+
+/**
  * @class Type
  * @decription Allowed (built-in) types: void  char  short  int  long  float  double  signed  unsigned, _Bool
+ * @param {Array.<string>} specifiers
  */
 class Type {
 	constructor(specifiers){
@@ -101,14 +111,14 @@ class Declarator {
 /**
  * @class Declaration
  * @param {Type} Type
- * @param {Declarator} declarator
+ * @param {Declarator|Unnamed} declarator
  * @param {Initializer} initializer
  */
 class Declaration extends Construct {
 	constructor(type, declarator, initializer){
 		super();
 		this.type = type;
-		this.declarator = declarator ?? (() => { throw new Error("Declarator cannot be null!")})();
+		this.declarator = declarator;// ?? (() => { throw new Error("Declarator cannot be null!")})();
 		this.initializer = initializer;
 		/*this.definition = this.initializer ? true : false;*/ //<--- shouldn't be in AST
 	}

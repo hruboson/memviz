@@ -26,6 +26,7 @@
 	<script src="src/ast/array.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/pointer.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/typedef.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/struct_union.js" type="text/javascript" charset="utf-8"></script>
 
 	<script src="src/parser/ansi_c.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
@@ -86,7 +87,25 @@
 		</div>
 		<div class="row fullscreen">
 			<div class="col-4">
-				<div id="editor">typedef long long int *const *volatile *_Atomic lli[][][][][][][][2];</div>
+				<div id="editor">typedef int i;
+typedef long long ll;
+
+typedef struct coordinates {
+	int x;
+	int y;
+} COORDINATES;
+
+int main(){
+	i a = 1;
+	ll b = 4242424242;
+
+	COORDINATES xy;
+	xy.x = 1;
+	xy.y = 0;
+	COORDINATES* xy_p = &xy;
+
+	return xy.x;
+}</div>
 			</div>
 			<div class="col-8">
 				<div class="row">

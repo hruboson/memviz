@@ -18,6 +18,29 @@
 %{
 	parser.yy.types = []; // typedef types
 	parser.yy.last_types = []; // typedefs of last parsing (gets cached)
+
+	function get_declarations(type_specifiers, declarator_list){
+		var r = [];
+		const type = new Type(type_specifiers); // type will be same regardless of typedef or variable declaration
+		for(var decl_init of declarator_list){ // handle multiple same-line declarations (int a, b = 10, c;)
+			var declarator = decl_init.declarator;
+			var initializer = decl_init.initializer;
+
+			if(type_specifiers.includes("typedef")){ // specifiers include typedef
+				r.push(new Typedef(type, declarator));
+				// get to the bottom of declarator
+				var decl_tmp = declarator;
+				while(decl_tmp.kind != DECLTYPE.ID && decl_tmp.child != null){
+					decl_tmp = decl_tmp.child;
+				}
+				parser.yy.types.push(decl_tmp.identifier.name); // add typedef name to types so lexer can work with them
+			}else{
+				r.push(new Declaration(type, declarator, initializer)); // basic variable declaration
+			}
+		}
+		
+		return r;
+	}
 %}
 
 %start translation_unit
@@ -196,28 +219,11 @@ constant_expression
 declaration
 	: declaration_specifiers ';'
 	{
-
+		$$ = [new Type($1)];
 	}
 	| declaration_specifiers init_declarator_list ';' 
 	{
-		$$ = [];
-		const type = new Type($1);
-		for(var decl_init of $2){
-			var declarator = decl_init.declarator;
-			var initializer = decl_init.initializer;
-
-			if($1.includes("typedef")){
-				$$.push(new Typedef(type, declarator));
-				// get to the bottom of declarator
-				var decl_tmp = declarator;
-				while(decl_tmp.kind != DECLTYPE.ID && decl_tmp.child != null){
-					decl_tmp = decl_tmp.child;
-				}
-				parser.yy.types.push(decl_tmp.identifier.name);
-			}else{
-				$$.push(new Declaration(type, declarator, initializer));
-			}
-		}
+		$$ = get_declarations($1, $2);
 	}
 	| static_assert_declaration
 	;
@@ -267,50 +273,75 @@ type_specifier
 	| BOOL
 	//| COMPLEX skip for now
 	//| IMAGINARY	
-	| atomic_type_specifier
-	| struct_or_union_specifier
-	| enum_specifier
+	//| atomic_type_specifier
+	| struct_or_union_specifier { $$ = $1; }
+	| enum_specifier { $$ = $1; }
 	| TYPEDEF_NAME
 	;
 
 struct_or_union_specifier
 	: struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER
+	{ // anonymous struct or union
+		$$ = ($1 == "STRUCT") ? new Struct($3) : new Union($3); 
+	}
+	| struct_or_union IDENTIFIER '{' struct_declaration_list '}' 
+	{ // struct variable initialization and struct definition 
+		$$ = ($1 == "STRUCT") ? new Struct($4, new Identifier($2)) : new Union($4, new Identifier($2)); 
+	}
+	| struct_or_union IDENTIFIER 
+	{ // struct variable declaration
+		$$ = ($1 == "STRUCT") ? new Struct(null, new Identifier($2)) : new Union(null, new Identifier($2)); 
+	}
 	;
 
 struct_or_union
-	: STRUCT
-	| UNION
+	: STRUCT { $$ = $1; }
+	| UNION { $$ = $1; }
 	;
 
 struct_declaration_list
-	: struct_declaration
-	| struct_declaration_list struct_declaration
+	: struct_declaration { $$ = Array.isArray($1) ? $1 : [$1]; } // fixes nested arrays
+	| struct_declaration_list struct_declaration { $$ = Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; }
 	;
 
 struct_declaration
-	: specifier_qualifier_list ';'
-	| specifier_qualifier_list struct_declarator_list ';'
-	| static_assert_declaration
+	: specifier_qualifier_list ';' 
+	{ 
+		$$ = new Declaration(new Type($1), new Unnamed(), null); 
+	}
+	| specifier_qualifier_list struct_declarator_list ';' 
+	{ 
+		$$ = [];
+		for(var decl_init of $2){
+			$$.push(new Declaration(new Type($1), decl_init.declarator, decl_init.initializer));
+		}
+		
+	}
+	| static_assert_declaration // skip for now
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
+	: type_specifier specifier_qualifier_list { $$ = [$1, ...$2]; }
+	| type_specifier { $$ = [$1]; }
+	| type_qualifier specifier_qualifier_list { $$ = [$1, ...$2]; }
+	| type_qualifier { $$ = [$1]; }
 	;
 
 struct_declarator_list
-	: struct_declarator
-	| struct_declarator_list ',' struct_declarator
+	: struct_declarator // single declaration per line
+	{
+		$$ = [$1];
+	}
+	| struct_declarator_list ',' struct_declarator 
+	{ 
+		$$ = [...$1, $3];
+	}
 	;
 
 struct_declarator
-	: ':' constant_expression
-	| declarator ':' constant_expression
-	| declarator
+	: ':' constant_expression { $$ = { declarator: new Unnamed(), initializer: $2 }; } 
+	| declarator ':' constant_expression { $$ = { declarator: $1, initializer: $3 }; }
+	| declarator { $$ = { declarator: $1, initializer: null }; }
 	;
 
 enum_specifier
@@ -331,15 +362,15 @@ enumerator
 	| enumeration_constant
 	;
 
-atomic_type_specifier
+/*atomic_type_specifier // skip for now
 	: ATOMIC '(' type_name ')'
-	;
+	;*/
 
 type_qualifier
 	: CONST
 	| RESTRICT
 	| VOLATILE
-	| ATOMIC
+	//| ATOMIC
 	;
 
 function_specifier
@@ -354,7 +385,7 @@ alignment_specifier
 
 declarator
 	: pointer direct_declarator { $$ = new Declarator(DECLTYPE.PTR, $2, $1); } //TODO get more data about pointer ($1)
-	| direct_declarator { $$ = $1; }
+	| direct_declarator { $$ = $1; } // always returns typeof Declarator
 	;
 
 direct_declarator // must always return typeof Declarator
@@ -368,7 +399,7 @@ direct_declarator // must always return typeof Declarator
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } !NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
-	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1); }
+	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1); } // TODO return size of array
 	| direct_declarator '(' parameter_type_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1); } //TODO function parameters
 	| direct_declarator '(' ')' { $$ = new Declarator(DECLTYPE.FNC, $1.identifier); } //TODO function call without parameters
 	| direct_declarator '(' identifier_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1); } // function arguments? I guess
