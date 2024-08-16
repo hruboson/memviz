@@ -533,15 +533,15 @@ jump_statement
 	;
 
 translation_unit
-	: translation_unit external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return [...$1, $2]; } // clear types because they get cached by JS
-	| external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return [$1]; } // clear types because they get cached by JS
-	| translation_unit external_declaration { $$ = [...$1, $2]; }
-	| external_declaration { $$ = [$1]; }
+	: translation_unit external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; } // clear types because they get cached by JS
+	| external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return Array.isArray($1) ? $1 : [$1]; } // clear types because they get cached by JS
+	| translation_unit external_declaration { $$ = Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; }
+	| external_declaration { $$ = Array.isArray($1) ? $1 : [$1]; }
 	;
 
 external_declaration
-	: function_definition { $$ = $1; } // function definition
-	| declaration { $$ = $1; } // global declaration //TODO: FIX DECLARATION NESTED ARRAY
+	: function_definition { $$ = $1; } // function definition // returns single instance of class Func
+	| declaration { $$ = $1; } // global declaration // always returns array
 	;
 
 function_definition
