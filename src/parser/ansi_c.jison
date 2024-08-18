@@ -51,7 +51,7 @@ primary_expression
 	| constant { $$ = $1; }
 	| string { $$ = $1; }
 	| '(' expression ')' { $$ = $2; }
-	| generic_selection
+	//| generic_selection // skip for now
 	;
 
 constant
@@ -69,7 +69,7 @@ string
 	| FUNC_NAME { $$ = $1 }
 	;
 
-generic_selection
+/*generic_selection // skip for now
 	: GENERIC '(' assignment_expression ',' generic_assoc_list ')'
 	;
 
@@ -81,7 +81,7 @@ generic_assoc_list
 generic_association
 	: type_name ':' assignment_expression
 	| DEFAULT ':' assignment_expression
-	;
+	;*/
 
 postfix_expression
 	: primary_expression
