@@ -3,15 +3,6 @@
  */
 
 /**
- * @class Unnamed
- */
-class Unnamed { 
-	constructor(){
-		this.unnamed = true; // only for AST representation
-	}
-}
-
-/**
  * @class Type
  * @decription Allowed (built-in) types: void  char  short  int  long  float  double  signed  unsigned, _Bool
  * @param {Array.<string>} specifiers

@@ -17,7 +17,7 @@ class Struct {
 /**
 * @class Union
 * @param {Array.<Declaration>|null} declarations Union's body (declarations inside)
-* @param {Identifier|null} tagname Tagname
+* @param {Tagname|null} tagname
 */
 class Union {
 	constructor(declarations, tagname){
