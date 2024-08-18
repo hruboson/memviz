@@ -72,6 +72,7 @@ class Interpreter {
 	* @return {json} AST
 	*/
 	parse(text){
+		this.#refresh_symbols();
 		this.#ast = this.#parser.parse(text);
 		return this.#ast;
 	}
@@ -95,8 +96,9 @@ class Interpreter {
 	/**
 	 * Refreshes cached symbols stored in parser
 	 * @return {void}
+	 * @private
 	 */
-	refresh_symbols(){
+	#refresh_symbols(){
 		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //TODO make this a class perhaps
 	}
 }

@@ -98,9 +98,6 @@ break;
 case 7:
  this.$ = new Literal("f_literal", $$[$0]); 
 break;
-case 8:
- this.$ = new ("e_literal", $$[$0]); 
-break;
 case 10:
  this.$ =  new Literal("s_literal", $$[$0]); 
 break;
@@ -223,10 +220,10 @@ case 236:
  this.$ = [...$$[$0-1], ...$$[$0]]; 
 break;
 case 255:
- parser.yy.last_symbols = parser.yy.symbols; interpreter.refresh_symbols(); return Array.isArray($$[$0-1]) ? [...$$[$0-2], ...$$[$0-1]] : [...$$[$0-2], $$[$0-1]]; 
+ parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? [...$$[$0-2], ...$$[$0-1]] : [...$$[$0-2], $$[$0-1]]; 
 break;
 case 256:
- parser.yy.last_symbols = parser.yy.symbols; interpreter.refresh_symbols(); return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
+ parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
 break;
 case 261:
  this.$ = new Func($$[$0-1], $$[$0-2], new CStmt($$[$0])); 
