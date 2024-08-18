@@ -34,6 +34,7 @@
 					decl_tmp = decl_tmp.child;
 				}
 				parser.yy.symbols.types.push(decl_tmp.identifier.name); // add typedef name to types so lexer can work with them
+				//! move this to Typedef constructor
 			}else{
 				r.push(new Declaration(type, declarator, initializer)); // basic variable declaration
 			}
@@ -57,7 +58,7 @@ primary_expression
 constant
 	: I_CONSTANT { $$ = new Literal("i_literal", $1); }
 	| F_CONSTANT { $$ = new Literal("f_literal", $1); }
-	| ENUMERATION_CONSTANT	//TODO
+	| ENUMERATION_CONSTANT //TODO	
 	;
 
 enumeration_constant
@@ -286,11 +287,11 @@ struct_or_union_specifier
 	}
 	| struct_or_union IDENTIFIER '{' struct_declaration_list '}' 
 	{ // struct variable initialization and struct definition 
-		$$ = ($1 == "STRUCT") ? new Struct($4, new Identifier($2)) : new Union($4, new Identifier($2)); 
+		$$ = ($1 == "STRUCT") ? new Struct($4, new Tagname($2)) : new Union($4, new Tagname($2)); 
 	}
 	| struct_or_union IDENTIFIER 
 	{ // struct variable declaration
-		$$ = ($1 == "STRUCT") ? new Struct(null, new Identifier($2)) : new Union(null, new Identifier($2)); 
+		$$ = ($1 == "STRUCT") ? new Struct(null, new Tagname($2)) : new Union(null, new Tagname($2)); 
 	}
 	;
 
@@ -345,21 +346,21 @@ struct_declarator
 	;
 
 enum_specifier
-	: ENUM '{' enumerator_list '}'
-	| ENUM '{' enumerator_list ',' '}'
-	| ENUM IDENTIFIER '{' enumerator_list '}'
-	| ENUM IDENTIFIER '{' enumerator_list ',' '}'
-	| ENUM IDENTIFIER
+	: ENUM '{' enumerator_list '}' { $$ = new Enum(new Unnamed(), $3); }
+	| ENUM '{' enumerator_list ',' '}' { $$ = new Enum(new Unnamed(), $3); }
+	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = new Enum($2, $4); }
+	| ENUM IDENTIFIER '{' enumerator_list ',' '}' { $$ = new Enum($2, $4); }
+	| ENUM IDENTIFIER { $$ = new Tagname($2); }
 	;
 
 enumerator_list
-	: enumerator
-	| enumerator_list ',' enumerator
+	: enumerator { $$ = [$1]; }
+	| enumerator_list ',' enumerator { $$ = [...$1, $3]; }
 	;
 
 enumerator
-	: enumeration_constant '=' constant_expression
-	| enumeration_constant
+	: enumeration_constant '=' constant_expression { $$ = new Enumerator($1, $3); }
+	| enumeration_constant { $$ = new Enumerator($1); }
 	;
 
 /*atomic_type_specifier // skip for now
@@ -564,7 +565,7 @@ jump_statement
 	;
 
 translation_unit
-	: translation_unit external_declaration EOF { parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; }
+	: translation_unit external_declaration EOF { parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; } // parser.yy gets cached btw -> fixed in interpreter.parse
 	| external_declaration EOF { parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($1) ? $1 : [$1]; }
 	| translation_unit external_declaration { $$ = Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; }
 	| external_declaration { $$ = Array.isArray($1) ? $1 : [$1]; }
@@ -572,7 +573,7 @@ translation_unit
 
 external_declaration
 	: function_definition { $$ = $1; } // function definition // returns single instance of class Func
-	| declaration { $$ = $1; } // global declaration // always returns array
+	| declaration { $$ = $1; } // global declaration // always returns array of Declarations
 	;
 
 function_definition

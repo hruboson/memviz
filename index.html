@@ -89,25 +89,8 @@
 		</div>
 		<div class="row fullscreen">
 			<div class="col-4">
-				<div id="editor">typedef int i;
-typedef long long ll;
-
-typedef struct coordinates {
-	int x;
-	int y;
-} COORDINATES;
-
-int main(){
-	i a = 1;
-	ll b = 4242424242;
-
-	COORDINATES xy;
-	xy.x = 1;
-	xy.y = 0;
-	COORDINATES* xy_p = &xy;
-
-	return xy.x;
-}</div>
+				<div id="editor">enum Foo { A, B, C = 10, D, E = 1, F, G = F + C };
+				</div>
 			</div>
 			<div class="col-8">
 				<div class="row">
@@ -160,7 +143,7 @@ int main(){
 		try{
 			interpreter.parse(input);
 			document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
-			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.user_types, null, 4);
+			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.user_types.concat(interpreter.user_enums), null, 4);
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}
