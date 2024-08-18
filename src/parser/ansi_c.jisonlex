@@ -87,8 +87,10 @@ WS  [\s\t\v\n\f]
 ({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return 'STRING_LITERAL'; }
 
 {L}({L}|{D})*		{ 
-						if (parser.yy.types.includes(yytext)){
+						if(parser.yy.symbols.types.includes(yytext)){
 							return 'TYPEDEF_NAME';
+						}else if(parser.yy.symbols.enums.includes(yytext)){
+							return 'ENUMERATION_CONSTANT';
 						}else{
 							return 'IDENTIFIER';
 						}

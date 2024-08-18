@@ -98,6 +98,9 @@ break;
 case 7:
  this.$ = new Literal("f_literal", $$[$0]); 
 break;
+case 8:
+ this.$ = new ("e_literal", $$[$0]); 
+break;
 case 10:
  this.$ =  new Literal("s_literal", $$[$0]); 
 break;
@@ -220,10 +223,10 @@ case 236:
  this.$ = [...$$[$0-1], ...$$[$0]]; 
 break;
 case 255:
- parser.yy.last_types = parser.yy.types; parser.yy.types = []; return Array.isArray($$[$0-1]) ? [...$$[$0-2], ...$$[$0-1]] : [...$$[$0-2], $$[$0-1]]; 
+ parser.yy.last_symbols = parser.yy.symbols; interpreter.refresh_symbols(); return Array.isArray($$[$0-1]) ? [...$$[$0-2], ...$$[$0-1]] : [...$$[$0-2], $$[$0-1]]; 
 break;
 case 256:
- parser.yy.last_types = parser.yy.types; parser.yy.types = []; return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
+ parser.yy.last_symbols = parser.yy.symbols; interpreter.refresh_symbols(); return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
 break;
 case 261:
  this.$ = new Func($$[$0-1], $$[$0-2], new CStmt($$[$0])); 
@@ -379,8 +382,8 @@ parse: function parse(input) {
     return true;
 }};
 
-	parser.yy.types = []; // typedef types
-	parser.yy.last_types = []; // typedefs of last parsing (gets cached)
+	parser.yy.symbols = { types: [], enums: [] };
+	parser.yy.last_symbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
 
 	function get_declarations(type_specifiers, declarator_list){
 		var r = [];
@@ -396,7 +399,7 @@ parse: function parse(input) {
 				while(decl_tmp.kind != DECLTYPE.ID && decl_tmp.child != null){
 					decl_tmp = decl_tmp.child;
 				}
-				parser.yy.types.push(decl_tmp.identifier.name); // add typedef name to types so lexer can work with them
+				parser.yy.symbols.types.push(decl_tmp.identifier.name); // add typedef name to types so lexer can work with them
 			}else{
 				r.push(new Declaration(type, declarator, initializer)); // basic variable declaration
 			}
@@ -847,8 +850,10 @@ break;
 case 52: return 15; 
 break;
 case 53: 
-						if (parser.yy.types.includes(yy_.yytext)){
+						if(parser.yy.symbols.types.includes(yy_.yytext)){
 							return 117;
+						}else if(parser.yy.symbols.enums.includes(yy_.yytext)){
+							return 13;
 						}else{
 							return 4;
 						}

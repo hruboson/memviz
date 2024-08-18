@@ -16,8 +16,8 @@
 %token ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
 
 %{
-	parser.yy.types = []; // typedef types
-	parser.yy.last_types = []; // typedefs of last parsing (gets cached)
+	parser.yy.symbols = { types: [], enums: [] };
+	parser.yy.last_symbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
 
 	function get_declarations(type_specifiers, declarator_list){
 		var r = [];
@@ -33,7 +33,7 @@
 				while(decl_tmp.kind != DECLTYPE.ID && decl_tmp.child != null){
 					decl_tmp = decl_tmp.child;
 				}
-				parser.yy.types.push(decl_tmp.identifier.name); // add typedef name to types so lexer can work with them
+				parser.yy.symbols.types.push(decl_tmp.identifier.name); // add typedef name to types so lexer can work with them
 			}else{
 				r.push(new Declaration(type, declarator, initializer)); // basic variable declaration
 			}
@@ -564,8 +564,8 @@ jump_statement
 	;
 
 translation_unit
-	: translation_unit external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; } // clear types because they get cached by JS
-	| external_declaration EOF { parser.yy.last_types = parser.yy.types; parser.yy.types = []; return Array.isArray($1) ? $1 : [$1]; } // clear types because they get cached by JS
+	: translation_unit external_declaration EOF { parser.yy.last_symbols = parser.yy.symbols; interpreter.refresh_symbols(); return Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; } // clear types because they get cached by JS
+	| external_declaration EOF { parser.yy.last_symbols = parser.yy.symbols; interpreter.refresh_symbols(); return Array.isArray($1) ? $1 : [$1]; } // clear types because they get cached by JS
 	| translation_unit external_declaration { $$ = Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; }
 	| external_declaration { $$ = Array.isArray($1) ? $1 : [$1]; }
 	;

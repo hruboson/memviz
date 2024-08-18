@@ -51,10 +51,18 @@ class Interpreter {
 	/* GETTERS */
 	/**
 	 * Returns types defined by user (typedefs)
-	 * @return {array} User-defined types
+	 * @return {Array.<string>} User-defined types
 	 */
 	get user_types(){
-		return this.#parser.Parser.prototype.yy.last_types;
+		return this.#parser.Parser.prototype.yy.last_symbols.types;
+	}
+
+	/**
+	 * Returns enums declared by user (enums)
+	 * @return {Array.<string>} User-defined enums
+	 */
+	get user_enums(){
+		return this.#parser.Parser.prototype.yy.last_symbols.enums;
 	}
 
 	/* FUNCTIONS */
@@ -82,6 +90,14 @@ class Interpreter {
 	//TODO
 	interpret(){
 		return 0;
+	}
+
+	/**
+	 * Refreshes cached symbols stored in parser
+	 * @return {void}
+	 */
+	refresh_symbols(){
+		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //TODO make this a class perhaps
 	}
 }
 
