@@ -447,7 +447,7 @@ type_name
 
 abstract_declarator
 	: pointer direct_abstract_declarator { $$ = new AbstractDeclarator(DECLTYPE.PTR, $2, $1); }
-	| pointer { $$ = new AbstractDeclarator(DECLTYPE.PTR); }
+	| pointer { $$ = new AbstractDeclarator(DECLTYPE.PTR, null, $1); }
 	| direct_abstract_declarator { $$ = $1; }
 	;
 

@@ -250,7 +250,7 @@ case 181:
  this.$ = new AbstractDeclarator(DECLTYPE.PTR, $$[$0], $$[$0-1]); 
 break;
 case 182:
- this.$ = new AbstractDeclarator(DECLTYPE.PTR); 
+ this.$ = new AbstractDeclarator(DECLTYPE.PTR, null, $$[$0]); 
 break;
 case 185:
  this.$ = new AbstractDeclarator(DECLTYPE.ARR); 
