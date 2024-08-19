@@ -6,14 +6,14 @@
 /**
  * @class Func
  * @param {Declarator} declarator
- * @param {Type} return_type
+ * @param {Type} returnType
  * @param {CStmt} body
  */
 class Func extends Stmt {
-	constructor(declarator, return_type, body){
+	constructor(declarator, returnType, body){
 		super();
 		this.declarator = declarator;
-		this.return_type = return_type;
+		this.returnType = returnType;
 		this.body = body;
 	}
 }

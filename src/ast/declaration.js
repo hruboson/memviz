@@ -1,17 +1,22 @@
 /**
  * @file Declaration and initialization-related classes
+ * @author Ondřej Hruboš
  */
 
 /**
  * @class Type
  * @decription Allowed (built-in) types: void  char  short  int  long  float  double  signed  unsigned, _Bool
- * @param {Array.<string>} specifiers
+ * @param {Array.<string>} [specifiers=[]]
  */
 class Type {
-	constructor(specifiers){
-		this.specifiers = specifiers.filter(function (without) {
-			return without !== "typedef"; // remove "typedef" as that is not needed in the specifiers 
-		});
+	constructor(specifiers=[]){
+		if(specifiers.length == 0){
+			this.specifiers = ["int"]; // Empty type defaults to int
+		}else{
+			this.specifiers = specifiers.filter(function (without) {
+				return without !== "typedef"; // remove "typedef" as that is not needed in the specifiers 
+			});
+		}
 		/*this.size = this.#get_size(this.specifiers);
 		this.unsigned = this.specifiers.includes("unsigned") ? true : false;*/ //<-- these shouldn't be in AST
 	}
@@ -54,7 +59,6 @@ class Initializer {
  */
 const DECLTYPE = {
 	ID: "ID", // identifier
-	DECLPAR: "DECLPAR", // declarator enclosed in parentheses
 	PTR: "PTR", // pointer
 	ARR: "ARR", // array
 	FNC: "FNC", // function
@@ -66,7 +70,7 @@ const DECLTYPE = {
  * @class Declarator
  * @param {DECLTYPE} kind Type of declarator. Described in [class description]{@link Declarator#description}.
  * @param {Declarator} child Child declarator
- * @param {Identifier|Pointer|null} data Idk whatever is needed just put it here
+ * @param {Identifier|Object|Pointer|null} data Idk whatever is needed just put it here
  */
 class Declarator {
 	//TODO Refactor + docu
@@ -75,13 +79,12 @@ class Declarator {
 	identifier;
 	ptr;
 	arr;
+	fnc;
 
 	constructor(kind, child, data){
 		switch(kind){
 			case DECLTYPE.ID:
 				this.identifier = data;
-				break;
-			case DECLTYPE.DECLPAR:
 				break;
 			case DECLTYPE.PTR:
 				this.ptr = data;
@@ -90,6 +93,7 @@ class Declarator {
 				this.arr = data;
 				break;
 			case DECLTYPE.FNC:
+				this.fnc = data;
 				break;
 			default:
 				throw new Error("Unknown declaration type!");
@@ -97,6 +101,17 @@ class Declarator {
 		this.kind = kind;
 		this.child = child;
 	}
+}
+
+/**
+ * Abstract declarator. For prototype-less function declarations.
+ * @class AbstractDeclarator
+ * @param {DECLTYPE} kind
+ * @param {AbstractDeclarator} child
+ * @param {Pointer|Object|null}
+ */
+class AbstractDeclarator {
+
 }
 
 /**

@@ -17,23 +17,23 @@
 
 %{
 	parser.yy.symbols = { types: [], enums: [] };
-	parser.yy.last_symbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
+	parser.yy.lastSymbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
 
-	function get_declarations(type_specifiers, declarator_list){
+	function getDeclarations(typeSpecifiers, declaratorList){
 		var r = [];
-		const type = new Type(type_specifiers); // type will be same regardless of typedef or variable declaration
-		for(var decl_init of declarator_list){ // handle multiple same-line declarations (int a, b = 10, c;)
-			var declarator = decl_init.declarator;
-			var initializer = decl_init.initializer;
+		const type = new Type(typeSpecifiers); // type will be same regardless of typedef or variable declaration
+		for(var declInit of declaratorList){ // handle multiple same-line declarations (int a, b = 10, c;)
+			var declarator = declInit.declarator;
+			var initializer = declInit.initializer;
 
-			if(type_specifiers.includes("typedef")){ // specifiers include typedef
+			if(typeSpecifiers.includes("typedef")){ // specifiers include typedef
 				r.push(new Typedef(type, declarator));
 				// get to the bottom of declarator
-				var decl_tmp = declarator;
-				while(decl_tmp.kind != DECLTYPE.ID && decl_tmp.child != null){
-					decl_tmp = decl_tmp.child;
+				var declTmp = declarator;
+				while(declTmp.kind != DECLTYPE.ID && declTmp.child != null){
+					declTmp = declTmp.child;
 				}
-				parser.yy.symbols.types.push(decl_tmp.identifier.name); // add typedef name to types so lexer can work with them
+				parser.yy.symbols.types.push(declTmp.identifier.name); // add typedef name to types so lexer can work with them
 				//! move this to Typedef constructor
 			}else{
 				r.push(new Declaration(type, declarator, initializer)); // basic variable declaration
@@ -58,7 +58,7 @@ primary_expression
 constant
 	: I_CONSTANT { $$ = new Literal("i_literal", $1); }
 	| F_CONSTANT { $$ = new Literal("f_literal", $1); }
-	| ENUMERATION_CONSTANT //TODO	
+	| ENUMERATION_CONSTANT { $$ = new Identifier($1); }	
 	;
 
 enumeration_constant
@@ -224,7 +224,7 @@ declaration
 	}
 	| declaration_specifiers init_declarator_list ';' 
 	{
-		$$ = get_declarations($1, $2);
+		$$ = getDeclarations($1, $2);
 	}
 	| static_assert_declaration
 	;
@@ -313,8 +313,8 @@ struct_declaration
 	| specifier_qualifier_list struct_declarator_list ';' 
 	{ 
 		$$ = [];
-		for(var decl_init of $2){
-			$$.push(new Declaration(new Type($1), decl_init.declarator, decl_init.initializer));
+		for(var declInit of $2){
+			$$.push(new Declaration(new Type($1), declInit.declarator, declInit.initializer));
 		}
 		
 	}
@@ -385,7 +385,7 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator { $$ = new Declarator(DECLTYPE.PTR, $2, $1); } //TODO get more data about pointer ($1)
+	: pointer direct_declarator { $$ = new Declarator(DECLTYPE.PTR, $2, $1); }
 	| direct_declarator { $$ = $1; } // always returns typeof Declarator
 	;
 
@@ -400,15 +400,15 @@ direct_declarator // must always return typeof Declarator
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } !NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
-	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1); } // TODO return size of array
-	| direct_declarator '(' parameter_type_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1); } //TODO function parameters
-	| direct_declarator '(' ')' { $$ = new Declarator(DECLTYPE.FNC, $1.identifier); } //TODO function call without parameters
-	| direct_declarator '(' identifier_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1); } // function arguments? I guess
+	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1, { size: $3 }); }
+	| direct_declarator '(' parameter_type_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }); }
+	| direct_declarator '(' ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: [] }); }
+	| direct_declarator '(' identifier_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }); } // Function parameters without type (type defaults to int) 
 	;
 
 pointer
 	: '*' type_qualifier_list pointer { $$ = new Pointer($3, $2); }
-	| '*' type_qualifier_list { $$ = new Pointer(null, $2); } //TODO add qualifiers to the pointer
+	| '*' type_qualifier_list { $$ = new Pointer(null, $2); }
 	| '*' pointer { $$ = new Pointer($2); }
 	| '*' { $$ = new Pointer(null); }
 	;
@@ -420,24 +420,24 @@ type_qualifier_list
 
 
 parameter_type_list
-	: parameter_list ',' ELLIPSIS
-	| parameter_list
+	: parameter_list ',' ELLIPSIS { $$ = $1; }
+	| parameter_list { $$ = $1; }
 	;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list ',' parameter_declaration
+	: parameter_declaration { $$ = [$1]; }
+	| parameter_list ',' parameter_declaration { $$ = [...$1, $3]; }
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
+	: declaration_specifiers declarator { $$ = new Declaration(new Type($1), $2); }
 	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
+	| declaration_specifiers { $$ = new Declaration(new Type($1), new Unnamed()); }
 	;
 
 identifier_list
-	: IDENTIFIER
-	| identifier_list ',' IDENTIFIER
+	: IDENTIFIER { $$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($1)))]; }
+	| identifier_list ',' IDENTIFIER { $$ = [...$1, new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($3)))]; }
 	;
 
 type_name
@@ -454,7 +454,7 @@ abstract_declarator
 direct_abstract_declarator
 	: '(' abstract_declarator ')'
 	| '[' ']'
-	| '[' '*' ']'
+	/*| '[' '*' ']'
 	| '[' STATIC type_qualifier_list assignment_expression ']'
 	| '[' STATIC assignment_expression ']'
 	| '[' type_qualifier_list STATIC assignment_expression ']'
@@ -467,7 +467,7 @@ direct_abstract_declarator
 	| direct_abstract_declarator '[' STATIC assignment_expression ']'
 	| direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'
 	| direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-	| direct_abstract_declarator '[' type_qualifier_list ']'
+	| direct_abstract_declarator '[' type_qualifier_list ']'*/
 	| direct_abstract_declarator '[' assignment_expression ']'
 	| '(' ')'
 	| '(' parameter_type_list ')'
@@ -476,8 +476,8 @@ direct_abstract_declarator
 	;
 
 initializer
-	: '{' initializer_list '}' { $$ = { type: "array_initializer", values: $2 }; }
-	| '{' initializer_list ',' '}' { $$ = { type: "array_initializer", values: $2 }; }
+	: '{' initializer_list '}' { $$ = $2; }
+	| '{' initializer_list ',' '}' { $$ = $2; }
 	| assignment_expression { $$ = $1; }
 	;
 

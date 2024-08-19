@@ -30,7 +30,7 @@
 	<script src="src/ast/struct_union.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/enum.js" type="text/javascript" charset="utf-8"></script>
 
-	<script src="src/parser/ansi_c.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/parser/c_parser.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 
 	<style type="text/css" media="screen">
@@ -143,7 +143,7 @@
 		try{
 			interpreter.parse(input);
 			document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
-			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.user_types.concat(interpreter.user_enums), null, 4);
+			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.userTypes.concat(interpreter.userEnums), null, 4);
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}

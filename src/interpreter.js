@@ -25,7 +25,7 @@ class Interpreter {
 	 * Parser instance
 	 * @private
 	 */
-	#parser = ansi_c;
+	#parser = c_parser;
 
 	/**
 	 * AST
@@ -53,16 +53,16 @@ class Interpreter {
 	 * Returns types defined by user (typedefs)
 	 * @return {Array.<string>} User-defined types
 	 */
-	get user_types(){
-		return this.#parser.Parser.prototype.yy.last_symbols.types;
+	get userTypes(){
+		return this.#parser.Parser.prototype.yy.lastSymbols.types;
 	}
 
 	/**
 	 * Returns enums declared by user (enums)
 	 * @return {Array.<string>} User-defined enums
 	 */
-	get user_enums(){
-		return this.#parser.Parser.prototype.yy.last_symbols.enums;
+	get userEnums(){
+		return this.#parser.Parser.prototype.yy.lastSymbols.enums;
 	}
 
 	/* FUNCTIONS */
@@ -72,7 +72,7 @@ class Interpreter {
 	* @return {json} AST
 	*/
 	parse(text){
-		this.#refresh_symbols();
+		this.#refreshSymbols();
 		this.#ast = this.#parser.parse(text);
 		return this.#ast;
 	}
@@ -81,7 +81,7 @@ class Interpreter {
 	* @todo implement
 	*/
 	//TODO
-	interpret_single(){
+	interpretSingle(){
 		return 1;
 	}
 
@@ -98,7 +98,7 @@ class Interpreter {
 	 * @return {void}
 	 * @private
 	 */
-	#refresh_symbols(){
+	#refreshSymbols(){
 		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //TODO make this a class perhaps
 	}
 }

@@ -4,7 +4,7 @@ run:
 	firefox index.html
 
 parser:
-	cd src/parser/ && jison ansi_c.jison ansi_c.jisonlex
+	cd src/parser/ && jison c_parser.jison c_parser.jisonlex
 
 doc: clean_doc
 	jsdoc -r src/ -t ${TEMPLATE_PATH} -d doc/gen/ --readme README.md
