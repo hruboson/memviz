@@ -86,10 +86,10 @@ switch (yystate) {
 case 1: case 7: case 8:
  this.$ = new Identifier($$[$0]); 
 break;
-case 2: case 3: case 83: case 117: case 118: case 123: case 124: case 156: case 171: case 193: case 215: case 217: case 239: case 240:
+case 2: case 3: case 83: case 117: case 118: case 123: case 124: case 156: case 171: case 183: case 193: case 215: case 217: case 239: case 240:
  this.$ = $$[$0]; 
 break;
-case 4: case 158: case 191: case 214:
+case 4: case 158: case 184: case 191: case 214:
  this.$ = $$[$0-1]; 
 break;
 case 5:
@@ -234,7 +234,7 @@ break;
 case 170: case 192:
  this.$ = $$[$0-2]; 
 break;
-case 174:
+case 174: case 175:
  this.$ = new Declaration(new Type($$[$0-1]), $$[$0]); 
 break;
 case 176:
@@ -245,6 +245,30 @@ case 177:
 break;
 case 178:
  this.$ = [...$$[$0-2], new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])))]; 
+break;
+case 181:
+ this.$ = new AbstractDeclarator(DECLTYPE.PTR, $$[$0], $$[$0-1]); 
+break;
+case 182:
+ this.$ = new AbstractDeclarator(DECLTYPE.PTR); 
+break;
+case 185:
+ this.$ = new AbstractDeclarator(DECLTYPE.ARR); 
+break;
+case 186:
+ this.$ = new AbstractDeclarator(DECLTYPE.ARR, $$[$0-3], $$[$0-1]); 
+break;
+case 187:
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC); 
+break;
+case 188:
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC, null, $$[$0-1]); 
+break;
+case 189:
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-2], { parameters: [] }); 
+break;
+case 190:
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }); 
 break;
 case 216:
  this.$ = [...$$[$0-1], ...$$[$0]]; 

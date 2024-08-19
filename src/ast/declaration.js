@@ -110,8 +110,10 @@ class Declarator {
  * @param {AbstractDeclarator} child
  * @param {Pointer|Object|null}
  */
-class AbstractDeclarator {
-
+class AbstractDeclarator extends Declarator {
+	constructor(kind, child, data){
+		super(kind, child, data);
+	}
 }
 
 /**

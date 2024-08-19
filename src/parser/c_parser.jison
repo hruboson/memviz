@@ -248,8 +248,8 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator '=' initializer { $$ = { declarator: $1, initializer: $3 }; }
-	| declarator { $$ = { declarator: $1, initializer: null }; }
+	: declarator '=' initializer { $$ = { declarator: $1, initializer: $3 }; } // helper structure, will be discarded further up 
+	| declarator { $$ = { declarator: $1, initializer: null }; } // same helper structure
 	;
 
 storage_class_specifier
@@ -431,7 +431,7 @@ parameter_list
 
 parameter_declaration
 	: declaration_specifiers declarator { $$ = new Declaration(new Type($1), $2); }
-	| declaration_specifiers abstract_declarator
+	| declaration_specifiers abstract_declarator { $$ = new Declaration(new Type($1), $2); }
 	| declaration_specifiers { $$ = new Declaration(new Type($1), new Unnamed()); }
 	;
 
@@ -446,14 +446,14 @@ type_name
 	;
 
 abstract_declarator
-	: pointer direct_abstract_declarator
-	| pointer
-	| direct_abstract_declarator
+	: pointer direct_abstract_declarator { $$ = new AbstractDeclarator(DECLTYPE.PTR, $2, $1); }
+	| pointer { $$ = new AbstractDeclarator(DECLTYPE.PTR); }
+	| direct_abstract_declarator { $$ = $1; }
 	;
 
 direct_abstract_declarator
-	: '(' abstract_declarator ')'
-	| '[' ']'
+	: '(' abstract_declarator ')' { $$ = $2; }
+	| '[' ']' { $$ = new AbstractDeclarator(DECLTYPE.ARR); }
 	/*| '[' '*' ']'
 	| '[' STATIC type_qualifier_list assignment_expression ']'
 	| '[' STATIC assignment_expression ']'
@@ -468,11 +468,11 @@ direct_abstract_declarator
 	| direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'
 	| direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'
 	| direct_abstract_declarator '[' type_qualifier_list ']'*/
-	| direct_abstract_declarator '[' assignment_expression ']'
-	| '(' ')'
-	| '(' parameter_type_list ')'
-	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_type_list ')'
+	| direct_abstract_declarator '[' assignment_expression ']' { $$ = new AbstractDeclarator(DECLTYPE.ARR, $1, $3); }
+	| '(' ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC); }
+	| '(' parameter_type_list ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, null, $2); }
+	| direct_abstract_declarator '(' ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, $1, { parameters: [] }); }
+	| direct_abstract_declarator '(' parameter_type_list ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, $1, { parameters: $3 }); }
 	;
 
 initializer
