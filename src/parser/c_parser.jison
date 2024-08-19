@@ -565,8 +565,8 @@ jump_statement
 	;
 
 translation_unit
-	: translation_unit external_declaration EOF { parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; } // parser.yy gets cached btw -> fixed in interpreter.parse
-	| external_declaration EOF { parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($1) ? $1 : [$1]; }
+	: translation_unit external_declaration EOF { parser.yy.lastSymbols = parser.yy.symbols; return Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; } // parser.yy gets cached btw -> fixed in interpreter.parse
+	| external_declaration EOF { parser.yy.lastSymbols = parser.yy.symbols; return Array.isArray($1) ? $1 : [$1]; }
 	| translation_unit external_declaration { $$ = Array.isArray($2) ? [...$1, ...$2] : [...$1, $2]; }
 	| external_declaration { $$ = Array.isArray($1) ? $1 : [$1]; }
 	;

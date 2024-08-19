@@ -250,10 +250,10 @@ case 216:
  this.$ = [...$$[$0-1], ...$$[$0]]; 
 break;
 case 235:
- parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? [...$$[$0-2], ...$$[$0-1]] : [...$$[$0-2], $$[$0-1]]; 
+ parser.yy.lastSymbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? [...$$[$0-2], ...$$[$0-1]] : [...$$[$0-2], $$[$0-1]]; 
 break;
 case 236:
- parser.yy.last_symbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
+ parser.yy.lastSymbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
 break;
 case 241:
  this.$ = new Func($$[$0-1], $$[$0-2], new CStmt($$[$0])); 
