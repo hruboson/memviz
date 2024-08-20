@@ -86,10 +86,10 @@ switch (yystate) {
 case 1: case 7: case 8:
  this.$ = new Identifier($$[$0]); 
 break;
-case 2: case 3: case 83: case 117: case 118: case 123: case 124: case 156: case 171: case 183: case 193: case 215: case 217: case 239: case 240:
+case 2: case 3: case 83: case 117: case 118: case 123: case 124: case 156: case 171: case 183: case 215: case 217: case 239: case 240:
  this.$ = $$[$0]; 
 break;
-case 4: case 158: case 184: case 191: case 214:
+case 4: case 158: case 184: case 191: case 198: case 214:
  this.$ = $$[$0-1]; 
 break;
 case 5:
@@ -117,10 +117,10 @@ break;
 case 87: case 89: case 91: case 93: case 95: case 130: case 132:
  this.$ = [$$[$0-1], ...$$[$0]]; 
 break;
-case 88: case 90: case 92: case 94: case 96: case 97: case 131: case 133: case 144: case 168: case 172: case 195: case 218:
+case 88: case 90: case 92: case 94: case 96: case 97: case 131: case 133: case 144: case 168: case 172: case 199: case 218:
  this.$ = [$$[$0]]; 
 break;
-case 98: case 145: case 173: case 197:
+case 98: case 145: case 173:
  this.$ = [...$$[$0-2], $$[$0]]; 
 break;
 case 99: case 137:
@@ -131,7 +131,7 @@ case 100: case 138:
 break;
 case 120:
  // anonymous struct or union
-		this.$ = ($$[$0-3] == "STRUCT") ? new Struct($$[$0-1]) : new Union($$[$0-1]); 
+		this.$ = ($$[$0-3] == "STRUCT") ? new Struct($$[$0-1], new Unnamed()) : new Union($$[$0-1], new Unnamed()); 
 	
 break;
 case 121:
@@ -152,7 +152,7 @@ case 126: case 237:
 break;
 case 127:
  
-		this.$ = new Declaration(new Type($$[$0-1]), new Unnamed(), null); 
+		this.$ = new Type($$[$0-1]); 
 	
 break;
 case 128:
@@ -208,7 +208,7 @@ case 159:
  this.$ = new Declarator(DECLTYPE.ARR, $$[$0-2]); 
 break;
 case 160:
- this.$ = new Declarator(DECLTYPE.ARR, $$[$0-3], { size: $$[$0-1] }); 
+ this.$ = new Declarator(DECLTYPE.ARR, $$[$0-3], $$[$0-1]); 
 break;
 case 161: case 163:
  this.$ = new Declarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }); 
@@ -228,7 +228,7 @@ break;
 case 167:
  this.$ = new Pointer(null); 
 break;
-case 169:
+case 169: case 200:
  this.$ = [...$$[$0-1], $$[$0]]; 
 break;
 case 170: case 192:
@@ -269,6 +269,27 @@ case 189:
 break;
 case 190:
  this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }); 
+break;
+case 193:
+ this.$ = new Initializer(INITTYPE.EXPR, $$[$0]); 
+break;
+case 194:
+ this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1])]; 
+break;
+case 195:
+ this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0])]; 
+break;
+case 196:
+ this.$ = [...$$[$0-3], new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1])]; 
+break;
+case 197:
+ this.$ = [...$$[$0-2], new Initializer(INITTYPE.NESTED, null, $$[$0])]; 
+break;
+case 201:
+ this.$ = new Designator($$[$0-1]); 
+break;
+case 202:
+ this.$ = new Designator(new Identifier($$[$0])); 
 break;
 case 216:
  this.$ = [...$$[$0-1], ...$$[$0]]; 

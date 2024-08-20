@@ -5,7 +5,7 @@
 /**
 * @class Struct
 * @param {Array.<Declaration>|null} declarations Struct's body (declarations inside)
-* @param {Identifier|null} tagname Tagname
+* @param {Tagname|Unnamed|null} tagname Tagname
 */
 class Struct {
 	constructor(declarations, tagname){
@@ -17,7 +17,7 @@ class Struct {
 /**
 * @class Union
 * @param {Array.<Declaration>|null} declarations Union's body (declarations inside)
-* @param {Tagname|null} tagname
+* @param {Tagname|Unnamed|null} tagname
 */
 class Union {
 	constructor(declarations, tagname){

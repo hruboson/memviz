@@ -226,7 +226,7 @@ declaration
 	{
 		$$ = getDeclarations($1, $2);
 	}
-	| static_assert_declaration
+	| static_assert_declaration //TODO
 	;
 
 declaration_specifiers
@@ -283,7 +283,7 @@ type_specifier
 struct_or_union_specifier
 	: struct_or_union '{' struct_declaration_list '}'
 	{ // anonymous struct or union
-		$$ = ($1 == "STRUCT") ? new Struct($3) : new Union($3); 
+		$$ = ($1 == "STRUCT") ? new Struct($3, new Unnamed()) : new Union($3, new Unnamed()); 
 	}
 	| struct_or_union IDENTIFIER '{' struct_declaration_list '}' 
 	{ // struct variable initialization and struct definition 
@@ -308,7 +308,7 @@ struct_declaration_list
 struct_declaration
 	: specifier_qualifier_list ';' 
 	{ 
-		$$ = new Declaration(new Type($1), new Unnamed(), null); 
+		$$ = new Type($1); 
 	}
 	| specifier_qualifier_list struct_declarator_list ';' 
 	{ 
@@ -400,7 +400,7 @@ direct_declarator // must always return typeof Declarator
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } !NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
-	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1, { size: $3 }); }
+	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1, $3); }
 	| direct_declarator '(' parameter_type_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }); }
 	| direct_declarator '(' ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: [] }); }
 	| direct_declarator '(' identifier_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }); } // Function parameters without type (type defaults to int) 
@@ -478,28 +478,28 @@ direct_abstract_declarator
 initializer
 	: '{' initializer_list '}' { $$ = $2; }
 	| '{' initializer_list ',' '}' { $$ = $2; }
-	| assignment_expression { $$ = $1; }
+	| assignment_expression { $$ = new Initializer(INITTYPE.EXPR, $1); }
 	;
 
 initializer_list
-	: designation initializer
-	| initializer { $$ = [$1]; }
-	| initializer_list ',' designation initializer
-	| initializer_list ',' initializer { $$ = [...$1, $3]; }
+	: designation initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $2, $1)]; }
+	| initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $1)]; }
+	| initializer_list ',' designation initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $4, $3)]; }
+	| initializer_list ',' initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $3)]; }
 	;
 
 designation
-	: designator_list '='
+	: designator_list '=' { $$ = $1; }
 	;
 
 designator_list
-	: designator
-	| designator_list designator
+	: designator { $$ = [$1]; }
+	| designator_list designator { $$ = [...$1, $2]; }
 	;
 
 designator
-	: '[' constant_expression ']'
-	| '.' IDENTIFIER
+	: '[' constant_expression ']' { $$ = new Designator($2); }
+	| '.' IDENTIFIER { $$ = new Designator(new Identifier($2)); }
 	;
 
 static_assert_declaration
