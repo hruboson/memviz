@@ -48,7 +48,10 @@ describe('parser correct', () => {
 	});
 	it('function definition, declaration, calls', () => {
 		chai.expect(function() { parse(function_definition_declaration); }).to.not.throw()
-	})
+	});
+	it('array designator', () => {
+		chai.expect(function() { parse(array_designator); }).to.not.throw()
+	});
 	it('while loop', () => {
 		chai.expect(function() { parse(while_loop_simple); }).to.not.throw()
 	});

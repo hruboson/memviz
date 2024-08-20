@@ -357,6 +357,15 @@ int main(){
 }
 `;
 
+const array_designator = `
+enum { RED, GREEN, BLUE };
+const char *nm[] = {
+	[RED] = "red",
+	[GREEN] = "green",
+	[BLUE] = "blue",
+};
+`;
+
 /* SIMPLE CF STATEMENTS */
 
 const while_loop_simple = `
