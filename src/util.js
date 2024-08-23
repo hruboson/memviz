@@ -6,7 +6,7 @@
 /**
  * Declares class as abstract. Call this function in class constructor to get the effect.
  * @param {Object} obj Instance of class (it will always be `this`)
- * @param {String} name Name of class to declare abstract
+ * @param {string} name Name of class to declare abstract
  */
 function abstract(obj, name){ // passing name makes the children not abstract
 	if(obj.constructor == name) { // abstract hack
@@ -17,8 +17,8 @@ function abstract(obj, name){ // passing name makes the children not abstract
 /**
  * Declares a function a class must implement. Call this function in class constructor to get the effect.
  * @param {Object} obj Instance of class (it will always be `this`)
- * @param {String} function_name Name of the function the class will have to implement
- * @param {Array} [parameters=[]] Optional parameters for function
+ * @param {string} function_name Name of the function the class will have to implement
+ * @param {array} [parameters=[]] Optional parameters for function
  */
 function intfc(obj, function_name, parameters = []){
 	if(typeof obj[function_name] != "function"){

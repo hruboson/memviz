@@ -6,7 +6,7 @@
 /**
  * @class Type
  * @decription Allowed (built-in) types: void  char  short  int  long  float  double  signed  unsigned, _Bool
- * @param {Array.<String>} [specifiers=[]]
+ * @param {Array.<string>} [specifiers=[]]
  */
 class Type {
 	constructor(specifiers=[]){

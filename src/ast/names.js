@@ -5,7 +5,7 @@
 /**
  * Used for functiuon names, object names, typedef names, enumeration constants
  * @class Identifier
- * @param {String} name
+ * @param {string} name
  */
 class Identifier extends Construct {
 	constructor(name){
@@ -22,7 +22,7 @@ class Identifier extends Construct {
  * Used for structs, unions and enums
  * @description Creates record in tag name space
  * @class Tagname
- * @param {String} name
+ * @param {string} name
  */
 class Tagname extends Construct {
 	constructor(name){

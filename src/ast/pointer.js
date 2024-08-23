@@ -5,7 +5,7 @@
 /**
  * @class Pointer
  * @param {Pointer} child
- * @param {Array.<String>} qualifiers
+ * @param {Array.<string>} qualifiers
  */
 class Pointer {
 	constructor(child, qualifiers){
