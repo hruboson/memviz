@@ -44,7 +44,7 @@ class Symtable {
 
 	/**
 	 * Symbol table
-	 * @type {Map<String, Symbol>}
+	 * @type {Map<string, Symbol>}
 	 */
 	symbols;
 
