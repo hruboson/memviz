@@ -51,7 +51,7 @@ class Interpreter {
 	/* GETTERS */
 	/**
 	 * Returns types defined by user (typedefs)
-	 * @return {Array.<string>} User-defined types
+	 * @return {Array.<String>} User-defined types
 	 */
 	get userTypes(){
 		return this.#parser.Parser.prototype.yy.lastSymbols.types;
@@ -59,7 +59,7 @@ class Interpreter {
 
 	/**
 	 * Returns enums declared by user (enums)
-	 * @return {Array.<string>} User-defined enums
+	 * @return {Array.<String>} User-defined enums
 	 */
 	get userEnums(){
 		return this.#parser.Parser.prototype.yy.lastSymbols.enums;
@@ -68,8 +68,8 @@ class Interpreter {
 	/* FUNCTIONS */
 	/**
 	* Parses user input
-	* @param {string} text User input
-	* @return {json} AST
+	* @param {String} text User input
+	* @return {JSON} AST
 	*/
 	parse(text){
 		this.#refreshSymbols();
