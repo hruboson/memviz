@@ -168,7 +168,7 @@ class Declaration extends Construct {
 	}
 
 	accept(visitor){
-
+		visitor.visitDeclaration(this);
 	}
 }
 

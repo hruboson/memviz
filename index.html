@@ -38,6 +38,8 @@
 	<script src="src/ast/enum.js" type="text/javascript" charset="utf-8"></script>
 
 	<script src="src/parser/c_parser.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/symtable.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/semantic.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 
 	<style type="text/css" media="screen">
@@ -89,9 +91,10 @@
 				<div style="left: 10px;"> </div>
 				<button class="btn btn-primary" onclick="execute(editor.getValue())"><i class="bx bx-sm bx-play"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-left"></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-right"></i></button>
+				<button class="btn btn-primary" onclick="interpreter.interpretSingle()"><i class="bx bx-sm bx-chevron-right"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-right"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-left"></i></button>
+				<button class="btn btn-primary disabled" id="programCounter">0/?</button>
 			</div>
 			<div class="col-6 text-end">
 				<span id="debugInfo" style="visibility: visible"> <!-- on release change to hidden -->
@@ -271,10 +274,12 @@ Split(['#split-editor', '#split-output'], {
 	}
 	
 	function execute(input){
+		document.getElementById("output").innerHTML = "";
 		try{
-			interpreter.parse(input);
-			document.getElementById("ast").innerHTML = JSON.stringify(interpreter.ast, null, 4);
+			const result = interpreter.run(input);
 			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.userTypes.concat(interpreter.userEnums), null, 4);
+			document.getElementById("symtable").innerHTML = JSON.stringify(Array.from(interpreter.symtable.symbols.entries()), null, 4);
+			document.getElementById("output").innerHTML = result;
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}
