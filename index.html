@@ -77,7 +77,7 @@
 		}
 
 		.gutter.gutter-horizontal {
-			background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+			background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
 			cursor: col-resize;
 		}
 	</style>
@@ -85,17 +85,21 @@
 <body>
 	<div class="container-fluid h-100 w-100 ps-0">
 		<div class="row pb-2 pt-1">
-			<div class="col-8">
+			<div class="col-6">
 				<div style="left: 10px;"> </div>
-				<button class="btn btn-primary" onclick="execute(editor.getValue())"><i class='bx bx-sm bx-play'></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-chevron-left'></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-chevron-right'></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-arrow-to-right'></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-arrow-to-left'></i></button>
+				<button class="btn btn-primary" onclick="execute(editor.getValue())"><i class="bx bx-sm bx-play"></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-left"></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-right"></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-right"></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-left"></i></button>
 			</div>
-			<div class="col-4 text-end">
-				<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#infoModal" type="button"><i class='bx bx-sm bx-info-circle'></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class='bx bx-sm bx-cog'></i></button>
+			<div class="col-6 text-end">
+				<span id="debugInfo" style="visibility: visible"> <!-- on release change to hidden -->
+					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#astOffcanvas" aria-controls="astOffcanvas">AST</button>
+					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#symtableOffcanvas" aria-controls="symtableOffcanvas">SYMTAB</button>
+				</span>
+				<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#infoModal" type="button"><i class="bx bx-sm bx-info-circle"></i></button>
+				<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#settingsModal" type="button"><i class="bx bx-sm bx-cog"></i></button>
 				<div class="btn-group">
 					<button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
 						Examples	
@@ -128,7 +132,43 @@
 				</div>
 				<div id="split-output">
 					<pre id="output"></pre>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- --------------------------------------- -->
+	<!-- 		INVISIBLE ELEMENTS				 -->
+	<!-- --------------------------------------- -->
+
+	<!-- AST offcanvas -->
+	<div class="offcanvas offcanvas-bottom h-75" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="astOffcanvas" aria-labelledby="offcanvasScrollingLabel">
+		<div class="offcanvas-header">
+			<h3 class="offcanvas-title" id="astOffcanvasLabel">AST</h3>
+			<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		</div>
+		<div class="offcanvas-body">
+			<div class="row">
+				<div class="col-6">
+					<pre id="ast"></pre>
+				</div>
+				<div class="col-6">
 					<pre id="typedefs"></pre>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Symbol table offcanvas -->
+	<div class="offcanvas offcanvas-bottom h-75" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="symtableOffcanvas" aria-labelledby="offcanvasScrollingLabel">
+		<div class="offcanvas-header">
+			<h3 class="offcanvas-title" id="symtableOffcanvasLabel">Symbol table</h3>
+			<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		</div>
+		<div class="offcanvas-body">
+			<div class="row">
+				<div class="col-6">
+					<pre id="symtable"></pre>
 				</div>
 			</div>
 		</div>
@@ -148,6 +188,37 @@
 						<li><a href="doc.html">Documentation</a></li>
 						<li><a href="tests.html" target="_blank">Tests</a></li>
 					</ul>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- settingsModal -->
+	<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="fs-5" id="settingsModalLabel">Settings</h3>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="debugMode">
+						<label class="form-check-label" for="debugMode">Debug mode</label>
+						<script>
+							const checkbox = document.getElementById("debugMode")
+							checkbox.addEventListener("change", (event) => {
+								if (event.currentTarget.checked) {
+									document.getElementById("debugInfo").style.visibility = "visible";
+								} else {
+									document.getElementById("debugInfo").style.visibility = "hidden";
+								}
+							});
+						</script>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -202,7 +273,7 @@ Split(['#split-editor', '#split-output'], {
 	function execute(input){
 		try{
 			interpreter.parse(input);
-			document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
+			document.getElementById("ast").innerHTML = JSON.stringify(interpreter.ast, null, 4);
 			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.userTypes.concat(interpreter.userEnums), null, 4);
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
