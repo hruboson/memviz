@@ -80,7 +80,5 @@ class Stack {
 	 */
 	push(item){
 		this.#items[this.#items.length] = item;
-		
-		console.log(this.#items);
 	}
 }
