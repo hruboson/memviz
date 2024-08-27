@@ -11,13 +11,13 @@ class SError extends Error {
 
 /**
  * Semantic analyzer for interpreter
- * @description Acts as a visitor for ast structures.
+ * @description Acts as a visitor for AST structures.
  * @class Semantic
- * @param {Symtable} Symbol table
+ * @param {Stack} Stack of symbol tables
  */
 class Semantic {
-	constructor(symtable){
-		this.symtable = symtable;
+	constructor(symtableStack){
+		this.symtableStack = symtableStack;
 	}
 
 
@@ -30,7 +30,15 @@ class Semantic {
 		const initializer = declaration.initializer;
 
 		if(declarator.kind == DECLTYPE.ID){
-			this.symtable.insert(declarator.identifier.name, declaration.type.specifiers[0]); //TODO specifiers
+			this.symtableStack.peek().insert(declarator.identifier.name, declaration.type.specifiers.toString()); //TODO specifiers
 		}
+	}
+
+	visitCompoundStatement(stmt){
+		this.symtableStack.push(new Symtable("compound statement", "stmt", this.symtableStack.peek()));
+	}
+
+	visitFunc(func){
+		this.symtableStack.push(new Symtable("function parameters", "param", this.symtableStack.peek()));
 	}
 }

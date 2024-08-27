@@ -45,6 +45,10 @@ class Stack {
 		this.#items = [];
 	}
 
+	get items(){
+		return this.#items;
+	}
+
 	/**
 	 * Returns the top-most item in stack
 	 * @return {Object}

@@ -10,7 +10,7 @@ class ScopeInfo {
 	}
 }
 
-class Symbol {
+class Sym {
 	name;
 	type;
 	initialized;
@@ -48,11 +48,20 @@ class Symtable {
 	 * Symbol table
 	 * @type {Map<string, Symbol>}
 	 */
-	symbols = new Map();
+	symbols;
+
+	/**
+	 * Children symbol tables (for traversal and visualization)
+	 * @description Empty array symbolizes no children
+	 * @type {Array.<Symtable>}
+	 */
+	children;
 
 	constructor(name, type, parent=null){
-		this.scope = parent === null ? new ScopeInfo(name, type, 1) : new ScopeInfo(name, type, parent.scopeInfo.level + 1);
+		this.symbols = new Map();
+		this.scopeInfo = (parent == null) ? new ScopeInfo(name, type, 0) : new ScopeInfo(name, type, parent.scopeInfo.level + 1);
 		this.parentSymtable = parent;
+		this.children = [];
 	}
 
 	/**
@@ -61,7 +70,7 @@ class Symtable {
 	 * @param {Symbol} Symbol
 	 */
 	insert(name, type){
-		this.symbols.set(name, new Symbol(name, type));
+		this.symbols.set(name, new Sym(name, type));
 	}
 
 	lookup(name){
@@ -72,9 +81,7 @@ class Symtable {
 	 * @todo implement pretty printing for debugging purposes
 	 */
 	print(){
-		while(this.parent != null){
-			
-		}
+		
 	}
 }
 

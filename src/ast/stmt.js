@@ -12,7 +12,7 @@ class Stmt extends Construct {
 		super();
 	}
 
-	accept(visitor){ return 1; }
+	accept(visitor){ return; }
 }
 
 /**
@@ -27,7 +27,7 @@ class CStmt extends Stmt {
 	}
 
 	accept(visitor){
-		return 1;
+		visitor.visitCompoundStatement(this);
 	}
 }
 
