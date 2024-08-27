@@ -62,6 +62,9 @@ class Symtable {
 		this.scopeInfo = (parent == null) ? new ScopeInfo(name, type, 0) : new ScopeInfo(name, type, parent.scopeInfo.level + 1);
 		this.parentSymtable = parent;
 		this.children = [];
+
+		// add this to parent's children
+		parent.children.append(this);
 	}
 
 	/**
