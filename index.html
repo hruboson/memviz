@@ -91,7 +91,7 @@
 				<div style="left: 10px;"> </div>
 				<button class="btn btn-primary" onclick="execute(editor.getValue())"><i class="bx bx-sm bx-play"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-left"></i></button>
-				<button class="btn btn-primary" onclick="interpreter.interpretSingle()"><i class="bx bx-sm bx-chevron-right"></i></button>
+				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-right"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-right"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-left"></i></button>
 				<button class="btn btn-primary disabled" id="programCounter">0/?</button>
@@ -110,6 +110,8 @@
 					<ul class="dropdown-menu">
 						<button class="dropdown-item" type="button" onclick="setExample(simple_variables_example)">variables</button>
 						<button class="dropdown-item" type="button" onclick="setExample(simple_array_example)">arrays</button>
+						<div class="dropdown-divider"></div>
+						<button class="dropdown-item" type="button" onclick="setExample(scopes_example)">scopes</button>
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(typedef_example)">typedef</button>
 						<button class="dropdown-item" type="button" onclick="setExample(struct_example)">struct</button>
@@ -274,11 +276,10 @@ Split(['#split-editor', '#split-output'], {
 	}
 	
 	function execute(input){
-		document.getElementById("output").innerHTML = "";
+		const interpreter = new Interpreter();
 		try{
 			const result = interpreter.run(input);
-			document.getElementById("typedefs").innerHTML = JSON.stringify(interpreter.userTypes.concat(interpreter.userEnums), null, 4);
-			document.getElementById("symtable").innerHTML = JSON.stringify(Array.from(interpreter.symtable.symbols.entries()), null, 4);
+			interpreter.updateHTML();
 			document.getElementById("output").innerHTML = result;
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;

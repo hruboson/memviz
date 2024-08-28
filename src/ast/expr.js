@@ -5,13 +5,17 @@ class Expr extends Construct {
 	}
 
 	accept(visitor){
-
+		visitor.visitExpr(this);
 	}
 }
 
 class CExpr extends Expr {
 	constructor(expr){
 		super(expr); // fix later, this is only placehodler so I can see something in the AST
+	}
+
+	accept(visitor){
+		visitor.visitCExpr(this);
 	}
 }
 
@@ -23,6 +27,6 @@ class Literal extends Construct {
 	}
 
 	accept(visitor){
-
+		visitor.visitLiteral(this);
 	}
 }

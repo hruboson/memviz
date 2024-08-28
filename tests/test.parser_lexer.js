@@ -1,4 +1,6 @@
 function parse(input){
+	var interpreter = new Interpreter();
+
 	interpreter.parse(input);
 }
 

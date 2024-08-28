@@ -16,32 +16,29 @@ class RTError extends Error {
 
 /**
  * Interpreter class, acts as a Visitor for AST
- * @descripiton Its main functions (parse, semantic, interpret) are designed to be daisy chained.
+ * @description We are pretending to be "compiling" to target machine code. This is in order to simulate single-pass of AST. Due to this reason, each visit 
+ * 				function first calls semantic analyzer and then changes internal state of interpreter. The output is only visible to the user if no error 
+ * 				is thrown.
  * @class Interpreter
- * @singleton
  */
 class Interpreter {
 
-	// singleton hack
-	static #instance;
 	constructor(){
-		this.#symtable = new Symtable("global", "global"); //tbh idk what ScopeInfo.type was supposed to be
-		this.#semanticAnalyzer = new Semantic(this.#symtable);
+		this.#symtableGlobal = new Symtable("global", "global"); //tbh idk what ScopeInfo.type was supposed to be
+		this.#symtableStack = new Stack();
+		this.#symtableStack.push(this.#symtableGlobal);
 
-		if(Interpreter.#instance){
-			return Interpreter.#instance;
-		}else{
-			Interpreter.#instance = this;
-		}
+		this.#semanticAnalyzer = new Semantic(this.#symtableStack);
 	}
 
 	/**
-	 * Simple function that runs all stages of interpreter (parser, semantic analyzer, interpret)
+	 * Simple function that runs all stages of interpreter
 	 * @param {string} code Code to be interpreted
 	 * @return {integer} Return value of main() function
+	 * @throws {RTError|SError|Error}
 	 */
 	run(code){
-		return this.parse(code).semantic(this.#ast).interpret(this.#ast);
+		return this.parse(code).interpret(this.#ast);
 	}
 
 	/* ATTRIBUTES */
@@ -66,9 +63,17 @@ class Interpreter {
 	 * @private
 	 * @type {Symtable}
 	 */
-	#symtable;
-	get symtable(){
-		return this.#symtable;
+	#symtableGlobal;
+	get symtableGlobal(){
+		return this.#symtableGlobal;
+	}
+
+	/**
+	 * Symtable stack (mostly for printing reason)
+	 */
+	#symtableStack;
+	get symtableStack(){
+		return this.#symtableStack;
 	}
 
 	/**
@@ -110,28 +115,23 @@ class Interpreter {
 	/* FUNCTIONS */
 	/**
 	* Parses user input
+	* @descriptions Sets the #ast attribute of interpreter
 	* @param {string} text User input
 	* @return {Interpreter} Interpreter
 	*/
 	parse(text){
 		this.#refreshSymbols();
 		this.#ast = this.#parser.parse(text);
-		this.#setProgramCounterText("0/" + this.#ast.length);
-		document.getElementById("ast").innerHTML = JSON.stringify(interpreter.ast, null, 4);
 		return this;
 	}
 
 	/**
-	 * Analyses AST and returns Interpreter instance
+	 * Semantic analysis of single construct
 	 * @throws {SError} Semantic error
-	 * @param {AST} ast
-	 * @return {Interpreter} Interpreter
+	 * @param {Construct} construct
 	 */
-	semantic(ast){
-		for(var instruction of ast){
-			instruction.accept(this.#semanticAnalyzer);
-		}
-		return this;
+	semantic(construct){
+		construct.accept(this.#semanticAnalyzer);
 	}
 
 	/**
@@ -155,16 +155,46 @@ class Interpreter {
 			instruction.accept(this);
 		}
 		
-		return JSON.stringify(Array.from(this.#symtable.symbols.entries()), null, 4); //TODO change this to return result of main()
+		return this.#symtableGlobal.print();//TODO change this to return result of main()
 	}
 
 	/*******************************
 	 *     VISITOR FUNCTIONS       *
 	 *******************************/
+
 	visitDeclaration(declaration){
+		this.semantic(declaration);
+
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
 	};
+
+	visitDeclarator(declarator){
+		this.semantic(declarator);
+	}
+
+	visitIdentifier(id){
+
+	}
+
+	visitCStmt(stmt){
+		this.semantic(stmt);
+
+		for(var instruction of stmt.sequence){
+			instruction.accept(this);
+		}
+
+		this.#symtableStack.pop();
+	}
+
+	visitFunc(func){
+		this.semantic(func);
+
+		func.declarator.accept(this);
+		func.body.accept(this);
+
+		this.#symtableStack.pop();
+	}
 
 
 
@@ -189,17 +219,14 @@ class Interpreter {
 	 * @private
 	 */
 	#refreshSymbols(){
-		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //TODO make this a class perhaps
+		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //? make this a class perhaps
 	}
 
-	#setProgramCounterText(text){
-		document.getElementById("programCounter").innerHTML = text; 
+	updateHTML(){
+		document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 4);
+		document.getElementById("programCounter").innerHTML = this.#pc + "/" + this.#ast.length; 
+		document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 4);
+		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print(); 
 	}
 
 }
-
-/**
- * Interpreter instance
- * @global
- */
-const interpreter = new Interpreter();

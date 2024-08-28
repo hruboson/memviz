@@ -10,7 +10,7 @@ class ScopeInfo {
 	}
 }
 
-class Symbol {
+class Sym {
 	name;
 	type;
 	initialized;
@@ -20,7 +20,7 @@ class Symbol {
 		this.name = name;
 		this.type = type;
 		this.initialized = false;
-		this.address = 0x00000000;
+		this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
 }
 
@@ -48,11 +48,25 @@ class Symtable {
 	 * Symbol table
 	 * @type {Map<string, Symbol>}
 	 */
-	symbols = new Map();
+	symbols;
+
+	/**
+	 * Children symbol tables (for traversal and visualization)
+	 * @description Empty array symbolizes no children
+	 * @type {Array.<Symtable>}
+	 */
+	children;
 
 	constructor(name, type, parent=null){
-		this.scope = parent === null ? new ScopeInfo(name, type, 1) : new ScopeInfo(name, type, parent.scopeInfo.level + 1);
+		this.symbols = new Map();
+		this.scopeInfo = (parent == null) ? new ScopeInfo(name, type, 0) : new ScopeInfo(name, type, parent.scopeInfo.level + 1);
 		this.parentSymtable = parent;
+		this.children = [];
+
+		// add this to parent's children
+		if(parent){
+			parent.children.push(this);
+		}
 	}
 
 	/**
@@ -61,7 +75,7 @@ class Symtable {
 	 * @param {Symbol} Symbol
 	 */
 	insert(name, type){
-		this.symbols.set(name, new Symbol(name, type));
+		this.symbols.set(name, new Sym(name, type));
 	}
 
 	lookup(name){
@@ -69,12 +83,26 @@ class Symtable {
 	}
 
 	/**
-	 * @todo implement pretty printing for debugging purposes
+	 * Prints the symtable and its children
+	 * @param {integer} [level=0] Indentation level
+	 * @return {string}
 	 */
-	print(){
-		while(this.parent != null){
-			
+	print(level=0){
+		const indent = `\t`.repeat(level);
+		const header = `${indent}${this.scopeInfo.name}(${this.scopeInfo.type}), level ${this.scopeInfo.level}\n`;
+		const divider = `${indent}` + (`¯`.repeat(header.length-1)) + `\n`;
+
+		var symbols_string = ``;
+		this.symbols.forEach(function(symbol, name){
+			symbols_string += `${indent}${name}: 0x${(+symbol.address).toString(16)}, \n`;
+		});
+
+		var prt = header + divider + symbols_string + divider;
+		for(const child of this.children){
+			prt += child.print(level+1);	
 		}
+
+		return prt;
 	}
 }
 

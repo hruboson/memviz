@@ -61,8 +61,9 @@ class Designator {
  * @param {Initializer} child For nested arrays and structs
  * @param {Designator|Array.<Designator>|null} designator Single or array of designators
  */
-class Initializer {
+class Initializer extends Construct {
 	constructor(kind, data, child, designator){
+		super();
 		this.kind = kind;
 		switch(kind){
 			case INITTYPE.EXPR:
@@ -84,6 +85,10 @@ class Initializer {
 		}
 		this.initializer = child;
 		this.designator = designator;
+	}	
+
+	accept(visitor){
+		visitor.visitInitializer(this);
 	}
 }
 
@@ -108,7 +113,7 @@ const DECLTYPE = {
  * @param {Declarator} child Child declarator
  * @param {Identifier|Object|Pointer|Expr|null} data Idk whatever is needed just put it here
  */
-class Declarator {
+class Declarator extends Construct {
 	//TODO Refactor + docu
 	kind;
 	child;
@@ -118,6 +123,7 @@ class Declarator {
 	fnc;
 
 	constructor(kind, child, data){
+		super();
 		this.kind = kind;
 		switch(kind){
 			case DECLTYPE.ID:
@@ -136,6 +142,10 @@ class Declarator {
 				throw new Error("Unknown declaration type!");
 		}
 		this.child = child;
+	}
+
+	accept(visitor){
+		visitor.visitDeclarator(this);
 	}
 }
 

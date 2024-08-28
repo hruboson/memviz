@@ -12,7 +12,9 @@ class Stmt extends Construct {
 		super();
 	}
 
-	accept(visitor){ return 1; }
+	accept(visitor){
+		visitor.visitStmt(this);
+	}
 }
 
 /**
@@ -27,7 +29,7 @@ class CStmt extends Stmt {
 	}
 
 	accept(visitor){
-		return 1;
+		visitor.visitCStmt(this);
 	}
 }
 
@@ -36,7 +38,9 @@ class CStmt extends Stmt {
  * @class EStmt
  */
 class EStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitEStmt(this);
+	}
 }
 
 /**
@@ -44,14 +48,18 @@ class EStmt extends Stmt {
  * @class SStmt
  */
 class SStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitSStmt(this);
+	}
 }
 
 /**
  * Iteration statement (for, while, do-while)
  */
 class IStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitIStmt(this);
+	}
 }
 
 /**
@@ -59,5 +67,7 @@ class IStmt extends Stmt {
  * @class JStmt
  */
 class JStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitJStmt(this);
+	}
 }

@@ -45,6 +45,10 @@ class Stack {
 		this.#items = [];
 	}
 
+	get items(){
+		return this.#items;
+	}
+
 	/**
 	 * Returns the top-most item in stack
 	 * @return {Object}
@@ -80,7 +84,5 @@ class Stack {
 	 */
 	push(item){
 		this.#items[this.#items.length] = item;
-		
-		console.log(this.#items);
 	}
 }
