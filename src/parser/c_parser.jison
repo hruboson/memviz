@@ -523,7 +523,7 @@ labeled_statement
 
 compound_statement
 	: '{' '}'
-	| '{'  block_item_list '}' { $$ = $2; }
+	| '{'  block_item_list '}' { $$ = new CStmt($2); }
 	;
 
 block_item_list
@@ -577,7 +577,7 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, new CStmt($3)); }
+	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, $3); }
  	//| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;

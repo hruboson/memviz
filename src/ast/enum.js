@@ -17,7 +17,7 @@ class Enum extends Construct {
 	}
 
 	accept(visitor){
-
+		visitor.visitEnum(this);
 	}
 }
 

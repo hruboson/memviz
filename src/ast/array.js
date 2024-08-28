@@ -15,4 +15,8 @@ class Arr extends Construct{ // should this be child of Construct or something e
 	constructor(){
 		super();
 	}
+
+	accept(visitor){
+		visitor.visitArr(this);
+	}
 }
