@@ -20,7 +20,7 @@ class Sym {
 		this.name = name;
 		this.type = type;
 		this.initialized = false;
-		this.address = 0x00000000;
+		this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
 }
 
@@ -94,7 +94,7 @@ class Symtable {
 
 		var symbols_string = ``;
 		this.symbols.forEach(function(symbol, name){
-			symbols_string += `${indent}${name}: ${symbol.address}, \n`;
+			symbols_string += `${indent}${name}: 0x${(+symbol.address).toString(16)}, \n`;
 		});
 
 		var prt = header + divider + symbols_string + divider;
