@@ -169,19 +169,31 @@ class Interpreter {
 		const initializer = declaration.initializer;
 	};
 
-	visitCompoundStatement(stmt){
+	visitDeclarator(declarator){
+		this.semantic(declarator);
+	}
+
+	visitIdentifier(id){
+
+	}
+
+	visitCStmt(stmt){
 		this.semantic(stmt);
 
 		for(var instruction of stmt.sequence){
-			this.semantic(instruction);
 			instruction.accept(this);
 		}
+
+		this.#symtableStack.pop();
 	}
 
 	visitFunc(func){
 		this.semantic(func);
 
+		func.declarator.accept(this);
 		func.body.accept(this);
+
+		this.#symtableStack.pop();
 	}
 
 
