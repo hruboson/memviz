@@ -155,7 +155,7 @@ class Interpreter {
 			instruction.accept(this);
 		}
 		
-		return JSON.stringify(Array.from(this.#symtableGlobal.symbols.entries()), null, 4); //TODO change this to return result of main()
+		return this.#symtableGlobal.print();//TODO change this to return result of main()
 	}
 
 	/*******************************
@@ -214,7 +214,7 @@ class Interpreter {
 		document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 4);
 		document.getElementById("programCounter").innerHTML = this.#pc + "/" + this.#ast.length; 
 		document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 4);
-		document.getElementById("symtable").innerHTML = JSON.stringify(this.#symtableStack.items, null, 4);
+		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print(); 
 	}
 
 }

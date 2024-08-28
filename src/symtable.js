@@ -64,7 +64,9 @@ class Symtable {
 		this.children = [];
 
 		// add this to parent's children
-		parent.children.append(this);
+		if(parent){
+			parent.children.push(this);
+		}
 	}
 
 	/**
@@ -81,10 +83,26 @@ class Symtable {
 	}
 
 	/**
-	 * @todo implement pretty printing for debugging purposes
+	 * Prints the symtable and its children
+	 * @param {integer} [level=0] Indentation level
+	 * @return {string}
 	 */
-	print(){
-		
+	print(level=0){
+		const indent = `\t`.repeat(level);
+		const header = `${indent}${this.scopeInfo.name}(${this.scopeInfo.type}), level ${this.scopeInfo.level}\n`;
+		const divider = `${indent}` + (`¯`.repeat(header.length-1)) + `\n`;
+
+		var symbols_string = ``;
+		this.symbols.forEach(function(symbol, name){
+			symbols_string += `${indent}${name}: ${symbol.address}, \n`;
+		});
+
+		var prt = header + divider + symbols_string + divider;
+		for(const child of this.children){
+			prt += child.print(level+1);	
+		}
+
+		return prt;
 	}
 }
 
