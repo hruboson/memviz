@@ -190,8 +190,7 @@ class Interpreter {
 	visitFunc(func){
 		this.semantic(func);
 
-		func.declarator.accept(this);
-		func.body.accept(this);
+		func.body.accept(this); // run body
 
 		this.#symtableStack.pop();
 	}

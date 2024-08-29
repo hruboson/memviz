@@ -20,6 +20,49 @@ class Semantic {
 		this.symtableStack = symtableStack;
 	}
 
+	/**
+	 * Adds symbol to current scope
+	 * @param {SYMTYPE} type
+	 * @return {string|null} Symbol name, null in case of anonymous
+	 */
+	addSymbol(declarator, specifiers, type, initializer=null){		
+		var declChild = declarator;
+
+		// ascend the declarator list and extract all information from it
+		var declMainType = type;
+		var declPtr = false;
+		var symbolName = ""; // return value
+
+		do{
+			if(declChild.kind == DECLTYPE.ID){
+				this.symtableStack.peek().insert(declChild.identifier.name, declMainType, specifiers.toString(), declPtr);
+				symbolName = declChild.identifier.name;
+			}
+			if(declChild.kind == DECLTYPE.FNC){
+				declMainType = SYMTYPE.FNC;
+			}
+			if(declChild.kind == DECLTYPE.PTR){
+				declPtr = true;
+			}
+			if(declChild.kind == DECLTYPE.ARR){
+				
+			}
+			if(declChild.kind == DECLTYPE.STRUCT){
+				declMainType == SYMTYPE.STRUCT;
+			}
+			if(declChild.kind == DECLTYPE.NESTED){
+				// continue down the chain
+			}
+			declChild = declChild.child;
+		}while(declChild != null);
+
+		if(initializer){
+			this.symtableStack.peek().lookup(symbolName).initialized = true;
+		}
+
+		return symbolName;
+	}
+
 
 	/*******************************
 	 *     VISITOR FUNCTIONS       *
@@ -29,17 +72,15 @@ class Semantic {
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
 
-		// placeholder, probably replace with accept to visitDeclarator
-		if(declarator.kind == DECLTYPE.ID){
-			this.symtableStack.peek().insert(declarator.identifier.name, declaration.type.specifiers.toString()); //TODO specifiers
-		}
+		this.addSymbol(declarator, declaration.type.specifiers, SYMTYPE.VAR, initializer);
 	}
 
 	visitDeclarator(declarator){
-		if(declarator.kind == DECLTYPE.FNC){
-			for(const param of declarator.fnc.parameters){
-				this.symtableStack.peek().insert(param.declarator.identifier.name, param.type.specifiers.toString());	
-			}
+	}
+
+	visitInitializer(initializer){
+		if(initializer.kind == INITTYPE.EXPR){
+			
 		}
 	}
 
@@ -48,7 +89,11 @@ class Semantic {
 	}
 
 	visitFunc(func){
-		this.symtableStack.push(new Symtable("function parameters", "param", this.symtableStack.peek()));
-		func.declarator.accept(this);
+		const funcName = this.addSymbol(func.declarator, func.returnType, SYMTYPE.FNC); // adds function to global symbol table
+		this.symtableStack.push(new Symtable(funcName, "function params", this.symtableStack.peek()));
+
+		for(const param of func.declarator.fnc.parameters){
+			this.addSymbol(param.declarator, param.type.specifiers, SYMTYPE.PARAM);
+		}
 	}
 }

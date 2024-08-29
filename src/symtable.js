@@ -10,15 +10,29 @@ class ScopeInfo {
 	}
 }
 
+/**
+ * @typedef SYMTYPE
+ */
+const SYMTYPE = {
+	VAR: "VAR",
+	PARAM: "PARAM",
+	FNC: "FNC",
+	STRUCT: "STRUCT",
+}
+
 class Sym {
 	name;
 	type;
+	specifiers;
+	pointer;
 	initialized;
 	address;
 
-	constructor(name, type){
+	constructor(name, type, specifiers, pointer){
 		this.name = name;
 		this.type = type;
+		this.specifiers = specifiers;
+		this.pointer = pointer;
 		this.initialized = false;
 		this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
@@ -74,12 +88,12 @@ class Symtable {
 	 * @param {string} name
 	 * @param {Symbol} Symbol
 	 */
-	insert(name, type){
-		this.symbols.set(name, new Sym(name, type));
+	insert(name, type, specifiers, pointer){
+		this.symbols.set(name, new Sym(name, type, specifiers, pointer));
 	}
 
 	lookup(name){
-
+		return this.symbols.get(name);
 	}
 
 	/**
@@ -94,7 +108,7 @@ class Symtable {
 
 		var symbols_string = ``;
 		this.symbols.forEach(function(symbol, name){
-			symbols_string += `${indent}${name}: 0x${(+symbol.address).toString(16)}, \n`;
+			symbols_string += `${indent}(${symbol.type}) ${name}: 0x${(+symbol.address).toString(16)}, ${symbol.specifiers}, ${symbol.pointer}; \n`;
 		});
 
 		var prt = header + divider + symbols_string + divider;
