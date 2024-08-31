@@ -16,7 +16,10 @@ class Semantic {
 
 	/**
 	 * Adds symbol to current scope
+	 * @param {Declarator} declarator
+	 * @param {Array.<string>} specifiers
 	 * @param {SYMTYPE} type
+	 * @param {Initializer} [initializer=null]
 	 * @return {string|null} Symbol name, null in case of anonymous
 	 */
 	addSymbol(declarator, specifiers, type, initializer=null){		
@@ -29,7 +32,11 @@ class Semantic {
 
 		do{
 			if(declChild.kind == DECLTYPE.ID){
-				this.symtableStack.peek().insert(declChild.identifier.name, declMainType, specifiers.toString(), declPtr);
+				try{
+					this.symtableStack.peek().insert(declChild.identifier.name, declMainType, specifiers.toString(), declPtr);
+				}catch(e){
+					throw new SError(e.details, declarator.loc);
+				}
 				symbolName = declChild.identifier.name;
 			}
 			if(declChild.kind == DECLTYPE.FNC){
