@@ -1,3 +1,8 @@
+/**
+ * @file Expression-related classes
+ * @author Ondřej Hruboš
+ */
+
 class Expr extends Construct {
 	constructor(expr){
 		super();
