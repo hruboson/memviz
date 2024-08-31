@@ -36,5 +36,9 @@ class Typedef extends Construct {
 		this.declarator = declarator;
 		this.loc = loc;
 	}
+
+	accept(visitor){
+		visitor.visitTypedef(this);
+	}
 }
 
