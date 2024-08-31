@@ -1,4 +1,9 @@
 /**
+ * @file Semantic analyzer
+ * @author Ondřej Hruboš
+ */
+
+/**
  * Semantic Error
  * @class SError
  */

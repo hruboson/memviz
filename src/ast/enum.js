@@ -10,6 +10,19 @@
  * @param {Array.<Enumerator>} enumerator_list
  */
 class Enum extends Construct {
+
+	/**
+	 * Tagname of Enum
+	 * @type {Tagname}
+	 */
+	tagname;
+
+	/**
+	 * List of enumerators
+	 * @type {Array.<Enumerator>}
+	 */
+	enumerator_list;
+
 	constructor(tagname, enumerator_list){
 		super();
 		this.tagname = tagname;
@@ -24,12 +37,26 @@ class Enum extends Construct {
 /**
  * @class Enumerator
  * @param {Identifier} Enumerator identifier, resides in ordinary identifiers (not tag or member names)
- * @param {CExpr} [constant_expression=null] Optional constant expression 
+ * @param {CExpr} [constantExpression=null] Optional constant expression 
  */
 class Enumerator {
-	constructor(identifier, constant_expression = null){
+	
+	/**
+	 * Name (identifier) of enumerator
+	 * @type {Identifier}
+	 */
+	identifier;
+
+	/**
+	 * Optional constant expression (otherwise calculated)
+	 * @type {CExpr}
+	 */
+	constantExpression
+
+
+	constructor(identifier, constantExpression = null){
 		this.identifier = identifier;
-		this.constant_expression = constant_expression;
+		this.constantExpression = constantExpression;
 	}
 }
 

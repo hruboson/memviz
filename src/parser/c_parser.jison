@@ -1,3 +1,10 @@
+/**
+ * @file Parser grammar (source: https://www.quut.com/c/ANSI-C-grammar-y-2011.html)
+ * @author jutta@pobox.com
+ * @author DAGwyn@aol.com
+ * @author Ondřej Hruboš (modification)
+ */
+
 %token IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL FUNC_NAME SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -16,6 +23,7 @@
 %token ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
 
 %{
+	
 	parser.yy.symbols = { types: [], enums: [] };
 	parser.yy.lastSymbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
 

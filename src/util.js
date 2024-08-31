@@ -24,7 +24,7 @@ function intfc(obj, function_name, parameters = []){
 	if(typeof obj[function_name] != "function"){
 		throw new Error(`Class ${obj.constructor.name} must implement function ${function_name}!`);
 	}else if(obj[function_name].length != parameters.length){
-		throw new Error(`Function ${function_name} must have the following parameters: ${parameters}!`)
+		throw new Error(`Function ${function_name} must have the following parameters: ${parameters}!`);
 	}
 }
 

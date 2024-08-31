@@ -24,7 +24,7 @@ class RTError extends Error {
 class Interpreter {
 
 	constructor(){
-		this.#symtableGlobal = new Symtable("global", "global"); //tbh idk what ScopeInfo.type was supposed to be
+		this.#symtableGlobal = new Symtable("global", "global");
 		this.#symtableStack = new Stack();
 		this.#symtableStack.push(this.#symtableGlobal);
 
@@ -214,13 +214,16 @@ class Interpreter {
 	/* Helper functions */
 	/**
 	 * Refreshes cached symbols stored in parser
-	 * @return {void}
 	 * @private
 	 */
 	#refreshSymbols(){
 		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //? make this a class perhaps
 	}
 
+	/**
+	 * Updates HTML to display interpreter output and generated structure
+	 * @todo If needed, pass the element ids as arguments
+	 */
 	updateHTML(){
 		document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 4);
 		document.getElementById("programCounter").innerHTML = this.#pc + "/" + this.#ast.length; 

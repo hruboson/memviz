@@ -21,8 +21,16 @@ class Stmt extends Construct {
  * Compound statement (block/block statement). 
  * @description It is a sequence of *statements* and *declarations*. Each CStmt creates new block scope.
  * @class CStmt
+ * @param {Array.<Construct>} sequence
  */
 class CStmt extends Stmt {
+
+	/**
+	 * Sequence of statements and expressions
+	 * @type {Array.<Construct>}
+	 */
+	sequence;
+
 	constructor(sequence){
 		super();
 		this.sequence = sequence;

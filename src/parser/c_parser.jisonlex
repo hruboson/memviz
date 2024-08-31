@@ -1,3 +1,10 @@
+/**
+ * @file Lexer grammar (source: https://www.quut.com/c/ANSI-C-grammar-l-2011.html)
+ * @author jutta@pobox.com
+ * @author DAGwyn@aol.com
+ * @author Ondřej Hruboš (modification)
+ */
+
 O   [0-7]
 D   [0-9]
 NZ  [1-9]

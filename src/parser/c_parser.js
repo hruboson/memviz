@@ -457,6 +457,7 @@ parse: function parse(input) {
     return true;
 }};
 
+	
 	parser.yy.symbols = { types: [], enums: [] };
 	parser.yy.lastSymbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
 

@@ -1,6 +1,33 @@
+/**
+ * @file Symbol table
+ * @author Ondřej Hruboš
+ */
+
+/**
+ * @class ScopeInfo
+ * @description Holds information about scope
+ * @param {string} name Usually name of function or anything that's unique
+ * @param {string} type Type of scope (e.g. function parameters, CStmt, global, ...)
+ * @param {integer} level Level of scope (should be calculated automatically)
+ */
 class ScopeInfo {
+
+	/**
+	 * Name of scope (should be unique in case of functions)
+	 * @type {string}
+	 */
 	name;
+
+	/**
+	 * Type of scope (e.g. function parameters, CStmt, global, ...)
+	 * @type {string}
+	 */
 	type;
+
+	/**
+	 * Level of scope
+	 * @type {integer}
+	 */
 	level;
 
 	constructor(name, type, level){
@@ -11,6 +38,7 @@ class ScopeInfo {
 }
 
 /**
+ * Enum for possible types of symbols
  * @typedef SYMTYPE
  */
 const SYMTYPE = {
@@ -20,12 +48,50 @@ const SYMTYPE = {
 	STRUCT: "STRUCT",
 }
 
+/**
+ * @class Sym
+ * @description Structure for holding information about a single symbol
+ * @param {string} name Name (identifier) of the symbol
+ * @param {SYMTYPE} type Type of the symbol
+ * @param {Array.<string>} specifiers Specifiers of symbol
+ * @param {bool} pointer Is symbol a pointer?
+ */
 class Sym {
+
+	/**
+	 * Name (identifier) of the symbol
+	 * @type {string}
+	 * */
 	name;
+
+	/**
+	 * Type of the symbol
+	 * @type {SYMTYPE}
+	 */
 	type;
+
+	/**
+	 * Specifiers of symbol
+	 * @type {Array.<string>}
+	 */
 	specifiers;
+
+	/**
+	 * Symbolizes whether symbol is a pointer
+	 * @type {bool}
+	 */
 	pointer;
+
+	/**
+	 * Symbolizes whether symbol is initialized. If it is, then address must be set.
+	 * @type {bool}
+	 */
 	initialized;
+
+	/**
+	 * Hexadecimal number specifying where in memory the symbol is stored
+	 * @type {integer}
+	 */
 	address;
 
 	constructor(name, type, specifiers, pointer){
@@ -77,7 +143,7 @@ class Symtable {
 		this.parentSymtable = parent;
 		this.children = [];
 
-		// add this to parent's children
+		// add this instance to parent's children
 		if(parent){
 			parent.children.push(this);
 		}
@@ -85,13 +151,20 @@ class Symtable {
 
 	/**
 	 * Inserts symbol into symbol table
-	 * @param {string} name
-	 * @param {Symbol} Symbol
+	 * @param {string} name Symbol name (identifier)
+	 * @param {type} type
+	 * @param {Array.<string>} specifiers
+	 * @param {bool} pointer
 	 */
 	insert(name, type, specifiers, pointer){
 		this.symbols.set(name, new Sym(name, type, specifiers, pointer));
 	}
 
+	/**
+	 * Looks up symbol in symbol table
+	 * @param {string} name Symbol name (identifier)
+	 * @return {Symbol|undefined} Returns Symbol in case of success, undefined if the symbol was not found
+	 */
 	lookup(name){
 		return this.symbols.get(name);
 	}
