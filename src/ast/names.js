@@ -7,6 +7,7 @@
  * Used for functiuon names, object names, typedef names, enumeration constants
  * @class Identifier
  * @param {string} name
+ * @param {Object} loc
  */
 class Identifier extends Construct {
 
@@ -16,9 +17,16 @@ class Identifier extends Construct {
 	 */
 	name;
 
-	constructor(name){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(name, loc){
 		super();
 		this.name = name;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -31,6 +39,7 @@ class Identifier extends Construct {
  * @description Creates record in tag name space
  * @class Tagname
  * @param {string} name
+ * @param {Object} loc
  */
 class Tagname extends Construct {
 
@@ -40,9 +49,16 @@ class Tagname extends Construct {
 	 */
 	name;
 
-	constructor(name){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(name, loc){
 		super();
 		this.name = name;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -53,10 +69,12 @@ class Tagname extends Construct {
 /**
  * Unnamed (anonymous) union and structure 
  * @class Unnamed
+ * @param {Object} loc
  */
 class Unnamed {
-	constructor(){
+	constructor(loc){
 		this.unnamed = true; // only for AST representation
+		this.loc = loc;
 	}
 }
 

@@ -7,6 +7,7 @@
  * @class Pointer
  * @param {Pointer} child
  * @param {Array.<string>} qualifiers
+ * @param {Object} loc
  */
 class Pointer {
 	
@@ -22,8 +23,15 @@ class Pointer {
 	 */
 	qualifiers;
 
-	constructor(child, qualifiers){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(child, qualifiers, loc){
 		this.child = child;
 		this.qualifiers = qualifiers;
+		this.loc = loc;
 	}
 }

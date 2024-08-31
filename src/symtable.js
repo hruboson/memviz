@@ -112,6 +112,7 @@ class Sym {
  * @param {Symtable} [parent=null] Parent scoped symbol table
  */
 class Symtable {
+
 	/**
 	 * Parent symtable
 	 * @type {Symtable}
@@ -157,6 +158,10 @@ class Symtable {
 	 * @param {bool} pointer
 	 */
 	insert(name, type, specifiers, pointer){
+		if(this.lookup(name)){
+			throw new SError(`redefinition of ${name}`);
+		}
+
 		this.symbols.set(name, new Sym(name, type, specifiers, pointer));
 	}
 

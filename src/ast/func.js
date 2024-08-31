@@ -8,6 +8,7 @@
  * @param {Declarator} declarator
  * @param {Type} returnType
  * @param {CStmt} body
+ * @param {Object} loc
  */
 class Func extends Stmt {
 
@@ -29,11 +30,18 @@ class Func extends Stmt {
 	 */
 	body;
 
-	constructor(declarator, returnType, body){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(declarator, returnType, body, loc){
 		super();
 		this.declarator = declarator;
 		this.returnType = returnType;
 		this.body = body;
+		this.loc = loc;
 	}
 
 	accept(visitor){

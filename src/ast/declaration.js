@@ -7,6 +7,7 @@
  * @class Type
  * @decription Allowed (built-in) types: void  char  short  int  long  float  double  signed  unsigned, _Bool
  * @param {Array.<string>} [specifiers=[]]
+ * @param {Object} loc
  */
 class Type {
 
@@ -16,7 +17,14 @@ class Type {
 	 */
 	specifiers;
 
-	constructor(specifiers=[]){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(specifiers=[], loc){
+		this.loc = loc;
 		if(specifiers.length == 0){
 			this.specifiers = ["int"]; // Empty type defaults to int
 		}else{
@@ -45,6 +53,7 @@ const INITTYPE = { //FIX These types are probably wrong and are not used in code
  * Used to modify which part of struct/array is being initialized (a kind of specifier)
  * @class Designator
  * @param {Identifier|CExpr|Array.<Identifier>|Array.<CExpr>} designator Either identifier or constant expression OR arrays of them
+ * @param {Object} loc
  */
 class Designator {
 	
@@ -54,13 +63,20 @@ class Designator {
 	 */
 	designator;
 
-	constructor(designator){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(designator, loc){
 		if(designator instanceof Identifier){ //FIX should be exact instanceof, create a function in util.js for this
 			this.kind = "IDENTIFIER";
 		}else{
 			this.kind = "CEXPR";
 		}
 		this.designator = designator;
+		this.loc = loc;
 	}
 }
 
@@ -72,6 +88,7 @@ class Designator {
  * @param {Expr|Arr|Struct} data
  * @param {Initializer} child For nested arrays and structs
  * @param {Designator|Array.<Designator>|null} designator Single or array of designators
+ * @param {Object} loc
  */
 class Initializer extends Construct {
 	
@@ -111,7 +128,13 @@ class Initializer extends Construct {
 	 */
 	designator;
 
-	constructor(kind, data, child, designator){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(kind, data, child, designator, loc){
 		super();
 		this.kind = kind;
 		switch(kind){
@@ -134,6 +157,7 @@ class Initializer extends Construct {
 		}
 		this.initializer = child;
 		this.designator = designator;
+		this.loc = loc;
 	}	
 
 	accept(visitor){
@@ -161,6 +185,7 @@ const DECLTYPE = {
  * @param {DECLTYPE} kind Type of declarator. Described in [class description]{@link Declarator#description}.
  * @param {Declarator} [child=null] Child declarator
  * @param {Identifier|Object|Pointer|Expr|null} data Idk whatever is needed just put it here
+ * @param {Object} loc
  */
 class Declarator extends Construct {
 	
@@ -205,7 +230,13 @@ class Declarator extends Construct {
 	 */
 	fnc;
 
-	constructor(kind, child=null, data){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(kind, child=null, data, loc){
 		super();
 		this.kind = kind;
 		switch(kind){
@@ -225,6 +256,7 @@ class Declarator extends Construct {
 				throw new Error("Unknown declaration type!");
 		}
 		this.child = child;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -237,11 +269,12 @@ class Declarator extends Construct {
  * @class AbstractDeclarator
  * @param {DECLTYPE} kind
  * @param {AbstractDeclarator} child
- * @param {Pointer|Object|null}
+ * @param {Pointer|Object|null} data
+ * @param {Object} loc
  */
 class AbstractDeclarator extends Declarator {
-	constructor(kind, child, data){
-		super(kind, child, data);
+	constructor(kind, child, data, loc){
+		super(kind, child, data, loc);
 	}
 }
 
@@ -250,6 +283,7 @@ class AbstractDeclarator extends Declarator {
  * @param {Type} Type
  * @param {Declarator|Unnamed} declarator
  * @param {Initializer} initializer
+ * @param {Object} loc
  */
 class Declaration extends Construct {
 
@@ -271,11 +305,18 @@ class Declaration extends Construct {
 	 */ 
 	initializer;
 
-	constructor(type, declarator, initializer){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(type, declarator, initializer, loc){
 		super();
 		this.type = type;
 		this.declarator = declarator;
 		this.initializer = initializer;
+		this.loc = loc;
 	}
 
 	accept(visitor){

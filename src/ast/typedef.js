@@ -7,9 +7,10 @@
  * @class Typedef
  * @param {Type} type Type specifiers
  * @param {Declarator} declarator Declarator of typedef
+ * @param {Object} loc
  */
 
-class Typedef {
+class Typedef extends Construct {
 	
 	/**
 	 * Specifiers of type
@@ -23,9 +24,17 @@ class Typedef {
 	 */
 	declarator;
 
-	constructor(type, declarator){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(type, declarator, loc){
+		super();
 		this.type = type;
 		this.declarator = declarator;
+		this.loc = loc;
 	}
 }
 

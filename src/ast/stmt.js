@@ -22,6 +22,7 @@ class Stmt extends Construct {
  * @description It is a sequence of *statements* and *declarations*. Each CStmt creates new block scope.
  * @class CStmt
  * @param {Array.<Construct>} sequence
+ * @param {Object} loc
  */
 class CStmt extends Stmt {
 
@@ -31,9 +32,16 @@ class CStmt extends Stmt {
 	 */
 	sequence;
 
-	constructor(sequence){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(sequence, loc){
 		super();
 		this.sequence = sequence;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -63,6 +71,7 @@ class SStmt extends Stmt {
 
 /**
  * Iteration statement (for, while, do-while)
+ * @class IStmt
  */
 class IStmt extends Stmt {
 	accept(visitor){

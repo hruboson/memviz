@@ -4,17 +4,6 @@
  */
 
 /**
- * Runtime error
- * @class RTError
- */
-class RTError extends Error {
-	constructor(e) {
-		super(e);
-		this.name = "Runtime error";
-	}
-}
-
-/**
  * Interpreter class, acts as a Visitor for AST
  * @description We are pretending to be "compiling" to target machine code. This is in order to simulate single-pass of AST. Due to this reason, each visit 
  * 				function first calls semantic analyzer and then changes internal state of interpreter. The output is only visible to the user if no error 

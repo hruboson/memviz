@@ -8,6 +8,7 @@
  * @class Enum
  * @param {Tagname} tagname
  * @param {Array.<Enumerator>} enumerator_list
+ * @param {Object} loc
  */
 class Enum extends Construct {
 
@@ -23,10 +24,17 @@ class Enum extends Construct {
 	 */
 	enumerator_list;
 
-	constructor(tagname, enumerator_list){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(tagname, enumerator_list, loc){
 		super();
 		this.tagname = tagname;
 		this.enumerator_list = enumerator_list;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -38,6 +46,7 @@ class Enum extends Construct {
  * @class Enumerator
  * @param {Identifier} Enumerator identifier, resides in ordinary identifiers (not tag or member names)
  * @param {CExpr} [constantExpression=null] Optional constant expression 
+ * @param {Object} loc
  */
 class Enumerator {
 	
@@ -53,10 +62,16 @@ class Enumerator {
 	 */
 	constantExpression
 
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
 
-	constructor(identifier, constantExpression = null){
+	constructor(identifier, constantExpression = null, loc){
 		this.identifier = identifier;
 		this.constantExpression = constantExpression;
+		this.loc = loc;
 	}
 }
 

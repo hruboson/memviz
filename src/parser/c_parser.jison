@@ -27,15 +27,15 @@
 	parser.yy.symbols = { types: [], enums: [] };
 	parser.yy.lastSymbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
 
-	function getDeclarations(typeSpecifiers, declaratorList){
+	function getDeclarations(typeSpecifiers, declaratorList, loc){
 		var r = [];
-		const type = new Type(typeSpecifiers); // type will be same regardless of typedef or variable declaration
+		const type = new Type(typeSpecifiers, loc); // type will be same regardless of typedef or variable declaration
 		for(var declInit of declaratorList){ // handle multiple same-line declarations (int a, b = 10, c;)
 			var declarator = declInit.declarator;
 			var initializer = declInit.initializer;
 
 			if(typeSpecifiers.includes("typedef")){ // specifiers include typedef
-				r.push(new Typedef(type, declarator));
+				r.push(new Typedef(type, declarator, loc));
 				// get to the bottom of declarator
 				var declTmp = declarator;
 				while(declTmp.kind != DECLTYPE.ID && declTmp.child != null){
@@ -44,7 +44,7 @@
 				parser.yy.symbols.types.push(declTmp.identifier.name); // add typedef name to types so lexer can work with them
 				//! move this to Typedef constructor
 			}else{
-				r.push(new Declaration(type, declarator, initializer)); // basic variable declaration
+				r.push(new Declaration(type, declarator, initializer, loc)); // basic variable declaration
 			}
 		}
 		
@@ -56,7 +56,7 @@
 %%
 
 primary_expression
-	: IDENTIFIER { $$ = new Identifier($1); }
+	: IDENTIFIER { $$ = new Identifier($1, @$); }
 	| constant { $$ = $1; }
 	| string { $$ = $1; }
 	| '(' expression ')' { $$ = $2; }
@@ -64,17 +64,17 @@ primary_expression
 	;
 
 constant
-	: I_CONSTANT { $$ = new Literal("i_literal", $1); }
-	| F_CONSTANT { $$ = new Literal("f_literal", $1); }
-	| ENUMERATION_CONSTANT { $$ = new Identifier($1); }	
+	: I_CONSTANT { $$ = new Literal("i_literal", $1, @$); }
+	| F_CONSTANT { $$ = new Literal("f_literal", $1, @$); }
+	| ENUMERATION_CONSTANT { $$ = new Identifier($1, @$); }	
 	;
 
 enumeration_constant
-	: IDENTIFIER { $$ = new Identifier($1); }
+	: IDENTIFIER { $$ = new Identifier($1, @$); }
 	;
 
 string
-	: STRING_LITERAL { $$ =  new Literal("s_literal", $1); }
+	: STRING_LITERAL { $$ =  new Literal("s_literal", $1, @$); }
 	| FUNC_NAME { $$ = $1 }
 	;
 
@@ -228,11 +228,11 @@ constant_expression
 declaration
 	: declaration_specifiers ';'
 	{
-		$$ = [new Type($1)];
+		$$ = [new Type($1, @$)];
 	}
 	| declaration_specifiers init_declarator_list ';' 
 	{
-		$$ = getDeclarations($1, $2);
+		$$ = getDeclarations($1, $2, @$);
 	}
 	| static_assert_declaration //TODO
 	;
@@ -291,15 +291,15 @@ type_specifier
 struct_or_union_specifier
 	: struct_or_union '{' struct_declaration_list '}'
 	{ // anonymous struct or union
-		$$ = ($1 == "STRUCT") ? new Struct($3, new Unnamed()) : new Union($3, new Unnamed()); 
+		$$ = ($1 == "STRUCT") ? new Struct($3, new Unnamed(@$), @$) : new Union($3, new Unnamed(@$), @$); 
 	}
 	| struct_or_union IDENTIFIER '{' struct_declaration_list '}' 
 	{ // struct variable initialization and struct definition 
-		$$ = ($1 == "STRUCT") ? new Struct($4, new Tagname($2)) : new Union($4, new Tagname($2)); 
+		$$ = ($1 == "STRUCT") ? new Struct($4, new Tagname($2, @$), @$) : new Union($4, new Tagname($2, @$), @$); 
 	}
 	| struct_or_union IDENTIFIER 
 	{ // struct variable declaration
-		$$ = ($1 == "STRUCT") ? new Struct(null, new Tagname($2)) : new Union(null, new Tagname($2)); 
+		$$ = ($1 == "STRUCT") ? new Struct(null, new Tagname($2, @$), @$) : new Union(null, new Tagname($2, @$), @$); 
 	}
 	;
 
@@ -316,13 +316,13 @@ struct_declaration_list
 struct_declaration
 	: specifier_qualifier_list ';' 
 	{ 
-		$$ = new Type($1); 
+		$$ = new Type($1, @$); 
 	}
 	| specifier_qualifier_list struct_declarator_list ';' 
 	{ 
 		$$ = [];
 		for(var declInit of $2){
-			$$.push(new Declaration(new Type($1), declInit.declarator, declInit.initializer));
+			$$.push(new Declaration(new Type($1, @$), declInit.declarator, declInit.initializer, @$));
 		}
 		
 	}
@@ -348,17 +348,17 @@ struct_declarator_list
 	;
 
 struct_declarator
-	: ':' constant_expression { $$ = { declarator: new Unnamed(), initializer: $2 }; } 
+	: ':' constant_expression { $$ = { declarator: new Unnamed(@$), initializer: $2 }; } 
 	| declarator ':' constant_expression { $$ = { declarator: $1, initializer: $3 }; }
 	| declarator { $$ = { declarator: $1, initializer: null }; }
 	;
 
 enum_specifier
-	: ENUM '{' enumerator_list '}' { $$ = new Enum(new Unnamed(), $3); }
-	| ENUM '{' enumerator_list ',' '}' { $$ = new Enum(new Unnamed(), $3); }
-	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = new Enum($2, $4); }
-	| ENUM IDENTIFIER '{' enumerator_list ',' '}' { $$ = new Enum($2, $4); }
-	| ENUM IDENTIFIER { $$ = new Tagname($2); }
+	: ENUM '{' enumerator_list '}' { $$ = new Enum(new Unnamed(@$), $3, @$); }
+	| ENUM '{' enumerator_list ',' '}' { $$ = new Enum(new Unnamed(@$), $3, @$); }
+	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = new Enum($2, $4, @$); }
+	| ENUM IDENTIFIER '{' enumerator_list ',' '}' { $$ = new Enum($2, $4, @$); }
+	| ENUM IDENTIFIER { $$ = new Tagname($2, @$); }
 	;
 
 enumerator_list
@@ -367,8 +367,8 @@ enumerator_list
 	;
 
 enumerator
-	: enumeration_constant '=' constant_expression { $$ = new Enumerator($1, $3); }
-	| enumeration_constant { $$ = new Enumerator($1); }
+	: enumeration_constant '=' constant_expression { $$ = new Enumerator($1, $3, @$); }
+	| enumeration_constant { $$ = new Enumerator($1, null, @$); }
 	;
 
 /*atomic_type_specifier // skip for now
@@ -393,14 +393,14 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator { $$ = new Declarator(DECLTYPE.PTR, $2, $1); }
+	: pointer direct_declarator { $$ = new Declarator(DECLTYPE.PTR, $2, $1, @$); }
 	| direct_declarator { $$ = $1; } // always returns typeof Declarator
 	;
 
 direct_declarator // must always return typeof Declarator
-	: IDENTIFIER { $$ = new Declarator(DECLTYPE.ID, null, new Identifier($1)); }
+	: IDENTIFIER { $$ = new Declarator(DECLTYPE.ID, null, new Identifier($1, @$), @$); }
 	| '(' declarator ')' { $$ = $2; }
-	| direct_declarator '[' ']' { $$ = new Declarator(DECLTYPE.ARR, $1); }
+	| direct_declarator '[' ']' { $$ = new Declarator(DECLTYPE.ARR, $1, null, @$); }
 	/* NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW | direct_declarator '[' '*' ']' { $$ = { ...$1, declarator_type: "array", size: null }; } // fix these later
 	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$ = { ...$1, declarator_type: "array"}; }
 	| direct_declarator '[' STATIC assignment_expression ']' { $$ = $1; }
@@ -408,17 +408,17 @@ direct_declarator // must always return typeof Declarator
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$ = $1; }
 	| direct_declarator '[' type_qualifier_list ']' { $$ = $1; } !NOT SUPPORTING VARIABLE LENGTH ARRAYS FOR NOW */ 
-	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1, $3); }
-	| direct_declarator '(' parameter_type_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }); }
-	| direct_declarator '(' ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: [] }); }
-	| direct_declarator '(' identifier_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }); } // Function parameters without type (type defaults to int) 
+	| direct_declarator '[' assignment_expression ']' { $$ = new Declarator(DECLTYPE.ARR, $1, $3, @$); }
+	| direct_declarator '(' parameter_type_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }, @$); }
+	| direct_declarator '(' ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: [] }, @$); }
+	| direct_declarator '(' identifier_list ')' { $$ = new Declarator(DECLTYPE.FNC, $1, { parameters: $3 }, @$); } // Function parameters without type (type defaults to int) 
 	;
 
 pointer
-	: '*' type_qualifier_list pointer { $$ = new Pointer($3, $2); }
-	| '*' type_qualifier_list { $$ = new Pointer(null, $2); }
-	| '*' pointer { $$ = new Pointer($2); }
-	| '*' { $$ = new Pointer(null); }
+	: '*' type_qualifier_list pointer { $$ = new Pointer($3, $2, @$); }
+	| '*' type_qualifier_list { $$ = new Pointer(null, $2, @$); }
+	| '*' pointer { $$ = new Pointer($2, null, @$); }
+	| '*' { $$ = new Pointer(null, null, @$); }
 	;
 
 type_qualifier_list
@@ -438,13 +438,13 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator { $$ = new Declaration(new Type($1), $2); }
-	| declaration_specifiers abstract_declarator { $$ = new Declaration(new Type($1), $2); }
-	| declaration_specifiers { $$ = new Declaration(new Type($1), new Unnamed()); }
+	: declaration_specifiers declarator { $$ = new Declaration(new Type($1, @$), $2, @$); }
+	| declaration_specifiers abstract_declarator { $$ = new Declaration(new Type($1, @$), $2, @$); }
+	| declaration_specifiers { $$ = new Declaration(new Type($1), new Unnamed(@$), @$); }
 	;
 
 identifier_list
-	: IDENTIFIER { $$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($1)))]; }
+	: IDENTIFIER { $$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($1)), @$)]; }
 	| identifier_list ',' IDENTIFIER { $$ = [...$1, new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($3)))]; }
 	;
 
@@ -454,14 +454,14 @@ type_name
 	;
 
 abstract_declarator
-	: pointer direct_abstract_declarator { $$ = new AbstractDeclarator(DECLTYPE.PTR, $2, $1); }
-	| pointer { $$ = new AbstractDeclarator(DECLTYPE.PTR, null, $1); }
+	: pointer direct_abstract_declarator { $$ = new AbstractDeclarator(DECLTYPE.PTR, $2, $1, @$); }
+	| pointer { $$ = new AbstractDeclarator(DECLTYPE.PTR, null, $1, @$); }
 	| direct_abstract_declarator { $$ = $1; }
 	;
 
 direct_abstract_declarator
 	: '(' abstract_declarator ')' { $$ = $2; }
-	| '[' ']' { $$ = new AbstractDeclarator(DECLTYPE.ARR); }
+	| '[' ']' { $$ = new AbstractDeclarator(DECLTYPE.ARR, null, null, @$); }
 	/*| '[' '*' ']'
 	| '[' STATIC type_qualifier_list assignment_expression ']'
 	| '[' STATIC assignment_expression ']'
@@ -477,21 +477,21 @@ direct_abstract_declarator
 	| direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'
 	| direct_abstract_declarator '[' type_qualifier_list ']'*/
 	| direct_abstract_declarator '[' assignment_expression ']' { $$ = new AbstractDeclarator(DECLTYPE.ARR, $1, $3); }
-	| '(' ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC); }
-	| '(' parameter_type_list ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, null, $2); }
-	| direct_abstract_declarator '(' ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, $1, { parameters: [] }); }
-	| direct_abstract_declarator '(' parameter_type_list ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, $1, { parameters: $3 }); }
+	| '(' ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, null, null, @$); }
+	| '(' parameter_type_list ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, null, $2, @$); }
+	| direct_abstract_declarator '(' ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, $1, { parameters: [] }, @$); }
+	| direct_abstract_declarator '(' parameter_type_list ')' { $$ = new AbstractDeclarator(DECLTYPE.FNC, $1, { parameters: $3 }, @$); }
 	;
 
 initializer
 	: '{' initializer_list '}' { $$ = $2; }
 	| '{' initializer_list ',' '}' { $$ = $2; }
-	| assignment_expression { $$ = new Initializer(INITTYPE.EXPR, $1); }
+	| assignment_expression { $$ = new Initializer(INITTYPE.EXPR, $1, @$); }
 	;
 
 initializer_list
-	: designation initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $2, $1)]; }
-	| initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $1)]; }
+	: designation initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $2, $1, @$)]; }
+	| initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $1, @$)]; }
 	| initializer_list ',' designation initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $4, $3)]; }
 	| initializer_list ',' initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $3)]; }
 	;
@@ -506,8 +506,8 @@ designator_list
 	;
 
 designator
-	: '[' constant_expression ']' { $$ = new Designator($2); }
-	| '.' IDENTIFIER { $$ = new Designator(new Identifier($2)); }
+	: '[' constant_expression ']' { $$ = new Designator($2, @$); }
+	| '.' IDENTIFIER { $$ = new Designator(new Identifier($2, @$)); }
 	;
 
 static_assert_declaration
@@ -531,7 +531,7 @@ labeled_statement
 
 compound_statement
 	: '{' '}'
-	| '{'  block_item_list '}' { $$ = new CStmt($2); }
+	| '{'  block_item_list '}' { $$ = new CStmt($2, @$); }
 	;
 
 block_item_list
@@ -585,7 +585,7 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, $3); }
+	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, $3, @$); }
  	//| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;
