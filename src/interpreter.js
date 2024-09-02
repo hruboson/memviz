@@ -4,17 +4,6 @@
  */
 
 /**
- * Runtime error
- * @class RTError
- */
-class RTError extends Error {
-	constructor(e) {
-		super(e);
-		this.name = "Runtime error";
-	}
-}
-
-/**
  * Interpreter class, acts as a Visitor for AST
  * @description We are pretending to be "compiling" to target machine code. This is in order to simulate single-pass of AST. Due to this reason, each visit 
  * 				function first calls semantic analyzer and then changes internal state of interpreter. The output is only visible to the user if no error 
@@ -24,7 +13,7 @@ class RTError extends Error {
 class Interpreter {
 
 	constructor(){
-		this.#symtableGlobal = new Symtable("global", "global"); //tbh idk what ScopeInfo.type was supposed to be
+		this.#symtableGlobal = new Symtable("global", "global");
 		this.#symtableStack = new Stack();
 		this.#symtableStack.push(this.#symtableGlobal);
 
@@ -195,6 +184,10 @@ class Interpreter {
 		this.#symtableStack.pop();
 	}
 
+	visitTypedef(typedef){
+		this.semantic(typedef);
+	}
+
 
 
 
@@ -214,13 +207,16 @@ class Interpreter {
 	/* Helper functions */
 	/**
 	 * Refreshes cached symbols stored in parser
-	 * @return {void}
 	 * @private
 	 */
 	#refreshSymbols(){
 		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //? make this a class perhaps
 	}
 
+	/**
+	 * Updates HTML to display interpreter output and generated structure
+	 * @todo If needed, pass the element ids as arguments
+	 */
 	updateHTML(){
 		document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 4);
 		document.getElementById("programCounter").innerHTML = this.#pc + "/" + this.#ast.length; 

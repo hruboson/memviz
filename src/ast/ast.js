@@ -21,6 +21,13 @@ class AST {
  * @implements accept
  */
 class Construct {
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
 	constructor(){
 		abstract(this, Construct);
 		intfc(this, "accept", ["visitor"]);

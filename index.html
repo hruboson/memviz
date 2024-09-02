@@ -37,6 +37,7 @@
 	<script src="src/ast/struct_union.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/enum.js" type="text/javascript" charset="utf-8"></script>
 
+	<script src="src/error.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/parser/c_parser.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/symtable.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/semantic.js" type="text/javascript" charset="utf-8"></script>
@@ -89,7 +90,7 @@
 		<div class="row pb-2 pt-1">
 			<div class="col-6">
 				<div style="left: 10px;"> </div>
-				<button class="btn btn-primary" onclick="execute(editor.getValue())"><i class="bx bx-sm bx-play"></i></button>
+				<button class="btn btn-primary" onclick="execute(editor.getValue(), { execute: true })"><i class="bx bx-sm bx-play"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-left"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-right"></i></button>
 				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-right"></i></button>
@@ -98,6 +99,7 @@
 			</div>
 			<div class="col-6 text-end">
 				<span id="debugInfo" style="visibility: visible"> <!-- on release change to hidden -->
+					<button class="btn btn-primary" onclick="execute(editor.getValue(), { parse: true })"><i class='bx bxs-parking'></i></button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#astOffcanvas" aria-controls="astOffcanvas">AST</button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#symtableOffcanvas" aria-controls="symtableOffcanvas">SYMTAB</button>
 				</span>
@@ -274,12 +276,25 @@ Split(['#split-editor', '#split-output'], {
 		editor.setValue(example);
 		//editor.session.replace(new ace.Range(0, 0, 1, 1), example);
 	}
-	
-	function execute(input){
+
+	/**
+	 * @description Interpreter runner helper function. Should be only ever called from HTML (e.g. button)
+	 * @global
+	 * @param {string} input
+	 * @param {Object} flags Set flags to run different stages of interpreter ({ execute: true } for complete interpretation)
+	 */
+	function execute(input, flags){
 		const interpreter = new Interpreter();
 		try{
-			const result = interpreter.run(input);
-			interpreter.updateHTML();
+			var result;
+			if(flags.parse){
+				result = JSON.stringify(interpreter.parse(input).ast, null, 4);
+				interpreter.updateHTML();
+			}
+			if(flags.execute){
+				result = interpreter.run(input);
+				interpreter.updateHTML();
+			}
 			document.getElementById("output").innerHTML = result;
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;

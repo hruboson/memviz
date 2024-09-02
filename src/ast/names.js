@@ -1,16 +1,32 @@
 /**
  * @file Structures for different kinds of names
+ * @author Ondřej Hruboš
  */
 
 /**
  * Used for functiuon names, object names, typedef names, enumeration constants
  * @class Identifier
  * @param {string} name
+ * @param {Object} loc
  */
 class Identifier extends Construct {
-	constructor(name){
+
+	/**
+	 * Name of identifier
+	 * @type {string}
+	 */
+	name;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(name, loc){
 		super();
 		this.name = name;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -23,11 +39,26 @@ class Identifier extends Construct {
  * @description Creates record in tag name space
  * @class Tagname
  * @param {string} name
+ * @param {Object} loc
  */
 class Tagname extends Construct {
-	constructor(name){
+
+	/**
+	 * Name of tagname
+	 * @type {string}
+	 */
+	name;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(name, loc){
 		super();
 		this.name = name;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -36,12 +67,14 @@ class Tagname extends Construct {
 }
 
 /**
- * ?Is this the same as anonymous?
+ * Unnamed (anonymous) union and structure 
  * @class Unnamed
+ * @param {Object} loc
  */
-class Unnamed { 
-	constructor(){
+class Unnamed {
+	constructor(loc){
 		this.unnamed = true; // only for AST representation
+		this.loc = loc;
 	}
 }
 

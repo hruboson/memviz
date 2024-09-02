@@ -1,6 +1,33 @@
+/**
+ * @file Symbol table
+ * @author Ondřej Hruboš
+ */
+
+/**
+ * @class ScopeInfo
+ * @description Holds information about scope
+ * @param {string} name Usually name of function or anything that's unique
+ * @param {string} type Type of scope (e.g. function parameters, CStmt, global, ...)
+ * @param {integer} level Level of scope (should be calculated automatically)
+ */
 class ScopeInfo {
+
+	/**
+	 * Name of scope (should be unique in case of functions)
+	 * @type {string}
+	 */
 	name;
+
+	/**
+	 * Type of scope (e.g. function parameters, CStmt, global, ...)
+	 * @type {string}
+	 */
 	type;
+
+	/**
+	 * Level of scope
+	 * @type {integer}
+	 */
 	level;
 
 	constructor(name, type, level){
@@ -11,6 +38,7 @@ class ScopeInfo {
 }
 
 /**
+ * Enum for possible types of symbols
  * @typedef SYMTYPE
  */
 const SYMTYPE = {
@@ -18,21 +46,62 @@ const SYMTYPE = {
 	PARAM: "PARAM",
 	FNC: "FNC",
 	STRUCT: "STRUCT",
+	TYPEDEF: "TYPEDEF",
 }
 
+/**
+ * @class Sym
+ * @description Structure for holding information about a single symbol
+ * @param {string} name Name (identifier) of the symbol
+ * @param {SYMTYPE} type Type of the symbol
+ * @param {Array.<string>} specifiers Specifiers of symbol
+ * @param {bool} pointer Is symbol a pointer?
+ * @param {integer} dimension Dimension of array, 0 for non-array
+ */
 class Sym {
+
+	/**
+	 * Name (identifier) of the symbol
+	 * @type {string}
+	 * */
 	name;
+
+	/**
+	 * Type of the symbol
+	 * @type {SYMTYPE}
+	 */
 	type;
+
+	/**
+	 * Specifiers of symbol
+	 * @type {Array.<string>}
+	 */
 	specifiers;
+
+	/**
+	 * Symbolizes whether symbol is a pointer
+	 * @type {bool}
+	 */
 	pointer;
+
+	/**
+	 * Symbolizes whether symbol is initialized. If it is, then address must be set.
+	 * @type {bool}
+	 */
 	initialized;
+
+	/**
+	 * Hexadecimal number specifying where in memory the symbol is stored
+	 * @type {integer}
+	 */
 	address;
 
-	constructor(name, type, specifiers, pointer){
+	constructor(name, type, specifiers, pointer, dimension=0){
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
 		this.pointer = pointer;
+		this.dimension = dimension;
 		this.initialized = false;
 		this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
@@ -46,6 +115,7 @@ class Sym {
  * @param {Symtable} [parent=null] Parent scoped symbol table
  */
 class Symtable {
+
 	/**
 	 * Parent symtable
 	 * @type {Symtable}
@@ -77,7 +147,7 @@ class Symtable {
 		this.parentSymtable = parent;
 		this.children = [];
 
-		// add this to parent's children
+		// add this instance to parent's children
 		if(parent){
 			parent.children.push(this);
 		}
@@ -85,13 +155,25 @@ class Symtable {
 
 	/**
 	 * Inserts symbol into symbol table
-	 * @param {string} name
-	 * @param {Symbol} Symbol
+	 * @param {string} name Symbol name (identifier)
+	 * @param {type} type
+	 * @param {Array.<string>} specifiers
+	 * @param {bool} pointer
+	 * @param {integer} dimension
 	 */
-	insert(name, type, specifiers, pointer){
-		this.symbols.set(name, new Sym(name, type, specifiers, pointer));
+	insert(name, type, specifiers, pointer, dimension=0){
+		if(this.lookup(name)){
+			throw new SError(`redefinition of ${name}`);
+		}
+
+		this.symbols.set(name, new Sym(name, type, specifiers, pointer, dimension));
 	}
 
+	/**
+	 * Looks up symbol in symbol table
+	 * @param {string} name Symbol name (identifier)
+	 * @return {Symbol|undefined} Returns Symbol in case of success, undefined if the symbol was not found
+	 */
 	lookup(name){
 		return this.symbols.get(name);
 	}
@@ -108,7 +190,13 @@ class Symtable {
 
 		var symbols_string = ``;
 		this.symbols.forEach(function(symbol, name){
-			symbols_string += `${indent}(${symbol.type}) ${name}: 0x${(+symbol.address).toString(16)}, ${symbol.specifiers}, ${symbol.pointer}; \n`;
+			const spacing = ` `.repeat(symbol.type.length + 3);
+			symbols_string += `${indent}(${symbol.type}) ${name}
+${indent}${spacing}addr: 0x${(+symbol.address).toString(16)}
+${indent}${spacing}type: ${symbol.specifiers}
+${indent}${spacing}ptr: ${symbol.pointer}
+${indent}${spacing}arr: ${symbol.dimension}
+`;
 		});
 
 		var prt = header + divider + symbols_string + divider;

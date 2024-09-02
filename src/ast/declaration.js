@@ -7,9 +7,24 @@
  * @class Type
  * @decription Allowed (built-in) types: void  char  short  int  long  float  double  signed  unsigned, _Bool
  * @param {Array.<string>} [specifiers=[]]
+ * @param {Object} loc
  */
 class Type {
-	constructor(specifiers=[]){
+
+	/**
+	 * Array of specifiers
+	 * @type {Array.<string>}
+	 */
+	specifiers;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(specifiers=[], loc){
+		this.loc = loc;
 		if(specifiers.length == 0){
 			this.specifiers = ["int"]; // Empty type defaults to int
 		}else{
@@ -17,8 +32,6 @@ class Type {
 				return without !== "typedef"; // remove "typedef" as that is not needed in the specifiers 
 			});
 		}
-		/*this.size = this.#get_size(this.specifiers);
-		this.unsigned = this.specifiers.includes("unsigned") ? true : false;*/ //<-- these shouldn't be in AST
 	}
 }
 
@@ -40,15 +53,30 @@ const INITTYPE = { //FIX These types are probably wrong and are not used in code
  * Used to modify which part of struct/array is being initialized (a kind of specifier)
  * @class Designator
  * @param {Identifier|CExpr|Array.<Identifier>|Array.<CExpr>} designator Either identifier or constant expression OR arrays of them
+ * @param {Object} loc
  */
 class Designator {
-	constructor(designator){
+	
+	/**
+	 * Either identifier or constant expression OR arrays of them
+	 * @type {Identifier|CExpr|Array.<Identifier>|Array.<CExpr>}
+	 */
+	designator;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(designator, loc){
 		if(designator instanceof Identifier){ //FIX should be exact instanceof, create a function in util.js for this
 			this.kind = "IDENTIFIER";
 		}else{
 			this.kind = "CEXPR";
 		}
 		this.designator = designator;
+		this.loc = loc;
 	}
 }
 
@@ -57,12 +85,56 @@ class Designator {
  * @desription Initializer can be one of the following: expression, scalar initializer, array initializer, structure initializer
  * @class Initializer
  * @param {INITTYPE} kind
- * @param {Expr|Array.<Expr>} data
+ * @param {Expr|Arr|Struct} data
  * @param {Initializer} child For nested arrays and structs
  * @param {Designator|Array.<Designator>|null} designator Single or array of designators
+ * @param {Object} loc
  */
 class Initializer extends Construct {
-	constructor(kind, data, child, designator){
+	
+	/**
+	 * Kind of initializer
+	 * @type {INITTYPE}
+	 */
+	kind;
+
+	/**
+	 * Expression initializer
+	 * @type {Expr}
+	 */
+	expr;
+
+	/**
+	 * Array initializer
+	 * @type {Arr}
+	 */
+	arr;
+
+	/**
+	 * Struct initializer
+	 * @type {Struct}
+	 */
+	struct;
+
+	/**
+	 * Child initializer (for nested arrays and structs)
+	 * @type {Initializer}
+	 */
+	child;
+
+	/**
+	 * Designator
+	 * @type {Designator|Array.<Designator>|null}
+	 */
+	designator;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(kind, data, child, designator, loc){
 		super();
 		this.kind = kind;
 		switch(kind){
@@ -85,6 +157,7 @@ class Initializer extends Construct {
 		}
 		this.initializer = child;
 		this.designator = designator;
+		this.loc = loc;
 	}	
 
 	accept(visitor){
@@ -110,19 +183,60 @@ const DECLTYPE = {
  * @description Can be either: identifier, declarator enclosed in parentheses (pointers to arrays, pointers to functions), pointer declarator, array declarator, function declarator
  * @class Declarator
  * @param {DECLTYPE} kind Type of declarator. Described in [class description]{@link Declarator#description}.
- * @param {Declarator} child Child declarator
+ * @param {Declarator} [child=null] Child declarator
  * @param {Identifier|Object|Pointer|Expr|null} data Idk whatever is needed just put it here
+ * @param {Object} loc
  */
 class Declarator extends Construct {
-	//TODO Refactor + docu
+	
+	/**
+	 * Type of declarator. Described in [class description]{@link Declarator#description}.
+	 * @type {DECLTYPE}
+	 */
 	kind;
+
+	/**
+	 * Child declarator
+	 * @type {Declarator}
+	 */
 	child;
+
+	/**
+	 * Identifier of declarator
+	 * @description Should be only set if DECLTYPE is ID
+	 * @type {Identifier}
+	 */
 	identifier;
+
+	/**
+	 * Pointer of declarator
+	 * @description Should be only set if DECLTYPE is PTR
+	 * @type {Pointer}
+	 */
 	ptr;
+
+	/**
+	 * Size of array of declarator
+	 * @description Should be only set if DECLTYPE is ARR
+	 * @type {Array}
+	 * @todo check if this is correct (when you continue work on parser)
+	 */
 	arrSizeExp;
+
+	/**
+	 * Function parameters
+	 * @description Should be only set if DECLTYPE is FNC
+	 * @type {Object}
+	 */
 	fnc;
 
-	constructor(kind, child, data){
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(kind, child=null, data, loc){
 		super();
 		this.kind = kind;
 		switch(kind){
@@ -142,6 +256,7 @@ class Declarator extends Construct {
 				throw new Error("Unknown declaration type!");
 		}
 		this.child = child;
+		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -154,11 +269,12 @@ class Declarator extends Construct {
  * @class AbstractDeclarator
  * @param {DECLTYPE} kind
  * @param {AbstractDeclarator} child
- * @param {Pointer|Object|null}
+ * @param {Pointer|Object|null} data
+ * @param {Object} loc
  */
 class AbstractDeclarator extends Declarator {
-	constructor(kind, child, data){
-		super(kind, child, data);
+	constructor(kind, child, data, loc){
+		super(kind, child, data, loc);
 	}
 }
 
@@ -167,14 +283,40 @@ class AbstractDeclarator extends Declarator {
  * @param {Type} Type
  * @param {Declarator|Unnamed} declarator
  * @param {Initializer} initializer
+ * @param {Object} loc
  */
 class Declaration extends Construct {
-	constructor(type, declarator, initializer){
+
+	/**
+	 * Type (specifiers) of declaration
+	 * @type {Type}
+	 */
+	type;
+
+	/**
+	 * Declarator part of Declaration
+	 * @type {Declarator}
+	 */ 
+	declarator;
+
+	/**
+	 * Initializer part of Declaration (or null if there is none)
+	 * @type {Initializer}
+	 */ 
+	initializer;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(type, declarator, initializer, loc){
 		super();
 		this.type = type;
-		this.declarator = declarator;// ?? (() => { throw new Error("Declarator cannot be null!")})();
+		this.declarator = declarator;
 		this.initializer = initializer;
-		/*this.definition = this.initializer ? true : false;*/ //<--- shouldn't be in AST
+		this.loc = loc;
 	}
 
 	accept(visitor){

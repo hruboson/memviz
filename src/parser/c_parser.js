@@ -84,7 +84,7 @@ performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* actio
 var $0 = $$.length - 1;
 switch (yystate) {
 case 1: case 7: case 8:
- this.$ = new Identifier($$[$0]); 
+ this.$ = new Identifier($$[$0], this._$); 
 break;
 case 2: case 3: case 83: case 117: case 118: case 123: case 124: case 156: case 171: case 183: case 215: case 217: case 239: case 240:
  this.$ = $$[$0]; 
@@ -93,25 +93,25 @@ case 4: case 158: case 184: case 191: case 198:
  this.$ = $$[$0-1]; 
 break;
 case 5:
- this.$ = new Literal("i_literal", $$[$0]); 
+ this.$ = new Literal("i_literal", $$[$0], this._$); 
 break;
 case 6:
- this.$ = new Literal("f_literal", $$[$0]); 
+ this.$ = new Literal("f_literal", $$[$0], this._$); 
 break;
 case 9:
- this.$ =  new Literal("s_literal", $$[$0]); 
+ this.$ =  new Literal("s_literal", $$[$0], this._$); 
 break;
 case 10:
  this.$ = $$[$0] 
 break;
 case 84:
 
-		this.$ = [new Type($$[$0-1])];
+		this.$ = [new Type($$[$0-1], this._$)];
 	
 break;
 case 85:
 
-		this.$ = getDeclarations($$[$0-2], $$[$0-1]);
+		this.$ = getDeclarations($$[$0-2], $$[$0-1], this._$);
 	
 break;
 case 87: case 89: case 91: case 93: case 95: case 130: case 132:
@@ -131,17 +131,17 @@ case 100: case 138:
 break;
 case 120:
  // anonymous struct or union
-		this.$ = ($$[$0-3] == "STRUCT") ? new Struct($$[$0-1], new Unnamed()) : new Union($$[$0-1], new Unnamed()); 
+		this.$ = ($$[$0-3] == "STRUCT") ? new Struct($$[$0-1], new Unnamed(this._$), this._$) : new Union($$[$0-1], new Unnamed(this._$), this._$); 
 	
 break;
 case 121:
  // struct variable initialization and struct definition 
-		this.$ = ($$[$0-4] == "STRUCT") ? new Struct($$[$0-1], new Tagname($$[$0-3])) : new Union($$[$0-1], new Tagname($$[$0-3])); 
+		this.$ = ($$[$0-4] == "STRUCT") ? new Struct($$[$0-1], new Tagname($$[$0-3], this._$), this._$) : new Union($$[$0-1], new Tagname($$[$0-3], this._$), this._$); 
 	
 break;
 case 122:
  // struct variable declaration
-		this.$ = ($$[$0-1] == "STRUCT") ? new Struct(null, new Tagname($$[$0])) : new Union(null, new Tagname($$[$0])); 
+		this.$ = ($$[$0-1] == "STRUCT") ? new Struct(null, new Tagname($$[$0], this._$), this._$) : new Union(null, new Tagname($$[$0], this._$), this._$); 
 	
 break;
 case 125: case 238:
@@ -152,14 +152,14 @@ case 126: case 237:
 break;
 case 127:
  
-		this.$ = new Type($$[$0-1]); 
+		this.$ = new Type($$[$0-1], this._$); 
 	
 break;
 case 128:
  
 		this.$ = [];
 		for(var declInit of $$[$0-1]){
-			this.$.push(new Declaration(new Type($$[$0-2]), declInit.declarator, declInit.initializer));
+			this.$.push(new Declaration(new Type($$[$0-2], this._$), declInit.declarator, declInit.initializer, this._$));
 		}
 		
 	
@@ -175,58 +175,58 @@ case 135:
 	
 break;
 case 136:
- this.$ = { declarator: new Unnamed(), initializer: $$[$0] }; 
+ this.$ = { declarator: new Unnamed(this._$), initializer: $$[$0] }; 
 break;
 case 139:
- this.$ = new Enum(new Unnamed(), $$[$0-1]); 
+ this.$ = new Enum(new Unnamed(this._$), $$[$0-1], this._$); 
 break;
 case 140:
- this.$ = new Enum(new Unnamed(), $$[$0-2]); 
+ this.$ = new Enum(new Unnamed(this._$), $$[$0-2], this._$); 
 break;
 case 141:
- this.$ = new Enum($$[$0-3], $$[$0-1]); 
+ this.$ = new Enum($$[$0-3], $$[$0-1], this._$); 
 break;
 case 142:
- this.$ = new Enum($$[$0-4], $$[$0-2]); 
+ this.$ = new Enum($$[$0-4], $$[$0-2], this._$); 
 break;
 case 143:
- this.$ = new Tagname($$[$0]); 
+ this.$ = new Tagname($$[$0], this._$); 
 break;
 case 146:
- this.$ = new Enumerator($$[$0-2], $$[$0]); 
+ this.$ = new Enumerator($$[$0-2], $$[$0], this._$); 
 break;
 case 147:
- this.$ = new Enumerator($$[$0]); 
+ this.$ = new Enumerator($$[$0], null, this._$); 
 break;
 case 155:
- this.$ = new Declarator(DECLTYPE.PTR, $$[$0], $$[$0-1]); 
+ this.$ = new Declarator(DECLTYPE.PTR, $$[$0], $$[$0-1], this._$); 
 break;
 case 157:
- this.$ = new Declarator(DECLTYPE.ID, null, new Identifier($$[$0])); 
+ this.$ = new Declarator(DECLTYPE.ID, null, new Identifier($$[$0], this._$), this._$); 
 break;
 case 159:
- this.$ = new Declarator(DECLTYPE.ARR, $$[$0-2]); 
+ this.$ = new Declarator(DECLTYPE.ARR, $$[$0-2], null, this._$); 
 break;
 case 160:
- this.$ = new Declarator(DECLTYPE.ARR, $$[$0-3], $$[$0-1]); 
+ this.$ = new Declarator(DECLTYPE.ARR, $$[$0-3], $$[$0-1], this._$); 
 break;
 case 161: case 163:
- this.$ = new Declarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }); 
+ this.$ = new Declarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }, this._$); 
 break;
 case 162:
- this.$ = new Declarator(DECLTYPE.FNC, $$[$0-2], { parameters: [] }); 
+ this.$ = new Declarator(DECLTYPE.FNC, $$[$0-2], { parameters: [] }, this._$); 
 break;
 case 164:
- this.$ = new Pointer($$[$0], $$[$0-1]); 
+ this.$ = new Pointer($$[$0], $$[$0-1], this._$); 
 break;
 case 165:
- this.$ = new Pointer(null, $$[$0]); 
+ this.$ = new Pointer(null, $$[$0], this._$); 
 break;
 case 166:
- this.$ = new Pointer($$[$0]); 
+ this.$ = new Pointer($$[$0], null, this._$); 
 break;
 case 167:
- this.$ = new Pointer(null); 
+ this.$ = new Pointer(null, null, this._$); 
 break;
 case 169: case 200:
  this.$ = [...$$[$0-1], $$[$0]]; 
@@ -235,49 +235,49 @@ case 170: case 192:
  this.$ = $$[$0-2]; 
 break;
 case 174: case 175:
- this.$ = new Declaration(new Type($$[$0-1]), $$[$0]); 
+ this.$ = new Declaration(new Type($$[$0-1], this._$), $$[$0], this._$); 
 break;
 case 176:
- this.$ = new Declaration(new Type($$[$0]), new Unnamed()); 
+ this.$ = new Declaration(new Type($$[$0]), new Unnamed(this._$), this._$); 
 break;
 case 177:
- this.$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])))]; 
+ this.$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])), this._$)]; 
 break;
 case 178:
  this.$ = [...$$[$0-2], new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])))]; 
 break;
 case 181:
- this.$ = new AbstractDeclarator(DECLTYPE.PTR, $$[$0], $$[$0-1]); 
+ this.$ = new AbstractDeclarator(DECLTYPE.PTR, $$[$0], $$[$0-1], this._$); 
 break;
 case 182:
- this.$ = new AbstractDeclarator(DECLTYPE.PTR, null, $$[$0]); 
+ this.$ = new AbstractDeclarator(DECLTYPE.PTR, null, $$[$0], this._$); 
 break;
 case 185:
- this.$ = new AbstractDeclarator(DECLTYPE.ARR); 
+ this.$ = new AbstractDeclarator(DECLTYPE.ARR, null, null, this._$); 
 break;
 case 186:
  this.$ = new AbstractDeclarator(DECLTYPE.ARR, $$[$0-3], $$[$0-1]); 
 break;
 case 187:
- this.$ = new AbstractDeclarator(DECLTYPE.FNC); 
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC, null, null, this._$); 
 break;
 case 188:
- this.$ = new AbstractDeclarator(DECLTYPE.FNC, null, $$[$0-1]); 
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC, null, $$[$0-1], this._$); 
 break;
 case 189:
- this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-2], { parameters: [] }); 
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-2], { parameters: [] }, this._$); 
 break;
 case 190:
- this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }); 
+ this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }, this._$); 
 break;
 case 193:
- this.$ = new Initializer(INITTYPE.EXPR, $$[$0]); 
+ this.$ = new Initializer(INITTYPE.EXPR, $$[$0], this._$); 
 break;
 case 194:
- this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1])]; 
+ this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1], this._$)]; 
 break;
 case 195:
- this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0])]; 
+ this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], this._$)]; 
 break;
 case 196:
  this.$ = [...$$[$0-3], new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1])]; 
@@ -286,13 +286,13 @@ case 197:
  this.$ = [...$$[$0-2], new Initializer(INITTYPE.NESTED, null, $$[$0])]; 
 break;
 case 201:
- this.$ = new Designator($$[$0-1]); 
+ this.$ = new Designator($$[$0-1], this._$); 
 break;
 case 202:
- this.$ = new Designator(new Identifier($$[$0])); 
+ this.$ = new Designator(new Identifier($$[$0], this._$)); 
 break;
 case 214:
- this.$ = new CStmt($$[$0-1]); 
+ this.$ = new CStmt($$[$0-1], this._$); 
 break;
 case 216:
  this.$ = [...$$[$0-1], ...$$[$0]]; 
@@ -304,7 +304,7 @@ case 236:
  parser.yy.lastSymbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
 break;
 case 241:
- this.$ = new Func($$[$0-1], $$[$0-2], $$[$0]); 
+ this.$ = new Func($$[$0-1], $$[$0-2], $$[$0], this._$); 
 break;
 }
 },
@@ -457,18 +457,19 @@ parse: function parse(input) {
     return true;
 }};
 
+	
 	parser.yy.symbols = { types: [], enums: [] };
 	parser.yy.lastSymbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
 
-	function getDeclarations(typeSpecifiers, declaratorList){
+	function getDeclarations(typeSpecifiers, declaratorList, loc){
 		var r = [];
-		const type = new Type(typeSpecifiers); // type will be same regardless of typedef or variable declaration
+		const type = new Type(typeSpecifiers, loc); // type will be same regardless of typedef or variable declaration
 		for(var declInit of declaratorList){ // handle multiple same-line declarations (int a, b = 10, c;)
 			var declarator = declInit.declarator;
 			var initializer = declInit.initializer;
 
 			if(typeSpecifiers.includes("typedef")){ // specifiers include typedef
-				r.push(new Typedef(type, declarator));
+				r.push(new Typedef(type, declarator, loc));
 				// get to the bottom of declarator
 				var declTmp = declarator;
 				while(declTmp.kind != DECLTYPE.ID && declTmp.child != null){
@@ -477,7 +478,7 @@ parse: function parse(input) {
 				parser.yy.symbols.types.push(declTmp.identifier.name); // add typedef name to types so lexer can work with them
 				//! move this to Typedef constructor
 			}else{
-				r.push(new Declaration(type, declarator, initializer)); // basic variable declaration
+				r.push(new Declaration(type, declarator, initializer, loc)); // basic variable declaration
 			}
 		}
 		
