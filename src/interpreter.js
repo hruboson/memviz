@@ -184,6 +184,10 @@ class Interpreter {
 		this.#symtableStack.pop();
 	}
 
+	visitTypedef(typedef){
+		this.semantic(typedef);
+	}
+
 
 
 

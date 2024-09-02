@@ -46,6 +46,7 @@ const SYMTYPE = {
 	PARAM: "PARAM",
 	FNC: "FNC",
 	STRUCT: "STRUCT",
+	TYPEDEF: "TYPEDEF",
 }
 
 /**
@@ -55,6 +56,7 @@ const SYMTYPE = {
  * @param {SYMTYPE} type Type of the symbol
  * @param {Array.<string>} specifiers Specifiers of symbol
  * @param {bool} pointer Is symbol a pointer?
+ * @param {integer} dimension Dimension of array, 0 for non-array
  */
 class Sym {
 
@@ -94,11 +96,12 @@ class Sym {
 	 */
 	address;
 
-	constructor(name, type, specifiers, pointer){
+	constructor(name, type, specifiers, pointer, dimension=0){
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
 		this.pointer = pointer;
+		this.dimension = dimension;
 		this.initialized = false;
 		this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
@@ -156,13 +159,14 @@ class Symtable {
 	 * @param {type} type
 	 * @param {Array.<string>} specifiers
 	 * @param {bool} pointer
+	 * @param {integer} dimension
 	 */
-	insert(name, type, specifiers, pointer){
+	insert(name, type, specifiers, pointer, dimension=0){
 		if(this.lookup(name)){
 			throw new SError(`redefinition of ${name}`);
 		}
 
-		this.symbols.set(name, new Sym(name, type, specifiers, pointer));
+		this.symbols.set(name, new Sym(name, type, specifiers, pointer, dimension));
 	}
 
 	/**
@@ -186,7 +190,13 @@ class Symtable {
 
 		var symbols_string = ``;
 		this.symbols.forEach(function(symbol, name){
-			symbols_string += `${indent}(${symbol.type}) ${name}: 0x${(+symbol.address).toString(16)}, ${symbol.specifiers}, ${symbol.pointer}; \n`;
+			const spacing = ` `.repeat(symbol.type.length + 3);
+			symbols_string += `${indent}(${symbol.type}) ${name}
+${indent}${spacing}addr: 0x${(+symbol.address).toString(16)}
+${indent}${spacing}type: ${symbol.specifiers}
+${indent}${spacing}ptr: ${symbol.pointer}
+${indent}${spacing}arr: ${symbol.dimension}
+`;
 		});
 
 		var prt = header + divider + symbols_string + divider;
