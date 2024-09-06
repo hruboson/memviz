@@ -102,4 +102,8 @@ class Semantic {
 	visitTypedef(typedef){
 		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, typedef.type.specifiers);
 	}
+	visitFuncCallExpr(funcCall){
+		
+		//todo
+	}
 }

@@ -188,6 +188,12 @@ class Interpreter {
 		this.semantic(typedef);
 	}
 
+	visitFuncCallExpr(funcCall){
+		this.semantic(funcCall);
+
+		//todo
+	}
+
 
 
 

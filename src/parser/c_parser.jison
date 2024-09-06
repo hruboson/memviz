@@ -64,8 +64,8 @@ primary_expression
 	;
 
 constant
-	: I_CONSTANT { $$ = new Literal("i_literal", $1, @$); }
-	| F_CONSTANT { $$ = new Literal("f_literal", $1, @$); }
+	: I_CONSTANT { $$ = new CExpr("i_constant", $1, @$); }
+	| F_CONSTANT { $$ = new CExpr("f_constant", $1, @$); }
 	| ENUMERATION_CONSTANT { $$ = new Identifier($1, @$); }	
 	;
 
@@ -74,7 +74,7 @@ enumeration_constant
 	;
 
 string
-	: STRING_LITERAL { $$ =  new Literal("s_literal", $1, @$); }
+	: STRING_LITERAL { $$ =  new CExpr("s_literal", $1, @$); }
 	| FUNC_NAME { $$ = $1 }
 	;
 
@@ -93,10 +93,17 @@ generic_association
 	;*/
 
 postfix_expression
-	: primary_expression
+	//TODO this is basically the only part of expression that isn't finished and will probably be the most difficult to tackle. GL ^_^
+	: primary_expression { $$ = $1; }
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'
+	{ 
+		$$ = new FuncCallExpr($1, [], @$);
+	}
 	| postfix_expression '(' argument_expression_list ')'
+	{
+		$$ = new FuncCallExpr($1, $3, @$);
+	}
 	| postfix_expression '.' IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression INC_OP
@@ -106,114 +113,129 @@ postfix_expression
 	;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+	: assignment_expression { $$ = [$1]; }
+	| argument_expression_list ',' assignment_expression { $$ = [...$1, $3]; }
 	;
 
 unary_expression
-	: postfix_expression
+	: postfix_expression { $$ = $1; }
 	| INC_OP unary_expression
+	{
+		$$ = new UExpr($2, $1, @$);
+	}
 	| DEC_OP unary_expression
+	{
+		$$ = new UExpr($2, $1, @$);
+	}
 	| unary_operator cast_expression
+	{
+		$$ = new UExpr($2, $1, @$);
+	}
 	| SIZEOF unary_expression
+	{
+		$$ = new UExpr($2, $1, @$);
+	}
 	| SIZEOF '(' type_name ')'
-	| ALIGNOF '(' type_name ')'
+	{
+		$$ = new UExpr($3, $1, @$);
+	}
+	//| ALIGNOF '(' type_name ')' skip for now
 	;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
+	: '&' { $$ = $1; }
+	| '*' { $$ = $1; }
+	| '+' { $$ = $1; }
+	| '-' { $$ = $1; }
+	| '~' { $$ = $1; }
+	| '!' { $$ = $1; }
 	;
 
 cast_expression
-	: unary_expression
-	| '(' type_name ')' cast_expression
+	: unary_expression { $$ = $1; }
+	| '(' type_name ')' cast_expression { $$ = new CastExpr($2, $4, @$); }
 	;
 
 multiplicative_expression
-	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
+	: cast_expression { $$ = $1; }
+	| multiplicative_expression '*' cast_expression { $$ = new BArithExpr($1, $2, $3, @$); }
+	| multiplicative_expression '/' cast_expression { $$ = new BArithExpr($1, $2, $3, @$); }
+	| multiplicative_expression '%' cast_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 additive_expression
-	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
+	: multiplicative_expression { $$ = $1; }
+	| additive_expression '+' multiplicative_expression { $$ = new BArithExpr($1, $2, $3, @$); }
+	| additive_expression '-' multiplicative_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+	: additive_expression { $$ = $1; }
+	| shift_expression LEFT_OP additive_expression { $$ = new BArithExpr($1, $2, $3, @$); }
+	| shift_expression RIGHT_OP additive_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 relational_expression
-	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	: shift_expression { $$ = $1; }
+	| relational_expression '<' shift_expression { $$ = new BCompExpr($1, $2, $3, @$); }
+	| relational_expression '>' shift_expression { $$ = new BCompExpr($1, $2, $3, @$); }
+	| relational_expression LE_OP shift_expression { $$ = new BCompExpr($1, $2, $3, @$); }
+	| relational_expression GE_OP shift_expression { $$ = new BCompExpr($1, $2, $3, @$); }
 	;
 
 equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	: relational_expression { $$ = $1; }
+	| equality_expression EQ_OP relational_expression { $$ = new BCompExpr($1, $2, $3, @$); }
+	| equality_expression NE_OP relational_expression { $$ = new BCompExpr($1, $2, $3, @$); }
 	;
 
 and_expression
-	: equality_expression
-	| and_expression '&' equality_expression
+	: equality_expression { $$ = $1; }
+	| and_expression '&' equality_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 exclusive_or_expression
-	: and_expression
-	| exclusive_or_expression '^' and_expression
+	: and_expression { $$ = $1; }
+	| exclusive_or_expression '^' and_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 inclusive_or_expression
-	: exclusive_or_expression
-	| inclusive_or_expression '|' exclusive_or_expression
+	: exclusive_or_expression { $$ = $1; }
+	| inclusive_or_expression '|' exclusive_or_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression AND_OP inclusive_or_expression
+	: inclusive_or_expression { $$ = $1; }
+	| logical_and_expression AND_OP inclusive_or_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
+	: logical_and_expression { $$ = $1; }
+	| logical_or_expression OR_OP logical_and_expression { $$ = new BArithExpr($1, $2, $3, @$); }
 	;
 
 conditional_expression
-	: logical_or_expression
-	| logical_or_expression '?' expression ':' conditional_expression
+	: logical_or_expression { $$ = $1; }
+	| logical_or_expression '?' expression ':' conditional_expression { $$ = new CondExpr($1, $3, $5, @$); }
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression { $$ = $1; }
+	| unary_expression assignment_operator assignment_expression { $$ = new BAssignExpr($1, $2, $3, @$); }
 	;
 
 assignment_operator
-	: '='
-	| MUL_ASSIGN 
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	: '=' { $$ = $1; }
+	| MUL_ASSIGN { $$ = $1; }
+	| DIV_ASSIGN { $$ = $1; }
+	| MOD_ASSIGN { $$ = $1; }
+	| ADD_ASSIGN { $$ = $1; }
+	| SUB_ASSIGN { $$ = $1; }
+	| LEFT_ASSIGN { $$ = $1; }
+	| RIGHT_ASSIGN { $$ = $1; }
+	| AND_ASSIGN { $$ = $1; }
+	| XOR_ASSIGN { $$ = $1; }
+	| OR_ASSIGN { $$ = $1; }
 	;
 
 expression
@@ -449,6 +471,7 @@ identifier_list
 	;
 
 type_name
+	//TODO
 	: specifier_qualifier_list abstract_declarator
 	| specifier_qualifier_list
 	;
