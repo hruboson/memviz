@@ -12,22 +12,40 @@ class Stmt extends Construct {
 		super();
 	}
 
-	accept(visitor){ return 1; }
+	accept(visitor){
+		visitor.visitStmt(this);
+	}
 }
 
 /**
  * Compound statement (block/block statement). 
  * @description It is a sequence of *statements* and *declarations*. Each CStmt creates new block scope.
  * @class CStmt
+ * @param {Array.<Construct>} sequence
+ * @param {Object} loc
  */
 class CStmt extends Stmt {
-	constructor(sequence){
+
+	/**
+	 * Sequence of statements and expressions
+	 * @type {Array.<Construct>}
+	 */
+	sequence;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	constructor(sequence, loc){
 		super();
 		this.sequence = sequence;
+		this.loc = loc;
 	}
 
 	accept(visitor){
-		return 1;
+		visitor.visitCStmt(this);
 	}
 }
 
@@ -36,7 +54,9 @@ class CStmt extends Stmt {
  * @class EStmt
  */
 class EStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitEStmt(this);
+	}
 }
 
 /**
@@ -44,14 +64,19 @@ class EStmt extends Stmt {
  * @class SStmt
  */
 class SStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitSStmt(this);
+	}
 }
 
 /**
  * Iteration statement (for, while, do-while)
+ * @class IStmt
  */
 class IStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitIStmt(this);
+	}
 }
 
 /**
@@ -59,5 +84,7 @@ class IStmt extends Stmt {
  * @class JStmt
  */
 class JStmt extends Stmt {
-
+	accept(visitor){
+		visitor.visitJStmt(this);
+	}
 }

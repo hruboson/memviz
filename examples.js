@@ -88,3 +88,50 @@ void main(){
 	lli big_number = 9223372036854775807; // long long int maximum
 }
 `;
+
+const scopes_example = `int a = 1; // initialize symbol a with value 1 (global scope)
+
+void main(){
+	int a = 2; // scope of new inner a, global a is hidden
+	printf("%d", a);
+	
+	{
+		int a = 3; // new scope, new a
+		printf("%d", a);
+
+		int x = 100;
+		printf("%d", x);
+	} 
+
+	// printf("%d", x); <-- ERROR, x is out of scope
+
+	// a is once again equal to 2
+	printf("%d", a);
+
+	// int a = 2; <-- ERROR, cannot reinitialize variable of the same name
+}
+
+void foo(int a){ // global scope is hidden
+	printf("%d", a); // prints value passed as an argument
+}
+
+void baz(){
+	printf("%d", a); // prints global a
+}
+`;
+
+const declaration_example = `void foo();
+
+void main(){
+	foo();
+	// bar(); // Error - undeclared function
+}
+
+void foo(){
+	printf("foo");
+}
+
+void bar(){
+	printf("bar");
+}
+`;

@@ -25,7 +25,10 @@
 	<script src="src/ast/struct_union.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/enum.js" type="text/javascript" charset="utf-8"></script>
 
+	<script src="src/error.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/parser/c_parser.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/symtable.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/semantic.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
@@ -38,7 +41,7 @@
 		mocha.checkLeaks();
 	</script>
 	<script src="tests/test.parser_lexer.js"></script>
-	<script src="tests/test.example.js"></script>
+	<script src="tests/test.util.js"></script>
 	<script class="mocha-exec">
 		mocha.run();
 	</script>

@@ -5,19 +5,29 @@
 
 /**
  * Interpreter class, acts as a Visitor for AST
+ * @description We are pretending to be "compiling" to target machine code. This is in order to simulate single-pass of AST. Due to this reason, each visit 
+ * 				function first calls semantic analyzer and then changes internal state of interpreter. The output is only visible to the user if no error 
+ * 				is thrown.
  * @class Interpreter
- * @singleton
  */
 class Interpreter {
 
-	// singleton hack
-	static #instance;
 	constructor(){
-		if(Interpreter.#instance){
-			return Interpreter.#instance;
-		}else{
-			Interpreter.#instance = this;
-		}
+		this.#symtableGlobal = new Symtable("global", "global");
+		this.#symtableStack = new Stack();
+		this.#symtableStack.push(this.#symtableGlobal);
+
+		this.#semanticAnalyzer = new Semantic(this.#symtableStack);
+	}
+
+	/**
+	 * Simple function that runs all stages of interpreter
+	 * @param {string} code Code to be interpreted
+	 * @return {integer} Return value of main() function
+	 * @throws {RTError|SError|Error}
+	 */
+	run(code){
+		return this.parse(code).interpret(this.#ast);
 	}
 
 	/* ATTRIBUTES */
@@ -38,14 +48,40 @@ class Interpreter {
 	}
 
 	/**
+	 * Top-most (global) symbol table
+	 * @private
+	 * @type {Symtable}
+	 */
+	#symtableGlobal;
+	get symtableGlobal(){
+		return this.#symtableGlobal;
+	}
+
+	/**
+	 * Symtable stack (mostly for printing reason)
+	 */
+	#symtableStack;
+	get symtableStack(){
+		return this.#symtableStack;
+	}
+
+	/**
+	 * Semantic analyzer
+	 * @private
+	 * @type {Semantic}
+	 */
+	#semanticAnalyzer;
+	get semanticAnalyzer(){
+		return this.#semanticAnalyzer;
+	}
+
+	/**
 	 * Program counter
 	 * @private
 	 */
 	#pc = 0;
 	get pc(){
-		const instr = this.#pc;
-		this.#pc += 1;
-		return instr;
+		return this.#pc;
 	}
 
 	/* GETTERS */
@@ -68,13 +104,23 @@ class Interpreter {
 	/* FUNCTIONS */
 	/**
 	* Parses user input
+	* @descriptions Sets the #ast attribute of interpreter
 	* @param {string} text User input
-	* @return {json} AST
+	* @return {Interpreter} Interpreter
 	*/
 	parse(text){
 		this.#refreshSymbols();
 		this.#ast = this.#parser.parse(text);
-		return this.#ast;
+		return this;
+	}
+
+	/**
+	 * Semantic analysis of single construct
+	 * @throws {SError} Semantic error
+	 * @param {Construct} construct
+	 */
+	semantic(construct){
+		construct.accept(this.#semanticAnalyzer);
 	}
 
 	/**
@@ -82,29 +128,106 @@ class Interpreter {
 	*/
 	//TODO
 	interpretSingle(){
-		return 1;
+
 	}
 
 	/**
-	* @todo implement
-	*/
+	 * Interprets instructions
+	 * @throws {RTError} Runtime error
+	 * @param {AST} ast
+	 * @todo implement
+	 * @todo change to run main() function
+	 */
 	//TODO
-	interpret(){
-		return 0;
+	interpret(ast){
+		for(var instruction of ast){
+			instruction.accept(this);
+		}
+		
+		return this.#symtableGlobal.print();//TODO change this to return result of main()
 	}
 
+	/*******************************
+	 *     VISITOR FUNCTIONS       *
+	 *******************************/
+
+	visitDeclaration(declaration){
+		this.semantic(declaration);
+
+		const declarator = declaration.declarator;
+		const initializer = declaration.initializer;
+	};
+
+	visitDeclarator(declarator){
+		this.semantic(declarator);
+	}
+
+	visitIdentifier(id){
+
+	}
+
+	visitCStmt(stmt){
+		this.semantic(stmt);
+
+		for(var instruction of stmt.sequence){
+			instruction.accept(this);
+		}
+
+		this.#symtableStack.pop();
+	}
+
+	visitFunc(func){
+		this.semantic(func);
+
+		func.body.accept(this); // run body
+
+		this.#symtableStack.pop();
+	}
+
+	visitTypedef(typedef){
+		this.semantic(typedef);
+	}
+
+	visitFuncCallExpr(funcCall){
+		this.semantic(funcCall);
+
+		//todo
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/* Helper functions */
 	/**
 	 * Refreshes cached symbols stored in parser
-	 * @return {void}
 	 * @private
 	 */
 	#refreshSymbols(){
-		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //TODO make this a class perhaps
+		this.#parser.Parser.prototype.yy.symbols = { types: [], enums: [] }; //? make this a class perhaps
 	}
-}
 
-/**
- * Interpreter instance
- * @global
- */
-const interpreter = new Interpreter();
+	/**
+	 * Updates HTML to display interpreter output and generated structure
+	 * @todo If needed, pass the element ids as arguments
+	 */
+	updateHTML(){
+		document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 4);
+		document.getElementById("programCounter").innerHTML = this.#pc + "/" + this.#ast.length; 
+		document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 4);
+		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print(); 
+	}
+
+}
