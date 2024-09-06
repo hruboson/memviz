@@ -119,3 +119,19 @@ void baz(){
 	printf("%d", a); // prints global a
 }
 `;
+
+const declaration_example = `void foo();
+
+void main(){
+	foo();
+	// bar(); // Error - undeclared function
+}
+
+void foo(){
+	printf("foo");
+}
+
+void bar(){
+	printf("bar");
+}
+`;
