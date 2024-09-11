@@ -105,6 +105,10 @@ class Sym {
 		this.initialized = false;
 		this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
+
+	initialize(){
+		this.initialized = true;
+	}
 }
 
 /**
@@ -156,14 +160,25 @@ class Symtable {
 	/**
 	 * Inserts symbol into symbol table
 	 * @param {string} name Symbol name (identifier)
-	 * @param {type} type
+	 * @param {SYMTYPE} type
 	 * @param {Array.<string>} specifiers
 	 * @param {bool} pointer
 	 * @param {integer} dimension
 	 */
 	insert(name, type, specifiers, pointer, dimension=0){
-		if(this.lookup(name)){
-			throw new SError(`redefinition of ${name}`);
+		const sym = this.lookup(name);
+		if(sym){
+			if(sym.initialized){
+				throw new SError(`redefinition of ${name}`);
+			}else{
+				// allow function declaration - definition
+				if(type == SYMTYPE.FNC){
+					sym.initialize();
+					return;
+				}
+
+				throw new SError(`redefinition of ${name}`);
+			}
 		}
 
 		this.symbols.set(name, new Sym(name, type, specifiers, pointer, dimension));

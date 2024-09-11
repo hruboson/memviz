@@ -32,30 +32,30 @@ class Semantic {
 		var dimension = 0;
 
 		do{
-			if(declChild.kind == DECLTYPE.ID){
-				try{
+			try {
+				if(declChild.kind == DECLTYPE.ID){
 					this.symtableStack.peek().insert(declChild.identifier.name, declMainType, specifiers.toString(), declPtr, dimension);
-				}catch(e){
-					throw new SError(e.details, declarator.loc);
+					symbolName = declChild.identifier.name;
 				}
-				symbolName = declChild.identifier.name;
+				if(declChild.kind == DECLTYPE.FNC){
+					declMainType = SYMTYPE.FNC;
+				}
+				if(declChild.kind == DECLTYPE.PTR){
+					declPtr = true;
+				}
+				if(declChild.kind == DECLTYPE.ARR){
+					dimension += 1;
+				}
+				if(declChild.kind == DECLTYPE.STRUCT){
+					declMainType == SYMTYPE.STRUCT;
+				}
+				if(declChild.kind == DECLTYPE.NESTED){
+					// continue down the chain
+				}
+				declChild = declChild.child;
+			} catch(e){
+				throw new SError(e.details, declarator.loc);
 			}
-			if(declChild.kind == DECLTYPE.FNC){
-				declMainType = SYMTYPE.FNC;
-			}
-			if(declChild.kind == DECLTYPE.PTR){
-				declPtr = true;
-			}
-			if(declChild.kind == DECLTYPE.ARR){
-				dimension += 1;
-			}
-			if(declChild.kind == DECLTYPE.STRUCT){
-				declMainType == SYMTYPE.STRUCT;
-			}
-			if(declChild.kind == DECLTYPE.NESTED){
-				// continue down the chain
-			}
-			declChild = declChild.child;
 		}while(declChild != null);
 
 		if(initializer){
@@ -101,5 +101,9 @@ class Semantic {
 
 	visitTypedef(typedef){
 		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, typedef.type.specifiers);
+	}
+	visitFuncCallExpr(funcCall){
+		
+		//todo
 	}
 }

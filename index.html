@@ -51,8 +51,23 @@
 			position: relative;
 		}
 
+		#split-console {
+			overflow: hidden;
+		}
+
+		.console {
+			background-color: black;
+			color: #33FF33;	
+			height: 100vh;
+			width: 101%;
+		}
+
+		.console pre::before {
+			content: "$> ";
+		}
+
 		.fullscreen{
-			height: 92vh;
+			height: 94vh;
 		}
 
 		.btn{
@@ -71,6 +86,7 @@
 		.split {
 			display: flex;
 			flex-direction: row;
+			height: 100%;
 		}
 
 		.gutter {
@@ -82,6 +98,10 @@
 		.gutter.gutter-horizontal {
 			background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
 			cursor: col-resize;
+		}
+		.gutter.gutter-vertical {
+		    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+		    cursor: row-resize;
 		}
 	</style>
 </head>
@@ -114,6 +134,7 @@
 						<button class="dropdown-item" type="button" onclick="setExample(simple_array_example)">arrays</button>
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(scopes_example)">scopes</button>
+						<button class="dropdown-item" type="button" onclick="setExample(declaration_example)">declarations</button>
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(typedef_example)">typedef</button>
 						<button class="dropdown-item" type="button" onclick="setExample(struct_example)">struct</button>
@@ -131,14 +152,21 @@
 			</div>
 		</div>
 		<div class="row fullscreen">
-			<div class="split">
-				<div id="split-editor">
-					<div id="editor">void main(){
+			<div id="split-ve">
+				<div class="split">
+					<div id="split-editor">
+						<div id="editor">void main(){
 	printf("Hello world!");
 }</div>
+					</div>
+					<div id="split-output" style="overflow: scroll;">
+						<pre id="output"></pre>
+					</div>
 				</div>
-				<div id="split-output">
-					<pre id="output"></pre>
+			</div>
+			<div id="split-console">
+				<div class="console">
+					<pre>Hello World! (PLACEHOLDER)</pre>
 				</div>
 			</div>
 		</div>
@@ -259,10 +287,17 @@
 
 <!-- Split view settings-->
 <script>
-Split(['#split-editor', '#split-output'], {
+Split(["#split-editor", "#split-output"], {
 	sizes: [60, 40],
     gutterSize: 5,
     snapOffset: 100,
+});
+Split(["#split-ve", "#split-console"], {
+	sizes: [95, 5],
+	direction: "vertical",
+    gutterSize: 5,
+	snapOffset: 10,
+    minSize: 0,
 })
 </script>
 
