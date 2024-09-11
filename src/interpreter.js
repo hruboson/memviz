@@ -71,18 +71,23 @@ class Interpreter {
 	 * @type {Semantic}
 	 */
 	#semanticAnalyzer;
-	get semanticAnalyzer(){
-		return this.#semanticAnalyzer;
-	}
 
 	/**
 	 * Program counter
+	 * @description Currently interpreted line
 	 * @private
+	 * @type {integer}
 	 */
 	#pc = 0;
 	get pc(){
 		return this.#pc;
 	}
+
+	/**
+	 * Breakline
+	 * @type {integer}
+	 */
+	#breakline = 0;
 
 	/* GETTERS */
 	/**
@@ -124,19 +129,30 @@ class Interpreter {
 	}
 
 	/**
-	* @todo implement
-	*/
-	//TODO
-	interpretSingle(){
+	 * Interpret until specified breakline
+	 * @throws {RTError|SError}
+	 * @param {integer} line Interpret until this line number
+	 * @todo change to run main() function
+	 */
+	interpretBreakline(breakline){
+		this.#breakline = breakline;
+		var iNum = 0;
+		var instruction = this.#ast[iNum];
+		while(instruction && instruction.loc.first_line <= this.#breakline){
+			instruction.accept(this);
+			this.updateHTML();
 
+			iNum++;
+			instruction = this.#ast[iNum];
+		}
 	}
 
 	/**
 	 * Interprets instructions
 	 * @throws {RTError} Runtime error
 	 * @param {AST} ast
-	 * @todo implement
 	 * @todo change to run main() function
+	 * @todo remove probably??? or make it run interpretBreakline until end
 	 */
 	//TODO
 	interpret(ast){
@@ -169,11 +185,22 @@ class Interpreter {
 	visitCStmt(stmt){
 		this.semantic(stmt);
 
-		for(var instruction of stmt.sequence){
+		var iNum = 0;
+		var instruction = stmt.sequence[iNum];
+		while(instruction && instruction.loc.first_line <= this.#breakline){
 			instruction.accept(this);
+			this.updateHTML();
+
+			iNum++;
+			instruction = stmt.sequence[iNum];
 		}
+		
+		/*for(var instruction of stmt.sequence){ old version without breaklines
+			instruction.accept(this);
+		}*/
 
 		this.#symtableStack.pop();
+		//! this.#symtableStack.peek().children.pop() // removes child not longer used (scope went out of its life)
 	}
 
 	visitFunc(func){
@@ -225,9 +252,16 @@ class Interpreter {
 	 */
 	updateHTML(){
 		document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 4);
-		document.getElementById("programCounter").innerHTML = this.#pc + "/" + this.#ast.length; 
+		document.getElementById("programCounter").innerHTML = breaklineEditor + "/" + editor.getSession().getLength(); 
 		document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 4);
-		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print(); 
-	}
+		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 
+		unhighlight(); // global function, defined in index.html
+
+		// create new marker
+		var rangeTBI = new Range(this.#breakline, 0, this.#breakline, 1); // to be interpreted
+		var markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine")
+		var rangeJI = new Range(this.#breakline - 1, 0, this.#breakline - 1, 1); // just interpreted 
+		var markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine")
+	}
 }
