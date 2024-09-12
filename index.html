@@ -110,6 +110,8 @@
 	<style>
     #rubberduck {
 		position: absolute;
+		left: 50%;
+		top: 50%;
 		z-index: 1000;
 		width: 100px;
 		height: 100px;
@@ -264,7 +266,7 @@
 				</div>
 				<div class="modal-body">
 					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" id="rubberduckVisibility">
+						<input class="form-check-input" type="checkbox" id="rubberduckVisibility" autocomplete="off">
 						<label class="form-check-label" for="rubberduckVisibility">Rubber duck</label>
 						<script>
 							const checkbox = document.getElementById("rubberduckVisibility")
@@ -279,7 +281,7 @@
 					</div>
 
 					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" id="debugMode">
+						<input class="form-check-input" type="checkbox" id="debugMode" autocomplete="off">
 						<label class="form-check-label" for="debugMode">Debug mode</label>
 						<script>
 							const checkbox = document.getElementById("debugMode")
