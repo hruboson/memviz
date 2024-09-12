@@ -43,14 +43,8 @@
 	<script src="src/semantic.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 
+	<!-- Custom CSS -->
 	<style type="text/css" media="screen">
-		#editor { 
-			height: 100%;
-		    width: 100%;
-		    display: flex;
-			position: relative;
-		}
-
 		#split-console {
 			overflow: hidden;
 		}
@@ -135,11 +129,11 @@
 		<div class="row pb-2 pt-1">
 			<div class="col-6">
 				<div style="left: 10px;"> </div>
-				<button class="btn btn-primary" onclick="execute(editor.getValue(), { execute: true })"><i class="bx bx-sm bx-play"></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-left"></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-chevron-right"></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-right"></i></button>
-				<button class="btn btn-primary" onclick="alert('TODO')"><i class="bx bx-sm bx-arrow-to-left"></i></button>
+				<button class="btn btn-primary" onclick="execute(editor.getValue(), { parse: true });" id="execute"><i class="bx bx-sm bx-play"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executePrev: true });" id="prevInstr"><i class="bx bx-sm bx-chevron-left"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executeNext: true });" id="nextInstr"><i class="bx bx-sm bx-chevron-right"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executeEnd: true });" id="endInstr"><i class="bx bx-sm bx-arrow-to-right"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executeBeg: true });" id="begInstr"><i class="bx bx-sm bx-arrow-to-left"></i></button>
 				<button class="btn btn-primary disabled" id="programCounter">0/?</button>
 			</div>
 			<div class="col-6 text-end">
@@ -304,24 +298,20 @@
 
 <!-- Ace editor settings -->
 <script>
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/monokai");
-    editor.session.setMode("ace/mode/c_cpp");
+	// Extendsions
+	var Range = ace.require("ace/range").Range;
+
+	// Editor settings
+	var editor = ace.edit("editor");
+	editor.setTheme("ace/theme/monokai");
+	editor.session.setMode("ace/mode/c_cpp");
 	editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: false,
+		enableBasicAutocompletion: true,
+		enableSnippets: true,
+		enableLiveAutocompletion: false,
 		fontSize: "11pt",
 		enableLinking: true,
 		showPrintMargin: false,
-    });
-
-	//TODO links
-	editor.on("linkClick",function(data){
-	  console.log("CLICK", data); // Just for testing so you can see what classes things are...
-	  if(data && data.token && data.token.type == "link"){
-		window.open(data.token.value, "_blank");
-	  }
 	});
 </script>
 
@@ -409,12 +399,51 @@ function setTranslate(xPos, yPos, el) {
 <!-- Helpers -->
 <script>
 	/**
+	 * @description Current breakline, increases with each single instruction interpretation
+	 * @global
+	 * @type {integer}
+	 */
+	var breaklineEditor = 0;
+
+	function unhighlight(){
+		// src: https://stackoverflow.com/questions/65677814/how-to-remove-all-the-existing-highlight-markers-in-ace-editor-using-react
+		// clears any existing markers
+		const markers = editor.getSession().getMarkers();
+		if(markers){
+			const markersArr = Object.keys(markers);
+			for(const marker of markersArr){
+				editor.getSession().removeMarker(markers[marker].id);
+			}
+		}
+	}
+
+	const buttonList = ["prevInstr", "nextInstr", "endInstr", "begInstr"];
+	function toggleButtons(disable){
+		if(disable){
+			for(button of buttonList){
+				var btn = document.getElementById(button);
+				btn.classList.add("disabled");
+			}
+		}else{
+			for(button of buttonList){
+				var btn = document.getElementById(button);
+				btn.classList.remove("disabled");
+			}
+		}
+	}
+
+
+	/**
 	 * @description Changes code snippet in editor. Called by Examples dropdown (its buttons).
 	 * @global
 	 */
 	function setExample(example){
 		editor.setValue(example);
 		//editor.session.replace(new ace.Range(0, 0, 1, 1), example);
+
+		unhighlight();
+		toggleButtons(true);
+		breaklineEditor = 0;
 	}
 
 	/**
@@ -424,15 +453,56 @@ function setTranslate(xPos, yPos, el) {
 	 * @param {Object} flags Set flags to run different stages of interpreter ({ execute: true } for complete interpretation)
 	 */
 	function execute(input, flags){
-		const interpreter = new Interpreter();
+		var interpreter = new Interpreter();
 		try{
 			var result;
 			if(flags.parse){
 				result = JSON.stringify(interpreter.parse(input).ast, null, 4);
 				interpreter.updateHTML();
+				toggleButtons(false);
 			}
 			if(flags.execute){
 				result = interpreter.run(input);
+				interpreter.updateHTML();
+			}
+			if(flags.executeNext){
+				if(breaklineEditor > editor.getSession().getLength()){
+					return;
+				}
+
+				breaklineEditor++;
+				interpreter.parse(input);
+				interpreter.interpretBreakline(breaklineEditor);
+				result = interpreter.symtableGlobal.print();
+				interpreter.updateHTML();
+			}
+			if(flags.executePrev){
+				if(breaklineEditor < 1){
+					return;
+				}
+
+				breaklineEditor--;
+				interpreter.parse(input);
+				interpreter.interpretBreakline(breaklineEditor);
+				result = interpreter.symtableGlobal.print();
+				interpreter.updateHTML();
+			}
+			if(flags.executeEnd){
+				breaklineEditor = editor.getSession().getLength();
+				interpreter.parse(input);
+				interpreter.interpretBreakline(breaklineEditor);
+				result = interpreter.symtableGlobal.print();
+				interpreter.updateHTML();
+			}
+			if(flags.executeBeg){
+				if(breaklineEditor < 1){
+					return;
+				}
+
+				breaklineEditor = 0;
+				interpreter.parse(input);
+				interpreter.interpretBreakline(breaklineEditor);
+				result = interpreter.symtableGlobal.print();
 				interpreter.updateHTML();
 			}
 			document.getElementById("output").innerHTML = result;
