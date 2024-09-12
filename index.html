@@ -333,67 +333,67 @@ Split(["#split-ve", "#split-console"], {
 
 <!-- Rubber duck -->
 <script>
-// source: https://www.kirupa.com/html5/drag.htm
-var dragItem = document.querySelector("#rubberduck");
-var container = document.querySelector("body");
+	// source: https://www.kirupa.com/html5/drag.htm
+	var RDdragItem = document.querySelector("#rubberduck");
+	var RDcontainer = document.querySelector("body");
 
-var active = false;
-var currentX;
-var currentY;
-var initialX;
-var initialY;
-var xOffset = 0;
-var yOffset = 0;
+	var RDactive = false;
+	var RDcurrentX;
+	var RDcurrentY;
+	var RDinitialX;
+	var RDinitialY;
+	var RDxOffset = 0;
+	var RDyOffset = 0;
 
-container.addEventListener("touchstart", dragStart, false);
-container.addEventListener("touchend", dragEnd, false);
-container.addEventListener("touchmove", drag, false);
+	RDcontainer.addEventListener("touchstart", RDdragStart, false);
+	RDcontainer.addEventListener("touchend", RDdragEnd, false);
+	RDcontainer.addEventListener("touchmove", RDdrag, false);
 
-container.addEventListener("mousedown", dragStart, false);
-container.addEventListener("mouseup", dragEnd, false);
-container.addEventListener("mousemove", drag, false);
+	RDcontainer.addEventListener("mousedown", RDdragStart, false);
+	RDcontainer.addEventListener("mouseup", RDdragEnd, false);
+	RDcontainer.addEventListener("mousemove", RDdrag, false);
 
-function dragStart(e) {
-	if (e.type === "touchstart") {
-		initialX = e.touches[0].clientX - xOffset;
-		initialY = e.touches[0].clientY - yOffset;
-	} else {
-		initialX = e.clientX - xOffset;
-		initialY = e.clientY - yOffset;
-	}
-
-	if (e.target === dragItem) {
-		active = true;
-	}
-}
-
-function dragEnd(e) {
-	initialX = currentX;
-	initialY = currentY;
-	active = false;
-}
-
-function drag(e) {
-	if (active) {
-		e.preventDefault();
-		if (e.type === "touchmove") {
-			currentX = e.touches[0].clientX - initialX;
-			currentY = e.touches[0].clientY - initialY;
+	function RDdragStart(e) {
+		if (e.type === "touchstart") {
+			RDinitialX = e.touches[0].clientX - RDxOffset;
+			RDinitialY = e.touches[0].clientY - RDyOffset;
 		} else {
-			currentX = e.clientX - initialX;
-			currentY = e.clientY - initialY;
+			RDinitialX = e.clientX - RDxOffset;
+			RDinitialY = e.clientY - RDyOffset;
 		}
 
-		xOffset = currentX;
-		yOffset = currentY;
-
-		setTranslate(currentX, currentY, dragItem);
+		if (e.target === RDdragItem) {
+			RDactive = true;
 		}
 	}
 
-function setTranslate(xPos, yPos, el) {
-	el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
-}
+	function RDdragEnd(e) {
+		RDinitialX = RDcurrentX;
+		RDinitialY = RDcurrentY;
+		RDactive = false;
+	}
+
+	function RDdrag(e) {
+		if (RDactive) {
+			e.preventDefault();
+			if (e.type === "touchmove") {
+				RDcurrentX = e.touches[0].clientX - RDinitialX;
+				RDcurrentY = e.touches[0].clientY - RDinitialY;
+			} else {
+				RDcurrentX = e.clientX - RDinitialX;
+				RDcurrentY = e.clientY - RDinitialY;
+			}
+
+			RDxOffset = RDcurrentX;
+			RDyOffset = RDcurrentY;
+
+			RDsetTranslate(RDcurrentX, RDcurrentY, RDdragItem);
+			}
+		}
+
+	function RDsetTranslate(xPos, yPos, el) {
+		el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+	}
 </script>
 
 <!-- Helpers -->
