@@ -78,6 +78,7 @@
 
 		body{
 			background-color: #272822;
+			overflow: hidden;
 		}
 	</style>
 
@@ -104,8 +105,30 @@
 		    cursor: row-resize;
 		}
 	</style>
+
+	<!-- Rubber duck CSS -->
+	<style>
+    #rubberduck {
+		position: absolute;
+		z-index: 1000;
+		width: 100px;
+		height: 100px;
+		background-image: url("./img/rubberduck.png");
+		touch-action: none;
+		user-select: none;
+		visibility: hidden;
+    }
+    #rubberduck:active {
+    }
+    #rubberduck:hover {
+		cursor: pointer;
+		border-width: 20px;
+    }
+	</style>
 </head>
 <body>
+	<div id="rubberduck"></div>
+
 	<div class="container-fluid h-100 w-100 ps-0">
 		<div class="row pb-2 pt-1">
 			<div class="col-6">
@@ -241,6 +264,21 @@
 				</div>
 				<div class="modal-body">
 					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="rubberduckVisibility">
+						<label class="form-check-label" for="rubberduckVisibility">Rubber duck</label>
+						<script>
+							const checkbox = document.getElementById("rubberduckVisibility")
+							checkbox.addEventListener("change", (event) => {
+								if (event.currentTarget.checked) {
+									document.getElementById("rubberduck").style.visibility = "visible";
+								} else {
+									document.getElementById("rubberduck").style.visibility = "hidden";
+								}
+							});
+						</script>
+					</div>
+
+					<div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" id="debugMode">
 						<label class="form-check-label" for="debugMode">Debug mode</label>
 						<script>
@@ -299,6 +337,71 @@ Split(["#split-ve", "#split-console"], {
 	snapOffset: 10,
     minSize: 0,
 })
+</script>
+
+<!-- Rubber duck -->
+<script>
+// source: https://www.kirupa.com/html5/drag.htm
+var dragItem = document.querySelector("#rubberduck");
+var container = document.querySelector("body");
+
+var active = false;
+var currentX;
+var currentY;
+var initialX;
+var initialY;
+var xOffset = 0;
+var yOffset = 0;
+
+container.addEventListener("touchstart", dragStart, false);
+container.addEventListener("touchend", dragEnd, false);
+container.addEventListener("touchmove", drag, false);
+
+container.addEventListener("mousedown", dragStart, false);
+container.addEventListener("mouseup", dragEnd, false);
+container.addEventListener("mousemove", drag, false);
+
+function dragStart(e) {
+	if (e.type === "touchstart") {
+		initialX = e.touches[0].clientX - xOffset;
+		initialY = e.touches[0].clientY - yOffset;
+	} else {
+		initialX = e.clientX - xOffset;
+		initialY = e.clientY - yOffset;
+	}
+
+	if (e.target === dragItem) {
+		active = true;
+	}
+}
+
+function dragEnd(e) {
+	initialX = currentX;
+	initialY = currentY;
+	active = false;
+}
+
+function drag(e) {
+	if (active) {
+		e.preventDefault();
+		if (e.type === "touchmove") {
+			currentX = e.touches[0].clientX - initialX;
+			currentY = e.touches[0].clientY - initialY;
+		} else {
+			currentX = e.clientX - initialX;
+			currentY = e.clientY - initialY;
+		}
+
+		xOffset = currentX;
+		yOffset = currentY;
+
+		setTranslate(currentX, currentY, dragItem);
+		}
+	}
+
+function setTranslate(xPos, yPos, el) {
+	el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+}
 </script>
 
 <!-- Helpers -->
