@@ -263,8 +263,8 @@
 						<input class="form-check-input" type="checkbox" id="rubberduckVisibility" autocomplete="off">
 						<label class="form-check-label" for="rubberduckVisibility">Rubber duck</label>
 						<script>
-							const checkbox = document.getElementById("rubberduckVisibility")
-							checkbox.addEventListener("change", (event) => {
+							const checkboxRubberduck = document.getElementById("rubberduckVisibility");
+							checkboxRubberduck.addEventListener("change", (event) => {
 								if (event.currentTarget.checked) {
 									document.getElementById("rubberduck").style.visibility = "visible";
 								} else {
@@ -278,8 +278,8 @@
 						<input class="form-check-input" type="checkbox" id="debugMode" autocomplete="off">
 						<label class="form-check-label" for="debugMode">Debug mode</label>
 						<script>
-							const checkbox = document.getElementById("debugMode")
-							checkbox.addEventListener("change", (event) => {
+							const checkboxDebugMode = document.getElementById("debugMode");
+							checkboxDebugMode.addEventListener("change", (event) => {
 								if (event.currentTarget.checked) {
 									document.getElementById("debugInfo").style.visibility = "visible";
 								} else {
@@ -298,7 +298,7 @@
 
 <!-- Ace editor settings -->
 <script>
-	// Extendsions
+	// Extensions
 	var Range = ace.require("ace/range").Range;
 
 	// Editor settings
