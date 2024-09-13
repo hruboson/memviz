@@ -151,11 +151,11 @@
 		<div class="row pb-2 pt-1">
 			<div class="col-6">
 				<div style="left: 10px;"> </div>
-				<button class="btn btn-primary" onclick="execute(editor.getValue(), { parse: true });" id="execute"><i class="bx bx-sm bx-play"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executePrev: true });" id="prevInstr"><i class="bx bx-sm bx-chevron-left"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executeNext: true });" id="nextInstr"><i class="bx bx-sm bx-chevron-right"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executeEnd: true });" id="endInstr"><i class="bx bx-sm bx-arrow-to-right"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), { executeBeg: true });" id="begInstr"><i class="bx bx-sm bx-arrow-to-left"></i></button>
+				<button class="btn btn-primary" 		 onclick="execute(editor.getValue(), EXEOPT.PARSE);" id="execute"><i class="bx bx-sm bx-play"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEPREV);" id="prevInstr"><i class="bx bx-sm bx-chevron-left"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTENEXT);" id="nextInstr"><i class="bx bx-sm bx-chevron-right"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEEND);" id="endInstr"><i class="bx bx-sm bx-arrow-to-right"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEBEG);" id="begInstr"><i class="bx bx-sm bx-arrow-to-left"></i></button>
 				<button class="btn btn-primary disabled" id="programCounter">0/?</button>
 			</div>
 			<div class="col-6 text-end">
@@ -196,7 +196,7 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor">void main(){
+						<div id="editor" onChange="toggleButtons(true);">void main(){
 	printf("Hello world!");
 }</div>
 					</div>
@@ -335,6 +335,9 @@
 		enableLinking: true,
 		showPrintMargin: false,
 	});
+	editor.getSession().on('change', function() {
+		toggleButtons(true);
+	});
 </script>
 
 <!-- Split view settings-->
@@ -439,7 +442,18 @@ Split(["#split-ve", "#split-console"], {
 		}
 	}
 
+	/**
+	 * List of action (execute) buttons
+	 * @global
+	 * @type {Array.<string>}
+	 */
 	const buttonList = ["prevInstr", "nextInstr", "endInstr", "begInstr"];
+
+	/**
+	 * Switched disabled state of action buttons
+	 * @global
+	 * @param {bool} disable
+	 */
 	function toggleButtons(disable){
 		if(disable){
 			for(button of buttonList){
@@ -458,6 +472,7 @@ Split(["#split-ve", "#split-console"], {
 	/**
 	 * @description Changes code snippet in editor. Called by Examples dropdown (its buttons).
 	 * @global
+	 * @param {string} example
 	 */
 	function setExample(example){
 		editor.setValue(example);
@@ -469,65 +484,70 @@ Split(["#split-ve", "#split-console"], {
 	}
 
 	/**
+	 * Execute options enum
+	 * @global
+	 */
+	const EXEOPT = {
+		PARSE: "PARSE",
+		EXECUTEALL: "EXECUTEALL",
+		EXECUTENEXT: "EXECUTENEXT",
+		EXECUTEPREV: "EXECUTEPREV",
+		EXECUTEEND: "EXECUTEEND",
+		EXECUTEBEG: "EXECUTEBEG",
+	}
+
+	/**
 	 * @description Interpreter runner helper function. Should be only ever called from HTML (e.g. button)
 	 * @global
 	 * @param {string} input
 	 * @param {Object} flags Set flags to run different stages of interpreter ({ execute: true } for complete interpretation)
 	 */
-	function execute(input, flags){
+	function execute(input, flag){
 		var interpreter = new Interpreter();
 		try{
-			var result;
-			if(flags.parse){
-				result = JSON.stringify(interpreter.parse(input).ast, null, 4);
-				interpreter.updateHTML();
-				toggleButtons(false);
-			}
-			if(flags.execute){
-				result = interpreter.run(input);
-				interpreter.updateHTML();
-			}
-			if(flags.executeNext){
-				if(breaklineEditor > editor.getSession().getLength()){
-					return;
-				}
+			switch(flag){
+				case EXEOPT.PARSE:
+					interpreter.parse(input);
+					toggleButtons(false);
+					break;
 
-				breaklineEditor++;
-				interpreter.parse(input);
-				interpreter.interpretBreakline(breaklineEditor);
-				result = interpreter.symtableGlobal.print();
-				interpreter.updateHTML();
-			}
-			if(flags.executePrev){
-				if(breaklineEditor < 1){
-					return;
-				}
+				case EXEOPT.EXECUTEALL:
+					breaklineEditor = editor.getSession().getLength();
+					break;
 
-				breaklineEditor--;
-				interpreter.parse(input);
-				interpreter.interpretBreakline(breaklineEditor);
-				result = interpreter.symtableGlobal.print();
-				interpreter.updateHTML();
-			}
-			if(flags.executeEnd){
-				breaklineEditor = editor.getSession().getLength();
-				interpreter.parse(input);
-				interpreter.interpretBreakline(breaklineEditor);
-				result = interpreter.symtableGlobal.print();
-				interpreter.updateHTML();
-			}
-			if(flags.executeBeg){
-				if(breaklineEditor < 1){
-					return;
-				}
+				case EXEOPT.EXECUTENEXT:
+					if(breaklineEditor >= editor.getSession().getLength()){
+						return;
+					}
 
-				breaklineEditor = 0;
-				interpreter.parse(input);
-				interpreter.interpretBreakline(breaklineEditor);
-				result = interpreter.symtableGlobal.print();
-				interpreter.updateHTML();
+					breaklineEditor++;
+					break;
+
+				case EXEOPT.EXECUTEPREV:
+					if(breaklineEditor < 1){
+						return;
+					}
+
+					breaklineEditor--;
+					break;
+
+				case EXEOPT.EXECUTEEND:
+					breaklineEditor = editor.getSession().getLength();
+					break;
+
+				case EXEOPT.EXECUTEBEG:
+					if(breaklineEditor < 1){
+						return;
+					}
+
+					breaklineEditor = 0;
+					break;
 			}
-			document.getElementById("output").innerHTML = result;
+
+			interpreter.parse(input);
+			interpreter.interpretBreakline(breaklineEditor);
+			interpreter.updateHTML();
+			document.getElementById("output").innerHTML = interpreter.symtableGlobal.print();
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}
