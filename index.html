@@ -160,7 +160,7 @@
 			</div>
 			<div class="col-6 text-end">
 				<span id="debugInfo" style="visibility: visible"> <!-- on release change to hidden -->
-					<button class="btn btn-primary" onclick="execute(editor.getValue(), { parse: true })"><i class='bx bxs-parking'></i></button>
+					<button class="btn btn-primary" onclick="execute(editor.getValue(), EXEOPT.PARSE)"><i class='bx bxs-parking'></i></button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#astOffcanvas" aria-controls="astOffcanvas">AST</button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#symtableOffcanvas" aria-controls="symtableOffcanvas">SYMTAB</button>
 				</span>
@@ -196,7 +196,7 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="toggleButtons(true);">void main(){
+						<div id="editor" onChange="resetEditor();">void main(){
 	printf("Hello world!");
 }</div>
 					</div>
@@ -336,7 +336,7 @@
 		showPrintMargin: false,
 	});
 	editor.getSession().on('change', function() {
-		toggleButtons(true);
+		resetEditor();
 	});
 </script>
 
@@ -468,6 +468,16 @@ Split(["#split-ve", "#split-console"], {
 		}
 	}
 
+	/**
+	 * Resets state of editor and action buttons
+	 * @global
+	 */
+	function resetEditor(){
+		toggleButtons(true);
+		unhighlight();
+		breaklineEditor = 0;
+	}
+
 
 	/**
 	 * @description Changes code snippet in editor. Called by Examples dropdown (its buttons).
@@ -509,6 +519,7 @@ Split(["#split-ve", "#split-console"], {
 				case EXEOPT.PARSE:
 					interpreter.parse(input);
 					toggleButtons(false);
+					breaklineEditor = 0;
 					break;
 
 				case EXEOPT.EXECUTEALL:
