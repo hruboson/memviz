@@ -98,11 +98,11 @@ postfix_expression
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'
 	{ 
-		$$ = new FuncCallExpr($1, [], @$);
+		$$ = new FncCallExpr($1, [], @$);
 	}
 	| postfix_expression '(' argument_expression_list ')'
 	{
-		$$ = new FuncCallExpr($1, $3, @$);
+		$$ = new FncCallExpr($1, $3, @$);
 	}
 	| postfix_expression '.' IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
@@ -608,7 +608,7 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement { $$ = new Func($2, $1, $3, @$); }
+	: declaration_specifiers declarator compound_statement { $$ = new Fnc($2, $1, $3, @$); }
  	//| declaration_specifiers declarator declaration_list compound_statement 
 	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
 	;

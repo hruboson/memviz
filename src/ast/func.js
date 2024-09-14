@@ -4,13 +4,13 @@
  */
 
 /**
- * @class Func
+ * @class Fnc
  * @param {Declarator} declarator
  * @param {Type} returnType
  * @param {CStmt} body
  * @param {Object} loc
  */
-class Func extends Stmt {
+class Fnc extends Stmt {
 
 	/**
 	 * Declarator of function
@@ -45,6 +45,6 @@ class Func extends Stmt {
 	}
 
 	accept(visitor){
-		visitor.visitFunc(this);
+		visitor.visitFnc(this);
 	}
 }

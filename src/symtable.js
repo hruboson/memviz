@@ -57,6 +57,7 @@ const SYMTYPE = {
  * @param {Array.<string>} specifiers Specifiers of symbol
  * @param {bool} pointer Is symbol a pointer?
  * @param {integer} dimension Dimension of array, 0 for non-array
+ * @param {Array.<Declarator>} parameters
  */
 class Sym {
 
@@ -96,13 +97,20 @@ class Sym {
 	 */
 	address;
 
-	constructor(name, type, specifiers, pointer, dimension=0){
+	/**
+	 * In case of function, stores parameters
+	 * @type {Array.<Declarator>}
+	 */
+	parameters;
+
+	constructor(name, type, specifiers, pointer, dimension=0, parameters=null){
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
 		this.pointer = pointer;
 		this.dimension = dimension;
 		this.initialized = false;
+		this.parameters = parameters;
 		this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
 
@@ -148,7 +156,7 @@ class Symtable {
 	constructor(name, type, parent=null){
 		this.symbols = new Map();
 		this.scopeInfo = (parent == null) ? new ScopeInfo(name, type, 0) : new ScopeInfo(name, type, parent.scopeInfo.level + 1);
-		this.parentSymtable = parent;
+		this.parent = parent;
 		this.children = [];
 
 		// add this instance to parent's children
@@ -164,8 +172,9 @@ class Symtable {
 	 * @param {Array.<string>} specifiers
 	 * @param {bool} pointer
 	 * @param {integer} dimension
+	 * @param {Array.<Declarator>} parameters
 	 */
-	insert(name, type, specifiers, pointer, dimension=0){
+	insert(name, type, specifiers, pointer, dimension=0, parameters=null){
 		const sym = this.lookup(name);
 		if(sym){
 			if(sym.initialized){
@@ -181,16 +190,34 @@ class Symtable {
 			}
 		}
 
-		this.symbols.set(name, new Sym(name, type, specifiers, pointer, dimension));
+		this.symbols.set(name, new Sym(name, type, specifiers, pointer, dimension, parameters));
 	}
 
 	/**
-	 * Looks up symbol in symbol table
+	 * Looks up symbol in symbol table (local)
 	 * @param {string} name Symbol name (identifier)
 	 * @return {Sym|undefined} Returns Symbol in case of success, undefined if the symbol was not found
 	 */
 	lookup(name){
 		return this.symbols.get(name);
+	}
+
+	/**
+	 * Traverses this and all parent symbol tables and either finds a symbol and returns it, or throws SError
+	 * @param {string} name Symbol name (identifier)
+	 * @return {Sym} Returns Symbol in case of succes
+	 * @throws {SError}
+	 */
+	resolve(name){
+		if(!this.symbols.get(name)){
+			if(this.parent){
+				return this.parent.resolve(name);
+			}else{
+				throw new SError(`undeclared symbol ${name}`);
+			}
+		}else{
+			return this.symbols.get(name);
+		}
 	}
 
 	/**

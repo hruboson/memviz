@@ -191,16 +191,16 @@ class CExpr extends Expr {
  * Function call expression
  * @class FuncCall
  */
-class FuncCallExpr extends Expr {
+class FncCallExpr extends Expr {
 	constructor(expr, argumentList, loc){
 		super();
 		this.expr = expr;
-		this.argumentList = argumentList;
+		this.arguments = argumentList;
 		this.loc = loc;
 	}
 
 	accept(visitor){
-		visitor.visitFuncCallExpr(this);
+		visitor.visitFncCallExpr(this);
 	}
 }
 

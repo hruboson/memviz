@@ -106,12 +106,12 @@ case 10:
 break;
 case 13:
  
-		this.$ = new FuncCallExpr($$[$0-2], [], this._$);
+		this.$ = new FncCallExpr($$[$0-2], [], this._$);
 	
 break;
 case 14:
 
-		this.$ = new FuncCallExpr($$[$0-3], $$[$0-1], this._$);
+		this.$ = new FncCallExpr($$[$0-3], $$[$0-1], this._$);
 	
 break;
 case 21: case 87: case 89: case 91: case 93: case 95: case 96: case 130: case 132: case 143: case 167: case 171: case 198: case 217:
@@ -351,7 +351,7 @@ case 235:
  parser.yy.lastSymbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
 break;
 case 240:
- this.$ = new Func($$[$0-1], $$[$0-2], $$[$0], this._$); 
+ this.$ = new Fnc($$[$0-1], $$[$0-2], $$[$0], this._$); 
 break;
 }
 },
