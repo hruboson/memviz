@@ -21,13 +21,13 @@ class Interpreter {
 	}
 
 	/**
-	 * Simple function that runs all stages of interpreter
-	 * @param {string} code Code to be interpreted
-	 * @return {integer} Return value of main() function
-	 * @throws {RTError|SError|Error}
+	 * Simple function that prepares ("""compiles""") the C code
+	 * @param {string} code Code to be "compiled"
+	 * @return {Object} TODO
+	 * @throws {SError|Error}
 	 */
-	run(code){
-		return this.parse(code).interpret(this.#ast);
+	compile(code){
+		return this.parse(code).semantic(this.#ast);
 	}
 
 	/* ATTRIBUTES */
@@ -122,10 +122,21 @@ class Interpreter {
 	/**
 	 * Semantic analysis of single construct
 	 * @throws {SError} Semantic error
-	 * @param {Construct} construct
+	 * @param {AST} ast
 	 */
-	semantic(construct){
-		construct.accept(this.#semanticAnalyzer);
+	semantic(ast){
+		for(const construct of ast){
+			construct.accept(this.#semanticAnalyzer);
+		}
+		
+		const mainFnc = this.#symtableGlobal.lookup("main");
+		if(mainFnc){
+			if(mainFnc.type != SYMTYPE.FNC){
+				throw new SError("main is not a function");
+			}
+		}else{
+			throw new SError("Undefined reference to main()")
+		}
 	}
 
 	/**
@@ -137,18 +148,18 @@ class Interpreter {
 	interpretBreakline(breakline){
 		this.#breakline = breakline;
 		var iNum = 0;
-		var instruction = this.#ast[iNum];
-		while(instruction && instruction.loc.first_line <= this.#breakline){
-			instruction.accept(this);
+		var construct = this.#ast[iNum];
+		while(construct && construct.loc.first_line <= this.#breakline){
+			construct.accept(this);
 			this.updateHTML();
 
 			iNum++;
-			instruction = this.#ast[iNum];
+			construct = this.#ast[iNum];
 		}
 	}
 
 	/**
-	 * Interprets instructions
+	 * Interprets ast (for now, maybe do IC later)
 	 * @throws {RTError} Runtime error
 	 * @param {AST} ast
 	 * @todo change to run main() function
@@ -156,8 +167,8 @@ class Interpreter {
 	 */
 	//TODO
 	interpret(ast){
-		for(var instruction of ast){
-			instruction.accept(this);
+		for(const construct of ast){
+			construct.accept(this);
 		}
 		
 		return this.#symtableGlobal.print();//TODO change this to return result of main()
@@ -168,14 +179,11 @@ class Interpreter {
 	 *******************************/
 
 	visitDeclaration(declaration){
-		this.semantic(declaration);
-
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
 	};
 
 	visitDeclarator(declarator){
-		this.semantic(declarator);
 	}
 
 	visitIdentifier(id){
@@ -183,42 +191,31 @@ class Interpreter {
 	}
 
 	visitCStmt(stmt){
-		this.semantic(stmt);
-
 		var iNum = 0;
-		var instruction = stmt.sequence[iNum];
-		while(instruction && instruction.loc.first_line <= this.#breakline){
-			instruction.accept(this);
+		var construct = stmt.sequence[iNum];
+		while(construct && construct.loc.first_line <= this.#breakline){
+			construct.accept(this);
 			this.updateHTML();
 
 			iNum++;
-			instruction = stmt.sequence[iNum];
+			construct = stmt.sequence[iNum];
 		}
 		
-		/*for(var instruction of stmt.sequence){ old version without breaklines
-			instruction.accept(this);
+		/*for(var construct of stmt.sequence){ old version without breaklines
+			construct.accept(this);
 		}*/
 
-		this.#symtableStack.pop();
 		//! this.#symtableStack.peek().children.pop() // removes child not longer used (scope went out of its life)
 	}
 
 	visitFunc(func){
-		this.semantic(func);
-
 		func.body.accept(this); // run body
-
-		this.#symtableStack.pop();
 	}
 
 	visitTypedef(typedef){
-		this.semantic(typedef);
 	}
 
 	visitFuncCallExpr(funcCall){
-		this.semantic(funcCall);
-
-		//todo
 	}
 
 
