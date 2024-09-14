@@ -58,10 +58,6 @@ class Semantic {
 			}
 		}while(declChild != null);
 
-		if(initializer){
-			this.symtableStack.peek().lookup(symbolName).initialized = true;
-		}
-
 		return symbolName;
 	}
 
@@ -88,6 +84,12 @@ class Semantic {
 
 	visitCStmt(stmt){
 		this.symtableStack.push(new Symtable("compound statement", "stmt", this.symtableStack.peek()));
+
+		for(const construct of stmt.sequence){
+			construct.accept(this);
+		}
+
+		this.symtableStack.pop();
 	}
 
 	visitFunc(func){
@@ -97,13 +99,28 @@ class Semantic {
 		for(const param of func.declarator.fnc.parameters){
 			this.addSymbol(SYMTYPE.PARAM, param.declarator, param.type.specifiers);
 		}
+
+		for(const construct of func.body.sequence){
+			construct.accept(this);
+		}
+
+		this.symtableStack.pop();
 	}
 
 	visitTypedef(typedef){
 		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, typedef.type.specifiers);
 	}
+
 	visitFuncCallExpr(funcCall){
 		
 		//todo
+	}
+
+	visitBAssignExpr(expr){
+
+	}
+
+	visitReturn(ret){
+
 	}
 }
