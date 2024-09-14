@@ -187,7 +187,7 @@ class Symtable {
 	/**
 	 * Looks up symbol in symbol table
 	 * @param {string} name Symbol name (identifier)
-	 * @return {Symbol|undefined} Returns Symbol in case of success, undefined if the symbol was not found
+	 * @return {Sym|undefined} Returns Symbol in case of success, undefined if the symbol was not found
 	 */
 	lookup(name){
 		return this.symbols.get(name);
