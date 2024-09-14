@@ -157,7 +157,7 @@ void main() {
   foo(1); // OK
   bar(); // semantic error
   
-  x = 10; // semantic error
+  y = 10; // semantic error
   
   int arr[5];
   arr[10] = 10; // runtime error
