@@ -89,7 +89,7 @@ break;
 case 2: case 3: case 11: case 23: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 37: case 41: case 44: case 47: case 52: case 55: case 57: case 59: case 61: case 63: case 65: case 67: case 69: case 70: case 71: case 72: case 73: case 74: case 75: case 76: case 77: case 78: case 79: case 82: case 116: case 117: case 122: case 123: case 155: case 170: case 182: case 214: case 216: case 238: case 239:
  this.$ = $$[$0]; 
 break;
-case 4: case 157: case 183: case 190: case 197:
+case 4: case 157: case 183: case 190: case 197: case 219:
  this.$ = $$[$0-1]; 
 break;
 case 5:
@@ -326,11 +326,23 @@ break;
 case 201:
  this.$ = new Designator(new Identifier($$[$0], this._$)); 
 break;
+case 212:
+ this.$ = new CStmt([], this._$); 
+break;
 case 213:
  this.$ = new CStmt($$[$0-1], this._$); 
 break;
 case 215:
  this.$ = [...$$[$0-1], ...$$[$0]]; 
+break;
+case 218:
+ this.$ = new NOP(this._$); 
+break;
+case 232:
+ this.$ = new Return(null, this._$); 
+break;
+case 233:
+ this.$ = new Return($$[$0-1], this._$); 
 break;
 case 234:
  parser.yy.lastSymbols = parser.yy.symbols; return Array.isArray($$[$0-1]) ? [...$$[$0-2], ...$$[$0-1]] : [...$$[$0-2], $$[$0-1]]; 

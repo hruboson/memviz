@@ -33,6 +33,17 @@ class Expr extends Construct {
 	}
 }
 
+class NOP extends Construct {
+	constructor(loc){
+		super();
+		this.loc = loc;
+	}
+
+	accept(visitor){
+		return;
+	}
+}
+
 /**
  * Unary expression 
  * @description +a, -a, ++a, --a, a++, a--, ~a, !a

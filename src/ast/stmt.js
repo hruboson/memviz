@@ -88,3 +88,26 @@ class JStmt extends Stmt {
 		visitor.visitJStmt(this);
 	}
 }
+
+class Return extends JStmt {
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+
+	/**
+	 * Return expression
+	 * @type {Expr|null}
+	 */
+	expr;
+
+	constructor(expr, loc){
+		super();
+		this.expr = expr;
+	}
+
+	accept(visitor){
+		visitor.visitReturn(this);
+	}
+}

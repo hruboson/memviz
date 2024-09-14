@@ -553,7 +553,7 @@ labeled_statement
 	;
 
 compound_statement
-	: '{' '}'
+	: '{' '}' { $$ = new CStmt([], @$); }
 	| '{'  block_item_list '}' { $$ = new CStmt($2, @$); }
 	;
 
@@ -568,8 +568,8 @@ block_item
 	;
 
 expression_statement
-	: ';'
-	| expression ';'
+	: ';' { $$ = new NOP(@$); }
+	| expression ';' { $$ = $1; }
 	;
 
 selection_statement
@@ -591,8 +591,8 @@ jump_statement
 	: GOTO IDENTIFIER ';'
 	| CONTINUE ';'
 	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
+	| RETURN ';' { $$ = new Return(null, @$); }
+	| RETURN expression ';' { $$ = new Return($2, @$); }
 	;
 
 translation_unit
