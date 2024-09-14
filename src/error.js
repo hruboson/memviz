@@ -11,12 +11,12 @@
  */
 class SError extends Error {
 	constructor(details, loc=null) {
-		var line = "";
-		if(loc){
-			line = loc.first_line;
+		if(!loc){
+			super(`Semantic analysis error: ${details}`);
+		}else{
+			const line = loc.first_line;
+			super(`Semantic analysis error: ${details} on line ${line}`);
 		}
-
-		super(`Semantic analysis error: ${details} on line ${line}`);
 		this.details = details;
 		this.loc = loc;
 		this.name = "Semantic analysis error";
