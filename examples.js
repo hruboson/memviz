@@ -180,3 +180,12 @@ const expressions_example = `int main(){
 	i = +i;
 	return i;
 }`;
+
+const function_pointer_example = `int a(){
+	return 1;
+}
+
+void main() {
+	int (*b)() = &a;
+	return (*b)();
+}`;
