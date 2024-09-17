@@ -252,6 +252,7 @@ class Interpreter {
 		document.getElementById("programCounter").innerHTML = breaklineEditor + "/" + editor.getSession().getLength(); 
 		document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 4);
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
+		document.getElementById("warnings").innerHTML = warnings.print();
 
 		unhighlight(); // global function, defined in index.html
 

@@ -178,6 +178,11 @@ class Semantic {
 	visitReturn(ret){
 		try{
 			ret.expr.accept(this);
+			console.log(ret.loc);
+
+			if(ret.expr instanceof Identifier){//! just a showcase, remove later
+				warnings.add(`return with a value in function returning void`, WTYPE.RETURNTYPE, ret.loc);
+			}
 		}catch(e){
 			console.log(e);
 		}

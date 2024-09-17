@@ -105,6 +105,7 @@ class Return extends JStmt {
 	constructor(expr, loc){
 		super();
 		this.expr = expr;
+		this.loc = loc;
 	}
 
 	accept(visitor){
