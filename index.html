@@ -566,7 +566,11 @@ Split(["#split-ve", "#split-console"], {
 			interpreter.parse(input);
 			interpreter.interpretBreakline(breaklineEditor);
 			interpreter.updateHTML();
-			document.getElementById("output").innerHTML = interpreter.symtableGlobal.print();
+			if(flag == EXEOPT.PARSE){
+				document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
+			}else{
+				document.getElementById("output").innerHTML = interpreter.symtableGlobal.print();
+			}
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}
