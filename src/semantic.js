@@ -136,6 +136,8 @@ class Semantic {
 			}else if(fncCall.arguments.length < fncSym.parameters.length){
 				throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
 			}
+		}else{
+			return "TODO";
 		}
 	}
 
@@ -144,7 +146,16 @@ class Semantic {
 			expr.left.accept(this);
 			expr.right.accept(this);
 		}catch(e){
-			throw new SError(e.details, expr.loc); // add loc info
+			throw e;
+		}
+	}
+
+	visitBArithExpr(expr){
+		try{
+			expr.left.accept(this);
+			expr.right.accept(this);
+		}catch(e){
+			throw e;
 		}
 	}
 
@@ -157,10 +168,18 @@ class Semantic {
 	}
 
 	visitIdentifier(identifier){
-		const name = this.symtableStack.peek().resolve(identifier.name);
+		try{
+			const name = this.symtableStack.peek().resolve(identifier.name);
+		}catch(e){
+			throw new SError(e.details, identifier.loc);
+		}
 	}
 
 	visitReturn(ret){
-
+		try{
+			ret.expr.accept(this);
+		}catch(e){
+			console.log(e);
+		}
 	}
 }

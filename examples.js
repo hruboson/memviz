@@ -168,3 +168,14 @@ void main() {
 void foo(int x){
   
 }`;
+
+const expressions_example = `int main(){
+	int i;
+	i = +10;
+	i += 10;
+	i++;
+	++i;
+	i = i + (10 + (20 + 30));
+	i = +i;
+	return i;
+}`;
