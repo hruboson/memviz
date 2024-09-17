@@ -137,32 +137,33 @@ void bar(){
 `;
 
 // this one is mostly for debugging
+// commented errors are working
 const errors_example = `void foo(int x);
 void bar();
 
 void main() {
-  int z = 1/0; // runtime error
+	int z = 1/0; // runtime error
   
-  int *p;
-  float f = 4.1;
-  p = &f; // wrong pointer type (warning)
+	int *p;
+	float f = 4.1;
+	p = &f; // wrong pointer type (warning)
   
-  //int *p; // semantic (redeclaration)
-  *p = 10; // runtime error
+	//int *p; // semantic (redeclaration)
+	*p = 10; // runtime error
   
-  int x;
-  int a = x; // uninitialized (warning)
+	int x;
+	int a = x; // uninitialized (warning)
   
-  foo(); // semantic error
-  foo(1); // OK
-  bar(); // semantic error
+	// foo(); // semantic error
+	foo(1); // OK
+	bar(); // semantic error
   
-  y = 10; // semantic error
+	//y = 10; // semantic error
   
-  int arr[5];
-  arr[10] = 10; // runtime error
-  printf("%ul", sizeof(arr[0]));
-  return 0;
+	int arr[5];
+	arr[10] = 10; // runtime error
+	//printf("%ul", sizeof(arr[0]));
+	return 0; // return type with void (warning)
 }
 
 void foo(int x){
