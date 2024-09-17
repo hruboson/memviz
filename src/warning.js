@@ -58,7 +58,6 @@ class Warning {
 
 /**
  * @class WarningSystem
- * @singleton
  */
 class WarningSystem {
 	/**
@@ -67,29 +66,33 @@ class WarningSystem {
 	 */
 	#list = [];
 
-	static #instance;
-	constructor(){
-		if(WarningSystem.#instance){
-			return WarningSystem.#instance;
-		}else{
-			WarningSystem.#instance = this;
-		}
-	}
-
+	/**
+	 * Adds new warning to array
+	 * @param {string} msg
+	 * @param {WTYPE} type
+	 * @param {Object} loc
+	 */
 	new(msg, type, loc){
 		this.#list.push(new Warning(msg, type, loc));
 	}
 
 	/**
 	 * Alias for new()
+	 * @param {string} msg
+	 * @param {WTYPE} type
+	 * @param {Object} loc
 	 */
 	add(msg, type, loc){
 		this.new(msg, type, loc);
 	}
 
+	/**
+	 * Prints warnings
+	 * @return {string}
+	 */
 	print(){
 		if(this.#list.length < 1){
-			return;
+			return ``;
 		}
 
 		const header = `Compiler warnings: \n`;
@@ -102,10 +105,3 @@ class WarningSystem {
 	}
 }
 
-/**
- * Warning system constant
- * @type {WarningSystem}
- * @global
- * @const
- */
-const warnings = new WarningSystem();

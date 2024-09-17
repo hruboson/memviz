@@ -8,10 +8,12 @@
  * @description Acts as a visitor for AST structures.
  * @class Semantic
  * @param {Stack} Stack of symbol tables (reference to Interpreter symtableStack)
+ * @param {WarningSystem}
  */
 class Semantic {
-	constructor(symtableStack){
+	constructor(symtableStack, warningSystem){
 		this.symtableStack = symtableStack;
+		this.warningSystem = warningSystem;
 	}
 
 	/**
@@ -178,10 +180,9 @@ class Semantic {
 	visitReturn(ret){
 		try{
 			ret.expr.accept(this);
-			console.log(ret.loc);
 
 			if(ret.expr instanceof Identifier){//! just a showcase, remove later
-				warnings.add(`return with a value in function returning void`, WTYPE.RETURNTYPE, ret.loc);
+				this.warningSystem.add(`return with a value in function returning void`, WTYPE.RETURNTYPE, ret.loc);
 			}
 		}catch(e){
 			console.log(e);

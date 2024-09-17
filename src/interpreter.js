@@ -17,11 +17,12 @@ class Interpreter {
 		this.#symtableStack = new Stack();
 		this.#symtableStack.push(this.#symtableGlobal);
 
-		this.#semanticAnalyzer = new Semantic(this.#symtableStack);
+		this.#warningSystem = new WarningSystem();
+		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 	}
 
 	/**
-	 * Simple function that prepares ("""compiles""") the C code
+	 * Single function that prepares ("""compiles""") the C code
 	 * @param {string} code Code to be "compiled"
 	 * @return {Object} TODO
 	 * @throws {SError|Error}
@@ -71,6 +72,13 @@ class Interpreter {
 	 * @type {Semantic}
 	 */
 	#semanticAnalyzer;
+
+	/**
+	 * Warning system
+	 * @private
+	 * @type {WarningSystem}
+	 */
+	#warningSystem;
 
 	/**
 	 * Program counter
@@ -252,7 +260,7 @@ class Interpreter {
 		document.getElementById("programCounter").innerHTML = breaklineEditor + "/" + editor.getSession().getLength(); 
 		document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 4);
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
-		document.getElementById("warnings").innerHTML = warnings.print();
+		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
 
 		unhighlight(); // global function, defined in index.html
 
