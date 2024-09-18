@@ -127,7 +127,7 @@ class Interpreter {
 	}
 
 	/**
-	 * Semantic analysis of single construct
+	 * Semantic analysis of AST
 	 * @throws {SError} Semantic error
 	 * @param {AST} ast
 	 */
