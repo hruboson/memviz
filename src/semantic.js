@@ -24,7 +24,7 @@ class Semantic {
 	 * @param {Array.<Declarator>} [parameters=null]
 	 * @return {string|null} Symbol name, null in case of anonymous
 	 */
-	addSymbol(type, declarator, initializer, specifiers){		
+	addSymbol(type, declarator, initializer, specifiers){
 		var declChild = declarator;
 
 		// ascend the declarator list and extract all information from it
@@ -66,6 +66,15 @@ class Semantic {
 				throw new SError(e.details, declarator.loc);
 			}
 		}while(declChild != null);
+
+		if(initializer instanceof Initializer){
+			if(isFunction){
+				//? this might be completely wrong check this!
+				if(!declPtr){
+					throw new SError(`Function ${symbolName} initialized like a variable`);
+				}	
+			}
+		}
 
 		return symbolName;
 	}
