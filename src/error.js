@@ -35,3 +35,16 @@ class RTError extends Error {
 		this.name = "Runtime error";
 	}
 }
+
+/**
+ * App (Internal error - error made by my (author's) mistake
+ * @class AppError
+ * @param {string} e Error message
+ */
+class AppError extends Error {
+	constructor(e){
+		const msg = `Application Error: \n\n${e}`;
+		console.error(msg);
+		super(msg);
+	}
+}
