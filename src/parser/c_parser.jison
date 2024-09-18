@@ -346,7 +346,6 @@ struct_declaration
 		for(var declInit of $2){
 			$$.push(new Declaration(new Type($1, @$), declInit.declarator, declInit.initializer, @$));
 		}
-		
 	}
 	| static_assert_declaration // skip for now
 	;
@@ -460,14 +459,14 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator { $$ = new Declaration(new Type($1, @$), $2, @$); }
-	| declaration_specifiers abstract_declarator { $$ = new Declaration(new Type($1, @$), $2, @$); }
-	| declaration_specifiers { $$ = new Declaration(new Type($1), new Unnamed(@$), @$); }
+	: declaration_specifiers declarator { $$ = new Declaration(new Type($1, @$), $2, null, @$); }
+	| declaration_specifiers abstract_declarator { $$ = new Declaration(new Type($1, @$), $2, null, @$); }
+	| declaration_specifiers { $$ = new Declaration(new Type($1), new Unnamed(@$), null, @$); }
 	;
 
 identifier_list
-	: IDENTIFIER { $$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($1)), @$)]; }
-	| identifier_list ',' IDENTIFIER { $$ = [...$1, new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($3)))]; }
+	: IDENTIFIER { $$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($1)), null, @$)]; }
+	| identifier_list ',' IDENTIFIER { $$ = [...$1, new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($3)), null, @$)]; }
 	;
 
 type_name
@@ -509,14 +508,14 @@ direct_abstract_declarator
 initializer
 	: '{' initializer_list '}' { $$ = $2; }
 	| '{' initializer_list ',' '}' { $$ = $2; }
-	| assignment_expression { $$ = new Initializer(INITTYPE.EXPR, $1, @$); }
+	| assignment_expression { $$ = new Initializer(INITTYPE.EXPR, $1, null, null, @$); }
 	;
 
 initializer_list
 	: designation initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $2, $1, @$)]; }
-	| initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $1, @$)]; }
-	| initializer_list ',' designation initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $4, $3)]; }
-	| initializer_list ',' initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $3)]; }
+	| initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $1, null, @$)]; }
+	| initializer_list ',' designation initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $4, $3, @$)]; }
+	| initializer_list ',' initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $3, null, @$)]; }
 	;
 
 designation

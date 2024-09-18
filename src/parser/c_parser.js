@@ -196,7 +196,6 @@ case 127:
 		for(var declInit of $$[$0-1]){
 			this.$.push(new Declaration(new Type($$[$0-2], this._$), declInit.declarator, declInit.initializer, this._$));
 		}
-		
 	
 break;
 case 133:
@@ -270,16 +269,16 @@ case 169: case 191:
  this.$ = $$[$0-2]; 
 break;
 case 173: case 174:
- this.$ = new Declaration(new Type($$[$0-1], this._$), $$[$0], this._$); 
+ this.$ = new Declaration(new Type($$[$0-1], this._$), $$[$0], null, this._$); 
 break;
 case 175:
- this.$ = new Declaration(new Type($$[$0]), new Unnamed(this._$), this._$); 
+ this.$ = new Declaration(new Type($$[$0]), new Unnamed(this._$), null, this._$); 
 break;
 case 176:
- this.$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])), this._$)]; 
+ this.$ = [new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])), null, this._$)]; 
 break;
 case 177:
- this.$ = [...$$[$0-2], new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])))]; 
+ this.$ = [...$$[$0-2], new Declaration(new Type(), new Declarator(DECLTYPE.ID, new Identifier($$[$0])), null, this._$)]; 
 break;
 case 180:
  this.$ = new AbstractDeclarator(DECLTYPE.PTR, $$[$0], $$[$0-1], this._$); 
@@ -306,19 +305,19 @@ case 189:
  this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }, this._$); 
 break;
 case 192:
- this.$ = new Initializer(INITTYPE.EXPR, $$[$0], this._$); 
+ this.$ = new Initializer(INITTYPE.EXPR, $$[$0], null, null, this._$); 
 break;
 case 193:
  this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1], this._$)]; 
 break;
 case 194:
- this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], this._$)]; 
+ this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], null, this._$)]; 
 break;
 case 195:
- this.$ = [...$$[$0-3], new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1])]; 
+ this.$ = [...$$[$0-3], new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1], this._$)]; 
 break;
 case 196:
- this.$ = [...$$[$0-2], new Initializer(INITTYPE.NESTED, null, $$[$0])]; 
+ this.$ = [...$$[$0-2], new Initializer(INITTYPE.NESTED, null, $$[$0], null, this._$)]; 
 break;
 case 200:
  this.$ = new Designator($$[$0-1], this._$); 
