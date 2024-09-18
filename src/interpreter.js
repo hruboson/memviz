@@ -5,9 +5,8 @@
 
 /**
  * Interpreter class, acts as a Visitor for AST
- * @description We are pretending to be "compiling" to target machine code. This is in order to simulate single-pass of AST. Due to this reason, each visit 
- * 				function first calls semantic analyzer and then changes internal state of interpreter. The output is only visible to the user if no error 
- * 				is thrown.
+ * @description We are pretending to be "compiling" to target machine code. The interpreter first analyses the code using the Semantic analyzer and either throws
+ * 				an error or allows for further interpretation of AST.
  * @class Interpreter
  */
 class Interpreter {
