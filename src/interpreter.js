@@ -136,7 +136,7 @@ class Interpreter {
 			construct.accept(this.#semanticAnalyzer);
 		}
 		
-		const mainFnc = this.#symtableGlobal.lookup("main");
+		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
 		if(mainFnc){
 			if(mainFnc.type != SYMTYPE.FNC){
 				throw new SError("main is not a function");

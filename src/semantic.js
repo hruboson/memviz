@@ -24,7 +24,7 @@ class Semantic {
 	 * @param {Array.<Declarator>} [parameters=null]
 	 * @return {string|null} Symbol name, null in case of anonymous
 	 */
-	addSymbol(type, declarator, specifiers){		
+	addSymbol(type, declarator, initializer, specifiers){		
 		var declChild = declarator;
 
 		// ascend the declarator list and extract all information from it
@@ -33,15 +33,19 @@ class Semantic {
 		var symbolName = ""; // return value
 		var dimension = 0;
 		var parameters = null;
+		var isFunction = false;
+		var namespace = NAMESPACE.ORDS;
+		var initialized = initializer ? true : false;
 
 		do{
 			try {
 				if(declChild.kind == DECLTYPE.ID){
-					this.symtableStack.peek().insert(declChild.identifier.name, declMainType, specifiers.toString(), declPtr, dimension, parameters);
+					const currSymtable = this.symtableStack.peek();
+					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers.toString(), declPtr, dimension, parameters, isFunction);
 					symbolName = declChild.identifier.name;
 				}
 				if(declChild.kind == DECLTYPE.FNC){
-					declMainType = SYMTYPE.FNC;
+					isFunction = true;
 					parameters = declarator.fnc.parameters;
 				}
 				if(declChild.kind == DECLTYPE.PTR){
@@ -51,6 +55,7 @@ class Semantic {
 					dimension += 1;
 				}
 				if(declChild.kind == DECLTYPE.STRUCT){
+					namespace = NAMESPACE.TAGS;
 					declMainType == SYMTYPE.STRUCT;
 				}
 				if(declChild.kind == DECLTYPE.NESTED){
@@ -74,7 +79,7 @@ class Semantic {
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
 
-		this.addSymbol(SYMTYPE.VAR, declarator, declaration.type.specifiers, initializer);
+		this.addSymbol(SYMTYPE.OBJ, declarator, initializer, declaration.type.specifiers);
 	}
 
 	visitDeclarator(declarator){
@@ -97,11 +102,11 @@ class Semantic {
 	}
 
 	visitFnc(fnc){
-		const fncName = this.addSymbol(SYMTYPE.FNC, fnc.declarator, fnc.returnType, fnc.declarator.fnc.parameters); // adds function to global symbol table
+		const fncName = this.addSymbol(SYMTYPE.FNC, fnc.declarator, fnc.body, fnc.returnType); // adds function to global symbol table
 		this.symtableStack.push(new Symtable(fncName, "function params", this.symtableStack.peek()));
 
 		for(const param of fnc.declarator.fnc.parameters){
-			this.addSymbol(SYMTYPE.PARAM, param.declarator, param.type.specifiers);
+			this.addSymbol(SYMTYPE.OBJ, param.declarator, false, param.type.specifiers);
 		}
 
 		this.symtableStack.push(new Symtable(fncName, "body", this.symtableStack.peek()));
@@ -114,7 +119,7 @@ class Semantic {
 	}
 
 	visitTypedef(typedef){
-		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, typedef.type.specifiers);
+		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, false, typedef.type.specifiers);
 	}
 
 	visitFncCallExpr(fncCall){
@@ -129,7 +134,7 @@ class Semantic {
 				throw new SError(`undeclared function ${fncName}`, fncCall.loc);
 			}
 
-			if(fncSym.type != SYMTYPE.FNC){
+			if(!fncSym.isFunction){
 				throw new SError(`called object ${fncName} is not a function or function pointer`, fncCall.loc);
 			}
 

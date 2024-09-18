@@ -39,14 +39,17 @@ class ScopeInfo {
 
 /**
  * Enum for possible types of symbols
+ * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.1} 
+ * @global
  * @typedef SYMTYPE
  */
 const SYMTYPE = {
-	VAR: "VAR",
-	PARAM: "PARAM",
+	OBJ: "OBJ",
 	FNC: "FNC",
-	STRUCT: "STRUCT",
+	TAG: "TAG",
+	MEMBER: "MEMBER",
 	TYPEDEF: "TYPEDEF",
+	LABEL: "LABEL",
 }
 
 /**
@@ -54,6 +57,7 @@ const SYMTYPE = {
  * @description Structure for holding information about a single symbol
  * @param {string} name Name (identifier) of the symbol
  * @param {SYMTYPE} type Type of the symbol
+ * @param {bool} initialized
  * @param {Array.<string>} specifiers Specifiers of symbol
  * @param {bool} pointer Is symbol a pointer?
  * @param {integer} dimension Dimension of array, 0 for non-array
@@ -103,20 +107,40 @@ class Sym {
 	 */
 	parameters;
 
-	constructor(name, type, specifiers, pointer, dimension=0, parameters=null){
+	/**
+	 * Object can be type of function (e.g. pointer to function)
+	 * @type {bool}
+	 */
+	isFunction;
+
+	constructor(name, type, initialized, specifiers, pointer, dimension=0, parameters=null, isFunction=false){
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
 		this.pointer = pointer;
 		this.dimension = dimension;
-		this.initialized = false;
+		this.initialized = initialized;
 		this.parameters = parameters;
-		this.address = Math.floor(Math.random() * 4294967296); // for now random
+		this.isFunction = isFunction;
+		//this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
 
 	initialize(){
 		this.initialized = true;
 	}
+}
+
+/**
+ * Types of name spaces
+ * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.3}
+ * @global
+ * @typedef NAMESPACE
+ */
+const NAMESPACE = {
+	ORDS: "ORDS", // ordinary identifiers
+	TAGS: "TAGS",
+	MEMBERS: "MEMBERS",
+	LABELS: "LABELS",
 }
 
 /**
@@ -141,10 +165,31 @@ class Symtable {
 	scopeInfo;
 
 	/**
-	 * Symbol table
-	 * @type {Map<string, Symbol>}
+	 * Objects name space - everything that isn't structure, union, enum, member of structure, union or enum, or label
+	 * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.3}
+	 * @type {Map<string, Sym>}
 	 */
-	symbols;
+	objects;
+
+	/**
+	 * Tags namespace - structure, union, enum
+	 * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.3}
+	 * @type {Map<string, Sym>}
+	 */
+	tags;
+
+	/**
+	 * Name spaces of each defined tag
+	 * @type {Array.<Map<string, Map<string, Sym>>>}
+	 */
+	memberSpaces;
+
+	/**
+	 * Labels namespace
+	 * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.3}
+	 * @type {Map<string, Sym>}
+	 */
+	labels;
 
 	/**
 	 * Children symbol tables (for traversal and visualization)
@@ -154,7 +199,11 @@ class Symtable {
 	children;
 
 	constructor(name, type, parent=null){
-		this.symbols = new Map();
+		this.objects = new Map();
+		this.tags = new Map();
+		this.labels = new Map();
+		this.memberSpaces = [];
+
 		this.scopeInfo = (parent == null) ? new ScopeInfo(name, type, 0) : new ScopeInfo(name, type, parent.scopeInfo.level + 1);
 		this.parent = parent;
 		this.children = [];
@@ -167,39 +216,65 @@ class Symtable {
 
 	/**
 	 * Inserts symbol into symbol table
-	 * @param {string} name Symbol name (identifier)
+	 * @param {NAMESPACE} namespace Name space to add the identifier to
 	 * @param {SYMTYPE} type
+	 * @param {string} name Symbol name (identifier)
 	 * @param {Array.<string>} specifiers
 	 * @param {bool} pointer
 	 * @param {integer} dimension
 	 * @param {Array.<Declarator>} parameters
 	 */
-	insert(name, type, specifiers, pointer, dimension=0, parameters=null){
-		const sym = this.lookup(name);
-		if(sym){
-			if(sym.initialized){
-				throw new SError(`redefinition of ${name}`);
-			}else{
-				// allow function declaration - definition
-				if(type == SYMTYPE.FNC){
-					sym.initialize();
-					return;
+	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, parameters=null, isFunction=false){
+		switch(namespace){
+			case NAMESPACE.ORDS:
+				const sym = this.lookup(namespace, name);
+				if(sym){
+					if(sym.initialized){
+						throw new SError(`redefinition of ${name}`);
+					}else{
+						// allow function declaration - definition
+						if(type == SYMTYPE.FNC){
+							sym.initialize();
+							return;
+						}
+
+						throw new SError(`redefinition of ${name}`);
+					}
 				}
 
-				throw new SError(`redefinition of ${name}`);
-			}
+				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, parameters, isFunction));
+				break;
+			case NAMESPACE.TAGS:
+				break;
+			case NAMESPACE.MEMBERS:
+				break;
+			case NAMESPACE.LABELS:
+				break;
+			default:
+				throw new AppError("Wrong namespace type while inserting symbol!");
 		}
-
-		this.symbols.set(name, new Sym(name, type, specifiers, pointer, dimension, parameters));
 	}
 
 	/**
 	 * Looks up symbol in symbol table (local)
+	 * @param {NAMESPACE} namespace Type of namespace to look for given name (identifier)
 	 * @param {string} name Symbol name (identifier)
 	 * @return {Sym|undefined} Returns Symbol in case of success, undefined if the symbol was not found
 	 */
-	lookup(name){
-		return this.symbols.get(name);
+	lookup(namespace, name){
+		switch(namespace){
+			case NAMESPACE.ORDS:
+				return this.objects.get(name);
+			case NAMESPACE.TAGS:
+				return this.tags.get(name);
+			case NAMESPACE.MEMBERS:
+				break;
+				//TODO return this.membersSpaces.get(name);
+			case NAMESPACE.LABELS:
+				return this.labels.get(name);
+			default:
+				throw new AppError("Wrong namespace type while looking up symbol!");
+		}
 	}
 
 	/**
@@ -209,14 +284,21 @@ class Symtable {
 	 * @throws {SError}
 	 */
 	resolve(name){
-		if(!this.symbols.get(name)){
+		if(this.objects.get(name)){
+			return this.objects.get(name);
+
+		}else if(this.tags.get(name)){
+			return this.tags.get(name);
+
+		}else if(this.labels.get(name)){
+			return this.labels.get(name);
+
+		}else{
 			if(this.parent){
 				return this.parent.resolve(name);
 			}else{
 				throw new SError(`undeclared symbol ${name}`);
 			}
-		}else{
-			return this.symbols.get(name);
 		}
 	}
 
@@ -230,18 +312,29 @@ class Symtable {
 		const header = `${indent}${this.scopeInfo.name}(${this.scopeInfo.type}), level ${this.scopeInfo.level}\n`;
 		const divider = `${indent}` + (`¯`.repeat(header.length-1)) + `\n`;
 
-		var symbols_string = ``;
-		this.symbols.forEach(function(symbol, name){
+		var objectsString = ``;
+		this.objects.forEach(function(symbol, name){
 			const spacing = ` `.repeat(symbol.type.length + 3);
-			symbols_string += `${indent}(${symbol.type}) ${name}
-${indent}${spacing}addr: 0x${(+symbol.address).toString(16)}
+
+			//${indent}${spacing}addr: 0x${(+symbol.address).toString(16)}
+
+			objectsString += `${indent}(${symbol.type}) ${name}
 ${indent}${spacing}type: ${symbol.specifiers}
 ${indent}${spacing}ptr: ${symbol.pointer}
 ${indent}${spacing}arr: ${symbol.dimension}
+${indent}${spacing}init: ${symbol.initialized}
 `;
+
+			if(symbol.isFunction){
+				objectsString += `${indent}${spacing}isFunction: ${symbol.isFunction}\n`;
+				/*symbol.parameters.forEach(function(){
+					objectsString += `${indent}\t`;
+				});*/
+			}
 		});
 
-		var prt = header + divider + symbols_string + divider;
+
+		var prt = header + divider + objectsString + divider;
 		for(const child of this.children){
 			prt += child.print(level+1);	
 		}
