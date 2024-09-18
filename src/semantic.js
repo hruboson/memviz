@@ -69,9 +69,9 @@ class Semantic {
 
 		if(initializer instanceof Initializer){
 			if(isFunction){
-				//? this might be completely wrong check this!
+				//? this might be completely wrong check this! Yes it is wrong, it could be function that returns pointer (honestly really check this xd)
 				if(!declPtr){
-					throw new SError(`Function ${symbolName} initialized like a variable`);
+					throw new SError(`Function ${symbolName} initialized like a variable`, initializer.loc);
 				}	
 			}
 		}
