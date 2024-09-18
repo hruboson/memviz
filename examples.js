@@ -140,6 +140,8 @@ void bar(){
 // commented errors are working
 const errors_example = `void foo(int x);
 void bar();
+int fnc();
+int fnc = 10; // semantic error
 
 void main() {
 	int z = 1/0; // runtime error
@@ -154,6 +156,8 @@ void main() {
 	int x;
 	int a = x; // uninitialized (warning)
   
+	int fnc = 10; // ok
+
 	// foo(); // semantic error
 	foo(1); // OK
 	bar(); // semantic error
