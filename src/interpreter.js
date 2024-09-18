@@ -216,8 +216,8 @@ class Interpreter {
 		//! this.#symtableStack.peek().children.pop() // removes child not longer used (scope went out of its life)
 	}
 
-	visitFunc(func){
-		func.body.accept(this); // run body
+	visitFnc(fnc){
+		fnc.body.accept(this); // run body
 	}
 
 	visitTypedef(typedef){
