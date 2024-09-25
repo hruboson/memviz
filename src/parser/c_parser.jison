@@ -93,9 +93,8 @@ generic_association
 	;*/
 
 postfix_expression
-	//TODO this is basically the only part of expression that isn't finished and will probably be the most difficult to tackle. GL ^_^
 	: primary_expression { $$ = $1; }
-	| postfix_expression '[' expression ']'
+	| postfix_expression '[' expression ']' { $$ = new SubscriptExpr($1, $3, @$); } // There should always be check on whether $3 is array (in semantic, intepreter, ...), and if yes, its a warning from compiler
 	| postfix_expression '(' ')'
 	{ 
 		$$ = new FncCallExpr($1, [], @$);
@@ -104,12 +103,12 @@ postfix_expression
 	{
 		$$ = new FncCallExpr($1, $3, @$);
 	}
-	| postfix_expression '.' IDENTIFIER
-	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
-	| '(' type_name ')' '{' initializer_list '}'
-	| '(' type_name ')' '{' initializer_list ',' '}'
+	| postfix_expression '.' IDENTIFIER { $$ = new MemberAccessExpr($1, $3, @$); }
+	| postfix_expression PTR_OP IDENTIFIER { $$ = new PtrMemberAccessExpr($1, $3, @$); }
+	| postfix_expression INC_OP { $$ = new UExpr($1, $2, @$); } //! this might need to know that it's postfix
+	| postfix_expression DEC_OP { $$ = new UExpr($1, $2, @$); }
+	| '(' type_name ')' '{' initializer_list '}' //TODO dont really know what this is at the moment
+	| '(' type_name ')' '{' initializer_list ',' '}' // it could be structure initialization
 	;
 
 argument_expression_list

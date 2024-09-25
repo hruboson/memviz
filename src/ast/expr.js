@@ -22,9 +22,8 @@ class Operator {
  * @param {Object} loc
  */
 class Expr extends Construct {
-	constructor(expr, loc){
+	constructor(loc){
 		super();
-		this.expr = expr;
 		this.loc = loc;
 	}
 
@@ -54,10 +53,9 @@ class NOP extends Construct {
  */
 class UExpr extends Expr {
 	constructor(expr, op, loc){
-		super();
+		super(loc);
 		this.op = op;
 		this.expr = expr;
-		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -75,11 +73,10 @@ class UExpr extends Expr {
  */
 class BExpr extends Expr {
 	constructor(left, op, right, loc){
-		super();
+		super(loc);
 		this.left = left;
 		this.op = op;
 		this.right = right;
-		this.loc = loc;
 	}
 }
 
@@ -159,6 +156,63 @@ class BCompExpr extends BExpr {
 	}
 }
 
+/**
+ * Member access expressions
+ */
+
+/**
+ * Subscript expression
+ * @description a[b]
+ * @param {Expr} pointer
+ * @param {Expr} integer
+ */
+class SubscriptExpr extends Expr {
+	constructor(pointer, expr, loc){
+		super(loc);
+		this.pointer = pointer;
+		this.expr = expr;
+	}
+
+	accept(visitor){
+		visitor.visitSubscriptExpr(this);
+	}
+}
+
+/**
+ * Member access (structure/union)
+ * @description a.b
+ * @param {Expr} expr Can be either structure or union
+ * @param {Identifier} member
+ */
+class MemberAccessExpr extends Expr {
+	constructor(expr, member, loc){
+		super(loc);
+		this.expr = expr;
+		this.member = member;
+	}
+
+	accept(visitor){
+		visitor.visitMemberAccessExpr(this);
+	}
+}
+
+/**
+ * Pointer member access (pointer to structure/union)
+ * @description a->b
+ * @param {Expr} pointer
+ * @param {Identifier} member
+ */
+class PtrMemberAccessExpr extends Expr {
+	constructor(pointer, member, loc){
+		super(loc);
+		this.pointer = pointer;
+		this.member = member;
+	}
+
+	accept(visitor){
+		visitor.visitPtrMemberAccessExpr(this);
+	}
+}
 
 /**
  * Constant - integer, float, double, char
@@ -166,10 +220,9 @@ class BCompExpr extends BExpr {
  */
 class CExpr extends Expr {
 	constructor(type, value, loc){
-		super();
+		super(loc);
 		this.type = type;
 		this.value = value;
-		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -178,7 +231,7 @@ class CExpr extends Expr {
 }
 
 /**
- * More specialized expressions
+ * More specialized expressions:
   * function call
   * comma operator
   * type cast
@@ -193,10 +246,9 @@ class CExpr extends Expr {
  */
 class FncCallExpr extends Expr {
 	constructor(expr, argumentList, loc){
-		super();
+		super(loc);
 		this.expr = expr;
 		this.arguments = argumentList;
-		this.loc = loc;
 	}
 
 	accept(visitor){
@@ -205,8 +257,8 @@ class FncCallExpr extends Expr {
 }
 
 class CastExpr extends Expr {
-	constructor(type, epxr){
-		super();
+	constructor(type, expr, loc){
+		super(loc);
 		this.type = type;
 		this.expr = expr;
 	}

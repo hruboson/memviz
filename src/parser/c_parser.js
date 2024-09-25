@@ -104,6 +104,9 @@ break;
 case 10:
  this.$ = $$[$0] 
 break;
+case 12:
+ this.$ = new SubscriptExpr($$[$0-3], $$[$0-1], this._$); 
+break;
 case 13:
  
 		this.$ = new FncCallExpr($$[$0-2], [], this._$);
@@ -113,6 +116,15 @@ case 14:
 
 		this.$ = new FncCallExpr($$[$0-3], $$[$0-1], this._$);
 	
+break;
+case 15:
+ this.$ = new MemberAccessExpr($$[$0-2], $$[$0], this._$); 
+break;
+case 16:
+ this.$ = new PtrMemberAccessExpr($$[$0-2], $$[$0], this._$); 
+break;
+case 17: case 18:
+ this.$ = new UExpr($$[$0-1], $$[$0], this._$); 
 break;
 case 21: case 80: case 87: case 89: case 91: case 93: case 95: case 96: case 130: case 132: case 143: case 167: case 171: case 198:
  this.$ = [$$[$0]]; 
