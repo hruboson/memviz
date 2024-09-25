@@ -239,8 +239,8 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression
-	| expression ',' assignment_expression
+	: assignment_expression { $$ = [$1]; }
+	| expression ',' assignment_expression { $$ = [...$1, $3]; }
 	;
 
 constant_expression
@@ -539,7 +539,7 @@ static_assert_declaration
 statement
 	: labeled_statement
 	| compound_statement
-	| expression_statement
+	| expression_statement { $$ = $1; }
 	| selection_statement
 	| iteration_statement
 	| jump_statement
@@ -558,17 +558,17 @@ compound_statement
 
 block_item_list
 	: block_item { $$ = $1; }
-	| block_item_list block_item { $$ = [...$1, ...$2]; }
+	| block_item_list block_item { $$ = [...$1, ...$2]; } // block_item always returns array
 	;
 
 block_item
-	: declaration { $$ = $1; } // V-- declaration always returns array (because there could be multiple declarations on single line)
-	| statement { $$ = [$1]; } // TODO: check this later, I don't like it returning array (it was needed because of declaration)
+	: declaration { $$ = Array.isArray($1) ? $1 : [$1]; }
+	| statement { $$ = Array.isArray($1) ? $1 : [$1]; }
 	;
 
 expression_statement
 	: ';' { $$ = new NOP(@$); }
-	| expression ';' { $$ = $1; }
+	| expression ';' { $$ = Array.isArray($1) ? $1 : [$1]; } // expression always returns array (due to operator ",")
 	;
 
 selection_statement

@@ -86,10 +86,10 @@ switch (yystate) {
 case 1: case 7: case 8:
  this.$ = new Identifier($$[$0], this._$); 
 break;
-case 2: case 3: case 11: case 23: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 37: case 41: case 44: case 47: case 52: case 55: case 57: case 59: case 61: case 63: case 65: case 67: case 69: case 70: case 71: case 72: case 73: case 74: case 75: case 76: case 77: case 78: case 79: case 82: case 116: case 117: case 122: case 123: case 155: case 170: case 182: case 214: case 216: case 238: case 239:
+case 2: case 3: case 11: case 23: case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 37: case 41: case 44: case 47: case 52: case 55: case 57: case 59: case 61: case 63: case 65: case 67: case 69: case 70: case 71: case 72: case 73: case 74: case 75: case 76: case 77: case 78: case 79: case 82: case 116: case 117: case 122: case 123: case 155: case 170: case 182: case 205: case 214: case 238: case 239:
  this.$ = $$[$0]; 
 break;
-case 4: case 157: case 183: case 190: case 197: case 219:
+case 4: case 157: case 183: case 190: case 197:
  this.$ = $$[$0-1]; 
 break;
 case 5:
@@ -114,10 +114,10 @@ case 14:
 		this.$ = new FncCallExpr($$[$0-3], $$[$0-1], this._$);
 	
 break;
-case 21: case 87: case 89: case 91: case 93: case 95: case 96: case 130: case 132: case 143: case 167: case 171: case 198: case 217:
+case 21: case 80: case 87: case 89: case 91: case 93: case 95: case 96: case 130: case 132: case 143: case 167: case 171: case 198:
  this.$ = [$$[$0]]; 
 break;
-case 22: case 97: case 144: case 172:
+case 22: case 81: case 97: case 144: case 172:
  this.$ = [...$$[$0-2], $$[$0]]; 
 break;
 case 24: case 25: case 26: case 27:
@@ -179,7 +179,7 @@ case 121:
 		this.$ = ($$[$0-1] == "STRUCT") ? new Struct(null, new Tagname($$[$0], this._$), this._$) : new Union(null, new Tagname($$[$0], this._$), this._$); 
 	
 break;
-case 124: case 237:
+case 124: case 216: case 217: case 237:
  this.$ = Array.isArray($$[$0]) ? $$[$0] : [$$[$0]]; 
 break;
 case 125: case 236:
@@ -336,6 +336,9 @@ case 215:
 break;
 case 218:
  this.$ = new NOP(this._$); 
+break;
+case 219:
+ this.$ = Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
 break;
 case 232:
  this.$ = new Return(null, this._$); 
