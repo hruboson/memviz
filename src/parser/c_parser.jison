@@ -12,15 +12,24 @@
 %token XOR_ASSIGN OR_ASSIGN
 %token TYPEDEF_NAME ENUMERATION_CONSTANT
 
-%token TYPEDEF EXTERN STATIC AUTO REGISTER INLINE
+%token TYPEDEF /*NOT SUPPORTED: EXTERN STATIC AUTO REGISTER INLINE*/
+
+/*NOT SUPPORTED-------------------------------------------
 %token CONST RESTRICT VOLATILE
+---------------------------------------------------------*/
+
 %token BOOL CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE VOID
+
+/*NOT SUPPORTED-------------------------------------------
 %token COMPLEX IMAGINARY 
+---------------------------------------------------------*/
 %token STRUCT UNION ENUM ELLIPSIS
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
+/*NOT SUPPORTED-------------------------------------------
 %token ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
+---------------------------------------------------------*/
 
 %{
 	
@@ -60,7 +69,9 @@ primary_expression
 	| constant { $$ = $1; }
 	| string { $$ = $1; }
 	| '(' expression ')' { $$ = $2; }
-	//| generic_selection // skip for now
+	/*NOT SUPPORTED-------------------------------------------
+	| generic_selection
+	--------------------------------------------------------*/
 	;
 
 constant
@@ -78,7 +89,8 @@ string
 	| FUNC_NAME { $$ = $1 }
 	;
 
-/*generic_selection // skip for now
+/*NOT SUPPORTED-------------------------------------------
+generic_selection
 	: GENERIC '(' assignment_expression ',' generic_assoc_list ')'
 	;
 
@@ -90,7 +102,8 @@ generic_assoc_list
 generic_association
 	: type_name ':' assignment_expression
 	| DEFAULT ':' assignment_expression
-	;*/
+	;
+--------------------------------------------------------*/
 
 postfix_expression
 	: primary_expression { $$ = $1; }
@@ -107,8 +120,11 @@ postfix_expression
 	| postfix_expression PTR_OP IDENTIFIER { $$ = new PtrMemberAccessExpr($1, $3, @$); }
 	| postfix_expression INC_OP { $$ = new UExpr($1, $2, @$); } //! this might need to know that it's postfix
 	| postfix_expression DEC_OP { $$ = new UExpr($1, $2, @$); }
-	| '(' type_name ')' '{' initializer_list '}' //TODO dont really know what this is at the moment
-	| '(' type_name ')' '{' initializer_list ',' '}' // it could be structure initialization
+	/*NOT SUPPORTED-------------------------------------------
+	// Compound literals
+	| '(' type_name ')' '{' initializer_list '}'
+	| '(' type_name ')' '{' initializer_list ',' '}'
+	--------------------------------------------------------*/
 	;
 
 argument_expression_list
@@ -138,7 +154,9 @@ unary_expression
 	{
 		$$ = new UExpr($3, $1, @$);
 	}
-	//| ALIGNOF '(' type_name ')' skip for now
+	/*NOT SUPPORTED-------------------------------------------
+	//| ALIGNOF '(' type_name ')'
+	--------------------------------------------------------*/
 	;
 
 unary_operator
@@ -255,7 +273,9 @@ declaration
 	{
 		$$ = getDeclarations($1, $2, @$);
 	}
-	| static_assert_declaration //TODO
+	/*NOT SUPPORTED-------------------------------------------
+	| static_assert_declaration
+	--------------------------------------------------------*/
 	;
 
 declaration_specifiers
@@ -283,11 +303,13 @@ init_declarator
 
 storage_class_specifier
 	: TYPEDEF
+	/*NOT SUPPORTED-------------------------------------------
 	| EXTERN
 	| STATIC
 	| THREAD_LOCAL
 	| AUTO
 	| REGISTER
+	--------------------------------------------------------*/
 	;
 
 type_specifier
@@ -301,9 +323,11 @@ type_specifier
 	| SIGNED
 	| UNSIGNED
 	| BOOL
-	//| COMPLEX skip for now
-	//| IMAGINARY	
-	//| atomic_type_specifier
+	/*NOT SUPPORTED-------------------------------------------
+	| COMPLEX
+	| IMAGINARY	
+	| atomic_type_specifier
+	--------------------------------------------------------*/
 	| struct_or_union_specifier { $$ = $1; }
 	| enum_specifier { $$ = $1; }
 	| TYPEDEF_NAME
@@ -346,7 +370,9 @@ struct_declaration
 			$$.push(new Declaration(new Type($1, @$), declInit.declarator, declInit.initializer, @$));
 		}
 	}
-	| static_assert_declaration // skip for now
+	/*NOT SUPPORTED-------------------------------------------
+	| static_assert_declaration
+	--------------------------------------------------------*/
 	;
 
 specifier_qualifier_list
@@ -391,26 +417,35 @@ enumerator
 	| enumeration_constant { $$ = new Enumerator($1, null, @$); }
 	;
 
-/*atomic_type_specifier // skip for now
+/*NOT SUPPORTED-------------------------------------------
+atomic_type_specifier
 	: ATOMIC '(' type_name ')'
-	;*/
+	;
+--------------------------------------------------------*/
 
+
+/*NOT SUPPORTED-------------------------------------------
 type_qualifier
 	: CONST
 	| RESTRICT
 	| VOLATILE
-	//| ATOMIC
+	| ATOMIC
 	;
+--------------------------------------------------------*/
 
+/*NOT SUPPORTED-------------------------------------------
 function_specifier
 	: INLINE
 	| NORETURN
 	;
+--------------------------------------------------------*/
 
+/*NOT SUPPORTED-------------------------------------------
 alignment_specifier
 	: ALIGNAS '(' type_name ')'
 	| ALIGNAS '(' constant_expression ')'
 	;
+--------------------------------------------------------*/
 
 declarator
 	: pointer direct_declarator { $$ = new Declarator(DECLTYPE.PTR, $2, $1, @$); }
@@ -435,16 +470,19 @@ direct_declarator // must always return typeof Declarator
 	;
 
 pointer
-	: '*' type_qualifier_list pointer { $$ = new Pointer($3, $2, @$); }
-	| '*' type_qualifier_list { $$ = new Pointer(null, $2, @$); }
-	| '*' pointer { $$ = new Pointer($2, null, @$); }
+	 /*NOT SUPPORTED
+	| '*' type_qualifier_list pointer { $$ = new Pointer($3, null, @$); }
+	| '*' type_qualifier_list { $$ = new Pointer(null, $2, @$); } */
+	: '*' pointer { $$ = new Pointer($2, null, @$); } //TODO remove second parameter as qualifiers are no longer supported
 	| '*' { $$ = new Pointer(null, null, @$); }
 	;
 
+/*NOT SUPPORTED-------------------------------------------
 type_qualifier_list
 	: type_qualifier { $$ = [$1]; }
 	| type_qualifier_list type_qualifier { $$ = [...$1, $2]; }
 	;
+--------------------------------------------------------*/
 
 
 parameter_type_list
@@ -469,7 +507,7 @@ identifier_list
 	;
 
 type_name
-	//TODO
+	//!TODO
 	: specifier_qualifier_list abstract_declarator
 	| specifier_qualifier_list
 	;
@@ -531,9 +569,11 @@ designator
 	| '.' IDENTIFIER { $$ = new Designator(new Identifier($2, @$)); }
 	;
 
+/*NOT SUPPORTED-------------------------------------------
 static_assert_declaration
 	: STATIC_ASSERT '(' constant_expression ',' STRING_LITERAL ')' ';'
 	;
+--------------------------------------------------------*/
 
 statement
 	: labeled_statement
@@ -607,8 +647,10 @@ external_declaration
 
 function_definition
 	: declaration_specifiers declarator compound_statement { $$ = new Fnc($2, $1, $3, @$); }
- 	//| declaration_specifiers declarator declaration_list compound_statement 
-	/* ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html) */
+	/*NOT SUPPORTED-------------------------------------------
+	| declaration_specifiers declarator declaration_list compound_statement 
+	// ignore K&R type function declaration for now (https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Old_002dStyle-Function-Definitions.html)
+	--------------------------------------------------------*/
 	;
 
 declaration_list

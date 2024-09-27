@@ -359,7 +359,7 @@ int main(){
 
 const array_designator = `
 enum { RED, GREEN, BLUE };
-const char *nm[] = {
+char *nm[] = {
 	[RED] = "red",
 	[GREEN] = "green",
 	[BLUE] = "blue",
