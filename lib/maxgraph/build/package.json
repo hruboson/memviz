@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@maxgraph/core": "^0.14.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^6.0.1"
+  }
+}
