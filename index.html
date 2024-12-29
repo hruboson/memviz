@@ -19,6 +19,9 @@
 	<!-- Boxicons -->
 	<link href="lib/boxicons/css/boxicons.min.css" rel="stylesheet">
 
+	<!-- maxGraph -->
+	<script src="lib/maxgraph/maxgraph.bundle.js" type="text/javascript" charset="utf-8"></script>
+
 	<!-- Examples -->
 	<script src="examples.js" type="text/javascript" charset="utf-8"></script>
 
@@ -579,6 +582,69 @@ Split(["#split-ve", "#split-console"], {
 			document.getElementById("output").innerHTML = e.message;
 		}
 	}
+</script>
+<script>
+mxg = window.mxg;
+const container = document.getElementById('output');
+// Disables the built-in context menu
+mxg.InternalEvent.disableContextMenu(container);
+
+const graph = new mxg.Graph(container);
+graph.setEnabled(false); // Disable all interaction
+
+// Gets the default parent for inserting new cells. This
+// is normally the first child of the root (ie. layer 0).
+const parent = graph.getDefaultParent();
+
+// Adds cells to the model in a single step
+const pointer1 = graph.insertVertex({
+	parent,
+	position: [10, 10],
+	size: [50, 50],
+	value: "*a",
+	style: {
+		fontSize: 30,
+		fillColor: "#1BA1E2",
+	},
+});
+const pointer2 = graph.insertVertex({
+	parent,
+	position: [10, 70],
+	size: [50, 50],
+	value: "*b",
+	style: {
+		fontSize: 30,
+		fillColor: "#1BA1E2",
+	},
+});
+const value = graph.insertVertex({
+	parent,
+	position: [350, 90],
+	size: [50, 50],
+	style: {
+		fontSize: 30,
+		fillColor: "#60A917",
+	},
+	value: "10",
+});
+graph.insertEdge({
+	parent,
+	source: pointer1,
+	target: value,
+	style: {
+		edgeStyle: "orthogonalEdgeStyle",
+		rounded: true,
+	},
+});
+graph.insertEdge({
+	parent,
+	source: pointer2,
+	target: value,
+	style: {
+		edgeStyle: "topToBottomEdgeStyle",
+		rounded: true,
+	},
+});
 </script>
 </body>
 </html>
