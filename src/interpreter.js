@@ -18,6 +18,8 @@ class Interpreter {
 
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
+		this.#memsim = new Memsim();
+		this.#memviz = new Memviz();
 	}
 
 	/**
@@ -71,6 +73,20 @@ class Interpreter {
 	 * @type {Semantic}
 	 */
 	#semanticAnalyzer;
+
+	/**
+	 * Memory simulator
+	 * @private
+	 * @type {Memsim}
+	 */
+	#memsim;
+
+	/**
+	 * Memory visualizer
+	 * @private
+	 * @type {Memviz}
+	 */
+	#memviz;
 
 	/**
 	 * Warning system
