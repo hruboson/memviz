@@ -240,7 +240,7 @@ class Interpreter {
 	visitTypedef(typedef){
 	}
 
-	visitFuncCallExpr(funcCall){
+	visitFncCallExpr(fncCall){
 	}
 
 

@@ -36,7 +36,7 @@
 	<script src="src/ast/stmt.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/declaration.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/expr.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/ast/func.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/ast/fnc.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/array.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/pointer.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/ast/typedef.js" type="text/javascript" charset="utf-8"></script>
@@ -208,8 +208,14 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">void main(){
-	printf("Hello world!");
+						<div id="editor" onChange="resetEditor();">int a();
+
+void main(){
+    a();
+}
+
+int a(){
+    
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
