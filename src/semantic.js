@@ -143,6 +143,10 @@ class Semantic {
 				throw new SError(`undeclared function ${fncName}`, fncCall.loc);
 			}
 
+			/*if(!fncSym.initialized){ this should be checked on second walkthrough (or in interpreter??? I'm not sure)
+				throw new SError(`undefined reference to ${fncName}`, fncCall.loc);
+			}*/
+
 			if(!fncSym.isFunction){
 				throw new SError(`called object ${fncName} is not a function or function pointer`, fncCall.loc);
 			}
@@ -193,11 +197,27 @@ class Semantic {
 
 	visitReturn(ret){
 		try{
-			ret.expr.accept(this);
+			var symtable = this.symtableStack.peek();
+			var funcName = symtable.scopeInfo.name;
 
-			if(ret.expr instanceof Identifier){//! just a showcase, remove later
-				this.warningSystem.add(`return with a value in function returning void`, WTYPE.RETURNTYPE, ret.loc);
+			while(symtable.scopeInfo.type != "body"){ //TODO "body" (the string) should be enum same as "function params"
+				symtable = symtable.parent;
+				funcName = symtable.scopeInfo.name;
 			}
+
+			const funcSymbol = this.symtableStack.peek().resolve(funcName);
+
+			if(funcSymbol.specifiers == "void" && ret.expr != null){
+				this.warningSystem.add(`return with a value, in function returning void`, WTYPE.RETURNTYPE, ret.loc);
+			}
+
+			//ret.expr.accept(this);
+
+			/*if(ret.expr instanceof Identifier){//! just a showcase, remove later
+				this.warningSystem.add(`return with a value in function returning void`, WTYPE.RETURNTYPE, ret.loc);
+			}*/
+
+
 		}catch(e){
 			console.log(e);
 		}
