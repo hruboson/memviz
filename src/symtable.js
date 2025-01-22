@@ -122,7 +122,6 @@ class Sym {
 		this.initialized = initialized;
 		this.parameters = parameters;
 		this.isFunction = isFunction;
-		//this.address = Math.floor(Math.random() * 4294967296); // for now random
 	}
 
 	initialize(){

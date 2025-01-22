@@ -166,7 +166,7 @@ class Interpreter {
 	 * Interpret until specified breakline
 	 * @throws {RTError|SError}
 	 * @param {integer} line Interpret until this line number
-	 * @todo change to run main() function
+	 * @todo change to run main() function!!!
 	 */
 	interpretBreakline(breakline){
 		this.#breakline = breakline;
@@ -187,6 +187,7 @@ class Interpreter {
 	 * @param {AST} ast
 	 * @todo change to run main() function
 	 * @todo remove probably??? or make it run interpretBreakline until end
+	 * @note this function is currently UNUSED as far as I'm aware, maybe interpretBreakline is all I need
 	 */
 	//TODO
 	interpret(ast){
@@ -204,7 +205,7 @@ class Interpreter {
 	visitDeclaration(declaration){
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
-	};
+	}
 
 	visitDeclarator(declarator){
 	}
@@ -216,7 +217,8 @@ class Interpreter {
 	visitCStmt(stmt){
 		var iNum = 0;
 		var construct = stmt.sequence[iNum];
-		while(construct && construct.loc.first_line <= this.#breakline){
+
+		while(construct && construct.loc.first_line <= this.#breakline){ // construct can be null so that's the reason for while
 			construct.accept(this);
 			this.updateHTML();
 
