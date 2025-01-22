@@ -113,7 +113,13 @@ class Sym {
 	 */
 	isFunction;
 
-	constructor(name, type, initialized, specifiers, pointer, dimension=0, parameters=null, isFunction=false){
+	/**
+	 * "Pointer" to the code to be interpreted (in AST)
+	 * @type {Construct}
+	 */
+	astPtr;
+
+	constructor(name, type, initialized, specifiers, pointer, dimension=0, parameters=null, isFunction=false, astPtr=null){
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
@@ -122,6 +128,7 @@ class Sym {
 		this.initialized = initialized;
 		this.parameters = parameters;
 		this.isFunction = isFunction;
+		this.astPtr = astPtr;
 	}
 
 	initialize(){
@@ -223,7 +230,7 @@ class Symtable {
 	 * @param {integer} dimension
 	 * @param {Array.<Declarator>} parameters
 	 */
-	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, parameters=null, isFunction=false){
+	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, parameters=null, isFunction=false, astPtr=null){
 		switch(namespace){
 			case NAMESPACE.ORDS:
 				const sym = this.lookup(namespace, name);
@@ -241,7 +248,7 @@ class Symtable {
 					}
 				}
 
-				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, parameters, isFunction));
+				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, parameters, isFunction, astPtr));
 				break;
 			case NAMESPACE.TAGS:
 				break;

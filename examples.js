@@ -193,3 +193,12 @@ void main() {
 	int (*b)() = &a;
 	return (*b)();
 }`;
+
+const function_simple_example = `void hello(){
+	char a[] = "Hello world";
+	return;
+}
+
+void main(){
+	hello();
+}`;

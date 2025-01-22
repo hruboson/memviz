@@ -25,6 +25,7 @@
 	<!-- Examples -->
 	<script src="examples.js" type="text/javascript" charset="utf-8"></script>
 
+
 	<!-- ./SRC/* -->
 	<script src="src/util.js" type="text/javascript" charset="utf-8"></script>
 	
@@ -48,6 +49,7 @@
 	<script src="src/parser/c_parser.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/symtable.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/semantic.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/callstack.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Custom CSS -->
@@ -182,6 +184,7 @@
 						<button class="dropdown-item" type="button" onclick="setExample(simple_variables_example)">variables</button>
 						<button class="dropdown-item" type="button" onclick="setExample(simple_array_example)">arrays</button>
 						<button class="dropdown-item" type="button" onclick="setExample(expressions_example)">expresssions</button>
+						<button class="dropdown-item" type="button" onclick="setExample(function_simple_example)">functions</button>
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(scopes_example)">scopes</button>
 						<button class="dropdown-item" type="button" onclick="setExample(declaration_example)">declarations</button>
@@ -208,15 +211,16 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int a();
+						<div id="editor" onChange="resetEditor();">int a = 10;
+int b = 20;
+int* p = &a;
 
 void main(){
-    a();
+    return;
 }
 
-int a(){
-    
-}</div>
+int c = 30;
+int* x = &c;</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
 						<pre id="warnings"></pre>

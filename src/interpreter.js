@@ -18,6 +18,7 @@ class Interpreter {
 
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
+		this.#callStack = new CallStack();
 		this.#memsim = new Memsim();
 		this.#memviz = new Memviz();
 	}
@@ -66,6 +67,11 @@ class Interpreter {
 	get symtableStack(){
 		return this.#symtableStack;
 	}
+
+	/**
+	 * Call stack
+	 */
+	#callStack;
 
 	/**
 	 * Semantic analyzer
@@ -153,6 +159,7 @@ class Interpreter {
 		}
 		
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
+		console.log(mainFnc.astPtr);
 		if(mainFnc){
 			if(mainFnc.type != SYMTYPE.FNC){
 				throw new SError("main is not a function");
@@ -172,13 +179,15 @@ class Interpreter {
 		this.#breakline = breakline;
 		var iNum = 0;
 		var construct = this.#ast[iNum];
-		while(construct && construct.loc.first_line <= this.#breakline){
+
+		this.#callStack.call();
+		/*while(construct && construct.loc.first_line <= this.#breakline){
 			construct.accept(this);
 			this.updateHTML();
 
 			iNum++;
 			construct = this.#ast[iNum];
-		}
+		}*/
 	}
 
 	/**
@@ -241,6 +250,9 @@ class Interpreter {
 	}
 
 	visitFncCallExpr(fncCall){
+	}
+
+	visitReturn(ret){
 	}
 
 
