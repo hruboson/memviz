@@ -285,9 +285,11 @@ class Interpreter {
 	 * @todo If needed, pass the element ids as arguments
 	 */
 	updateHTML(){
-		document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 4);
-		document.getElementById("programCounter").innerHTML = breaklineEditor + "/" + editor.getSession().getLength(); 
-		document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 4);
+		JSONEDITeditorAST.set(this.#ast);
+		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
+		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2);
+		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2);
+		document.getElementById("programCounter").innerHTML = breaklineEditor + "/" + editor.getSession().getLength();
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
 

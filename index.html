@@ -22,6 +22,10 @@
 	<!-- maxGraph -->
 	<script src="lib/maxgraph/maxgraph.bundle.js" type="text/javascript" charset="utf-8"></script>
 
+	<!-- json viewer (for debug reasons) -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.1.2/jsoneditor.min.css" integrity="sha512-8G+Vb2+10BSrSo+wupdzJIylDLpGtEYniQhp0rsbTigPG7Onn2S08Ai/KEGlxN2Ncx9fGqVHtRehMuOjPb9f8g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.1.2/jsoneditor.min.js" integrity="sha512-j78GVmoaez3SedgGMQfYAQ1LFaBGy0KyOJuJKcseERaJt+Ws1p+0gDJso8txo1pq7QGibquf6cGHzl9CgXpGdg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 	<!-- Examples -->
 	<script src="examples.js" type="text/javascript" charset="utf-8"></script>
 
@@ -211,16 +215,14 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int a = 10;
-int b = 20;
-int* p = &a;
-
-void main(){
-    return;
+						<div id="editor" onChange="resetEditor();">void hello(){
+    int a = 1;
+    hello();
 }
 
-int c = 30;
-int* x = &c;</div>
+void main(){
+	hello();
+}</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
 						<pre id="warnings"></pre>
@@ -361,6 +363,18 @@ int* x = &c;</div>
 	editor.getSession().on('change', function() {
 		resetEditor();
 	});
+</script>
+
+<script>
+var JSONEDITcontainerAST = document.getElementById("ast");
+var JSONEDITcontainerTYPEDEFS = document.getElementById("typedefs");
+var JSONEDIToptions = {
+    mode: "view",
+	modes: ["view", "code", "tree", "preview"],
+	theme: "ace/theme/monokai", // doesn't work for some reason
+};
+var JSONEDITeditorAST = new JSONEditor(JSONEDITcontainerAST, JSONEDIToptions);
+var JSONEDITeditorTYPEDEFS = new JSONEditor(JSONEDITcontainerTYPEDEFS, JSONEDIToptions);
 </script>
 
 <!-- Split view settings-->
