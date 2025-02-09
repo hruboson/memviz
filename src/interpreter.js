@@ -103,20 +103,60 @@ class Interpreter {
 
 	/**
 	 * Program counter
-	 * @description Currently interpreted line
+	 * @description Currently interpreted statement
 	 * @private
 	 * @type {integer}
 	 */
-	#pc = 0;
+	#_pc = 0;
 	get pc(){
-		return this.#pc;
+		return this.#_pc;
+	}
+
+	set pc(integer){
+		this.#_pc = this.#_pc + 1;
+		if(this.#_pc > 1){
+			this.#_pcloclast = this.#_pcloc;
+		}
+		this.#_pcloc = integer;
 	}
 
 	/**
-	 * Breakline
+	 * Program counter line of code TO BE INTERPRETED
+	 * @private
 	 * @type {integer}
 	 */
-	#breakline = 0;
+	#_pcloc = 0;
+	get pcloc(){
+		return this.#_pcloc;
+	}
+
+	set pcloc(integer){
+		// NEVER SET IT MANUALLY, you've been warned
+		console.warning("NEVER SET PCLOC or PCLOCLAST MANUALLY!!!");
+	}
+
+	/**
+	 * Program counter line of code JUST INTERPRETED
+	 */
+	#_pcloclast = 0;
+	get pcloclast(){
+		return this.#_pcloclast;
+	}
+	
+	set pcloc(integer){
+		// NEVER SET IT MANUALLY, you've been warned
+		console.warning("NEVER SET PCLOC or PCLOCLAST MANUALLY!!!");
+	}
+
+
+
+	/**
+	 * Breakstop
+	 * @description How far the code should be interpreted (will be set in HTML)
+	 * @detail As user steps through code it keeps adding one to this
+	 * @type {integer}
+	 */
+	#breakstop = 0;
 
 	/* GETTERS */
 	/**
@@ -159,7 +199,6 @@ class Interpreter {
 		}
 		
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
-		console.log(mainFnc.astPtr);
 		if(mainFnc){
 			if(mainFnc.type != SYMTYPE.FNC){
 				throw new SError("main is not a function");
@@ -175,7 +214,7 @@ class Interpreter {
 	 * @param {integer} line Interpret until this line number
 	 * @todo change to run main() function!!!
 	 */
-	interpretBreakline(breakline){
+	/*interpretBreakline(breakline){
 		this.#breakline = breakline;
 		var iNum = 0;
 		var construct = this.#ast[iNum];
@@ -187,23 +226,22 @@ class Interpreter {
 
 			iNum++;
 			construct = this.#ast[iNum];
-		}*/
-	}
+		}
+	}*/
 
 	/**
-	 * Interprets ast (for now, maybe do IC later)
+	 * Interprets ast (for now, maybe do IC later -- like much much later)
 	 * @throws {RTError} Runtime error
 	 * @param {AST} ast
-	 * @todo change to run main() function
-	 * @todo remove probably??? or make it run interpretBreakline until end
-	 * @note this function is currently UNUSED as far as I'm aware, maybe interpretBreakline is all I need
+	 * @todo change to run main() function!!!
 	 */
-	//TODO
-	interpret(ast){
-		for(const construct of ast){
-			construct.accept(this);
-		}
+	interpret(breakstop){
+		this.#breakstop = breakstop; // get breakstop from user (HTML)
+
+		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
+		mainFnc.astPtr.accept(this);
 		
+		this.updateHTML();
 		return this.#symtableGlobal.print();//TODO change this to return result of main()
 	}
 
@@ -227,7 +265,7 @@ class Interpreter {
 		var iNum = 0;
 		var construct = stmt.sequence[iNum];
 
-		while(construct && construct.loc.first_line <= this.#breakline){ // construct can be null so that's the reason for while
+		while(construct && this.pc <= this.#breakstop){ // construct can be null so that's the reason for while
 			construct.accept(this);
 			this.updateHTML();
 
@@ -243,6 +281,7 @@ class Interpreter {
 	}
 
 	visitFnc(fnc){
+		this.pc = fnc.body.loc.first_line;
 		fnc.body.accept(this); // run body
 	}
 
@@ -250,6 +289,16 @@ class Interpreter {
 	}
 
 	visitFncCallExpr(fncCall){
+		//TODO create call stack perhaps
+		// but well this is the jist of it
+		const fnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, fncCall.expr.name);
+		fnc.astPtr.accept(this);
+
+		/*
+		console.log(this.pc);
+		console.log(this.pcloc);
+		console.log(this.pcloclast);
+		*/
 	}
 
 	visitReturn(ret){
@@ -289,16 +338,18 @@ class Interpreter {
 		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
 		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2);
 		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2);
-		document.getElementById("programCounter").innerHTML = breaklineEditor + "/" + editor.getSession().getLength();
+		document.getElementById("programCounter").innerHTML = this.#breakstop + "/" + editor.getSession().getLength(); // fix this!!!
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
 
 		unhighlight(); // global function, defined in index.html
 
 		// create new marker
-		var rangeTBI = new Range(this.#breakline, 0, this.#breakline, 1); // to be interpreted
+		if(this.pcloclast > 0){
+			var rangeJI = new Range(this.pcloclast, 0, this.pcloclast, 1); // just interpreted 
+			var markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine")
+		}
+		var rangeTBI = new Range(this.pcloc, 0, this.pcloc, 1); // to be interpreted
 		var markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine")
-		var rangeJI = new Range(this.#breakline - 1, 0, this.#breakline - 1, 1); // just interpreted 
-		var markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine")
 	}
 }

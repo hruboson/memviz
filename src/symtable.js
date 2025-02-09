@@ -128,7 +128,7 @@ class Sym {
 		this.initialized = initialized;
 		this.parameters = parameters;
 		this.isFunction = isFunction;
-		this.astPtr = astPtr;
+		this.astPtr = astPtr; // is this 100% pointer??? otherwise it's super inefficient (I'm not sure how JS pointers work)
 	}
 
 	initialize(){

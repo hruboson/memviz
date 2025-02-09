@@ -360,7 +360,7 @@ void main(){
 		enableLinking: true,
 		showPrintMargin: false,
 	});
-	editor.getSession().on('change', function() {
+	editor.getSession().on("change", function() {
 		resetEditor();
 	});
 </script>
@@ -556,50 +556,46 @@ Split(["#split-ve", "#split-console"], {
 				case EXEOPT.COMPILE:
 					interpreter.compile(input);
 					toggleButtons(false);
-					breaklineEditor = 0;
+					breakEditor = 0;
 					break;
 
 				case EXEOPT.PARSE:
 					interpreter.parse(input);
 					toggleButtons(false);
-					breaklineEditor = 0;
+					breakEditor = 0;
 					break;
 
 				case EXEOPT.EXECUTEALL:
-					breaklineEditor = editor.getSession().getLength();
+					breakEditor = editor.getSession().getLength(); // fix this, should be infinity
 					break;
 
 				case EXEOPT.EXECUTENEXT:
-					if(breaklineEditor >= editor.getSession().getLength()){
-						return;
-					}
-
-					breaklineEditor++;
+					breakEditor++;
 					break;
 
 				case EXEOPT.EXECUTEPREV:
-					if(breaklineEditor < 1){
+					if(breakEditor < 1){
 						return;
 					}
 
-					breaklineEditor--;
+					breakEditor--;
 					break;
 
 				case EXEOPT.EXECUTEEND:
-					breaklineEditor = editor.getSession().getLength();
+					breakEditor = editor.getSession().getLength();
 					break;
 
 				case EXEOPT.EXECUTEBEG:
-					if(breaklineEditor < 1){
+					if(breakEditor < 1){
 						return;
 					}
 
-					breaklineEditor = 0;
+					breakEditor = 0;
 					break;
 			}
 
-			interpreter.parse(input);
-			interpreter.interpretBreakline(breaklineEditor);
+			if(flag != EXEOPT.COMPILE) interpreter.compile(input); // this is all so ugly, I hate it
+			interpreter.interpret(breakEditor);
 			interpreter.updateHTML();
 			if(flag == EXEOPT.PARSE){
 				document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
