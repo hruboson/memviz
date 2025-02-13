@@ -23,16 +23,6 @@ class Interpreter {
 		this.#memviz = new Memviz();
 	}
 
-	/**
-	 * Single function that prepares ("""compiles""") the C code
-	 * @param {string} code Code to be "compiled"
-	 * @return {Object} TODO
-	 * @throws {SError|Error}
-	 */
-	compile(code){
-		return this.parse(code).semantic(this.#ast);
-	}
-
 	/* ATTRIBUTES */
 	/**
 	 * Parser instance
@@ -112,6 +102,11 @@ class Interpreter {
 		return this.#_pc;
 	}
 
+	/**
+	 * Sets the program counter to point at current construct being interpreted and also sets the pcloc/pcloclast which are used for visualizing program state
+	 * @public
+	 * @param {Construct} Construct which just got interpreted
+	 */
 	set pc(construct){
 		console.log(construct);
 		this.#_pc = construct;
@@ -137,12 +132,12 @@ class Interpreter {
 	 * Program counter line of code TO BE INTERPRETED
 	 * @private
 	 * @type {integer}
+	 * @see {pc}
 	 */
 	#_pcloc = 0;
 	get pcloc(){
 		return this.#_pcloc;
 	}
-
 	set pcloc(integer){
 		// NEVER SET IT MANUALLY, you've been warned
 		console.warning("NEVER SET PCLOC or PCLOCLAST MANUALLY!!!");
@@ -150,18 +145,18 @@ class Interpreter {
 
 	/**
 	 * Program counter line of code JUST INTERPRETED
+	 * @private
+	 * @type {integer}
+	 * @see {pc}
 	 */
 	#_pcloclast = 0;
 	get pcloclast(){
 		return this.#_pcloclast;
 	}
-	
 	set pcloc(integer){
 		// NEVER SET IT MANUALLY, you've been warned
 		console.warning("NEVER SET PCLOC or PCLOCLAST MANUALLY!!!");
 	}
-
-
 
 	/**
 	 * Breakstop
@@ -171,7 +166,6 @@ class Interpreter {
 	 */
 	#breakstop = 0;
 
-	/* GETTERS */
 	/**
 	 * Returns types defined by user (typedefs)
 	 * @return {Array.<string>} User-defined types
@@ -188,7 +182,10 @@ class Interpreter {
 		return this.#parser.Parser.prototype.yy.lastSymbols.enums;
 	}
 
-	/* FUNCTIONS */
+	/*******************
+	 *    FUNCTIONS    *
+	 ******************/
+
 	/**
 	* Parses user input
 	* @descriptions Sets the #ast attribute of interpreter
@@ -222,10 +219,20 @@ class Interpreter {
 	}
 
 	/**
+	 * Single function that prepares ("""compiles""") the C code
+	 * @param {string} code Code to be "compiled"
+	 * @throws {Error}
+	 */
+	compile(code){
+		this.parse(code).semantic(this.#ast);
+	}
+
+	/**
 	 * Interprets ast (for now, maybe do IC later -- like much much later)
 	 * @throws {RTError} Runtime error
 	 * @param {AST} ast
-	 * @todo change to run main() function!!!
+	 * @TODO catch what main returns (int)
+	 * @return {integer} result of main function
 	 */
 	interpret(breakstop){
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
@@ -263,23 +270,21 @@ class Interpreter {
 	}
 
 	visitCStmt(stmt){
+		// this is kind of ugly but it works really well
+
 		var iNum = 0;
 		var construct = stmt.sequence[iNum];
 
 		while(construct && this.#_instrNum <= this.#breakstop){ // construct can be null so that's the reason for while
 			construct.accept(this);
 
-			console.log("breakstop: ", this.#breakstop, " pcloclast: ", this.#_pcloclast, " pc: ", this.pc.loc.first_line, " iNum: ", iNum);
 			this.updateHTML();
 
 			iNum++;
 			construct = stmt.sequence[iNum];
 		}
 		
-		/*for(var construct of stmt.sequence){ old version without breaklines
-			construct.accept(this);
-		}*/
-
+		// V-- changing scopes will be done in call stack
 		//! this.#symtableStack.peek().children.pop() // removes child not longer used (scope went out of its life)
 	}
 
@@ -290,24 +295,20 @@ class Interpreter {
 	}
 
 	visitTypedef(typedef){
+
 	}
 
 	visitFncCallExpr(fncCall){
-		//TODO create call stack perhaps
+		//TODO create call stack!
 		// but well this is the jist of it
 		this.pc = fncCall;
 
 		const fnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, fncCall.expr.name);
 		fnc.astPtr.accept(this);
-
-		/*
-		console.log(this.pc);
-		console.log(this.pcloc);
-		console.log(this.pcloclast);
-		*/
 	}
 
 	visitReturn(ret){
+
 	}
 
 
@@ -326,7 +327,10 @@ class Interpreter {
 
 
 
-	/* Helper functions */
+	/************************************
+	 *          Helper functions        *
+	 ***********************************/
+
 	/**
 	 * Refreshes cached symbols stored in parser
 	 * @private
@@ -337,13 +341,13 @@ class Interpreter {
 
 	/**
 	 * Updates HTML to display interpreter output and generated structure
-	 * @todo If needed, pass the element ids as arguments
+	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
 	updateHTML(){
 		JSONEDITeditorAST.set(this.#ast);
 		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
-		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2);
-		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2);
+		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2); // old way of printing AST
+		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
 		document.getElementById("programCounter").innerHTML = "Step: " + this.#breakstop;
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
