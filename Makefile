@@ -6,7 +6,7 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin) # MacOS
     RM_RF := rm -rf
 endif
-ifeq ($(UNAME_S),Windows_NT)
+ifeq ($(UNAME_S),Windows_NT) # !fix
 	RM_RF := rmdir /s
 else # Linux
     RM_RF := rm -rf
