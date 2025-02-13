@@ -1,5 +1,17 @@
 include .env
 
+# Detect the operating system
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin) # MacOS
+    RM_RF := rm -rf
+endif
+ifeq ($(UNAME_S),Windows_NT)
+	RM_RF := rmdir /s
+else # Linux
+    RM_RF := rm -rf
+endif
+
 run:
 	firefox index.html
 
@@ -13,6 +25,6 @@ run_doc: doc
 	firefox doc.html
 
 clean_doc:
-	rm -f -r doc/gen/
+	$(RM_RF) doc/gen/
 
 .PHONY: tests
