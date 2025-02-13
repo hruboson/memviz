@@ -105,20 +105,33 @@ class Interpreter {
 	 * Program counter
 	 * @description Currently interpreted statement
 	 * @private
-	 * @type {integer}
+	 * @type {Construct}
 	 */
 	#_pc = 0;
 	get pc(){
 		return this.#_pc;
 	}
 
-	set pc(integer){
-		this.#_pc = this.#_pc + 1;
-		if(this.#_pc > 1){
-			this.#_pcloclast = this.#_pcloc;
+	set pc(construct){
+		console.log(construct);
+		this.#_pc = construct;
+		this.#_instrNum++;
+		if(construct){
+			if(this.#_pcloc > 0){
+				this.#_pcloclast = this.#_pcloc;
+			}
+
+			this.#_pcloc = construct.loc.first_line;
 		}
-		this.#_pcloc = integer;
 	}
+
+	/**
+	 * Instruction number
+	 * @description Counts the number of constructs interpreted
+	 * @private
+	 * @type {integer}
+	 */
+	#_instrNum = 0;
 
 	/**
 	 * Program counter line of code TO BE INTERPRETED
@@ -209,27 +222,6 @@ class Interpreter {
 	}
 
 	/**
-	 * Interpret until specified breakline
-	 * @throws {RTError|SError}
-	 * @param {integer} line Interpret until this line number
-	 * @todo change to run main() function!!!
-	 */
-	/*interpretBreakline(breakline){
-		this.#breakline = breakline;
-		var iNum = 0;
-		var construct = this.#ast[iNum];
-
-		this.#callStack.call();
-		/*while(construct && construct.loc.first_line <= this.#breakline){
-			construct.accept(this);
-			this.updateHTML();
-
-			iNum++;
-			construct = this.#ast[iNum];
-		}
-	}*/
-
-	/**
 	 * Interprets ast (for now, maybe do IC later -- like much much later)
 	 * @throws {RTError} Runtime error
 	 * @param {AST} ast
@@ -239,7 +231,11 @@ class Interpreter {
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
-		mainFnc.astPtr.accept(this);
+
+		if(breakstop > 0){
+			this.pc = mainFnc.astPtr.body.sequence[0]; // get the first construct of the sequence statement
+			this.pc.accept(this);
+		}
 		
 		this.updateHTML();
 		return this.#symtableGlobal.print();//TODO change this to return result of main()
@@ -250,11 +246,16 @@ class Interpreter {
 	 *******************************/
 
 	visitDeclaration(declaration){
+		this.pc = declaration;
+
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
+
+		declarator.accept(this);
 	}
 
 	visitDeclarator(declarator){
+
 	}
 
 	visitIdentifier(id){
@@ -265,8 +266,10 @@ class Interpreter {
 		var iNum = 0;
 		var construct = stmt.sequence[iNum];
 
-		while(construct && this.pc <= this.#breakstop){ // construct can be null so that's the reason for while
+		while(construct && this.#_instrNum <= this.#breakstop){ // construct can be null so that's the reason for while
 			construct.accept(this);
+
+			console.log("breakstop: ", this.#breakstop, " pcloclast: ", this.#_pcloclast, " pc: ", this.pc.loc.first_line, " iNum: ", iNum);
 			this.updateHTML();
 
 			iNum++;
@@ -281,8 +284,9 @@ class Interpreter {
 	}
 
 	visitFnc(fnc){
-		this.pc = fnc.body.loc.first_line;
-		fnc.body.accept(this); // run body
+		if(this.#_instrNum <= this.#breakstop){ // this is for the first call of main
+			fnc.body.accept(this); // run body
+		}
 	}
 
 	visitTypedef(typedef){
@@ -291,6 +295,8 @@ class Interpreter {
 	visitFncCallExpr(fncCall){
 		//TODO create call stack perhaps
 		// but well this is the jist of it
+		this.pc = fncCall;
+
 		const fnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, fncCall.expr.name);
 		fnc.astPtr.accept(this);
 
@@ -338,7 +344,7 @@ class Interpreter {
 		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
 		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2);
 		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2);
-		document.getElementById("programCounter").innerHTML = this.#breakstop + "/" + editor.getSession().getLength(); // fix this!!!
+		document.getElementById("programCounter").innerHTML = "Step: " + this.#breakstop;
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
 
@@ -346,10 +352,10 @@ class Interpreter {
 
 		// create new marker
 		if(this.pcloclast > 0){
-			var rangeJI = new Range(this.pcloclast, 0, this.pcloclast, 1); // just interpreted 
-			var markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine")
+			var rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted 
+			var markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
 		}
-		var rangeTBI = new Range(this.pcloc, 0, this.pcloc, 1); // to be interpreted
-		var markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine")
+		var rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // to be interpreted
+		var markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine");
 	}
 }
