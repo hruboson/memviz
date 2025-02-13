@@ -523,11 +523,7 @@ Split(["#split-ve", "#split-console"], {
 	 */
 	function setExample(example){
 		editor.setValue(example);
-		//editor.session.replace(new ace.Range(0, 0, 1, 1), example);
-
-		unhighlight();
-		toggleButtons(true);
-		breaklineEditor = 0;
+		resetEditor();
 	}
 
 	/**
@@ -548,6 +544,7 @@ Split(["#split-ve", "#split-console"], {
 	 * @global
 	 * @param {string} input
 	 * @param {Object} flags Set flags to run different stages of interpreter ({ execute: true } for complete interpretation)
+	 * @todo refactor or completely change the behaviour, this shit is gonna haunt me for ages if I leave it as is
 	 */
 	function execute(input, flag){
 		var interpreter = new Interpreter();
@@ -605,7 +602,7 @@ Split(["#split-ve", "#split-console"], {
 </script>
 <script>
 	// THIS IS ONLY A SHOWCASE, DELETE LATER
-	mxg = window.mxg;
+	mxg = window.mxg; // core of the library
 	const container = document.getElementById("output");
 	// Disables the built-in context menu
 	mxg.InternalEvent.disableContextMenu(container);
