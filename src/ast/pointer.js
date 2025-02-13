@@ -35,7 +35,7 @@ class Pointer {
 		this.loc = loc;
 	}
 
-	function accept(visitor){
+	accept(visitor){
 		return visitor.visitPtr(this);
 	}
 }
