@@ -194,6 +194,18 @@ void main() {
 	return (*b)();
 }`;
 
+const function_returning_function_example = `void a(){
+    return;
+}
+
+void (*getFunction())(void) {
+    return a;
+}
+
+void main(){
+	getFunction()();
+}`;
+
 const function_simple_example = `void hello(){
 	char a[] = "Hello world";
 	return;
