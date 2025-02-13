@@ -234,7 +234,7 @@ class Interpreter {
 
 		if(breakstop > 0){
 			this.pc = mainFnc.astPtr.body.sequence[0]; // get the first construct of the sequence statement
-			this.pc.accept(this);
+			mainFnc.astPtr.body.accept(this);
 		}
 		
 		this.updateHTML();
