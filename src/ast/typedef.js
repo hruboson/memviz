@@ -38,7 +38,7 @@ class Typedef extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitTypedef(this);
+		return visitor.visitTypedef(this);
 	}
 }
 

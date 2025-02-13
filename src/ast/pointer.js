@@ -34,4 +34,8 @@ class Pointer {
 		this.qualifiers = qualifiers;
 		this.loc = loc;
 	}
+
+	function accept(visitor){
+		return visitor.visitPtr(this);
+	}
 }

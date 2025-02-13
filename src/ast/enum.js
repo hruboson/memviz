@@ -38,7 +38,7 @@ class Enum extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitEnum(this);
+		return visitor.visitEnum(this);
 	}
 }
 

@@ -161,7 +161,7 @@ class Initializer extends Construct {
 	}	
 
 	accept(visitor){
-		visitor.visitInitializer(this);
+		return visitor.visitInitializer(this);
 	}
 }
 
@@ -260,7 +260,7 @@ class Declarator extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitDeclarator(this);
+		return visitor.visitDeclarator(this);
 	}
 }
 
@@ -320,7 +320,7 @@ class Declaration extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitDeclaration(this);
+		return visitor.visitDeclaration(this);
 	}
 }
 

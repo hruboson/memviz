@@ -45,6 +45,6 @@ class Fnc extends Stmt {
 	}
 
 	accept(visitor){
-		visitor.visitFnc(this);
+		return visitor.visitFnc(this);
 	}
 }

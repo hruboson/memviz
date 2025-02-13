@@ -13,7 +13,7 @@ class Stmt extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitStmt(this);
+		return visitor.visitStmt(this);
 	}
 }
 
@@ -45,7 +45,7 @@ class CStmt extends Stmt {
 	}
 
 	accept(visitor){
-		visitor.visitCStmt(this);
+		return visitor.visitCStmt(this);
 	}
 }
 
@@ -55,7 +55,7 @@ class CStmt extends Stmt {
  */
 class EStmt extends Stmt {
 	accept(visitor){
-		visitor.visitEStmt(this);
+		return visitor.visitEStmt(this);
 	}
 }
 
@@ -65,7 +65,7 @@ class EStmt extends Stmt {
  */
 class SStmt extends Stmt {
 	accept(visitor){
-		visitor.visitSStmt(this);
+		return visitor.visitSStmt(this);
 	}
 }
 
@@ -75,7 +75,7 @@ class SStmt extends Stmt {
  */
 class IStmt extends Stmt {
 	accept(visitor){
-		visitor.visitIStmt(this);
+		return visitor.visitIStmt(this);
 	}
 }
 
@@ -85,7 +85,7 @@ class IStmt extends Stmt {
  */
 class JStmt extends Stmt {
 	accept(visitor){
-		visitor.visitJStmt(this);
+		return visitor.visitJStmt(this);
 	}
 }
 
@@ -109,6 +109,6 @@ class Return extends JStmt {
 	}
 
 	accept(visitor){
-		visitor.visitReturn(this);
+		return visitor.visitReturn(this);
 	}
 }

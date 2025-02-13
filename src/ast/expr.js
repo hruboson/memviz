@@ -28,7 +28,7 @@ class Expr extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitExpr(this);
+		return visitor.visitExpr(this);
 	}
 }
 
@@ -59,7 +59,7 @@ class UExpr extends Expr {
 	}
 
 	accept(visitor){
-		visitor.visitUExpr(this);
+		return visitor.visitUExpr(this);
 	}
 }
 
@@ -95,7 +95,7 @@ class BAssignExpr extends BExpr {
 	}
 
 	accept(visitor){
-		visitor.visitBAssignExpr(this);
+		return visitor.visitBAssignExpr(this);
 	}
 }
 
@@ -114,7 +114,7 @@ class BArithExpr extends BExpr {
 	}
 
 	accept(visitor){
-		visitor.visitBArithExpr(this);
+		return visitor.visitBArithExpr(this);
 	}
 }
 
@@ -133,7 +133,7 @@ class BLogicExpr extends BExpr {
 	}
 
 	accept(visitor){
-		visitor.visitBLogicExpr(this);
+		return visitor.visitBLogicExpr(this);
 	}
 }
 
@@ -152,7 +152,7 @@ class BCompExpr extends BExpr {
 	}
 
 	accept(visitor){
-		visitor.visitBCompExpr(this);
+		return visitor.visitBCompExpr(this);
 	}
 }
 
@@ -174,7 +174,7 @@ class SubscriptExpr extends Expr {
 	}
 
 	accept(visitor){
-		visitor.visitSubscriptExpr(this);
+		return visitor.visitSubscriptExpr(this);
 	}
 }
 
@@ -192,7 +192,7 @@ class MemberAccessExpr extends Expr {
 	}
 
 	accept(visitor){
-		visitor.visitMemberAccessExpr(this);
+		return visitor.visitMemberAccessExpr(this);
 	}
 }
 
@@ -210,7 +210,7 @@ class PtrMemberAccessExpr extends Expr {
 	}
 
 	accept(visitor){
-		visitor.visitPtrMemberAccessExpr(this);
+		return visitor.visitPtrMemberAccessExpr(this);
 	}
 }
 
@@ -226,7 +226,7 @@ class CExpr extends Expr {
 	}
 
 	accept(visitor){
-		visitor.visitCExpr(this);
+		return visitor.visitCExpr(this);
 	}
 }
 
@@ -252,7 +252,7 @@ class FncCallExpr extends Expr {
 	}
 
 	accept(visitor){
-		visitor.visitFncCallExpr(this);
+		return visitor.visitFncCallExpr(this);
 	}
 }
 
@@ -264,7 +264,7 @@ class CastExpr extends Expr {
 	}
 
 	accept(visitor){
-		visitor.visitCastExpr(this);
+		return visitor.visitCastExpr(this);
 	}
 }
 

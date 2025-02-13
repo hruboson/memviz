@@ -30,7 +30,7 @@ class Identifier extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitIdentifier(this);
+		return visitor.visitIdentifier(this);
 	}
 }
 
@@ -62,7 +62,7 @@ class Tagname extends Construct {
 	}
 
 	accept(visitor){
-		visitor.visitTagname(this);
+		return visitor.visitTagname(this);
 	}
 }
 

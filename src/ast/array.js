@@ -26,6 +26,6 @@ class Arr extends Construct{ // should this be child of Construct or something e
 	}
 
 	accept(visitor){
-		visitor.visitArr(this);
+		return visitor.visitArr(this);
 	}
 }
