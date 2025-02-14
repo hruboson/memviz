@@ -199,7 +199,7 @@ const function_returning_function_example = `void a(){
 }
 
 void (*getFunction())(void) {
-    return a;
+    return a(), a;
 }
 
 void main(){

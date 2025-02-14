@@ -216,13 +216,20 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">void hello(){
-    int a = 1;
-    hello();
+						<div id="editor" onChange="resetEditor();">void a(){
+    return;
+}
+
+void b(){
+    return;
+}
+
+void (*getFunction())(void) {
+    return b(), a;
 }
 
 void main(){
-	hello();
+	getFunction()();
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
@@ -589,7 +596,9 @@ Split(["#split-ve", "#split-console"], {
 			}
 
 			if(flag != EXEOPT.COMPILE) interpreter.compile(input); // this is all so ugly, I hate it
-			interpreter.interpret(breakEditor);
+			const result = interpreter.interpret(breakEditor);
+			console.info("Main result: ", result);
+
 			interpreter.updateHTML();
 			if(flag == EXEOPT.PARSE){
 				document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);

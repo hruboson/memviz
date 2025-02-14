@@ -207,7 +207,7 @@ class Semantic {
 
 			const funcSymbol = this.symtableStack.peek().resolve(funcName);
 
-			if(funcSymbol.specifiers == "void" && ret.expr != null){
+			if(funcSymbol.specifiers == "void" && funcSymbol.pointer == false && ret.expr != null){
 				this.warningSystem.add(`return with a value, in function returning void`, WTYPE.RETURNTYPE, ret.loc);
 			}
 

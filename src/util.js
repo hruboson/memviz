@@ -86,3 +86,24 @@ class Stack {
 		this.#items[this.#items.length] = item;
 	}
 }
+
+/**
+ * Check the class of object against a string (name)
+ * @param {Object} obj Object to check
+ * @param {string} str Name of class to check against
+ * @return {boolean}
+ */
+function isclass(obj, str){
+	if(obj == null) return false;
+	return obj.constructor.name == str;
+}
+
+/**
+ * Get the name of class of the object
+ * @param {Object} obj Object to check
+ * @return {string}
+ */
+function getclass(obj){
+	if(obj == null) return "null";
+	return obj.constructor.name;
+}

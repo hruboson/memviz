@@ -108,7 +108,6 @@ class Interpreter {
 	 * @param {Construct} Construct which just got interpreted
 	 */
 	set pc(construct){
-		console.log(construct);
 		this.#_pc = construct;
 		this.#_instrNum++;
 		if(construct){
@@ -214,7 +213,7 @@ class Interpreter {
 				throw new SError("main is not a function");
 			}
 		}else{
-			throw new SError("Undefined reference to main()")
+			throw new SError("undefined reference to main()")
 		}
 	}
 
@@ -235,17 +234,24 @@ class Interpreter {
 	 * @return {integer} result of main function
 	 */
 	interpret(breakstop){
+		console.log("=========================================");
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
+		let result = "void";
 
 		if(breakstop > 0){
-			this.pc = mainFnc.astPtr.body.sequence[0]; // get the first construct of the sequence statement
-			mainFnc.astPtr.body.accept(this);
+			this.pc = mainFnc.astPtr.body.sequence[0]; // get the first construct of the sequence statement (for visualization)
+			try{
+				mainFnc.astPtr.body.accept(this);
+			}catch(ret){ // catch return value of main
+				result = ret.value;
+			}
 		}
 		
 		this.updateHTML();
-		return this.#symtableGlobal.print();//TODO change this to return result of main()
+		console.log("=========================================");
+		return result;
 	}
 
 	/*******************************
@@ -257,60 +263,90 @@ class Interpreter {
 
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
-
-		declarator.accept(this);
 	}
 
 	visitDeclarator(declarator){
 
 	}
 
-	visitIdentifier(id){
+	visitTypedef(typedef){
 
 	}
 
+	visitIdentifier(id){
+		return id;
+	}
+
 	visitCStmt(stmt){
-		// this is kind of ugly but it works really well
-
-		var iNum = 0;
-		var construct = stmt.sequence[iNum];
-
-		while(construct && this.#_instrNum <= this.#breakstop){ // construct can be null so that's the reason for while
+		for(const construct of stmt.sequence){
+			if(this.#_instrNum > this.#breakstop) return;
 			construct.accept(this);
 
 			this.updateHTML();
-
-			iNum++;
-			construct = stmt.sequence[iNum];
 		}
-		
+
 		// V-- changing scopes will be done in call stack
 		//! this.#symtableStack.peek().children.pop() // removes child not longer used (scope went out of its life)
 	}
 
 	visitFnc(fnc){
-		if(this.#_instrNum <= this.#breakstop){ // this is for the first call of main
+		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
+
+		try{
 			fnc.body.accept(this); // run body
+		}catch(ret){ // catch return
+			if(isclass(ret.value, "ReturnVoid")){ // maybe change the void to some struct
+				return null;
+			}
+			return ret.value;
 		}
 	}
 
-	visitTypedef(typedef){
+	visitFncCallExpr(callExpr){
+		var callee = callExpr.expr.accept(this); // callee should in the end return identifier or pointer to the function
 
-	}
+		if(this.#_instrNum > this.#breakstop) return;
+		this.pc = callExpr;
 
-	visitFncCallExpr(fncCall){
-		//TODO create call stack!
-		// but well this is the jist of it
-		this.pc = fncCall;
+		if(!callee.name){
+			throw new RTError("Callee is not an identifier", callExpr);
+		}
 
-		const fnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, fncCall.expr.name);
-		fnc.astPtr.accept(this);
+		const fncPtr = this.#symtableGlobal.lookup(NAMESPACE.ORDS, callee.name);
+		return fncPtr.astPtr.accept(this);
 	}
 
 	visitReturn(ret){
+		if(this.#_instrNum > this.#breakstop) return;
+		this.pc = ret;
 
+		// return only most right-hand expression, evaluate rest
+		// when expression is returned get the right-most operand to return and evaluate the left-hand operand
+		var expr = ret.expr;
+		// check if function has void signature if yes just to this (ignore return value) ---V the function should be on callstack -> DO THAT FIRST (I know it's a pain in the ass)
+		if(expr == null) throw new ReturnThrow(ret.loc, new ReturnVoid()); // in case of empty return (void return)
+
+		if(expr.length > 1){
+			for(let i = 0; i < expr.length - 1; i++){
+				if(this.#_instrNum > this.#breakstop) return;
+				expr[i].accept(this);
+			}
+
+			expr = expr[expr.length - 1];
+		}else if(expr.length == 1){
+			expr = expr[expr.length - 1];
+		}
+
+		expr = expr.accept(this); // resolve the last expression
+
+		if(this.#_instrNum > this.#breakstop) return;
+		throw new ReturnThrow(expr);
 	}
 
+	visitCExpr(expr){
+		this.pc = expr; // remove this later
+		return expr;
+	}
 
 
 
@@ -348,7 +384,7 @@ class Interpreter {
 		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
 		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2); // old way of printing AST
 		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
-		document.getElementById("programCounter").innerHTML = "Step: " + this.#breakstop;
+		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
 
@@ -356,10 +392,21 @@ class Interpreter {
 
 		// create new marker
 		if(this.pcloclast > 0){
-			var rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted 
-			var markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
+			let rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted 
+			let markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
 		}
-		var rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // to be interpreted
-		var markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine");
+		let rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // to be interpreted
+		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine");
 	}
+}
+
+class ReturnThrow {
+	constructor(construct){
+		this.loc = construct.loc;
+		this.value = construct;
+	}
+}
+
+class ReturnVoid {
+	// this could maybe be the NOP class from expr.js?	
 }

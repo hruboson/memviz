@@ -28,8 +28,15 @@ class Construct {
 	 */
 	loc;
 
+	/**
+	 * Class (type) of the Construct (JS things...)
+	 * @type {string}
+	 */
+	cType;
+
 	constructor(){
 		abstract(this, Construct);
 		intfc(this, "accept", ["visitor"]);
+		this.cType = this.constructor.name;
 	}
 }
