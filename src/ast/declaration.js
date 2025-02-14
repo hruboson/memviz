@@ -70,7 +70,7 @@ class Designator {
 	loc;
 
 	constructor(designator, loc){
-		if(designator instanceof Identifier){ //FIX should be exact instanceof, create a function in util.js for this
+		if(isclass(designator, "Identifier")){
 			this.kind = "IDENTIFIER";
 		}else{
 			this.kind = "CEXPR";

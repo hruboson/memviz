@@ -67,7 +67,7 @@ class Semantic {
 			}
 		}while(declChild != null);
 
-		if(initializer instanceof Initializer){
+		if(isclass(initializer, "Initializer")){
 			if(isFunction){
 				//? this might be completely wrong check this! Yes it is wrong, it could be function that returns pointer (honestly really check this xd)
 				if(!declPtr){
@@ -134,7 +134,7 @@ class Semantic {
 	visitFncCallExpr(fncCall){
 		//TODO https://en.cppreference.com/w/c/language/operator_other#Function_call
 		// for now just go with identifier
-		if(fncCall.expr instanceof Identifier){
+		if(isclass(fncCall.expr, "Identifier")){
 			const fncName = fncCall.expr.name;
 			const currSymtable = this.symtableStack.peek();
 			const fncSym = currSymtable.resolve(fncName);
