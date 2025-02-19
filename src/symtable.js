@@ -241,6 +241,8 @@ class Symtable {
 						// allow function declaration - definition
 						if(type == SYMTYPE.FNC){
 							sym.initialize();
+							sym.astPtr = astPtr;
+							sym.type = SYMTYPE.FNC;
 							return;
 						}
 

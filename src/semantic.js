@@ -23,7 +23,13 @@ class Semantic {
 	}
 
 	secondPhase(){
-		//TODO check symbol definition existence
+		const currSymtable = this.symtableStack.peek();
+
+		for (const [name, symbol] of currSymtable.objects) {
+			if (symbol.isFunction && !symbol.initialized) {
+				throw new SError(`function '${name}' declared but never defined`, symbol.astPtr.loc);
+			}
+		}
 	}
 
 	/**
@@ -59,7 +65,7 @@ class Semantic {
 					parameters = [];
 					for(const param of declarator.fnc.parameters){
 						if(param.type.specifiers.includes("void")) continue; // don't add void parameter
-						parameters.add(param);
+						parameters.push(param);
 					}
 				}
 				if(declChild.kind == DECLTYPE.PTR){
@@ -126,6 +132,7 @@ class Semantic {
 
 	visitFnc(fnc){
 		const fncName = this.addSymbol(SYMTYPE.FNC, fnc.declarator, fnc.body, fnc.returnType, fnc); // adds function to global symbol table
+		console.log(fncName);
 		this.symtableStack.push(new Symtable(fncName, "function params", this.symtableStack.peek()));
 
 		for(const param of fnc.declarator.fnc.parameters){
@@ -170,7 +177,6 @@ class Semantic {
 			if(fncCall.arguments.length > fncSym.parameters.length){
 				throw new SError(`too many arguments to function ${fncName}`, fncCall.loc);
 			}else if(fncCall.arguments.length < fncSym.parameters.length){
-				console.log(fncSym);
 				throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
 			}
 		}else{

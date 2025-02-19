@@ -55,6 +55,7 @@
 	<script src="src/semantic.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/callstack.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/nativefuncs.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Custom CSS -->
 	<style type="text/css" media="screen">
@@ -216,20 +217,14 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">void a(){
-    return;
+						<div id="editor" onChange="resetEditor();">void f(int x);
+int main(void)
+{
+    f(1);
 }
 
-void b(){
-    return;
-}
-
-void (*getFunction())(void) {
-    return b(), a;
-}
-
-void main(){
-	getFunction()();
+void f(int x){
+	int y = x + x;
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
