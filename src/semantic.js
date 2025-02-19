@@ -23,9 +23,9 @@ class Semantic {
 	}
 
 	secondPhase(){
-		const currSymtable = this.symtableStack.peek();
+		const gSymtable = this.symtableStack.peek();
 
-		for (const [name, symbol] of currSymtable.objects) {
+		for (const [name, symbol] of gSymtable.objects) {
 			if (symbol.isFunction && !symbol.initialized) {
 				throw new SError(`function '${name}' declared but never defined`, symbol.astPtr.loc);
 			}
@@ -132,7 +132,6 @@ class Semantic {
 
 	visitFnc(fnc){
 		const fncName = this.addSymbol(SYMTYPE.FNC, fnc.declarator, fnc.body, fnc.returnType, fnc); // adds function to global symbol table
-		console.log(fncName);
 		this.symtableStack.push(new Symtable(fncName, "function params", this.symtableStack.peek()));
 
 		for(const param of fnc.declarator.fnc.parameters){
