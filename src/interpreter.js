@@ -203,9 +203,11 @@ class Interpreter {
 	 * @param {AST} ast
 	 */
 	semantic(ast){
-		for(const construct of ast){
-			construct.accept(this.#semanticAnalyzer);
-		}
+		// first phase
+		this.#semanticAnalyzer.firstPhase(ast);
+		
+		// second phase
+		this.#semanticAnalyzer.secondPhase(); // additional semantic checks after creating symbol table
 		
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
 		if(mainFnc){
@@ -238,14 +240,14 @@ class Interpreter {
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
-		let result = "void";
+		let result = new ReturnVoid();
 
 		if(breakstop > 0){
 			this.pc = mainFnc.astPtr.body.sequence[0]; // get the first construct of the sequence statement (for visualization)
 			try{
 				mainFnc.astPtr.body.accept(this);
 			}catch(ret){ // catch return value of main
-				result = ret.value;
+				result = ret;
 			}
 		}
 		

@@ -16,6 +16,16 @@ class Semantic {
 		this.warningSystem = warningSystem;
 	}
 
+	firstPhase(ast){
+		for(const construct of ast){
+			construct.accept(this);
+		}
+	}
+
+	secondPhase(){
+		//TODO check symbol definition existence
+	}
+
 	/**
 	 * Adds symbol to current scope
 	 * @param {Declarator} declarator
@@ -46,7 +56,11 @@ class Semantic {
 				}
 				if(declChild.kind == DECLTYPE.FNC){
 					isFunction = true;
-					parameters = declarator.fnc.parameters;
+					parameters = [];
+					for(const param of declarator.fnc.parameters){
+						if(param.type.specifiers.includes("void")) continue; // don't add void parameter
+						parameters.add(param);
+					}
 				}
 				if(declChild.kind == DECLTYPE.PTR){
 					declPtr = true;
@@ -115,6 +129,8 @@ class Semantic {
 		this.symtableStack.push(new Symtable(fncName, "function params", this.symtableStack.peek()));
 
 		for(const param of fnc.declarator.fnc.parameters){
+			if(param.type.specifiers.includes("void")) continue; // dont add void as parameter to symtable: int f(void){}
+
 			this.addSymbol(SYMTYPE.OBJ, param.declarator, false, param.type.specifiers, param);
 		}
 
@@ -154,6 +170,7 @@ class Semantic {
 			if(fncCall.arguments.length > fncSym.parameters.length){
 				throw new SError(`too many arguments to function ${fncName}`, fncCall.loc);
 			}else if(fncCall.arguments.length < fncSym.parameters.length){
+				console.log(fncSym);
 				throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
 			}
 		}else{
@@ -212,7 +229,9 @@ class Semantic {
 			}
 
 			if(!funcSymbol.specifiers.includes("void")){
-				ret.expr.accept(this);
+				for(const exp of ret.expr){ // expr is always an array
+					exp.accept(this);
+				}
 			}
 
 			/*if(ret.expr instanceof Identifier){//! just a showcase, remove later
@@ -221,7 +240,7 @@ class Semantic {
 
 
 		}catch(e){
-			console.log(e);
+			console.error(e);
 		}
 	}
 }
