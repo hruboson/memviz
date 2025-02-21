@@ -154,32 +154,46 @@ class Semantic {
 	}
 
 	visitFncCallExpr(fncCall){
-		//TODO https://en.cppreference.com/w/c/language/operator_other#Function_call
-		// for now just go with identifier
+		var fncName;
+		var currSymtable;
+		var fncSym;
+
+		// https://en.cppreference.com/w/c/language/operator_other#Function_call
+		// so I should first implicitly convert the expression (lvalue) and check if it is pointer-to-function type 
+		// 	-->	https://en.cppreference.com/w/c/language/conversion#Lvalue_conversions
 		if(isclass(fncCall.expr, "Identifier")){
-			const fncName = fncCall.expr.name;
-			const currSymtable = this.symtableStack.peek();
-			const fncSym = currSymtable.resolve(fncName);
-
-			if(!fncSym){
-				throw new SError(`undeclared function ${fncName}`, fncCall.loc);
-			}
-
-			/*if(!fncSym.initialized){ this should be checked on second walkthrough (or in interpreter??? I'm not sure)
-				throw new SError(`undefined reference to ${fncName}`, fncCall.loc);
-			}*/
-
-			if(!fncSym.isFunction){
-				throw new SError(`called object ${fncName} is not a function or function pointer`, fncCall.loc);
-			}
-
-			if(fncCall.arguments.length > fncSym.parameters.length){
-				throw new SError(`too many arguments to function ${fncName}`, fncCall.loc);
-			}else if(fncCall.arguments.length < fncSym.parameters.length){
-				throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
-			}
+			fncName = fncCall.expr.name;
+			currSymtable = this.symtableStack.peek();
+			fncSym = currSymtable.resolve(fncName);
+		}else if(isclass(fncCall.expr, "FncCallExpr")){
+			fncName = fncCall.expr.expr.name;
+			currSymtable = this.symtableStack.peek();
+			fncSym = currSymtable.resolve(fncName);
+		}else if(isclass(fncCall.expr, "Array")){
+			console.info("Array expr call");
+			return;
 		}else{
-			return "TODO";
+			console.warning("TODO SEMANTICS FUNCTION CALL");
+		}
+
+
+		if(!fncSym){
+			throw new SError(`undeclared function ${fncName}`, fncCall.loc);
+		}
+
+		if(!fncSym.isFunction){
+			throw new SError(`called object ${fncName} is not a function or function pointer`, fncCall.loc);
+		}
+
+		if(fncCall.arguments.length > fncSym.parameters.length){
+			throw new SError(`too many arguments to function ${fncName}`, fncCall.loc);
+		}else if(fncCall.arguments.length < fncSym.parameters.length){
+			throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
+		}
+
+		// check types of parameters
+		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
+			this.typeCheck(this.getParameterType(param), arg);
 		}
 	}
 
@@ -247,5 +261,76 @@ class Semantic {
 		}catch(e){
 			console.error(e);
 		}
+	}
+
+	/**********************
+	 *  HELPER FUNCTIONS  *
+	 *********************/
+
+	/**
+	 * Returns the type of declared parameter
+	 * @param {Declarator} declarator
+	 * @return {string} specifiers
+	 */
+	getParameterType(declarator){
+		// not sure but for params it should not be longer than 1
+		return declarator[0].type.specifiers;
+	}
+
+	/**
+	 * Checks if the declared type matches the inferred type of the expression.
+	 * @param {Array<string>} specifiers The list of type specifiers from the declaration
+	 * @param {Object} expression The expression to be type-checked
+	 * @throws {Error} Throws an error if there is a type mismatch
+	 */
+	typeCheck(specifiers, expression) {
+		// Determine the expression type
+		let declType = this.normalizeType(specifiers);
+		let exprType = this.inferType(expression);
+
+		// Check if the types match
+		if (declType != exprType) {
+			throw new SError(`Type mismatch: expected ${declType}, but got ${exprType}`, expression.loc);
+		}
+	}
+
+	/**
+	 * Returns normalized specifier list (main type will be first)
+	 * @param {Array<string>} specifiers
+	 * @return {Arr}
+	 */
+	normalizeType(specifiers) {
+		// omit signed (as it is default)
+		let filteredSpecifiers = specifiers.includes("signed")
+        ? specifiers.filter(s => s != "signed")
+        : specifiers;
+
+		// sort specifiers for consistency
+		return filteredSpecifiers.sort().join(" ");
+	}
+
+	/**
+	 * Infers the type of an expression.
+	 * @param {Object} expression The expression object to analyze
+	 * @returns {string} The inferred C type of the expression
+	 * @throws {Error} Throws an error if the expression type is unknown
+	 */
+	inferType(expression) {
+		if (expression.cType == "CExpr") {
+			switch (expression.type) {
+				case "s_literal": return "char*";
+				case "i_constant":
+					if (expression.value.endsWith("LL")) return "int long long";  // Long long int
+					if (expression.value.endsWith("L")) return "int long";        // Long int
+					return "int";  // Default to int
+				case "f_constant":
+					if (expression.value.endsWith("f") || expression.value.endsWith("F")) return "float";
+					return "double";  // Default to double
+				default:
+					throw new AppError(`Unknown expression type: ${expression.type}`);
+			}
+		}
+
+		throw new AppError(`Invalid expression structure`);
 	}
 }

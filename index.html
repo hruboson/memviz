@@ -217,14 +217,23 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">void f(int x);
-int main(void)
-{
-    f(1);
+						<div id="editor" onChange="resetEditor();">void b(int x){
+    int xx = x;
+    return;
 }
 
-void f(int x){
-	int y = x + x;
+void (*a())(int){
+    return b;
+}
+
+void (*getFunction())(int) {
+    return a(1);
+}
+
+void main(){
+	b("");
+    (&b)(); // semantic error, missing int parameter
+    getFunction()(1);
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
