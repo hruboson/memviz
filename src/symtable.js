@@ -62,6 +62,9 @@ const SYMTYPE = {
  * @param {bool} pointer Is symbol a pointer?
  * @param {integer} dimension Dimension of array, 0 for non-array
  * @param {Array.<Declarator>} parameters
+ * @param {bool} isFunction Declares symbol as type of function
+ * @param {Construct} astPtr Pointer to AST
+ * @param {bool} isNative Specifies if function is native or user defined
  */
 class Sym {
 
@@ -119,7 +122,13 @@ class Sym {
 	 */
 	astPtr;
 
-	constructor(name, type, initialized, specifiers, pointer, dimension=0, parameters=null, isFunction=false, astPtr=null){
+	/**
+	 * Mark function as built-in (native). For printf, malloc, free, ...
+	 * @type {boolean}
+	 */
+	isNative;
+
+	constructor(name, type, initialized, specifiers, pointer, dimension=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
@@ -128,6 +137,7 @@ class Sym {
 		this.initialized = initialized;
 		this.parameters = parameters;
 		this.isFunction = isFunction;
+		this.isNative = isNative;
 		this.astPtr = astPtr; // is this 100% pointer??? otherwise it's super inefficient (I'm not sure how JS pointers work)
 	}
 
@@ -230,7 +240,7 @@ class Symtable {
 	 * @param {integer} dimension
 	 * @param {Array.<Declarator>} parameters
 	 */
-	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, parameters=null, isFunction=false, astPtr=null){
+	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
 		switch(namespace){
 			case NAMESPACE.ORDS:
 				const sym = this.lookup(namespace, name);
@@ -243,6 +253,7 @@ class Symtable {
 							sym.initialize();
 							sym.astPtr = astPtr;
 							sym.type = SYMTYPE.FNC;
+							sym.isNative = isNative;
 							return;
 						}
 
@@ -250,7 +261,7 @@ class Symtable {
 					}
 				}
 
-				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, parameters, isFunction, astPtr));
+				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, parameters, isFunction, astPtr, isNative));
 				break;
 			case NAMESPACE.TAGS:
 				break;
@@ -335,6 +346,7 @@ ${indent}${spacing}init: ${symbol.initialized}
 
 			if(symbol.isFunction){
 				objectsString += `${indent}${spacing}isFunction: ${symbol.isFunction}\n`;
+				objectsString += `${indent}${spacing}isNative: ${symbol.isNative}\n`;
 				/*symbol.parameters.forEach(function(){
 					objectsString += `${indent}\t`;
 				});*/

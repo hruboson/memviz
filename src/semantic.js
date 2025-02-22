@@ -34,10 +34,12 @@ class Semantic {
 
 	/**
 	 * Adds symbol to current scope
-	 * @param {Declarator} declarator
-	 * @param {Array.<string>} specifiers
 	 * @param {SYMTYPE} type
-	 * @param {Array.<Declarator>} [parameters=null]
+	 * @param {Declarator} declarator
+	 * @param {Initializer} initializer
+	 * @param {Array.<string>} specifiers
+	 * @param {Object} astPtr Pointer to structure (Construct) in AST
+	 *
 	 * @return {string|null} Symbol name, null in case of anonymous
 	 */
 	addSymbol(type, declarator, initializer, specifiers, astPtr=null){
@@ -185,6 +187,12 @@ class Semantic {
 			throw new SError(`called object ${fncName} is not a function or function pointer`, fncCall.loc);
 		}
 
+		if(fncSym.isNative){
+			// actually maybe do small typechecking (only first parameter or something like that), the same way I do calling in interpreter
+			// fncSym.accept(this); // add visitPrintF function and other native functions visitor functions
+			return;
+		}
+
 		if(fncCall.arguments.length > fncSym.parameters.length){
 			throw new SError(`too many arguments to function ${fncName}`, fncCall.loc);
 		}else if(fncCall.arguments.length < fncSym.parameters.length){
@@ -266,6 +274,30 @@ class Semantic {
 	/**********************
 	 *  HELPER FUNCTIONS  *
 	 *********************/
+
+	/**
+	 * Adds built-in (native) functions to the global symbol table.
+	 * Currently, only `printf` is added, but more functions can be implemented in `nativefuncs.js`.
+	 * @todo Add more built-in functions
+	 *
+	 * @see {@link nativefuncs.js}
+	 * @param {Symtable} symtableGlobal - The global symbol table where native functions are registered.
+	 */
+	addNativeFunctions(symtableGlobal){
+		symtableGlobal.insert(
+			NAMESPACE.ORDS,
+			SYMTYPE.FNC,
+			true,                      // initialized
+			"printf",                  // function name
+			["int"],                   // return type (C's printf returns int)
+			false,                     // not a pointer
+			0,                         // not an array
+			[new Declarator(DECLTYPE.ID, null, {name: "formatstr"})],
+			true,                      // isFunction
+			new NATIVE_printf(),       // no AST, built-in function pointer
+			true                       // isNative
+		);
+	}
 
 	/**
 	 * Returns the type of declared parameter

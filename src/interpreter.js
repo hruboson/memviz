@@ -203,6 +203,9 @@ class Interpreter {
 	 * @param {AST} ast
 	 */
 	semantic(ast){
+		// add native functions to global symtable (global scope)
+		this.#semanticAnalyzer.addNativeFunctions(this.#symtableGlobal);
+
 		// first phase
 		this.#semanticAnalyzer.firstPhase(ast);
 		
@@ -236,6 +239,8 @@ class Interpreter {
 	 * @return {integer} result of main function
 	 */
 	interpret(breakstop){
+		this.resetHTML(); // resets console output
+
 		console.log("=========================================");
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
@@ -247,6 +252,7 @@ class Interpreter {
 			try{
 				mainFnc.astPtr.body.accept(this);
 			}catch(ret){ // catch return value of main
+				//TODO fix this, I don't think it actually does what it's supposed to
 				result = ret;
 			}
 		}
@@ -291,9 +297,10 @@ class Interpreter {
 		//! this.#symtableStack.peek().children.pop() // removes child not longer used (scope went out of its life)
 	}
 
-	visitFnc(fnc){
+	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
-
+		
+		console.log(args);
 		try{
 			fnc.body.accept(this); // run body
 		}catch(ret){ // catch return
@@ -315,7 +322,7 @@ class Interpreter {
 		}
 
 		const fncPtr = this.#symtableGlobal.lookup(NAMESPACE.ORDS, callee.name);
-		return fncPtr.astPtr.accept(this);
+		return fncPtr.astPtr.accept(this, callExpr.arguments);
 	}
 
 	visitReturn(ret){
@@ -346,8 +353,46 @@ class Interpreter {
 	}
 
 	visitCExpr(expr){
-		this.pc = expr; // remove this later
-		return expr;
+		switch(expr.type){
+			case "s_literal":
+				return String(expr.value.slice(1,-1));
+			case "i_constant":
+				return parseInt(expr.value);
+			case "f_constant":
+				return parseFloat(expr.value);
+			default:
+				throw new AppError("wrong expr.type format while interpreting");
+		}
+	}
+
+	visitPrintF(printF, args){
+		if(args.length < 1){
+			throw new RTError("printf requires at least one argument (format string)");
+		}
+
+		const formatString = args[0].accept(this);  // Resolve format argument (CExpr will return value)
+		const otherArgs = args.slice(1)
+			.map(arg => arg.accept(this))
+			.filter(arg => arg !== undefined && !Number.isNaN(arg)); // this is probably fault in interpreter (maybe throw an error)
+
+		let i = 0;
+
+		let output = formatString.replace(/%[dsf]/g, match => { // currently supported: %d, %s, %f
+			if (i >= otherArgs.length) {
+				throw new RTError("Not enough arguments for printf");
+			}
+			return match === "%d" ? parseInt(otherArgs[i++]) :
+				match === "%f" ? parseFloat(otherArgs[i++]) :
+					match === "%s" ? String(otherArgs[i++]) :
+						match;
+		});
+
+		output = output.replace(/\\n/g, "<br>"); // replace \n for <br>, maybe add tab and other special characters in the future :-) would be nice, complete list is in jisonlex ES
+		output = output.replace(/\\\\/g, "\\"); // replace \\ for \
+
+		// TODO make some nicer interface for console and visualizer output
+		document.getElementById("console-output").innerHTML += output;
+		return 0; // printf in C returns 0 by default
 	}
 
 
@@ -399,6 +444,10 @@ class Interpreter {
 		}
 		let rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // to be interpreted
 		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine");
+	}
+
+	resetHTML(){
+		document.getElementById("console-output").innerHTML = "";
 	}
 }
 

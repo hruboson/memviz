@@ -214,3 +214,12 @@ const function_simple_example = `void hello(){
 void main(){
 	hello();
 }`;
+
+const tree_example = `int main(){
+    printf("    _    \\n");
+    printf("   / \\\\  \\n");
+    printf("  /   \\\\  \\n");
+    printf(" /     \\\\ \\n");
+    printf(" ------- \\n");
+    printf("    |    \\n");
+}`;

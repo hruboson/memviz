@@ -69,10 +69,6 @@
 			width: 101%;
 		}
 
-		.console pre::before {
-			content: "$> ";
-		}
-
 		.fullscreen{
 			height: 94vh;
 		}
@@ -209,6 +205,8 @@
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button">while loop</button>
 						<button class="dropdown-item" type="button">for loop</button>
+						<div class="dropdown-divider"></div>
+						<button class="dropdown-item" type="button" onclick="setExample(tree_example)">tree</button>
 					</ul>
 				</div>
 			</div>
@@ -217,23 +215,12 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">void b(int x){
-    int xx = x;
-    return;
-}
-
-void (*a())(int){
-    return b;
-}
-
-void (*getFunction())(int) {
-    return a(1);
-}
-
-void main(){
-	b("");
-    (&b)(); // semantic error, missing int parameter
-    getFunction()(1);
+						<div id="editor" onChange="resetEditor();">int main(){
+    printf("   _   \n");
+    printf("  / \\  \n");
+    printf(" /   \\ \n");
+    printf(" ----- \n");
+    printf("   |   \n");
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
@@ -244,7 +231,7 @@ void main(){
 			</div>
 			<div id="split-console">
 				<div class="console">
-					<pre>Hello World! (PLACEHOLDER)</pre>
+					<pre id="console-output">$&gt;</pre>
 				</div>
 			</div>
 		</div>
@@ -392,7 +379,7 @@ var JSONEDITeditorTYPEDEFS = new JSONEditor(JSONEDITcontainerTYPEDEFS, JSONEDITo
 <!-- Split view settings-->
 <script>
 Split(["#split-editor", "#split-output"], {
-	sizes: [60, 40],
+	sizes: [40, 60],
     gutterSize: 5,
     snapOffset: 100,
 });
