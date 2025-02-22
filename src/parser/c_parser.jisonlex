@@ -19,7 +19,7 @@ FS  [fFlL]
 IS  [uUlL]*
 CP 	[uUL] 
 SP  ("u8"|[uUL])
-ES  (\\(['"?\abfnrtv]|[0-7]{1,3}|"x"[a-fA-F0-9]+))
+ES  (\\([\\'"?\abfnrtv]|[0-7]{1,3}|"x"[a-fA-F0-9]+))
 WS  [\s\t\v\n\f]
 
 %%
