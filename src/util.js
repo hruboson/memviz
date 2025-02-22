@@ -31,7 +31,7 @@ function intfc(obj, function_name, parameters = []){
 /**
  * Implementation of simple stack
  * @description JS array stack functions don't include peek(), which is what I ultimately need the most.
- * @class {Stack}
+ * @class Stack
  */
 class Stack {
 	/**
