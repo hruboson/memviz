@@ -59,6 +59,11 @@
 
 	<!-- Custom CSS -->
 	<style type="text/css" media="screen">
+		@font-face {
+			font-family: FiraCode;
+			src: url(styles/firacode_mono_nerdfont/FiraMonoNerdFontMono-Regular.otf);
+		}
+
 		#split-console {
 		}
 
@@ -67,6 +72,7 @@
 			color: #33FF33;	
 			height: 100vh;
 			width: 101%;
+			font-family: FiraCode;
 		}
 
 		.fullscreen{
@@ -216,11 +222,11 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main(){
-    printf("   _   \n");
-    printf("  / \\  \n");
-    printf(" /   \\ \n");
-    printf(" ----- \n");
-    printf("   |   \n");
+    int a = 42;
+	int* ptr = &a;
+
+	char c[4];
+	char* d = &c[1];
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
@@ -615,53 +621,124 @@ Split(["#split-ve", "#split-console"], {
 	// is normally the first child of the root (ie. layer 0).
 	const parent = graph.getDefaultParent();
 
-	// Adds cells to the model in a single step
-	const pointer1 = graph.insertVertex({
+	const squareX = 30, rowY = 30;
+	const squareXYlen = 50;
+	const circleXYlen = 20;
+	const square = graph.insertVertex({
 		parent,
-		position: [10, 10],
-		size: [50, 50],
-		value: "*a",
+		position: [squareX, rowY], // Square position
+		size: [squareXYlen, squareXYlen], // Square size
+		value: "ptr",
 		style: {
-			fontSize: 30,
-			fillColor: "#1BA1E2",
+			// label style
+			labelPosition: "center",
+			verticalLabelPosition: "top",
+			spacingTop: 20,
+
+			// vertex style
+			fillColor: "#1BA1E2", // blue
+			strokeColor: "#006EAF", // darker blue
+			shape: "rectangle", // Explicitly defining it as a square
+
+			// font style
+			fontSize: 14,
+        	fontColor: "white",
+			fontFamily: "FiraCode",
 		},
 	});
-	const pointer2 = graph.insertVertex({
-		parent,
-		position: [10, 70],
-		size: [50, 50],
-		value: "*b",
+
+	// Create the inner circle inside the square
+	const circle = graph.insertVertex({
+		parent: square, // The square is the parent
+		position: [(squareXYlen/2)-(circleXYlen/2), (squareXYlen/2)-(circleXYlen/2)], // Position relative to the square
+		size: [circleXYlen, circleXYlen], // Circle size (adjust for best fit)
 		style: {
-			fontSize: 30,
-			fillColor: "#1BA1E2",
+			fillColor: "white",
+			strokeColor: "white",
+			fontSize: 14,
+			labelPosition: "center",
+			shape: "ellipse", // Makes it a circle
 		},
 	});
+
+	const labelBelowPtr = graph.insertVertex({
+		parent, 
+		position: [squareX, rowY + squareXYlen + 20], // Position below the square
+		size: [50, 20], // Label size
+		value: "int*",
+		style: {
+			fillColor: "none", // Transparent background
+			strokeColor: "none", // No border
+			labelPosition: "center",
+			verticalLabelPosition: "top",
+
+			// font style
+			fontSize: 14,
+        	fontColor: "white",
+			fontFamily: "FiraCode",
+		},
+	});
+
 	const value = graph.insertVertex({
 		parent,
-		position: [350, 90],
-		size: [50, 50],
+		position: [squareX + squareXYlen*2 + 10, rowY],
+		size: [squareXYlen, squareXYlen],
+		value: "42",
 		style: {
 			fontSize: 30,
 			fillColor: "#60A917",
-		},
-		value: "10",
-	});
-	graph.insertEdge({
-		parent,
-		source: pointer1,
-		target: value,
-		style: {
-			edgeStyle: "orthogonalEdgeStyle",
-			rounded: true,
+			strokeColor: "#2D7600",
+			fontColor: "white",
+			fontFamily: "FiraCode",
 		},
 	});
-	graph.insertEdge({
+
+	const labelBelowValue = graph.insertVertex({
+		parent, 
+		position: [squareX + squareXYlen*2 + 10, rowY + squareXYlen + 20], // Position below the square
+		size: [50, 20], // Label size
+		value: "int*",
+		style: {
+			fillColor: "none", // Transparent background
+			strokeColor: "none", // No border
+			labelPosition: "center",
+			verticalLabelPosition: "top",
+
+			// font style
+			fontSize: 14,
+        	fontColor: "white",
+			fontFamily: "FiraCode",
+		},
+	});
+
+	const labelAboveValue = graph.insertVertex({
+		parent, 
+		position: [squareX + squareXYlen*2 + 10, rowY - 5],
+		size: [50, 20],
+		value: "a",
+		style: {
+			fillColor: "none",
+			strokeColor: "none",
+			labelPosition: "center",
+			verticalLabelPosition: "top",
+
+			// font style
+			fontSize: 14,
+        	fontColor: "white",
+			fontFamily: "FiraCode",
+		},
+	});
+
+	const edge = graph.insertEdge({
 		parent,
-		source: pointer2,
+		source: circle,
 		target: value,
 		style: {
-			edgeStyle: "topToBottomEdgeStyle",
+			edgeStyle: "straightEdgeStyle", // Straight edge
+			strokeColor: "white",
 			rounded: true,
+			entryX: 0, // Left side of value vertex
+			entryY: 0, // Top side of value vertex
 		},
 	});
 </script>
