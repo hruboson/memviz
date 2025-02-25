@@ -622,18 +622,51 @@ Split(["#split-ve", "#split-console"], {
 	const parent = graph.getDefaultParent();
 
 	const squareX = 30, rowY = 30;
-	const squareXYlen = 50;
+	const squareXYlen = 70;
 	const circleXYlen = 20;
-	const square = graph.insertVertex({
+	const nHorizontal = 2; // max number of horizontal elements -- might need some recalculation (e.g. how long an array is)
+	const nVertical = 3; // number of objects inside of a stack frame
+
+	const sfX = 30, sfY = 30;
+	const labelHeight = squareXYlen/3;
+
+	const groupRectangle = graph.insertVertex({
 		parent,
-		position: [squareX, rowY], // Square position
-		size: [squareXYlen, squareXYlen], // Square size
-		value: "ptr",
+		position: [sfX, sfY],
+		value: "main",
+		size: [(squareXYlen * 1.6 + squareX) * nHorizontal, (squareXYlen + labelHeight*2 + 20) * nVertical], // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
 		style: {
 			// label style
 			labelPosition: "center",
+			verticalAlign: "bottom",
 			verticalLabelPosition: "top",
-			spacingTop: 20,
+			spacingBottom: 5,
+			align: "left",
+
+			strokeColor: "grey",
+			fillColor: "transparent",
+			shape: "rectangle",
+
+			// font style
+			fontSize: 14,
+        	fontColor: "white",
+
+			fontFamily: "FiraCode",
+		},
+	});
+
+	const square = graph.insertVertex({
+		parent: groupRectangle,
+		position: [squareX, rowY], // Square position
+		size: [squareXYlen, squareXYlen], // Square size
+		//value: "ptr",
+		style: {
+			// label style
+			/*labelPosition: "center",
+			verticalAlign: "bottom",
+			verticalLabelPosition: "top",
+			align: "left",
+			spacingBottom: 5,*/
 
 			// vertex style
 			fillColor: "#1BA1E2", // blue
@@ -661,16 +694,36 @@ Split(["#split-ve", "#split-console"], {
 		},
 	});
 
+	const labelAbovePtr = graph.insertVertex({
+		parent: groupRectangle, 
+		position: [squareX, rowY - labelHeight],
+		size: [squareXYlen, labelHeight],
+		value: "ptr",
+		style: {
+			fillColor: "transparent",
+			strokeColor: "transparent",
+			labelPosition: "center",
+			verticalLabelPosition: "middle",
+			align: "left",
+
+			// font style
+			fontSize: 14,
+        	fontColor: "white",
+			fontFamily: "FiraCode",
+		},
+	});
+
 	const labelBelowPtr = graph.insertVertex({
-		parent, 
-		position: [squareX, rowY + squareXYlen + 20], // Position below the square
-		size: [50, 20], // Label size
+		parent: groupRectangle, 
+		position: [squareX, rowY + squareXYlen], // Position below the square
+		size: [squareXYlen, labelHeight], // Label size
 		value: "int*",
 		style: {
-			fillColor: "none", // Transparent background
-			strokeColor: "none", // No border
+			fillColor: "transparent", // Transparent background
+			strokeColor: "transparent", // No border
 			labelPosition: "center",
-			verticalLabelPosition: "top",
+			verticalLabelPosition: "middle",
+			align: "right",
 
 			// font style
 			fontSize: 14,
@@ -680,7 +733,7 @@ Split(["#split-ve", "#split-console"], {
 	});
 
 	const value = graph.insertVertex({
-		parent,
+		parent: groupRectangle,
 		position: [squareX + squareXYlen*2 + 10, rowY],
 		size: [squareXYlen, squareXYlen],
 		value: "42",
@@ -694,15 +747,16 @@ Split(["#split-ve", "#split-console"], {
 	});
 
 	const labelBelowValue = graph.insertVertex({
-		parent, 
-		position: [squareX + squareXYlen*2 + 10, rowY + squareXYlen + 20], // Position below the square
-		size: [50, 20], // Label size
+		parent: groupRectangle, 
+		position: [squareX + squareXYlen*2 + 10, rowY + squareXYlen], // Position below the square
+		size: [squareXYlen, labelHeight], // Label size
 		value: "int",
 		style: {
-			fillColor: "none", // Transparent background
-			strokeColor: "none", // No border
+			fillColor: "transparent", // Transparent background
+			strokeColor: "transparent", // No border
 			labelPosition: "center",
-			verticalLabelPosition: "top",
+			verticalLabelPosition: "middle",
+			align: "right",
 
 			// font style
 			fontSize: 14,
@@ -712,15 +766,16 @@ Split(["#split-ve", "#split-console"], {
 	});
 
 	const labelAboveValue = graph.insertVertex({
-		parent, 
-		position: [squareX + squareXYlen*2 + 10, rowY - 5],
-		size: [50, 20],
+		parent: groupRectangle, 
+		position: [squareX + squareXYlen*2 + 10, rowY - labelHeight],
+		size: [squareXYlen, labelHeight],
 		value: "a",
 		style: {
-			fillColor: "none",
-			strokeColor: "none",
+			fillColor: "transparent",
+			strokeColor: "transparent",
 			labelPosition: "center",
-			verticalLabelPosition: "top",
+			verticalLabelPosition: "middle",
+			align: "left",
 
 			// font style
 			fontSize: 14,
@@ -730,7 +785,7 @@ Split(["#split-ve", "#split-console"], {
 	});
 
 	const edge = graph.insertEdge({
-		parent,
+		parent: groupRectangle,
 		source: circle,
 		target: value,
 		style: {
