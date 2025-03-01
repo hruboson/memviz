@@ -20,7 +20,7 @@ class Interpreter {
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.#callStack = new CallStack();
-		this.#memsim = new Memsim();
+		this.#memsim = new Memsim(this.#warningSystem);
 		this.#memviz = new Memviz();
 	}
 
@@ -264,6 +264,7 @@ class Interpreter {
 		}
 		
 		this.updateHTML();
+		this.#memsim.printMemory();
 		console.log("================END================");
 		return result;
 	}
@@ -307,6 +308,29 @@ class Interpreter {
 
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
+
+		// pass arguments and save their values
+		this.#currSymtable = fnc.symtbptr;
+		for(const [name, sym] of this.#currSymtable.objects){
+			//!SHOWCASE
+			let address = this.#memsim.stackAlloc(INTSIZE);
+			this.#memsim.setIntValue(address, 100000);
+			console.log(this.#memsim.getIntValue(address));
+
+			address = this.#memsim.stackAlloc(INTSIZE);
+			this.#memsim.setIntValue(address, 99999999999999, fnc.loc);
+			console.log(this.#memsim.getIntValue(address));
+
+
+			this.#memsim.addReference(address);
+			sym.assignAddress(address);
+			this.#memsim.removeReference(address);
+			console.log(sym);
+		}
+		/*for(let arg of args){
+			address = 0x111111;// initValue() -- simulate memory
+			this.#currSymtable.assignAddress()
+		}*/
 		
 		//console.log(args);
 		try{
@@ -421,6 +445,18 @@ class Interpreter {
 	/************************************
 	 *          Helper functions        *
 	 ***********************************/
+
+	/**
+	 * Determines and returns size of a type in bytes
+	 */
+	sizeof(str){
+		switch(str){
+			case "int":
+				return INTSIZE; // defined in memory.js
+			default:
+				return CHARSIZE;
+		}
+	}
 
 	/**
 	 * Refreshes cached symbols stored in parser

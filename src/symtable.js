@@ -145,6 +145,10 @@ class Sym {
 		this.initialized = true;
 	}
 
+	assignAddress(address){
+		this.address = address;
+	}
+
 	/**
 	 * Override to avoid recursion
 	 */

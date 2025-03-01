@@ -221,13 +221,22 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int main(){
+						<div id="editor" onChange="resetEditor();">void hello(int x){
+	char a[] = "Hello world";
+	return;
+}
+
+void main(){
+	hello(1);
+}
+
+/*int main(){
     int a = 42;
 	int* ptr = &a;
 
 	char c[4];
 	char* d = &c[1];
-}</div>
+}*/</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
 						<pre id="warnings"></pre>

@@ -11,6 +11,8 @@
  */
 const WTYPE = {
 	RETURNTYPE: "RETURNTYPE",
+
+	OVERFLOW: "OVERFLOW",
 }
 
 
@@ -95,7 +97,7 @@ class WarningSystem {
 			return ``;
 		}
 
-		const header = `Compiler warnings: \n`;
+		const header = `Warnings: \n`;
 		var prt = header; 
 		for(const warning of this.#list){
 			prt += `warning: ${warning.msg} [${warning.type}] on line ${warning.loc.first_line}`;
