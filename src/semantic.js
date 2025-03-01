@@ -189,19 +189,23 @@ class Semantic {
 		// https://en.cppreference.com/w/c/language/operator_other#Function_call
 		// so I should first implicitly convert the expression (lvalue) and check if it is pointer-to-function type 
 		// 	-->	https://en.cppreference.com/w/c/language/conversion#Lvalue_conversions
-		if(isclass(fncCall.expr, "Identifier")){
-			fncName = fncCall.expr.name;
-			currSymtable = this.symtableStack.peek();
-			fncSym = currSymtable.resolve(fncName);
-		}else if(isclass(fncCall.expr, "FncCallExpr")){
-			fncName = fncCall.expr.expr.name;
-			currSymtable = this.symtableStack.peek();
-			fncSym = currSymtable.resolve(fncName);
-		}else if(isclass(fncCall.expr, "Array")){
-			console.info("Array expr call");
-			return;
-		}else{
-			console.warning("TODO SEMANTICS FUNCTION CALL");
+		try{
+			if(isclass(fncCall.expr, "Identifier")){
+				fncName = fncCall.expr.name;
+				currSymtable = this.symtableStack.peek();
+				fncSym = currSymtable.resolve(fncName);
+			}else if(isclass(fncCall.expr, "FncCallExpr")){
+				fncName = fncCall.expr.expr.name;
+				currSymtable = this.symtableStack.peek();
+				fncSym = currSymtable.resolve(fncName);
+			}else if(isclass(fncCall.expr, "Array")){
+				console.info("Array expr call");
+				return;
+			}else{
+				console.error("TODO SEMANTICS FUNCTION CALL");
+			}
+		}catch(e){
+			throw new SError(e.details, fncCall.loc); // add loc information
 		}
 
 
@@ -225,11 +229,9 @@ class Semantic {
 
 		// check parameters
 		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
-			if(arg.cType == "Identifier"){ // check existence in case of identifier
-				arg.accept(this);
-			}
+			arg.accept(this);
 
-			this.typeCheck(this.getParameterType(param), arg); // check types of each argument
+			//this.typeCheck(this.getParameterType(param), arg); // check types of each argument
 		}
 	}
 
