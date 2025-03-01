@@ -303,8 +303,6 @@ class Interpreter {
 			this.updateHTML();
 		}
 
-		// V-- changing scopes will be done in call stack
-		//! this.#symtableStack.peek().children.pop() // removes child not longer used (scope went out of its life)
 	}
 
 	visitFnc(fnc, args){

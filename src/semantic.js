@@ -217,6 +217,11 @@ class Semantic {
 			throw new SError(`called object ${fncName} is not a function or function pointer`, fncCall.loc);
 		}
 
+		// semantic checks for each subtree of argument
+		for(let arg of fncCall.arguments){
+			arg.accept(this);
+		}
+
 		if(fncSym.isNative){
 			return;
 		}
@@ -227,11 +232,9 @@ class Semantic {
 			throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
 		}
 
-		// check parameters
+		// type checking
 		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
-			arg.accept(this);
-
-			//this.typeCheck(this.getParameterType(param), arg); // check types of each argument
+			this.typeCheck(this.getParameterType(param), arg);
 		}
 	}
 
