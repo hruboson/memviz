@@ -144,6 +144,23 @@ class Sym {
 	initialize(){
 		this.initialized = true;
 	}
+
+	/**
+	 * Override to avoid recursion
+	 */
+    toJSON() {
+        return {
+            name: this.name,
+            type: this.type,
+            initialized: this.initialized,
+            specifiers: this.specifiers,
+            pointer: this.pointer,
+            dimension: this.dimension,
+            isFunction: this.isFunction,
+            isNative: this.isNative,
+            astPtr: this.astPtr ? '[AST present]' : null, // Prevent deep recursion
+        };
+    }
 }
 
 /**

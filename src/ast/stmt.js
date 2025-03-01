@@ -8,6 +8,14 @@
  * @class Stmt
  */
 class Stmt extends Construct {
+	
+	/**
+	 * Corresponding symbol table for statement in AST
+	 * @description Pointer to symbol table for lookup
+	 * @type {Symtable}
+	 */
+	symtbptr;
+
 	constructor(){
 		super();
 	}
@@ -15,6 +23,24 @@ class Stmt extends Construct {
 	accept(visitor){
 		return visitor.visitStmt(this);
 	}
+
+	/**
+	 * Attaches pointer to corresponding symbol table to this AST node
+	 * @param {Symtable} symtable
+	 */
+	attachSymtable(symtable){
+		this.symtbptr = symtable;
+	}
+
+	/**
+	 * Override to avoid recursion when printing
+	 */
+    toJSON() {
+        const clone = { ...this }; // shallow copy
+		delete clone.symtbptr;
+		if(this.symtbptr) clone.symtbptr = this.symtbptr.scopeInfo.name + " (" + this.symtbptr.scopeInfo.type + ")";
+        return clone;
+    }
 }
 
 /**

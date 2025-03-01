@@ -101,6 +101,23 @@ class Semantic {
 		return symbolName;
 	}
 
+	/**
+	 * Pushes new scope onto stack. Attaches the scope to AST node.
+	 * @param {Symtable} symtable
+	 * @param {Construct} astPtr
+	 */
+	newScope(symtable, astPtr){
+		this.symtableStack.push(symtable);
+		astPtr.attachSymtable(symtable);
+	}
+
+	/**
+	 * Pops the top-most symbol table from symtable stack
+	 */
+	closeScope(){
+		this.symtableStack.pop();
+	}
+
 
 	/*******************************
 	 *     VISITOR FUNCTIONS       *
@@ -123,18 +140,23 @@ class Semantic {
 	}
 
 	visitCStmt(stmt){
-		this.symtableStack.push(new Symtable("compound statement", "stmt", this.symtableStack.peek()));
+		let symtable = new Symtable("compound statement", "stmt", this.symtableStack.peek());
+		this.newScope(symtable, stmt);
 
 		for(const construct of stmt.sequence){
 			construct.accept(this);
 		}
 
-		this.symtableStack.pop();
+		this.closeScope();
 	}
 
 	visitFnc(fnc){
+		//
 		const fncName = this.addSymbol(SYMTYPE.FNC, fnc.declarator, fnc.body, fnc.returnType, fnc); // adds function to global symbol table
-		this.symtableStack.push(new Symtable(fncName, "function params", this.symtableStack.peek()));
+
+		//
+		let symtableFnc = new Symtable(fncName, "function params", this.symtableStack.peek());
+		this.newScope(symtableFnc, fnc);
 
 		for(const param of fnc.declarator.fnc.parameters){
 			if(param.type.specifiers.includes("void")) continue; // dont add void as parameter to symtable: int f(void){}
@@ -142,13 +164,17 @@ class Semantic {
 			this.addSymbol(SYMTYPE.OBJ, param.declarator, false, param.type.specifiers, param);
 		}
 
-		this.symtableStack.push(new Symtable(fncName, "body", this.symtableStack.peek()));
+		//
+		let symtableBody = new Symtable(fncName, "body", this.symtableStack.peek());
+		this.newScope(symtableBody, fnc.body);
+
 		for(const construct of fnc.body.sequence){
 			construct.accept(this);
 		}
 		
-		this.symtableStack.pop();
-		this.symtableStack.pop();
+		//
+		this.closeScope();
+		this.closeScope();
 	}
 
 	visitTypedef(typedef){
@@ -188,8 +214,6 @@ class Semantic {
 		}
 
 		if(fncSym.isNative){
-			// actually maybe do small typechecking (only first parameter or something like that), the same way I do calling in interpreter
-			// fncSym.accept(this); // add visitPrintF function and other native functions visitor functions
 			return;
 		}
 
@@ -199,9 +223,13 @@ class Semantic {
 			throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
 		}
 
-		// check types of parameters
+		// check parameters
 		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
-			this.typeCheck(this.getParameterType(param), arg);
+			if(arg.cType == "Identifier"){ // check existence in case of identifier
+				arg.accept(this);
+			}
+
+			this.typeCheck(this.getParameterType(param), arg); // check types of each argument
 		}
 	}
 
@@ -348,21 +376,25 @@ class Semantic {
 	 * @throws {Error} Throws an error if the expression type is unknown
 	 */
 	inferType(expression) {
-		if (expression.cType == "CExpr") {
-			switch (expression.type) {
+		if(expression.cType == "CExpr") {
+			switch(expression.type) {
 				case "s_literal": return "char*";
 				case "i_constant":
-					if (expression.value.endsWith("LL")) return "int long long";  // Long long int
-					if (expression.value.endsWith("L")) return "int long";        // Long int
+					if(expression.value.endsWith("LL")) return "int long long";  // Long long int
+					if(expression.value.endsWith("L")) return "int long";        // Long int
 					return "int";  // Default to int
 				case "f_constant":
-					if (expression.value.endsWith("f") || expression.value.endsWith("F")) return "float";
+					if(expression.value.endsWith("f") || expression.value.endsWith("F")) return "float";
 					return "double";  // Default to double
 				default:
 					throw new AppError(`Unknown expression type: ${expression.type}`);
 			}
+		}else if(expression.cType == "Identifier"){
+			//TODO check variable type
+			return "int";
 		}
 
+		console.error(expression);
 		throw new AppError(`Invalid expression structure`);
 	}
 }

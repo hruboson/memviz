@@ -13,8 +13,9 @@ class Interpreter {
 
 	constructor(){
 		this.#symtableGlobal = new Symtable("global", "global");
-		this.#symtableStack = new Stack();
+		this.#symtableStack = new Stack(); // only for semantic analyzer
 		this.#symtableStack.push(this.#symtableGlobal);
+		this.#currSymtable = this.#symtableGlobal;
 
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
@@ -57,6 +58,11 @@ class Interpreter {
 	get symtableStack(){
 		return this.#symtableStack;
 	}
+
+	/**
+	 * Current symbol table pointer
+	 */
+	#currSymtable;
 
 	/**
 	 * Call stack
@@ -241,7 +247,7 @@ class Interpreter {
 	interpret(breakstop){
 		this.resetHTML(); // resets console output
 
-		console.log("=========================================");
+		console.log("===============START===============");
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
@@ -258,7 +264,7 @@ class Interpreter {
 		}
 		
 		this.updateHTML();
-		console.log("=========================================");
+		console.log("================END================");
 		return result;
 	}
 
@@ -282,10 +288,14 @@ class Interpreter {
 	}
 
 	visitIdentifier(id){
+		// showcase, modify later
+		console.log(this.#currSymtable.lookup(NAMESPACE.ORDS, id.name));
 		return id;
 	}
 
 	visitCStmt(stmt){
+		this.#currSymtable = stmt.symtbptr; // switch context (symtable)
+
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) return;
 			construct.accept(this);
@@ -300,7 +310,7 @@ class Interpreter {
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
 		
-		console.log(args);
+		//console.log(args);
 		try{
 			fnc.body.accept(this); // run body
 		}catch(ret){ // catch return
@@ -427,7 +437,7 @@ class Interpreter {
 	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
 	updateHTML(){
-		JSONEDITeditorAST.set(this.#ast);
+		JSONEDITeditorAST.set(JSON.parse(JSON.stringify(this.#ast))); // due to symtable now being attached to nodes, I cannot print it because of recursive references
 		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
 		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2); // old way of printing AST
 		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
