@@ -54,6 +54,22 @@ de
 */
 `;
 
+const multiline_double_main = `void hello(int x){
+	return;
+}
+
+int main(){
+	hello(1);
+}
+
+/*int main(){
+    int a = 42;
+	int* ptr = &a;
+
+	char c[4];
+	char* d = &c[1];
+}*/`;
+
 /* ARITHMETIC */
 const addition_all = `
 void main(){

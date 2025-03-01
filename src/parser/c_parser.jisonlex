@@ -27,7 +27,7 @@ WS  [\s\t\v\n\f]
 					var curr, prev;
 					curr = this.input();
 
-					while(!(curr == '/' && prev == '*') && this._input.length > 1){
+					while(!(curr == '/' && prev == '*') && this._input.length > 0){
 						prev = curr;
 						curr = this.input();
 					} 

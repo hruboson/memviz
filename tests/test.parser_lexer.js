@@ -12,6 +12,9 @@ describe('parser correct', () => {
 	it('multiline comments', () => {
 		chai.expect(function() { parse(multiline_comments); }).to.not.throw()
 	});
+	it('multiline comments - code inside and at the end', () => {
+		chai.expect(function() { parse(multiline_double_main); }).to.not.throw()
+	});
 	it('addition', () => {
 		chai.expect(function() { parse(addition_all); }).to.not.throw()
 	});
