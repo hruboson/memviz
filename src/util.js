@@ -107,3 +107,28 @@ function getclass(obj){
 	if(obj == null) return "null";
 	return obj.constructor.name;
 }
+
+/**
+ * Zips any number of iterables. It will always zip() the largest Iterable returning undefined for shorter arrays.
+ * @param  {...Iterable<any>} iterables
+ * @see {https://stackoverflow.com/questions/22015684/zip-arrays-in-javascript#72221748}
+ * @example 
+ * 	
+ * 	const a = zip(this.#currSymtable.objects, args); 
+ * 	console.log(...a);
+ *
+ */
+function* zip(...iterables) {
+  // get the iterator of for each iterables
+  const iters = [...iterables].map((iterable) => iterable[Symbol.iterator]());
+  let next = iters.map((iter) => iter.next().value);
+  // as long as any of the iterables returns something, yield a value (zip longest)
+  while(anyOf(next)) {
+    yield next;
+    next = iters.map((iter) => iter.next().value);
+  }
+
+  function anyOf(arr){
+    return arr.some(v => v !== undefined);
+  }
+}
