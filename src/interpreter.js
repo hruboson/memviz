@@ -313,11 +313,6 @@ class Interpreter {
 			this.memsim.setSymValue(sym, arg.value, MEMREGION.STACK);
 			console.log(this.memsim.readSymValue(sym));
 		}
-
-		//console.log(args);
-		for(const arg of args){
-			console.log(arg);
-		}
 		
 		try{
 			fnc.body.accept(this); // run body
