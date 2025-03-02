@@ -176,10 +176,6 @@ class Sym {
 		this.initialized = true;
 	}
 
-	assignAddress(address){
-		this.address = address;
-	}
-
 	/**
 	 * Determines the memory type based on the specifiers
 	 * @return {DATATYPE}
@@ -191,7 +187,6 @@ class Sym {
 		// Default type is 'int' if unspecified - but this should never happen
 		if (specSet.size === 0) return DATATYPE.int;
 
-		// Handle specific types
 		if (specSet.has("bool")) return DATATYPE.bool;
 		if (specSet.has("char")) return specSet.has("unsigned") ? DATATYPE.uchar : DATATYPE.char;
 		if (specSet.has("short")) return specSet.has("unsigned") ? DATATYPE.ushort : DATATYPE.short;
@@ -207,7 +202,7 @@ class Sym {
 		if (specSet.has("float")) return DATATYPE.float;
 		if (specSet.has("double")) return specSet.has("long") ? DATATYPE.longdouble : DATATYPE.double;
 
-		// Fallback (default to int)
+		// Default to int
 		return DATATYPE.int;
 	}
 

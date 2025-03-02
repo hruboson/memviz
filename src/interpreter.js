@@ -325,7 +325,7 @@ class Interpreter {
 	}
 
 	visitFncCallExpr(callExpr){
-		var callee = callExpr.expr.accept(this); // callee should in the end return identifier or pointer to the function
+		var callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
 
 		if(this.#_instrNum > this.#breakstop) return;
 		this.pc = callExpr;
