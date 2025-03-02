@@ -115,7 +115,7 @@ class Memsim {
 				break;
 
 			case DATATYPE.int:
-				break;
+				return this.readIntValue(sym.address);
 
 			case DATATYPE.uint:
 				break;
@@ -144,6 +144,10 @@ class Memsim {
 	}
 
 	setSymValue(sym, value, region){
+		if (!Object.values(MEMREGION).includes(region)) {
+			throw new AppError(`Invalid memory while setting MEMREGION of ${sym.identifier}: ${region}`);
+		}
+
 		switch(sym.memtype){
 			case DATATYPE.bool:
 				break;
@@ -161,6 +165,7 @@ class Memsim {
 				break;
 
 			case DATATYPE.int:
+				sym.address = sym.address ? this.changeIntValue(sym.address, value) : this.setIntValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.uint:
@@ -186,6 +191,9 @@ class Memsim {
 
 			case DATATYPE.longdouble:
 				break;
+
+			default:
+				throw new AppError(`Invalid DATATYPE while setting value of ${sym.identifier}: ${sym.memtype}!`);
 		}
 	}
 
@@ -262,32 +270,54 @@ class Memsim {
 		}
 	}
 
-	#setIntValue(value, region, loc){
+	setIntValue(value, region, loc){
 		if (value < INT_MIN || value > INT_MAX) {
-			this.#warningSystem.add(`Integer overflow at memory address 0x${address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
+			this.#warningSystem.add(`Integer overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
 			value = value & 0xFFFFFFFF; // truncate to 32 bits
 		}
 
 		const s = INTSIZE;
-		this.#allocRegion(region, s);
+		const addr = this.#allocRegion(region, s);
 
 		const memorySpace = new ArrayBuffer(s);
 		const view = new DataView(memorySpace);
 		view.setInt32(0, value, true); // little-endian!
 
 		for(let i = 0; i < s; i++){ // alloc every byte separately
-			this.memory.set(address + i, { value: view.getUint8(i), region: "heap" });
+			this.memory.set(addr + i, { value: view.getUint8(i), region: "heap" });
 		}
+
+		return addr;
 	}
 
-	#getIntValue(address) {
+	changeIntValue(value, loc){
+		if (value < INT_MIN || value > INT_MAX) {
+			this.#warningSystem.add(`Integer overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
+			value = value & 0xFFFFFFFF; // truncate to 32 bits
+		}
+
+		/*const s = INTSIZE;
+		const addr = this.#allocRegion(region, s);
+
+		const memorySpace = new ArrayBuffer(s);
+		const view = new DataView(memorySpace);
+		view.setInt32(0, value, true); // little-endian!
+
+		for(let i = 0; i < s; i++){ // alloc every byte separately
+			this.memory.set(addr + i, { value: view.getUint8(i), region: "heap" });
+		}*/
+
+		return sym.address;
+	}
+
+	readIntValue(addr) {
 		const s = INTSIZE;
 		const buffer = new ArrayBuffer(s);
 		const view = new DataView(buffer);
 
 		for(let i = 0; i < s; i++){
-			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
-			view.setUint8(i, this.memory.get(address + i).value);
+			if(!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
+			view.setUint8(i, this.memory.get(addr + i).value);
 		}
 
 		return view.getInt32(0, true);
@@ -302,8 +332,8 @@ class Memsim {
 	// Print memory for debugging
 	printMemory(){
 		console.log("Memory Dump:");
-		this.memory.forEach((data, address) => {
-			console.log(`${address}: value=${data.value.toString(2)}, region=${data.region}`);
+		this.memory.forEach((data, addr) => {
+			console.log(`${addr}: value=${data.value.toString(2)}, region=${data.region}`);
 		});
 	}
 }

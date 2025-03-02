@@ -306,13 +306,12 @@ class Interpreter {
 
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
-
-		// pass arguments and save their values
 		this.#currSymtable = fnc.symtbptr;
 
 		// initialize symbols and assign addresses
-		for(const [name, sym] of this.#currSymtable.objects){
-			this.memsim.setSymValue(sym);
+		for(const [[name, sym], arg] of zip(this.#currSymtable.objects, args)){
+			this.memsim.setSymValue(sym, arg.value, MEMREGION.STACK);
+			console.log(this.memsim.readSymValue(sym));
 		}
 
 		//console.log(args);
