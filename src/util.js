@@ -23,7 +23,7 @@ function abstract(obj, name){ // passing name makes the children not abstract
 function intfc(obj, function_name, parameters = []){
 	if(typeof obj[function_name] != "function"){
 		throw new Error(`Class ${obj.constructor.name} must implement function ${function_name}!`);
-	}else if(obj[function_name].length != parameters.length){
+	}else if(obj[function_name].length < parameters.length){
 		throw new Error(`Function ${function_name} must have the following parameters: ${parameters}!`);
 	}
 }

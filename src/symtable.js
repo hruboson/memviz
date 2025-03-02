@@ -53,6 +53,29 @@ const SYMTYPE = {
 }
 
 /**
+ * Enum for possible fundamental data types of symbol
+ * @global
+ * @typedef DATATYPE
+ * @see {memory.js} for sizes
+ */
+const DATATYPE = {
+	bool: { name: "bool", size: CHARSIZE },
+	char: { name: "char", size: CHARSIZE },
+	uchar: { name: "uchar", size: CHARSIZE },
+	short: { name: "short", size: SHORTSIZE },
+	ushort: { name: "ushort", size: SHORTSIZE },
+	int: { name: "int", size: INTSIZE },
+	uint: { name: "uint", size: INTSIZE },
+	long: { name: "long", size: LONGSIZE },
+	ulong: { name: "ulong", size: LONGSIZE },
+	longlong: { name: "longlong", size: LONGLONGSIZE },
+	ulonglong: { name: "ulonglong", size: LONGLONGSIZE },
+	float: { name: "float", size: FLOATSIZE },
+	double: { name: "double", size: DOUBLESIZE },
+	longdouble: { name: "longdouble", size: LONGDOUBLESIZE },
+}
+
+/**
  * @class Sym
  * @description Structure for holding information about a single symbol
  * @param {string} name Name (identifier) of the symbol
@@ -79,6 +102,13 @@ class Sym {
 	 * @type {SYMTYPE}
 	 */
 	type;
+
+	/**
+	 * Data type
+	 * @type {DATATYPE}
+	 * @description Derived from specifiers
+	 */
+	memtype;
 
 	/**
 	 * Specifiers of symbol
@@ -139,6 +169,7 @@ class Sym {
 		this.isFunction = isFunction;
 		this.isNative = isNative;
 		this.astPtr = astPtr; // is this 100% pointer??? otherwise it's super inefficient (I'm not sure how JS pointers work)
+		this.memtype = this.determineMemtype();
 	}
 
 	initialize(){
@@ -147,6 +178,37 @@ class Sym {
 
 	assignAddress(address){
 		this.address = address;
+	}
+
+	/**
+	 * Determines the memory type based on the specifiers
+	 * @return {DATATYPE}
+	 * @note Determined in constructor
+	 */
+	determineMemtype(){
+		let specSet = new Set(this.specifiers);
+
+		// Default type is 'int' if unspecified - but this should never happen
+		if (specSet.size === 0) return DATATYPE.int;
+
+		// Handle specific types
+		if (specSet.has("bool")) return DATATYPE.bool;
+		if (specSet.has("char")) return specSet.has("unsigned") ? DATATYPE.uchar : DATATYPE.char;
+		if (specSet.has("short")) return specSet.has("unsigned") ? DATATYPE.ushort : DATATYPE.short;
+		if (specSet.has("int")) return specSet.has("unsigned") ? DATATYPE.uint : DATATYPE.int;
+
+		// Handling 'long', 'long long', and unsigned variations
+		if (specSet.has("long")) {
+			if (specSet.has("long")) return specSet.has("unsigned") ? DATATYPE.ulonglong : DATATYPE.longlong;
+			return specSet.has("unsigned") ? DATATYPE.ulong : DATATYPE.long;
+		}
+
+		// Floating-point types
+		if (specSet.has("float")) return DATATYPE.float;
+		if (specSet.has("double")) return specSet.has("long") ? DATATYPE.longdouble : DATATYPE.double;
+
+		// Fallback (default to int)
+		return DATATYPE.int;
 	}
 
 	/**

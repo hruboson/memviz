@@ -20,8 +20,8 @@ class Interpreter {
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.#callStack = new CallStack();
-		this.#memsim = new Memsim(this.#warningSystem);
-		this.#memviz = new Memviz();
+		this.memsim = new Memsim(this.#warningSystem);
+		this.memviz = new Memviz(this.#currSymtable);
 	}
 
 	/* ATTRIBUTES */
@@ -78,17 +78,15 @@ class Interpreter {
 
 	/**
 	 * Memory simulator
-	 * @private
 	 * @type {Memsim}
 	 */
-	#memsim;
+	memsim;
 
 	/**
 	 * Memory visualizer
-	 * @private
 	 * @type {Memviz}
 	 */
-	#memviz;
+	memviz;
 
 	/**
 	 * Warning system
@@ -264,7 +262,7 @@ class Interpreter {
 		}
 		
 		this.updateHTML();
-		this.#memsim.printMemory();
+		this.memsim.printMemory();
 		console.log("================END================");
 		return result;
 	}
@@ -311,28 +309,17 @@ class Interpreter {
 
 		// pass arguments and save their values
 		this.#currSymtable = fnc.symtbptr;
+
+		// initialize symbols and assign addresses
 		for(const [name, sym] of this.#currSymtable.objects){
-			//!SHOWCASE
-			let address = this.#memsim.stackAlloc(INTSIZE);
-			this.#memsim.setIntValue(address, 100000);
-			console.log(this.#memsim.getIntValue(address));
-
-			address = this.#memsim.stackAlloc(INTSIZE);
-			this.#memsim.setIntValue(address, 99999999999999, fnc.loc);
-			console.log(this.#memsim.getIntValue(address));
-
-
-			this.#memsim.addReference(address);
-			sym.assignAddress(address);
-			this.#memsim.removeReference(address);
-			console.log(sym);
+			this.memsim.setSymValue(sym);
 		}
-		/*for(let arg of args){
-			address = 0x111111;// initValue() -- simulate memory
-			this.#currSymtable.assignAddress()
-		}*/
-		
+
 		//console.log(args);
+		for(const arg of args){
+			console.log(arg);
+		}
+		
 		try{
 			fnc.body.accept(this); // run body
 		}catch(ret){ // catch return

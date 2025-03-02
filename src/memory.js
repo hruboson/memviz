@@ -3,13 +3,70 @@
  * @author Ondřej Hruboš
  */
 
-// helper constants
-const CHARSIZE = 1;
-const INTSIZE = 4;
+// Helper constants for type sizes and limits
+// sources: 
+// 	- C Standard (ISO/IEC 9899)
+//	- limits.h
+//	- IEEE 754 FP Standard
 
+// Character (8-bit signed & unsigned)
+const CHARSIZE = 1;
+const CHAR_MIN = -128;
+const CHAR_MAX = 127;
+const UCHAR_MAX = 255;
+
+// Short Integer (16-bit signed & unsigned)
+const SHORTSIZE = 2;
+const SHORT_MIN = -32768;
+const SHORT_MAX = 32767;
+const USHORT_MAX = 65535;
+
+// Integer (32-bit signed & unsigned)
+const INTSIZE = 4;
 const INT_MIN = -2147483648;
 const INT_MAX = 2147483647;
 const UINT_MAX = 4294967295;
+
+// Long Integer (32-bit signed & unsigned, assuming standard C `long` on 32-bit systems)
+const LONGSIZE = 4;
+const LONG_MIN = -2147483648;
+const LONG_MAX = 2147483647;
+const ULONG_MAX = 4294967295;
+
+// Long Long Integer (64-bit signed & unsigned)
+const LONGLONGSIZE = 8;
+const LLONG_MIN = -9223372036854775808n; // Use BigInt (`n` at the end)
+const LLONG_MAX = 9223372036854775807n;
+const ULLONG_MAX = 18446744073709551615n;
+
+// Floating-Point Types (IEEE 754 Standard)
+// Floating point size in C can vary, but we assume standard 32-bit float and 64-bit double
+
+// Float (32-bit)
+const FLOATSIZE = 4;
+const FLOAT_MIN = 1.17549435e-38; // Smallest positive normalized float
+const FLOAT_MAX = 3.40282347e+38; // Largest finite float
+
+// Double (64-bit)
+const DOUBLESIZE = 8;
+const DOUBLE_MIN = 2.2250738585072014e-308; // Smallest positive normalized double
+const DOUBLE_MAX = 1.7976931348623157e+308; // Largest finite double
+
+// Long double (128-bit)
+const LONGDOUBLESIZE = 128;
+
+/**
+ * Memory regions
+ * @description Memory regions enum
+ * @global
+ * @typedef MEMREGION
+ */
+const MEMREGION = {
+	HEAP: "HEAP",
+	STACK: "STACK",
+	BSS: "BSS",
+	DATA: "DATA",
+}
 
 /**
  * @class Memsim
@@ -23,7 +80,7 @@ class Memsim {
 		this.#warningSystem = warningSystem;
 		this.memory = new Map(); // Simulated memory
 		this.references = new Map(); // Reference counter
-		this.addressPointer = 1000; // Heap starts at 1000
+		this.heapPointer = 1000; // Heap starts at 1000
 		this.stackPointer = 5000; // Stack starts at 5000 and grows downward
 		this.dataSegment = 2000;  // Initialized global variables
 		this.bssSegment = 3000;   // Uninitialized global variables
@@ -34,6 +91,110 @@ class Memsim {
 		this.bssSize = bssSize;
 	}
 
+	/*******************************
+	 *        CORE FUNCTIONS       *
+	 *******************************
+	 * High-level memory functions *
+	 ******************************/
+
+	readSymValue(sym){
+		switch(sym.memtype){
+			case DATATYPE.bool:
+				break;
+
+			case DATATYPE.char:
+				break;
+
+			case DATATYPE.uchar:
+				break;
+
+			case DATATYPE.short:
+				break;
+
+			case DATATYPE.ushort:
+				break;
+
+			case DATATYPE.int:
+				break;
+
+			case DATATYPE.uint:
+				break;
+
+			case DATATYPE.long:
+				break;
+
+			case DATATYPE.ulong:
+				break;
+
+			case DATATYPE.longlong:
+				break;
+
+			case DATATYPE.ulonglong:
+				break;
+
+			case DATATYPE.float:
+				break;
+
+			case DATATYPE.double:
+				break;
+
+			case DATATYPE.longdouble:
+				break;
+		}
+	}
+
+	setSymValue(sym, value, region){
+		switch(sym.memtype){
+			case DATATYPE.bool:
+				break;
+
+			case DATATYPE.char:
+				break;
+
+			case DATATYPE.uchar:
+				break;
+
+			case DATATYPE.short:
+				break;
+
+			case DATATYPE.ushort:
+				break;
+
+			case DATATYPE.int:
+				break;
+
+			case DATATYPE.uint:
+				break;
+
+			case DATATYPE.long:
+				break;
+
+			case DATATYPE.ulong:
+				break;
+
+			case DATATYPE.longlong:
+				break;
+
+			case DATATYPE.ulonglong:
+				break;
+
+			case DATATYPE.float:
+				break;
+
+			case DATATYPE.double:
+				break;
+
+			case DATATYPE.longdouble:
+				break;
+		}
+	}
+
+	/******************************
+	 *       MEMORY FUNCTIONS     *
+	 ******************************
+	 * Low-level memory functions *
+	 *****************************/
+
 	#storeMemory(address, size, region, value, type){
 		for (let i = 0; i < size; i++) {
 			this.memory.set(address + i, { 
@@ -43,6 +204,37 @@ class Memsim {
 
 			this.references.set(address + i, 0); // initialize reference counter
 		}
+	}
+
+	/**
+	 * Adjusts pointer in memory region and calls storeMemory to allocate memory, returns address of allocated memory
+	 * @param {MEMREGION} region
+	 * @param {integer} size Size of allocated memory in BYTES
+	 * @return {integer} address
+	 */
+	#allocRegion(region, size){
+		var addr;
+
+		switch(region){
+			case MEMREGION.STACK:
+				this.stackPointer -= size;
+				this.#storeMemory(this.stackPointer, size, MEMREGION.STACK);
+				addr = this.stackPointer;
+				break;
+			case MEMREGION.HEAP:
+				addr = this.heapPointer;
+				this.#storeMemory(this.heapPointer, size, MEMREGION.HEAP);
+				this.heapPointer += size;
+				break;
+			case MEMREGION.BSS:
+				console.error("TODO");
+				break;
+			case MEMREGION.DATA:
+				console.error("TODO");
+				break;
+		}
+
+		return addr;
 	}
 
 	/**
@@ -70,20 +262,15 @@ class Memsim {
 		}
 	}
 
-	stackAlloc(size){
-		this.stackPointer -= size;
-		this.#storeMemory(this.stackPointer, size, 'stack');
-		return this.stackPointer; // return base address
-	}
-
-	setIntValue(address, value, loc){
+	#setIntValue(value, region, loc){
 		if (value < INT_MIN || value > INT_MAX) {
 			this.#warningSystem.add(`Integer overflow at memory address 0x${address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
 			value = value & 0xFFFFFFFF; // truncate to 32 bits
 		}
-		console.info(value);
 
 		const s = INTSIZE;
+		this.#allocRegion(region, s);
+
 		const memorySpace = new ArrayBuffer(s);
 		const view = new DataView(memorySpace);
 		view.setInt32(0, value, true); // little-endian!
@@ -93,7 +280,7 @@ class Memsim {
 		}
 	}
 
-	getIntValue(address) {
+	#getIntValue(address) {
 		const s = INTSIZE;
 		const buffer = new ArrayBuffer(s);
 		const view = new DataView(buffer);
@@ -110,6 +297,7 @@ class Memsim {
 	/************************************
 	 *          Helper functions        *
 	 ***********************************/
+
 
 	// Print memory for debugging
 	printMemory(){

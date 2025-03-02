@@ -44,7 +44,7 @@ class Fnc extends Stmt {
 		this.loc = loc;
 	}
 
-	accept(visitor){
-		return visitor.visitFnc(this);
+	accept(visitor, args){
+		return visitor.visitFnc(this, args);
 	}
 }
