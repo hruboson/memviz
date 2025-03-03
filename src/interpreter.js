@@ -232,7 +232,7 @@ class Interpreter {
 
 	/**
 	 * Interprets ast (for now, maybe do IC later -- like much much later)
-	 * @throws {RTError} Runtime error
+	 * @throws {RTError|AppError|InternalError} Runtime error
 	 * @param {AST} ast
 	 * @TODO catch what main returns (int)
 	 * @return {integer} result of main function
@@ -258,6 +258,7 @@ class Interpreter {
 		
 		this.updateHTML();
 		this.memsim.printMemory();
+		console.log(this.#callStack);
 		console.log("================END================");
 		return result;
 	}
@@ -291,7 +292,6 @@ class Interpreter {
 	visitCStmt(stmt){
 		let sf = new StackFrame(stmt.symtbptr, stmt); // StackFrame creates deep copy of symbol table
 		this.#callStack.push(sf);
-		console.log(sf.symtable);
 
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) return;
@@ -472,12 +472,12 @@ class Interpreter {
 		unhighlight(); // global function, defined in index.html
 
 		// create new marker
-		if(this.pcloclast > 0){
+		/*if(this.pcloclast > 0){
 			let rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted 
 			let markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
-		}
-		let rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // to be interpreted
-		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeTBI", "fullLine");
+		}*/
+		let rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // Just interpreted
+		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeJI", "fullLine");
 	}
 
 	resetHTML(){
