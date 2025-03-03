@@ -50,7 +50,7 @@ const SYMTYPE = {
 	MEMBER: "MEMBER",
 	TYPEDEF: "TYPEDEF",
 	LABEL: "LABEL",
-}
+};
 
 /**
  * Enum for possible fundamental data types of symbol
@@ -59,21 +59,21 @@ const SYMTYPE = {
  * @see {memory.js} for sizes
  */
 const DATATYPE = {
-	bool: { name: "bool", size: CHARSIZE },
-	char: { name: "char", size: CHARSIZE },
-	uchar: { name: "uchar", size: CHARSIZE },
-	short: { name: "short", size: SHORTSIZE },
-	ushort: { name: "ushort", size: SHORTSIZE },
-	int: { name: "int", size: INTSIZE },
-	uint: { name: "uint", size: INTSIZE },
-	long: { name: "long", size: LONGSIZE },
-	ulong: { name: "ulong", size: LONGSIZE },
-	longlong: { name: "longlong", size: LONGLONGSIZE },
-	ulonglong: { name: "ulonglong", size: LONGLONGSIZE },
-	float: { name: "float", size: FLOATSIZE },
-	double: { name: "double", size: DOUBLESIZE },
-	longdouble: { name: "longdouble", size: LONGDOUBLESIZE },
-}
+	bool: "bool",
+	char: "char",
+	uchar: "uchar",
+	short: "short",
+	ushort: "ushort",
+	int: "int",
+	uint: "uint",
+	long: "long",
+	ulong: "ulong",
+	longlong: "longlong",
+	ulonglong: "ulonglong",
+	float: "float",
+	double: "double",
+	longdouble: "longdouble"
+};
 
 /**
  * @class Sym
@@ -235,7 +235,7 @@ const NAMESPACE = {
 	TAGS: "TAGS",
 	MEMBERS: "MEMBERS",
 	LABELS: "LABELS",
-}
+};
 
 /**
  * Scoped symbol table

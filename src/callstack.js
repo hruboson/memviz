@@ -1,5 +1,5 @@
 /**
- * @file Symbol table
+ * @file Call stack
  * @author Ondřej Hruboš
  */
 
@@ -7,11 +7,16 @@
  * @class CallStack
  */
 class CallStack extends Stack {
-	call(){
-		const tobeinterpreted = this.top();
+}
 
-		//console.log(tobeinterpreted.body);
-
-		this.pop();
+/**
+ * @class StackFrame
+ * @param {Symtable} symtable
+ * @param {Construct} construct Construct which created the stack frame
+ */
+class StackFrame {
+	constructor(symtable, construct){
+		this.symtable = structuredClone(symtable);
+		this.construct = construct;
 	}
 }

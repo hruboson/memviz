@@ -6,13 +6,13 @@
 /**
  * @class Memviz
  * @description Main visualization class, handles mostly memory visualization
- * All that is needed is the currently active symbol table, from there traverse the tree to the top and visualize every symbol that has address assigned
+ * Basically visualizing the call stack and each of its stack frames (symbol tables)
  */
 class Memviz {
 	
-	#symtable;
+	#callStack;
 	
-	constructor(symtable){
-		this.#symtable = symtable;
+	constructor(callStack){
+		this.#callStack = callStack;
 	}
 }

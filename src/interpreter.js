@@ -15,13 +15,13 @@ class Interpreter {
 		this.#symtableGlobal = new Symtable("global", "global");
 		this.#symtableStack = new Stack(); // only for semantic analyzer
 		this.#symtableStack.push(this.#symtableGlobal);
-		this.#currSymtable = this.#symtableGlobal;
 
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.#callStack = new CallStack();
+		this.#callStack.push(new StackFrame(this.#symtableGlobal));
 		this.memsim = new Memsim(this.#warningSystem);
-		this.memviz = new Memviz(this.#currSymtable);
+		this.memviz = new Memviz(this.#callStack);
 	}
 
 	/* ATTRIBUTES */
@@ -58,11 +58,6 @@ class Interpreter {
 	get symtableStack(){
 		return this.#symtableStack;
 	}
-
-	/**
-	 * Current symbol table pointer
-	 */
-	#currSymtable;
 
 	/**
 	 * Call stack
@@ -229,7 +224,7 @@ class Interpreter {
 	/**
 	 * Single function that prepares ("""compiles""") the C code
 	 * @param {string} code Code to be "compiled"
-	 * @throws {Error}
+	 * @throws {AppError|RTError}
 	 */
 	compile(code){
 		this.parse(code).semantic(this.#ast);
@@ -257,6 +252,7 @@ class Interpreter {
 				mainFnc.astPtr.body.accept(this);
 			}catch(ret){ // catch return value of main
 				//TODO fix this, I don't think it actually does what it's supposed to
+				console.info(ret);
 				result = ret;
 			}
 		}
@@ -288,12 +284,15 @@ class Interpreter {
 
 	visitIdentifier(id){
 		// showcase, modify later
-		console.log(this.#currSymtable.lookup(NAMESPACE.ORDS, id.name));
+		// old - newer with call stack
+		//console.log(this.#currSymtable.lookup(NAMESPACE.ORDS, id.name));
 		return id;
 	}
 
 	visitCStmt(stmt){
-		this.#currSymtable = stmt.symtbptr; // switch context (symtable)
+		let sf = new StackFrame(stmt.symtbptr, stmt); // StackFrame creates deep copy of symbol table
+		this.#callStack.push(sf);
+		console.log(sf.symtable);
 
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) return;
@@ -306,10 +305,12 @@ class Interpreter {
 
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
-		this.#currSymtable = fnc.symtbptr;
+
+		let sf = new StackFrame(fnc.symtbptr, fnc); // StackFrame creates deep copy of symbol table
+		this.#callStack.push(sf);
 
 		// initialize symbols and assign addresses
-		for(const [[name, sym], arg] of zip(this.#currSymtable.objects, args)){
+		for(const [[name, sym], arg] of zip(this.#callStack.top().symtable.objects, args)){
 			this.memsim.setSymValue(sym, arg.value, MEMREGION.STACK);
 			console.log(this.memsim.readSymValue(sym));
 		}
@@ -317,11 +318,20 @@ class Interpreter {
 		try{
 			fnc.body.accept(this); // run body
 		}catch(ret){ // catch return
-			if(isclass(ret.value, "ReturnVoid")){ // maybe change the void to some struct
+			if(ret instanceof InternalError){ // in case of too much recursion
+				throw ret;
+			}
+
+			if(isclass(ret.value, "ReturnVoid")){
+				this.#callStack.pop();
 				return null;
 			}
+			
+			this.#callStack.pop();
 			return ret.value;
 		}
+
+		this.#callStack.pop();
 	}
 
 	visitFncCallExpr(callExpr){
