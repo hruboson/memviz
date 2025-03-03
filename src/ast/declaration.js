@@ -185,7 +185,7 @@ class Initializer extends Construct {
 			this.loc = nested.loc ?? this.loc;
 		}
 
-		// Recursively unnest arrays
+		// recursively unnest arrays
 		if (this.kind == INITTYPE.ARR && this.arr) {
 			this.arr = this.arr.map(item => {
 				if (item.kind == INITTYPE.NESTED) {
@@ -195,7 +195,7 @@ class Initializer extends Construct {
 			});
 		}
 
-		// Recursively unnest structs
+		// recursively unnest structs
 		if (this.kind == INITTYPE.STRUCT && this.struct) {
 			for (const key in this.struct) {
 				if (this.struct[key].kind == INITTYPE.NESTED) {
