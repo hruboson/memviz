@@ -252,7 +252,6 @@ class Interpreter {
 				mainFnc.astPtr.body.accept(this);
 			}catch(ret){ // catch return value of main
 				//TODO fix this, I don't think it actually does what it's supposed to
-				console.info(ret);
 				result = ret;
 			}
 		}
