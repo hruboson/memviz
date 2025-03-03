@@ -223,3 +223,13 @@ const tree_example = `int main(){
     printf(" ------- \\n");
     printf("    |    \\n");
 }`;
+
+const infinite_recursion_example = `int a(){
+	int i = 1;
+	a();
+	return i;
+}
+
+int main(){
+	return a();
+}`;
