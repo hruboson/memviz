@@ -41,11 +41,10 @@ class Type {
  * @typedef INITTYPE 
  * @global
  */
-const INITTYPE = { //FIX These types are probably wrong and are not used in code
-	EXPR: "EXPR",
-	SCALAR: "SCALAR",
-	ARR: "ARRAY",
-	STRUCT: "STRUCT",
+const INITTYPE = {
+	EXPR: "EXPR", // expression == scalar, see https://en.cppreference.com/w/c/language/scalar_initialization
+	ARR: "ARRAY", // array == string, { ... }, see https://en.cppreference.com/w/c/language/array_initialization 
+	STRUCT: "STRUCT", // struct, see https://en.cppreference.com/w/c/language/struct_initialization
 	NESTED: "NESTED",
 }
 
@@ -139,20 +138,26 @@ class Initializer extends Construct {
 		this.kind = kind;
 		switch(kind){
 			case INITTYPE.EXPR:
-			case INITTYPE.SCALAR:
 				this.expr = data;
 				break;
-				break;
 			case INITTYPE.ARR:
+				if(data.length < 2){ // this is SCALAR
+					this.kind = INITTYPE.EXPR;
+					this.expr = data[0];
+					break;
+				}
 				this.arr = data;
 				break;
 			case INITTYPE.STRUCT:
 				this.struct = data;
 				break;
 			case INITTYPE.NESTED:
-				break;
+				this.child = data;
+				this.unnest();
+				return;
+
 			default:
-				throw new Error("Unknown initializer type!");
+				throw new AppError(`Unknown initializer type: ${kind}`);
 				break;
 		}
 		this.initializer = child;
@@ -162,6 +167,42 @@ class Initializer extends Construct {
 
 	accept(visitor){
 		return visitor.visitInitializer(this);
+	}
+
+	/**
+	 * Flatten Initializer - remove NESTED initializers and replace them with their child
+	 * hopefully this works, because it seems too good to be true
+	 */
+	unnest() {
+		if (this.kind == INITTYPE.NESTED) {
+			const nested = this.child; // get the nested initializer
+			this.kind = nested.kind;
+			this.expr = nested.expr ?? null;
+			this.arr = nested.arr ?? null;
+			this.struct = nested.struct ?? null;
+			this.child = nested.child ?? null;
+			this.designator = nested.designator ?? this.designator;
+			this.loc = nested.loc ?? this.loc;
+		}
+
+		// Recursively unnest arrays
+		if (this.kind == INITTYPE.ARR && this.arr) {
+			this.arr = this.arr.map(item => {
+				if (item.kind == INITTYPE.NESTED) {
+					item.unnest(); // modify in-place
+				}
+				return item;
+			});
+		}
+
+		// Recursively unnest structs
+		if (this.kind == INITTYPE.STRUCT && this.struct) {
+			for (const key in this.struct) {
+				if (this.struct[key].kind == INITTYPE.NESTED) {
+					this.struct[key].unnest(); // modify in-place
+				}
+			}
+		}
 	}
 }
 

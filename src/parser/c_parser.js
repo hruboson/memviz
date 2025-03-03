@@ -89,7 +89,7 @@ break;
 case 2: case 3: case 11: case 21: case 27: case 28: case 29: case 30: case 31: case 32: case 33: case 35: case 39: case 42: case 45: case 50: case 53: case 55: case 57: case 59: case 61: case 63: case 65: case 67: case 68: case 69: case 70: case 71: case 72: case 73: case 74: case 75: case 76: case 77: case 80: case 108: case 109: case 114: case 115: case 139: case 150: case 162: case 184: case 193: case 217: case 218:
  this.$ = $$[$0]; 
 break;
-case 4: case 141: case 163: case 170: case 177:
+case 4: case 141: case 163: case 177:
  this.$ = $$[$0-1]; 
 break;
 case 5:
@@ -268,7 +268,7 @@ break;
 case 148:
  this.$ = new Pointer(null, null, this._$); 
 break;
-case 149: case 171:
+case 149:
  this.$ = $$[$0-2]; 
 break;
 case 153: case 154:
@@ -307,20 +307,26 @@ break;
 case 169:
  this.$ = new AbstractDeclarator(DECLTYPE.FNC, $$[$0-3], { parameters: $$[$0-1] }, this._$); 
 break;
+case 170:
+ this.$ = new Initializer(INITTYPE.ARR, $$[$0-1], null, null, this._$); 
+break;
+case 171:
+ this.$ = new Initializer(INITTYPE.ARR, $$[$0-2], null, null, this._$); 
+break;
 case 172:
  this.$ = new Initializer(INITTYPE.EXPR, $$[$0], null, null, this._$); 
 break;
 case 173:
- this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1], this._$)]; 
+ this.$ = [new Initializer(INITTYPE.NESTED, $$[$0], null, $$[$0-1], this._$)]; 
 break;
 case 174:
- this.$ = [new Initializer(INITTYPE.NESTED, null, $$[$0], null, this._$)]; 
+ this.$ = [new Initializer(INITTYPE.NESTED, $$[$0], null, null, this._$)]; 
 break;
 case 175:
- this.$ = [...$$[$0-3], new Initializer(INITTYPE.NESTED, null, $$[$0], $$[$0-1], this._$)]; 
+ this.$ = [...$$[$0-3], new Initializer(INITTYPE.NESTED, $$[$0], null, $$[$0-1], this._$)]; 
 break;
 case 176:
- this.$ = [...$$[$0-2], new Initializer(INITTYPE.NESTED, null, $$[$0], null, this._$)]; 
+ this.$ = [...$$[$0-2], new Initializer(INITTYPE.NESTED, $$[$0], null, null, this._$)]; 
 break;
 case 179:
  this.$ = [...$$[$0-1], $$[$0]]; 

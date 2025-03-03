@@ -543,16 +543,16 @@ direct_abstract_declarator
 	;
 
 initializer
-	: '{' initializer_list '}' { $$ = $2; }
-	| '{' initializer_list ',' '}' { $$ = $2; }
+	: '{' initializer_list '}' { $$ = new Initializer(INITTYPE.ARR, $2, null, null, @$); }
+	| '{' initializer_list ',' '}' { $$ = new Initializer(INITTYPE.ARR, $2, null, null, @$); }
 	| assignment_expression { $$ = new Initializer(INITTYPE.EXPR, $1, null, null, @$); }
 	;
 
 initializer_list
-	: designation initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $2, $1, @$)]; }
-	| initializer { $$ = [new Initializer(INITTYPE.NESTED, null, $1, null, @$)]; }
-	| initializer_list ',' designation initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $4, $3, @$)]; }
-	| initializer_list ',' initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, null, $3, null, @$)]; }
+	: designation initializer { $$ = [new Initializer(INITTYPE.NESTED, $2, null, $1, @$)]; }
+	| initializer { $$ = [new Initializer(INITTYPE.NESTED, $1, null, null, @$)]; }
+	| initializer_list ',' designation initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, $4, null, $3, @$)]; }
+	| initializer_list ',' initializer { $$ = [...$1, new Initializer(INITTYPE.NESTED, $3, null, null, @$)]; }
 	;
 
 designation

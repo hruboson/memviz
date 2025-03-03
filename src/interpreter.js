@@ -19,7 +19,6 @@ class Interpreter {
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.#callStack = new CallStack();
-		this.#callStack.push(new StackFrame(this.#symtableGlobal));
 		this.memsim = new Memsim(this.#warningSystem);
 		this.memviz = new Memviz(this.#callStack);
 	}
@@ -219,6 +218,8 @@ class Interpreter {
 		}else{
 			throw new SError("undefined reference to main()")
 		}
+
+		this.#callStack.push(new StackFrame(this.#symtableGlobal)); // add global symtable to call stack
 	}
 
 	/**
@@ -272,10 +273,30 @@ class Interpreter {
 
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
+
+
+		console.log(initializer);
+		const value = initializer.accept(this);
+		console.log(value);
 	}
 
 	visitDeclarator(declarator){
 
+	}
+
+	visitInitializer(initializer){
+		switch(initializer.kind){
+			case INITTYPE.EXPR:
+				return initializer.expr.accept(this);
+			case INITTYPE.ARR:
+				//TODO
+				break;
+			case INITTYPE.STRUCT:
+				break;
+			// no more nested, was taken care of while creating the AST
+			default:
+				throw new AppError(`Unknown initializer kind (interpreter): ${initializer.kind}`);
+		}
 	}
 
 	visitTypedef(typedef){
