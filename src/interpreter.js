@@ -300,6 +300,9 @@ class Interpreter {
 			this.updateHTML();
 		}
 
+
+		if(this.#_instrNum > this.#breakstop) return;
+		this.#callStack.pop();
 	}
 
 	visitFnc(fnc, args){
