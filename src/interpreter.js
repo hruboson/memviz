@@ -219,7 +219,7 @@ class Interpreter {
 			throw new SError("undefined reference to main()")
 		}
 
-		this.#callStack.push(new StackFrame(this.#symtableGlobal)); // add global symtable to call stack
+		this.#callStack.push(new StackFrame(this.#symtableGlobal), null, null); // add global symtable to call stack
 	}
 
 	/**
@@ -252,7 +252,7 @@ class Interpreter {
 			try{
 				mainFnc.astPtr.body.accept(this);
 			}catch(ret){ // catch return value of main
-				//TODO fix this, I don't think it actually does what it's supposed to
+				//TODO fix this, I don't think it actually does what it's supposed to, maybe it does but it definitely doesn't check errors
 				result = ret;
 			}
 		}
@@ -275,13 +275,33 @@ class Interpreter {
 		const initializer = declaration.initializer;
 
 
-		console.log(initializer);
+		console.log(declarator);
+		const symbol = declarator.accept(this);
 		const value = initializer.accept(this);
 		console.log(value);
+		console.log(symbol);
+		this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
 	}
 
 	visitDeclarator(declarator){
-
+		// finds the symbol and returns it
+		// honestly dont remember what I wanted to do with the kind information... maybe its just useless and all I need is the symbol object
+		// ! be careful, the symbol value returned from callstack is object without functions (but that shouldn't be a problem)
+		switch(declarator.kind){
+			case DECLTYPE.PTR:
+				while(declarator.kind != DECLTYPE.ID){
+					declarator = declarator.child;
+				}
+				return this.#callStack.top().resolve(declaraotr.identifier.name);
+			case DECLTYPE.ID:
+				return this.#callStack.top().resolve(declarator.identifier.name);
+			case DECLTYPE.ARR:{
+				while(declarator.kind != DECLTYPE.ID){
+					declarator = declarator.child;
+				}
+				return this.#callStack.top().resolve(declarator.identifier.name);
+			}
+		}
 	}
 
 	visitInitializer(initializer){
@@ -311,7 +331,7 @@ class Interpreter {
 	}
 
 	visitCStmt(stmt){
-		let sf = new StackFrame(stmt.symtbptr, stmt); // StackFrame creates deep copy of symbol table
+		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.top()); // StackFrame creates deep copy of symbol table
 		this.#callStack.push(sf);
 
 		for(const construct of stmt.sequence){
@@ -329,7 +349,7 @@ class Interpreter {
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
 
-		let sf = new StackFrame(fnc.symtbptr, fnc); // StackFrame creates deep copy of symbol table
+		let sf = new StackFrame(fnc.symtbptr, fnc, this.#callStack.top()); // StackFrame creates deep copy of symbol table
 		this.#callStack.push(sf);
 
 		// initialize symbols and assign addresses
