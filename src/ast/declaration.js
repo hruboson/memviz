@@ -174,7 +174,7 @@ class Initializer extends Construct {
 	 * hopefully this works, because it seems too good to be true
 	 */
 	unnest() {
-		if (this.kind == INITTYPE.NESTED) {
+		if(this.kind == INITTYPE.NESTED){
 			const nested = this.child; // get the nested initializer
 			this.kind = nested.kind;
 			this.expr = nested.expr ?? null;
@@ -186,9 +186,9 @@ class Initializer extends Construct {
 		}
 
 		// recursively unnest arrays
-		if (this.kind == INITTYPE.ARR && this.arr) {
+		if(this.kind == INITTYPE.ARR && this.arr){
 			this.arr = this.arr.map(item => {
-				if (item.kind == INITTYPE.NESTED) {
+				if (item.kind == INITTYPE.NESTED){
 					item.unnest(); // modify in-place
 				}
 				return item;
@@ -196,10 +196,10 @@ class Initializer extends Construct {
 		}
 
 		// recursively unnest structs
-		if (this.kind == INITTYPE.STRUCT && this.struct) {
-			for (const key in this.struct) {
-				if (this.struct[key].kind == INITTYPE.NESTED) {
-					this.struct[key].unnest(); // modify in-place
+		if(this.kind == INITTYPE.STRUCT && this.struct){
+			for (const key in this.struct){
+				if (this.struct[key].kind == INITTYPE.NESTED){
+				this.struct[key].unnest(); // modify in-place
 				}
 			}
 		}
