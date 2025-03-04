@@ -124,18 +124,72 @@ class Semantic {
 	 *******************************/
 
 	visitDeclaration(declaration){
-		const declarator = declaration.declarator;
-		const initializer = declaration.initializer;
+		const declKind = declaration.declarator.accept(this);
+		const initKind = declaration.initializer.accept(this);
 
-		this.addSymbol(SYMTYPE.OBJ, declarator, initializer, declaration.type.specifiers, declaration);
+		if(declKind == DECLTYPE.ARR && !Array.isArray(initKind) || declKind != DECLTYPE.ARR && Array.isArray(initKind)){
+			throw new SError(`Invalid initializer`, declaration.loc);
+		}
+
+		this.addSymbol(SYMTYPE.OBJ, declaration.declarator, declaration.initializer, declaration.type.specifiers, declaration);
 	}
 
 	visitDeclarator(declarator){
+		switch(declarator.kind){
+			case DECLTYPE.PTR:
+				return DECLTYPE.PTR;
+			case DECLTYPE.ID:
+				return DECLTYPE.ID;
+			case DECLTYPE.ARR:
+				return DECLTYPE.ARR;
+			default:
+				throw new AppError(`Unknown declarator kind (semantic): ${initializer.kind}`);
+		}
 	}
 
 	visitInitializer(initializer){
-		if(initializer.kind == INITTYPE.EXPR){
-			
+		switch(initializer.kind){
+			case INITTYPE.EXPR:
+				return initializer.expr.accept(this);
+			case INITTYPE.ARR:{
+				const jsArr = initializer.toJSArray(this);
+
+				function checkDimensions(arr, depth=0){
+					console.log(depth, arr);
+					if(!Array.isArray(arr) || typeof arr == "string"){ // end on primitive values
+						return;
+					}
+
+					// check if all arrays at this level have the same length
+					const size = arr.length;
+					for(let i = 1; i < size; i++){
+						if (!Array.isArray(arr[i])) {
+							continue;
+						}
+
+						if(arr[i].length != arr[0].length){
+							let expectedLen = arr[0].length;
+							if(!arr[0].length) expectedLen = 1;
+							throw new SError(`Dimension mismatch: Expected ${expectedLen} elements, but found ${arr[i].length}`, initializer.loc);
+						}
+					}
+
+					// recursively check sub arrays
+					for(let i = 0; i < size; i++){
+						checkDimensions(arr[i], depth + 1);
+					}
+				}
+
+				// throws SError
+				console.log(jsArr);
+				checkDimensions(jsArr);
+				return INITTYPE.ARR;
+			}
+			case INITTYPE.STRUCT:
+				return INITTYPE.STRUCT;
+			// no more nested, was taken care of while creating the AST
+			default:
+				throw new AppError(`Unknown initializer kind (semantic): ${initializer.kind}`);
 		}
 	}
 
@@ -261,7 +315,16 @@ class Semantic {
 	}
 
 	visitCExpr(expr){
-
+		switch(expr.type){
+			case "s_literal":
+				return String(expr.value.slice(1,-1));
+			case "i_constant":
+				return parseInt(expr.value);
+			case "f_constant":
+				return parseFloat(expr.value);
+			default:
+				throw new AppError("wrong expr.type format while interpreting");
+		}
 	}
 
 	visitIdentifier(identifier){

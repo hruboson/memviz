@@ -204,6 +204,17 @@ class Initializer extends Construct {
 			}
 		}
 	}
+
+	toJSArray(visitor){
+		switch (this.kind){
+			case INITTYPE.EXPR:
+				return this.expr.accept(visitor);
+			case INITTYPE.ARR:
+				return this.arr.map(el => el.toJSArray(visitor)); // recursion -> maybe change to iterative for better performance
+			default:
+				throw new AppError(`Unknown initializer kind: ${this.kind}`);
+		}
+	}
 }
 
 /**
