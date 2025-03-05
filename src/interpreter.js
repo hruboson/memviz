@@ -274,12 +274,8 @@ class Interpreter {
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
 
-
-		console.log(declarator);
 		const symbol = declarator.accept(this);
 		const value = initializer.accept(this);
-		console.log(value);
-		console.log(symbol);
 		this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
 	}
 
@@ -288,13 +284,16 @@ class Interpreter {
 		// honestly dont remember what I wanted to do with the kind information... maybe its just useless and all I need is the symbol object
 		// ! be careful, the symbol value returned from callstack is object without functions (but that shouldn't be a problem)
 		switch(declarator.kind){
-			case DECLTYPE.PTR:
+			case DECLTYPE.PTR:{
 				while(declarator.kind != DECLTYPE.ID){
 					declarator = declarator.child;
 				}
 				return this.#callStack.top().resolve(declaraotr.identifier.name);
+			}
+
 			case DECLTYPE.ID:
 				return this.#callStack.top().resolve(declarator.identifier.name);
+
 			case DECLTYPE.ARR:{
 				while(declarator.kind != DECLTYPE.ID){
 					declarator = declarator.child;
@@ -309,8 +308,7 @@ class Interpreter {
 			case INITTYPE.EXPR:
 				return initializer.expr.accept(this);
 			case INITTYPE.ARR:
-				//TODO
-				break;
+				return initializer.toJSArray(this);
 			case INITTYPE.STRUCT:
 				break;
 			// no more nested, was taken care of while creating the AST
