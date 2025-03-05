@@ -127,8 +127,6 @@ class Semantic {
 		const declKind = declaration.declarator.accept(this);
 		const initKind = declaration.initializer.accept(this);
 
-		console.log("Decl:", declKind);
-		console.log("Init:", initKind);
 		if(declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR || 
 		   declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR    ){
 			throw new SError(`Invalid initializer`, declaration.loc);
@@ -158,7 +156,6 @@ class Semantic {
 				const jsArr = initializer.toJSArray(this);
 
 				function checkDimensions(arr, depth=0){
-					console.log(depth, arr);
 					if(!Array.isArray(arr) || typeof arr == "string"){ // end on primitive values
 						return;
 					}
@@ -184,7 +181,6 @@ class Semantic {
 				}
 
 				// throws SError
-				console.log(jsArr);
 				checkDimensions(jsArr);
 				return INITTYPE.ARR;
 			}
