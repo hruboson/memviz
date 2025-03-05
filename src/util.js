@@ -85,6 +85,19 @@ class Stack {
 	push(item){
 		this.#items[this.#items.length] = item;
 	}
+
+	[Symbol.iterator](){
+		let index = this.#items.length; // start from the top of the stack
+		return {
+		next: () => {
+			if (index > 0) {
+					return { value: this.#items[--index], done: false };
+				} else {
+					return { done: true };
+				}
+			}
+		};
+	}
 }
 
 /**

@@ -20,7 +20,7 @@ class Interpreter {
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.#callStack = new CallStack();
 		this.memsim = new Memsim(this.#warningSystem);
-		this.memviz = new Memviz(this.#callStack);
+		this.memviz = new Memviz(this.#callStack, document.getElementById("output")); // TODO pass the element id as string parameter for interpreter
 	}
 
 	/* ATTRIBUTES */
@@ -258,6 +258,7 @@ class Interpreter {
 		}
 		
 		this.updateHTML();
+		this.memviz.updateHTML();
 		this.memsim.printMemory();
 		console.log(this.#callStack);
 		console.log("================END================");
@@ -275,6 +276,8 @@ class Interpreter {
 		const initializer = declaration.initializer;
 
 		const symbol = declarator.accept(this);
+		symbol.initialized = true; // this basically means "interpreted"
+
 		const value = initializer.accept(this);
 		this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
 	}

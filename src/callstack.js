@@ -22,6 +22,12 @@ class StackFrame {
 	constructor(symtable, construct, parent){
 		//! danger: the symtable is copied as an object without functions, bear that in mind
 		this.symtable = structuredClone(symtable);
+
+		// uninitialize all variables - meaning they will be marked as "not interpreted yet"
+		for(const [name, sym] of this.symtable.objects.entries()){
+			sym.initialized = false;
+		}
+
 		this.construct = construct;
 		this.parent = parent;
 	}
