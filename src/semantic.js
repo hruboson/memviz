@@ -50,16 +50,34 @@ class Semantic {
 		var declPtr = false;
 		var symbolName = ""; // return value
 		var dimension = 0;
+		var size = [];
 		var parameters = null;
 		var isFunction = false;
 		var namespace = NAMESPACE.ORDS;
 		var initialized = initializer ? true : false;
 
+
+
+		if(isclass(initializer, "Initializer")){
+			if(isFunction){
+				//? this might be completely wrong check this! Yes it is wrong, it could be function that returns pointer (honestly really check this xd)
+				if(!declPtr){
+					throw new SError(`Function ${symbolName} initialized like a variable`, initializer.loc);
+				}	
+			}
+		}
+
 		do{
 			try {
 				if(declChild.kind == DECLTYPE.ID){
+					//TODO refactor this, its ugly as heck
+					if(initializer && dimension > 0 && size.length < 1){ // is an array and size was not determined from declarator (int[3] = ...);
+						const jsArray = initializer.toJSArray(this);
+						size = getArraySizes(jsArray);
+					}
+
 					const currSymtable = this.symtableStack.peek();
-					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers.toString(), declPtr, dimension, parameters, isFunction, astPtr);
+					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers.toString(), declPtr, dimension, size, parameters, isFunction, astPtr);
 					symbolName = declChild.identifier.name;
 				}
 				if(declChild.kind == DECLTYPE.FNC){
@@ -88,15 +106,6 @@ class Semantic {
 				throw new SError(e.details, declarator.loc);
 			}
 		}while(declChild != null);
-
-		if(isclass(initializer, "Initializer")){
-			if(isFunction){
-				//? this might be completely wrong check this! Yes it is wrong, it could be function that returns pointer (honestly really check this xd)
-				if(!declPtr){
-					throw new SError(`Function ${symbolName} initialized like a variable`, initializer.loc);
-				}	
-			}
-		}
 
 		return symbolName;
 	}

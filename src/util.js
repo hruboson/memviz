@@ -145,3 +145,31 @@ function* zip(...iterables){
 		return arr.some(v => v !== undefined);
 	}
 }
+
+/**
+ * Returns size of all dimension of an array
+ * @param {Array} arr
+ */
+function getArraySizes(jsArray){
+    if(!Array.isArray(jsArray)) return [];
+
+    let sizes = [];
+    let queue = [{ array: jsArray, depth: 0 }];
+
+    while(queue.length > 0){
+        let { array, depth } = queue.shift(); // dequeue an element
+
+        if(!Array.isArray(array)) continue; // skip non-array values
+
+        if(sizes.length <= depth){
+            sizes[depth] = array.length;
+        }
+
+        // Enqueue the next level arrays
+        for(let i = 0; i < array.length; i++){
+            queue.push({ array: array[i], depth: depth + 1 });
+        }
+    }
+
+    return sizes;
+}
