@@ -143,58 +143,85 @@ class Memsim {
 		}
 	}
 
+	/**
+	 * High-level memory function which determines and sets memory to a symbol
+	 * @param {Symbol} sym
+	 * @param {integer|character|double|Array|Object}
+	 * @param {MEMREGION} region
+	 */
 	setSymValue(sym, value, region){
 		if (!Object.values(MEMREGION).includes(region)) {
 			throw new AppError(`Invalid memory while setting MEMREGION of ${sym.identifier}: ${region}`);
 		}
 
+		if(sym.dimension > 0){ // array
+			this.setArrayValue(sym, value, region);
+		}else if(sym.pointer){
+			this.setPointerValue(sym, value, region);
+		}else { //TODO struct
+			this.setPrimitiveValue(sym, value, region);
+		}
+	}
+
+	setPrimitiveValue(sym, value, region){
 		switch(sym.memtype){
 			case DATATYPE.bool:
-				break;
+			break;
 
 			case DATATYPE.char:
-				break;
+			break;
 
 			case DATATYPE.uchar:
-				break;
+			break;
 
 			case DATATYPE.short:
-				break;
+			break;
 
 			case DATATYPE.ushort:
-				break;
+			break;
 
 			case DATATYPE.int:
-				sym.address = sym.address ? this.changeIntValue(sym.address, value) : this.setIntValue(value, region, sym.astPtr.loc);
-				break;
+				sym.address = sym.address ? this.changeIntValue(sym.address, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+			break;
 
 			case DATATYPE.uint:
-				break;
+			break;
 
 			case DATATYPE.long:
-				break;
+			break;
 
 			case DATATYPE.ulong:
-				break;
+			break;
 
 			case DATATYPE.longlong:
-				break;
+			break;
 
 			case DATATYPE.ulonglong:
-				break;
+			break;
 
 			case DATATYPE.float:
-				break;
+			break;
 
 			case DATATYPE.double:
-				break;
+			break;
 
 			case DATATYPE.longdouble:
-				break;
+			break;
 
 			default:
 				throw new AppError(`Invalid DATATYPE while setting value of ${sym.identifier}: ${sym.memtype}!`);
 		}
+	}
+
+	setArrayValue(sym, value, region){
+		// determine derived type of array
+		const memtype = sym.memtype;
+		const dimension = sym.dimension;
+	}
+
+	setPointerValue(sym, value, region){
+		// pointer is 32 bits
+		sym.addres = sym.address ? this.changeIntValue(sym, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
 	}
 
 	/******************************
