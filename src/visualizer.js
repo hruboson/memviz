@@ -29,7 +29,7 @@ class Memviz {
 
 		this.graph = new mxg.Graph(this.container); // main "canvas"
 
-		this.root = graph.getDefaultParent(); // default parent
+		this.root = this.graph.getDefaultParent(); // default parent
 	}
 
 	setGraphOptions(){
