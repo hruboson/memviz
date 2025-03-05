@@ -134,11 +134,15 @@ class Semantic {
 
 	visitDeclaration(declaration){
 		const declKind = declaration.declarator.accept(this);
-		const initKind = declaration.initializer.accept(this);
 
-		if(declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR || 
-		   declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR    ){
-			throw new SError(`Invalid initializer`, declaration.loc);
+		let initKind = null;
+		if(declaration.initializer){
+			initKind = declaration.initializer.accept(this);
+
+			if(declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR || 
+				declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR    ){
+				throw new SError(`Invalid initializer`, declaration.loc);
+			}
 		}
 
 		this.addSymbol(SYMTYPE.OBJ, declaration.declarator, declaration.initializer, declaration.type.specifiers, declaration);
