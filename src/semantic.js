@@ -127,7 +127,10 @@ class Semantic {
 		const declKind = declaration.declarator.accept(this);
 		const initKind = declaration.initializer.accept(this);
 
-		if(declKind == DECLTYPE.ARR && !Array.isArray(initKind) || declKind != DECLTYPE.ARR && Array.isArray(initKind)){
+		console.log("Decl:", declKind);
+		console.log("Init:", initKind);
+		if(declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR || 
+		   declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR    ){
 			throw new SError(`Invalid initializer`, declaration.loc);
 		}
 
