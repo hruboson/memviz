@@ -71,7 +71,7 @@ class Semantic {
 			try {
 				if(declChild.kind == DECLTYPE.ID){
 					//TODO refactor this, its ugly as heck
-					if(initializer && dimension > 0 && size.length < 1){ // is an array and size was not determined from declarator (int[3] = ...);
+					if(isclass(initializer, "Initializer") && dimension > 0 && size.length < 1){ // is an array and size was not determined from declarator (int[3] = ...);
 						const jsArray = initializer.toJSArray(this);
 						size = getArraySizes(jsArray);
 					}
@@ -92,6 +92,12 @@ class Semantic {
 					declPtr = true;
 				}
 				if(declChild.kind == DECLTYPE.ARR){
+					const exprValue = declChild.arrSizeExp.accept(this);
+					if(exprValue < 0){
+						throw new SError(`Invalid array size`, declarator.loc);
+					}
+
+					size[dimension] = exprValue; // should always be constant expression
 					dimension += 1;
 				}
 				if(declChild.kind == DECLTYPE.STRUCT){
@@ -103,7 +109,7 @@ class Semantic {
 				}
 				declChild = declChild.child;
 			} catch(e){
-				throw new SError(e.details, declarator.loc);
+				throw e;
 			}
 		}while(declChild != null);
 
@@ -140,7 +146,7 @@ class Semantic {
 			initKind = declaration.initializer.accept(this);
 
 			if(declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR || 
-				declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR    ){
+				declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR ){
 				throw new SError(`Invalid initializer`, declaration.loc);
 			}
 		}
