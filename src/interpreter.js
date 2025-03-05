@@ -276,7 +276,7 @@ class Interpreter {
 		const initializer = declaration.initializer;
 
 		const symbol = declarator.accept(this);
-		symbol.initialized = true; // this basically means "interpreted"
+		symbol.interpreted = true;
 
 		const value = initializer.accept(this);
 		this.memsim.setSymValue(symbol, value, MEMREGION.STACK);

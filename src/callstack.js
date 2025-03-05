@@ -25,7 +25,7 @@ class StackFrame {
 
 		// uninitialize all variables - meaning they will be marked as "not interpreted yet"
 		for(const [name, sym] of this.symtable.objects.entries()){
-			sym.initialized = false;
+			sym.interpreted = false;
 		}
 
 		this.construct = construct;

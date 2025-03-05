@@ -108,7 +108,7 @@ class Memviz {
 	vizStackFrame(stackFrame){
 		for(const [name, sym] of stackFrame.symtable.objects.entries()){
 			if(sym.type == "FNC") continue; // skip functions
-			if(!sym.initialized) continue; // skip not yet interpreted
+			if(!sym.interpreted) continue; // skip not yet interpreted
 			this.vizSym(sym);
 		}
 	}
