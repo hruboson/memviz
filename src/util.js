@@ -148,7 +148,11 @@ function* zip(...iterables){
 
 /**
  * Returns size of all dimension of an array
+ * @description Only works on array whose dimensions are the same size
  * @param {Array} arr
+ * @return {Array} sizes of dimensions
+ * @example
+ * 	[[1, 2], [3, 4], [5, 6]] -> returns [3, 2]
  */
 function getArraySizes(jsArray){
     if(!Array.isArray(jsArray)) return [];
