@@ -493,3 +493,13 @@ int main(){
 	return 1;
 }
 `;
+
+const wrong_array_initializer_size = `int main(){
+	int a = 1;
+	int b = { 2 };
+	int i[] = { 3, 4, 5 };
+    int y[][][] = { 
+        { {1, 2}, {3, 4} }, 
+        { {5, 6, 7}, {8, 9} }  // semantic error
+    };
+}`;
