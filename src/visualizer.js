@@ -24,6 +24,8 @@ class Memviz {
 	constructor(callStack, container){
 		if(!(container instanceof Element)) throw new Error(`Container must be a HTML element!`);
 
+		container.innerHTML = ""; // clear output
+
 		this.#callStack = callStack;
 		this.container = container;
 
@@ -101,14 +103,45 @@ class Memviz {
 
 	vizCallStack(){
 		for(const sf of this.#callStack){
+			if(sf.scopeInfo.name == "global")
 			this.vizStackFrame(sf);
 		}
 	}
 
 	vizStackFrame(stackFrame){
+		const root = this.root;
 		for(const [name, sym] of stackFrame.symtable.objects.entries()){
 			if(sym.type == "FNC") continue; // skip functions
 			if(!sym.interpreted) continue; // skip not yet interpreted
+
+			//TODO determine nVertical from largest array size
+			const nVertical = 3;
+
+			console.log((Memviz.squareXYlen + Memviz.labelHeight*2 + 20) * nVertical);
+			const stackFrameRectangle = this.graph.insertVertex({
+				root,
+				position: [Memviz.sfX, Memviz.sfY],
+				value: sf.scopeInfo.name,
+				size: [(Memviz.squareXYlen * 1.6 + Memviz.squareX) * stackFrame.symtable.objects.size, (Memviz.squareXYlen + Memviz.labelHeight*2 + 20) * nVertical], // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
+				style: {
+					// label style
+					labelPosition: "center",
+					verticalAlign: "bottom",
+					verticalLabelPosition: "top",
+					spacingBottom: 5,
+					align: "left",
+
+					strokeColor: "grey",
+					fillColor: "transparent",
+					shape: "rectangle",
+
+					// font style
+					fontSize: 14,
+					fontColor: "white",
+
+					fontFamily: "FiraCode",
+				},
+			});
 			this.vizSym(sym);
 		}
 	}
