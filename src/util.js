@@ -87,11 +87,11 @@ class Stack {
 	}
 
 	[Symbol.iterator](){
-		let index = this.#items.length; // start from the top of the stack
+		let index = 0; // start from bottom
 		return {
-		next: () => {
-			if (index > 0) {
-					return { value: this.#items[--index], done: false };
+			next: () => {
+				if (index < this.#items.length) {
+					return { value: this.#items[index++], done: false };
 				} else {
 					return { done: true };
 				}
