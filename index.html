@@ -225,8 +225,8 @@
 						<div id="editor" onChange="resetEditor();">void main(){
 	int a = 1;
 	int b = { 2 };
-	int i[] = { 3, 4, 5 };
-	int y[][] = { {6, 7}, {8, 9} };
+	int i[3];
+	int y[3][4];
 }
 
 /*int main(){
@@ -605,11 +605,6 @@ Split(["#split-ve", "#split-console"], {
 			console.info("Main result: ", result);
 
 			interpreter.updateHTML();
-			if(flag == EXEOPT.PARSE){
-				document.getElementById("output").innerHTML = JSON.stringify(interpreter.ast, null, 4);
-			}else{
-				document.getElementById("output").innerHTML = interpreter.symtableGlobal.print();
-			}
 		}catch(e){
 			document.getElementById("output").innerHTML = e.message;
 		}
