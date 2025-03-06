@@ -259,8 +259,8 @@ class Interpreter {
 		
 		this.updateHTML();
 		this.memviz.updateHTML();
-		this.memsim.printMemory();
-		console.log(this.#callStack);
+		//this.memsim.printMemory();
+		//console.log(this.#callStack);
 		console.log("================END================");
 		return result;
 	}
@@ -359,7 +359,7 @@ class Interpreter {
 		// initialize symbols and assign addresses
 		for(const [[name, sym], arg] of zip(this.#callStack.top().symtable.objects, args)){
 			this.memsim.setSymValue(sym, arg.value, MEMREGION.STACK);
-			console.log(this.memsim.readSymValue(sym));
+			//console.log(this.memsim.readSymValue(sym));
 		}
 		
 		try{

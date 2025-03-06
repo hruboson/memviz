@@ -24,22 +24,28 @@ class Memviz {
 	constructor(callStack, container){
 		if(!(container instanceof Element)) throw new Error(`Container must be a HTML element!`);
 
-		container.innerHTML = ""; // clear output
-
 		this.#callStack = callStack;
 		this.container = container;
 
 		this.graph = new mxg.Graph(this.container); // main "canvas"
-
 		this.root = this.graph.getDefaultParent(); // default parent
+
+		this.clear();
+	}
+
+	clear(){
+		//this.graph.model.clear();
+		this.container.innerHTML = ""; // clear output
+		this.graph = new mxg.Graph(this.container);
+		this.root = this.graph.getDefaultParent();
 	}
 
 	setGraphOptions(){
 		this.graph.setEnabled(false);
+		mxg.InternalEvent.disableContextMenu(this.container);
 	}
 
 	updateHTML(){
-		console.log(Memviz.squareX, Memviz.rowY, Memviz.labelHeight);
 		this.vizCallStack();
 	}
 
@@ -102,51 +108,66 @@ class Memviz {
 	}
 
 	vizCallStack(){
+		this.clear();
+
+		let nextY = 10;
 		for(const sf of this.#callStack){
-			if(sf.scopeInfo.name == "global")
-			this.vizStackFrame(sf);
+			nextY = this.vizStackFrame(sf, nextY);
 		}
 	}
 
-	vizStackFrame(stackFrame){
+	vizStackFrame(sf, y){
+		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([name, sym]) => sym.type !== "FNC" && sym.interpreted);
+
+		//TODO determine nVertical from largest array size
+		const nHorizontal = 3;
+
 		const root = this.root;
-		for(const [name, sym] of stackFrame.symtable.objects.entries()){
-			if(sym.type == "FNC") continue; // skip functions
-			if(!sym.interpreted) continue; // skip not yet interpreted
 
-			//TODO determine nVertical from largest array size
-			const nVertical = 3;
-
-			console.log((Memviz.squareXYlen + Memviz.labelHeight*2 + 20) * nVertical);
-			const stackFrameRectangle = this.graph.insertVertex({
-				root,
-				position: [Memviz.sfX, Memviz.sfY],
-				value: sf.scopeInfo.name,
-				size: [(Memviz.squareXYlen * 1.6 + Memviz.squareX) * stackFrame.symtable.objects.size, (Memviz.squareXYlen + Memviz.labelHeight*2 + 20) * nVertical], // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
-				style: {
-					// label style
-					labelPosition: "center",
-					verticalAlign: "bottom",
-					verticalLabelPosition: "top",
-					spacingBottom: 5,
-					align: "left",
-
-					strokeColor: "grey",
-					fillColor: "transparent",
-					shape: "rectangle",
-
-					// font style
-					fontSize: 14,
-					fontColor: "white",
-
-					fontFamily: "FiraCode",
-				},
-			});
-			this.vizSym(sym);
+		let height = (Memviz.squareXYlen + Memviz.labelHeight);
+		if(filteredObjects.length > 0){
+			height += 20; // inner padding for each row inside sf
+			height *= filteredObjects.length;
 		}
+
+		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
+
+		let sfY = y + Memviz.labelHeight + 10;
+
+		const stackFrameRectangle = this.graph.insertVertex({
+			root,
+			position: [Memviz.sfX, sfY],
+			value: sf.symtable.scopeInfo.name,
+			height: height,
+			width: width,
+			style: {
+				// label style
+				labelPosition: "center",
+				verticalAlign: "bottom",
+				verticalLabelPosition: "top",
+				spacingBottom: 5,
+				align: "left",
+
+				strokeColor: "grey",
+				fillColor: "transparent",
+				shape: "rectangle",
+
+				// font style
+				fontSize: 14,
+				fontColor: "white",
+
+				fontFamily: "FiraCode",
+			},
+		});
+
+		for(const [name, sym] of filteredObjects){
+			this.vizSym(sym, stackFrameRectangle);
+		}
+
+		return sfY + height;
 	}
 
-	vizSym(sym/*TODO params I will need*/){
+	vizSym(sym, parent){
 		console.log(sym);
 	}
 
