@@ -92,12 +92,14 @@ class Semantic {
 					declPtr = true;
 				}
 				if(declChild.kind == DECLTYPE.ARR){
-					const exprValue = declChild.arrSizeExp.accept(this);
-					if(exprValue < 0){
-						throw new SError(`Invalid array size`, declarator.loc);
-					}
+					if(declChild.arrSizeExp){
+						const exprValue = declChild.arrSizeExp.accept(this);
+						if(exprValue < 0){
+							throw new SError(`Invalid array size`, declarator.loc);
+						}
 
-					size[dimension] = exprValue; // should always be constant expression
+						size[dimension] = exprValue; // should always be constant expression
+					}
 					dimension += 1;
 				}
 				if(declChild.kind == DECLTYPE.STRUCT){
@@ -145,8 +147,8 @@ class Semantic {
 		if(declaration.initializer){
 			initKind = declaration.initializer.accept(this);
 
-			if(declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR || 
-				declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR ){
+			if( ((declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR) || (declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR)) 
+				&& (typeof initKind != "string" && declKind != DECLTYPE.ARR)){
 				throw new SError(`Invalid initializer`, declaration.loc);
 			}
 		}
