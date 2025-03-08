@@ -20,7 +20,7 @@ class Interpreter {
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.#callStack = new CallStack();
 		this.memsim = new Memsim(this.#warningSystem);
-		this.memviz = new Memviz(this.#callStack, document.getElementById("output")); // TODO pass the element id as string parameter for interpreter
+		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output")); // TODO pass the element id as string parameter for interpreter
 	}
 
 	/* ATTRIBUTES */

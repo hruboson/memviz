@@ -21,9 +21,10 @@ const mxg = window.mxg; // core of the MaxGraph library
  */
 class Memviz {
 	
-	constructor(callStack, container){
+	constructor(memsim, callStack, container){
 		if(!(container instanceof Element)) throw new Error(`Container must be a HTML element!`);
 
+		this.memsim = memsim;
 		this.#callStack = callStack;
 		this.container = container;
 
@@ -168,7 +169,7 @@ class Memviz {
 	}
 
 	vizSym(sym, parent){
-		console.log(sym);
+		console.log(this.memsim.readSymValue(sym));
 	}
 
 	

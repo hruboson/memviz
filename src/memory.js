@@ -97,52 +97,6 @@ class Memsim {
 	 * High-level memory functions *
 	 ******************************/
 
-	readSymValue(sym){
-		switch(sym.memtype){
-			case DATATYPE.bool:
-				break;
-
-			case DATATYPE.char:
-				break;
-
-			case DATATYPE.uchar:
-				break;
-
-			case DATATYPE.short:
-				break;
-
-			case DATATYPE.ushort:
-				break;
-
-			case DATATYPE.int:
-				return this.readIntValue(sym.address);
-
-			case DATATYPE.uint:
-				break;
-
-			case DATATYPE.long:
-				break;
-
-			case DATATYPE.ulong:
-				break;
-
-			case DATATYPE.longlong:
-				break;
-
-			case DATATYPE.ulonglong:
-				break;
-
-			case DATATYPE.float:
-				break;
-
-			case DATATYPE.double:
-				break;
-
-			case DATATYPE.longdouble:
-				break;
-		}
-	}
-
 	/**
 	 * High-level memory function which determines and sets memory to a symbol
 	 * @param {Symbol} sym
@@ -154,11 +108,12 @@ class Memsim {
 			throw new AppError(`Invalid memory while setting MEMREGION of ${sym.identifier}: ${region}`);
 		}
 
+		//TODO struct
 		if(sym.dimension > 0){ // array
 			this.setArrayValue(sym, value, region);
 		}else if(sym.pointer){
 			this.setPointerValue(sym, value, region);
-		}else { //TODO struct
+		}else { 
 			this.setPrimitiveValue(sym, value, region);
 		}
 	}
@@ -222,6 +177,78 @@ class Memsim {
 	setPointerValue(sym, value, region){
 		// pointer is 32 bits
 		sym.addres = sym.address ? this.changeIntValue(sym, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+	}
+
+	/**
+	 * High-level memory function which determines and reads memory of a symbol
+	 * @param {Symbol} sym
+	 * @param {integer|character|double|Array|Object}
+	 * @param {MEMREGION} region
+	 */
+	readSymValue(sym){
+		//TODO struct
+		if(sym.dimension > 0){ // array
+			return this.readArrayValue(sym);
+		}else if(sym.pointer){
+			return this.readPointerValue(sym);
+		}else {
+			return this.readPrimitiveValue(sym);
+		}
+	}
+
+	readPrimitiveValue(sym){
+		switch(sym.memtype){
+			case DATATYPE.bool:
+			break;
+
+			case DATATYPE.char:
+			break;
+
+			case DATATYPE.uchar:
+			break;
+
+			case DATATYPE.short:
+			break;
+
+			case DATATYPE.ushort:
+			break;
+
+			case DATATYPE.int:
+				return this.readIntValue(sym.address);
+
+			case DATATYPE.uint:
+			break;
+
+			case DATATYPE.long:
+			break;
+
+			case DATATYPE.ulong:
+			break;
+
+			case DATATYPE.longlong:
+			break;
+
+			case DATATYPE.ulonglong:
+			break;
+
+			case DATATYPE.float:
+			break;
+
+			case DATATYPE.double:
+			break;
+
+			case DATATYPE.longdouble:
+			break;
+		}
+
+	}
+
+	readArrayValue(sym){
+
+	}
+
+	readPointerValue(sym){
+
 	}
 
 	/******************************
