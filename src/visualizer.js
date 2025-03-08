@@ -130,6 +130,7 @@ class Memviz {
 			height += 20; // inner padding for each row inside sf
 			height *= filteredObjects.length;
 		}
+		height += 20; // bottom padding
 
 		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
 
@@ -161,15 +162,113 @@ class Memviz {
 			},
 		});
 
+		let nextY = 30; // first top padding
 		for(const [name, sym] of filteredObjects){
-			this.vizSym(sym, stackFrameRectangle);
+			nextY = this.vizSym(sym, stackFrameRectangle, nextY);
 		}
 
 		return sfY + height;
 	}
 
-	vizSym(sym, parent){
+	vizSym(sym, parent, y){
+		//TODO only a demo, add switch for types of symbol (array, pointer, structure, primitive)
+		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
+		let symY = y;
+
+		/*const ptrSquare = this.graph.insertVertex({
+			parent: parent,
+			position: [Memviz.squareX, symY], // Square position
+			size: [Memviz.squareXYlen, Memviz.squareXYlen], // Square size
+			value: this.memsim.readSymValue(sym),
+			style: {
+				// label style
+				labelPosition: "center",
+				verticalAlign: "bottom",
+				verticalLabelPosition: "top",
+				align: "left",
+				spacingBottom: 5,
+
+				// vertex style
+				fillColor: "#1BA1E2", // blue
+				strokeColor: "#006EAF", // darker blue
+				shape: "rectangle", // Explicitly defining it as a square
+
+				// font style
+				fontSize: 14,
+				fontColor: "white",
+				fontFamily: "FiraCode",
+			},
+		});*/
+
+		//value style (green square)
+		/*
+			style: {
+				fontSize: 30,
+				fillColor: "#60A917",
+				strokeColor: "#2D7600",
+				fontColor: "white",
+				fontFamily: "FiraCode",
+			},
+		*/
+
+		const value = this.graph.insertVertex({
+			parent: parent,
+			position: [Memviz.squareX, symY],
+			size: [Memviz.squareXYlen, Memviz.squareXYlen],
+			value: this.memsim.readSymValue(sym),
+			style: {
+				// vertex style
+				fillColor: "#1BA1E2", // blue
+				strokeColor: "#006EAF", // darker blue
+				shape: "rectangle", // Explicitly defining it as a square
+
+				// font style
+				fontSize: 30,
+				fontColor: "white",
+				fontFamily: "FiraCode",
+			},
+		});
+
+		const labelAbove = this.graph.insertVertex({
+			parent: parent, 
+			position: [Memviz.squareX, symY - Memviz.labelHeight],
+			size: [Memviz.squareXYlen, Memviz.labelHeight],
+			value: sym.name,
+			style: {
+				fillColor: "transparent",
+				strokeColor: "transparent",
+				labelPosition: "center",
+				verticalLabelPosition: "middle",
+				align: "left",
+
+				// font style
+				fontSize: 14,
+				fontColor: "white",
+				fontFamily: "FiraCode",
+			},
+		});
+
+		const labelBelow = this.graph.insertVertex({
+			parent: parent, 
+			position: [Memviz.squareX, symY + Memviz.squareXYlen], // Position below the square
+			size: [Memviz.squareXYlen, Memviz.labelHeight],
+			value: sym.specifiers,
+			style: {
+				fillColor: "transparent", // Transparent background
+				strokeColor: "transparent", // No border
+				labelPosition: "center",
+				verticalLabelPosition: "middle",
+				align: "right",
+
+				// font style
+				fontSize: 14,
+				fontColor: "white",
+				fontFamily: "FiraCode",
+			},
+		});
+
 		console.log(this.memsim.readSymValue(sym));
+		return symY + height;
 	}
 
 	
@@ -213,31 +312,6 @@ class Memviz {
 			fontSize: 14,
         	fontColor: "white",
 
-			fontFamily: "FiraCode",
-		},
-	});
-
-	const square = graph.insertVertex({
-		parent: groupRectangle,
-		position: [squareX, rowY], // Square position
-		size: [squareXYlen, squareXYlen], // Square size
-		//value: "ptr",
-		style: {
-			// label style
-			/*labelPosition: "center",
-			verticalAlign: "bottom",
-			verticalLabelPosition: "top",
-			align: "left",
-			spacingBottom: 5,*
-
-			// vertex style
-			fillColor: "#1BA1E2", // blue
-			strokeColor: "#006EAF", // darker blue
-			shape: "rectangle", // Explicitly defining it as a square
-
-			// font style
-			fontSize: 14,
-        	fontColor: "white",
 			fontFamily: "FiraCode",
 		},
 	});
