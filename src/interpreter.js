@@ -247,6 +247,14 @@ class Interpreter {
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
 		let result = new ReturnVoid();
 
+		// initialize global variables
+		/*for(const [name, symbol] of this.#symtableGlobal.objects){
+			if(symbol.isNative) continue; // skip built-in functions
+			console.log(symbol);
+			symbol.astPtr.accept(this);
+		}*/
+
+
 		if(breakstop > 0){
 			this.pc = mainFnc.astPtr.body.sequence[0]; // get the first construct of the sequence statement (for visualization)
 			try{
@@ -328,10 +336,12 @@ class Interpreter {
 
 	}
 
-	visitIdentifier(id, returnNode){
-		if(returnNode) return id; // for callee resolution
+	visitIdentifier(id){
+		const sym = this.symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
+		if(sym.isFunction) return id;
 
-		return this.memsim.readSymValue(this.#callStack.top().resolve(id.name));
+		sym = this.#callStack.top().resolve(id.name);
+		return this.memsim.readSymValue(sym);
 	}
 
 	visitCStmt(stmt){
@@ -385,12 +395,7 @@ class Interpreter {
 	}
 
 	visitFncCallExpr(callExpr){
-		var callee;
-		if(isclass(callExpr.expr, "Identifier")){
-			callee = callExpr.expr.accept(this, true);
-		}else{
-			callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
-		}
+		var callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
 
 		if(this.#_instrNum > this.#breakstop) return;
 		this.pc = callExpr;
@@ -424,11 +429,7 @@ class Interpreter {
 			expr = expr[expr.length - 1];
 		}
 
-		if(isclass(expr, "Identifier")){
-			expr = expr.accept(this, true);
-		}else{
-			expr = expr.accept(this); // resolve the last expression
-		}
+		expr = expr.accept(this); // resolve the last expression
 
 		if(this.#_instrNum > this.#breakstop) return;
 		throw new ReturnThrow(expr);

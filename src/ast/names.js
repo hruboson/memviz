@@ -29,8 +29,8 @@ class Identifier extends Construct {
 		this.loc = loc;
 	}
 
-	accept(visitor, returnNode=false){
-		return visitor.visitIdentifier(this, returnNode);
+	accept(visitor){
+		return visitor.visitIdentifier(this);
 	}
 }
 
