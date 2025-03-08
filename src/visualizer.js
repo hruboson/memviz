@@ -25,7 +25,7 @@ class Memviz {
 		if(!(container instanceof Element)) throw new Error(`Container must be a HTML element!`);
 
 		this.memsim = memsim;
-		this.#callStack = callStack;
+		this.callStack = callStack;
 		this.container = container;
 
 		this.graph = new mxg.Graph(this.container); // main "canvas"
@@ -112,12 +112,17 @@ class Memviz {
 		this.clear();
 
 		let nextY = 10;
-		for(const sf of this.#callStack){
+		for(const sf of this.callStack){
 			nextY = this.vizStackFrame(sf, nextY);
 		}
 	}
 
 	vizStackFrame(sf, y){
+		if(sf.symtable.scopeInfo.type == "stmt"){ // in case of compound statement (... {...} ...) keep the function name
+			sf.symtable.scopeInfo.name = sf.parent.symtable.scopeInfo.name + ": " + sf.symtable.scopeInfo.name;
+		}
+
+
 		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([name, sym]) => sym.type !== "FNC" && sym.interpreted);
 
 		//TODO determine nVertical from largest array size
@@ -267,7 +272,6 @@ class Memviz {
 			},
 		});
 
-		console.log(this.memsim.readSymValue(sym));
 		return symY + height;
 	}
 

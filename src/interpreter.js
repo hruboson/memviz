@@ -282,6 +282,7 @@ class Interpreter {
 		if(initializer){
 			value = initializer.accept(this);
 		}
+
 		this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
 	}
 
@@ -294,7 +295,7 @@ class Interpreter {
 				while(declarator.kind != DECLTYPE.ID){
 					declarator = declarator.child;
 				}
-				return this.#callStack.top().resolve(declaraotr.identifier.name);
+				return this.#callStack.top().resolve(declarator.identifier.name);
 			}
 
 			case DECLTYPE.ID:
@@ -345,7 +346,6 @@ class Interpreter {
 			this.updateHTML();
 		}
 
-
 		if(this.#_instrNum > this.#breakstop) return;
 		this.#callStack.pop();
 	}
@@ -353,15 +353,15 @@ class Interpreter {
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
 
-		let sf = new StackFrame(fnc.symtbptr, fnc, this.#callStack.top()); // StackFrame creates deep copy of symbol table
-		this.#callStack.push(sf);
+		let sfParams = new StackFrame(fnc.symtbptr, fnc, this.#callStack.top()); // StackFrame creates deep copy of symbol table
+		this.#callStack.push(sfParams);
 
 		// initialize symbols and assign addresses
-		for(const [[name, sym], arg] of zip(this.#callStack.top().symtable.objects, args)){
+		for(const [[name, sym], arg] of zip(this.#callStack.pop().symtable.objects, args)){ // pop param symtable
 			this.memsim.setSymValue(sym, arg.value, MEMREGION.STACK);
 			//console.log(this.memsim.readSymValue(sym));
 		}
-		
+
 		try{
 			fnc.body.accept(this); // run body
 		}catch(ret){ // catch return
@@ -370,15 +370,15 @@ class Interpreter {
 			}
 
 			if(isclass(ret.value, "ReturnVoid")){
-				this.#callStack.pop();
+				//this.#callStack.pop();
 				return null;
 			}
 			
-			this.#callStack.pop();
+			//this.#callStack.pop();
 			return ret.value;
 		}
 
-		this.#callStack.pop();
+		//this.#callStack.pop();
 	}
 
 	visitFncCallExpr(callExpr){
