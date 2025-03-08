@@ -306,6 +306,10 @@ class Semantic {
 			throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
 		}
 
+
+		console.log(fncCall);
+		console.log(fncSym);
+		
 		// type checking
 		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
 			this.typeCheck(this.getParameterType(param), arg);
@@ -408,6 +412,7 @@ class Semantic {
 			["int"],                   // return type (C's printf returns int)
 			false,                     // not a pointer
 			0,                         // not an array
+			0,						   // not an array so 0 size
 			[new Declarator(DECLTYPE.ID, null, {name: "formatstr"})],
 			true,                      // isFunction
 			new NATIVE_printf(),       // no AST, built-in function pointer
@@ -422,6 +427,7 @@ class Semantic {
 	 */
 	getParameterType(declarator){
 		// not sure but for params it should not be longer than 1
+		console.log(declarator);
 		return declarator[0].type.specifiers;
 	}
 
