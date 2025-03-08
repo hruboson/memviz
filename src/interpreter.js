@@ -260,7 +260,7 @@ class Interpreter {
 		this.updateHTML();
 		this.memviz.updateHTML();
 		//this.memsim.printMemory();
-		//console.log(this.#callStack);
+		console.log(this.#callStack);
 		console.log("================END================");
 		return result;
 	}
@@ -328,15 +328,14 @@ class Interpreter {
 
 	}
 
-	visitIdentifier(id){
-		// showcase, modify later
-		// old - newer with call stack
-		//console.log(this.#currSymtable.lookup(NAMESPACE.ORDS, id.name));
-		return id;
+	visitIdentifier(id, returnNode){
+		if(returnNode) return id; // for callee resolution
+
+		return this.memsim.readSymValue(this.#callStack.top().resolve(id.name));
 	}
 
 	visitCStmt(stmt){
-		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.top()); // StackFrame creates deep copy of symbol table
+		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.getParentSF(stmt.symtbptr)); // StackFrame creates deep copy of symbol table
 		this.#callStack.push(sf);
 
 		for(const construct of stmt.sequence){
@@ -351,38 +350,47 @@ class Interpreter {
 	}
 
 	visitFnc(fnc, args){
-		if(this.#_instrNum > this.#breakstop) return; // this is for the first call of main
+		if(this.#_instrNum > this.#breakstop) return;
 
-		let sfParams = new StackFrame(fnc.symtbptr, fnc, this.#callStack.top()); // StackFrame creates deep copy of symbol table
-		this.#callStack.push(sfParams);
+		let sfParams = new StackFrame(fnc.symtbptr, fnc, this.#callStack.getParentSF(fnc.symtbptr)); // StackFrame creates deep copy of symbol table
 
 		// initialize symbols and assign addresses
-		for(const [[name, sym], arg] of zip(this.#callStack.pop().symtable.objects, args)){ // pop param symtable
-			this.memsim.setSymValue(sym, arg.value, MEMREGION.STACK);
-			//console.log(this.memsim.readSymValue(sym));
+		for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
+			this.memsim.setSymValue(sym, arg.accept(this), MEMREGION.STACK);
+			sym.interpreted = true;
 		}
+
+		this.#callStack.push(sfParams);
 
 		try{
 			fnc.body.accept(this); // run body
 		}catch(ret){ // catch return
-			if(ret instanceof InternalError){ // in case of too much recursion
+			if(ret instanceof Error){ // in case of too much recursion, run-time errors, ...
 				throw ret;
 			}
 
 			if(isclass(ret.value, "ReturnVoid")){
-				//this.#callStack.pop();
+				if(this.#_instrNum > this.#breakstop) return;
+				this.#callStack.pop(); // pop param symtable
 				return null;
 			}
 			
-			//this.#callStack.pop();
+			if(this.#_instrNum > this.#breakstop) return;
+			this.#callStack.pop(); // pop param symtable
 			return ret.value;
 		}
 
-		//this.#callStack.pop();
+		if(this.#_instrNum > this.#breakstop) return;
+		this.#callStack.pop(); // pop param symtable
 	}
 
 	visitFncCallExpr(callExpr){
-		var callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
+		var callee;
+		if(isclass(callExpr.expr, "Identifier")){
+			callee = callExpr.expr.accept(this, true);
+		}else{
+			callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
+		}
 
 		if(this.#_instrNum > this.#breakstop) return;
 		this.pc = callExpr;

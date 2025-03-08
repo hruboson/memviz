@@ -105,7 +105,7 @@ class Memsim {
 	 */
 	setSymValue(sym, value, region){
 		if (!Object.values(MEMREGION).includes(region)) {
-			throw new AppError(`Invalid memory while setting MEMREGION of ${sym.identifier}: ${region}`);
+			throw new AppError(`Invalid memory while setting MEMREGION of ${sym.name}: ${region}`);
 		}
 
 		//TODO struct
@@ -187,6 +187,10 @@ class Memsim {
 	 */
 	readSymValue(sym){
 		if(!sym) throw new AppError("Trying to read value of undefined Symbol");
+		if(sym.address == undefined || isNaN(sym.address)){
+			console.error(sym);
+			throw new RTError(`Cannot read from a symbol with no address: ${sym.name}`);
+		}
 
 		//TODO struct
 		if(sym.dimension > 0){ // array
