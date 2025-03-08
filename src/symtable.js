@@ -144,6 +144,12 @@ class Sym {
 	initialized;
 
 	/**
+	 * Flag to mark inerpretation already happened on this symbol (declaration, initialization, ...anything)
+	 * @type {bool}
+	 */
+	interpreted = false;
+
+	/**
 	 * Hexadecimal number specifying where in memory the symbol is stored
 	 * @type {integer}
 	 */
