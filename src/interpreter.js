@@ -424,7 +424,11 @@ class Interpreter {
 			expr = expr[expr.length - 1];
 		}
 
-		expr = expr.accept(this); // resolve the last expression
+		if(isclass(expr, "Identifier")){
+			expr = expr.accept(this, true);
+		}else{
+			expr = expr.accept(this); // resolve the last expression
+		}
 
 		if(this.#_instrNum > this.#breakstop) return;
 		throw new ReturnThrow(expr);
