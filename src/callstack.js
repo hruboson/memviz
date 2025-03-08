@@ -8,6 +8,21 @@
  * @inheritdoc
  */
 class CallStack extends Stack {
+
+	/**
+	 * Retrives StackFrame from CallStack with the symtable corresponding to current top StackFrame symtable
+	 * @param {Symtable} symtbptr Pointer to symtable in semantic
+	 */
+	getParentSymtable(symtbptr){
+		const lookingFor = symtbptr.parent.scopeInfo.name;
+
+		for (let i = this.items.length - 1; i >= 0; i--) {
+			if (this.items[i].symtable.scopeInfo.name == lookingFor) {
+				return this.items[i];
+			}
+		}
+		return undefined;
+	}
 }
 
 /**
@@ -55,6 +70,8 @@ class StackFrame {
 	 * @throws {SError}
 	 */
 	resolve(name){
+		if(!name) throw new AppError("Undefined identifier name while resolving in call stack");
+
 		if(this.symtable.objects.get(name)){
 			return this.symtable.objects.get(name);
 

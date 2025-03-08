@@ -186,6 +186,8 @@ class Memsim {
 	 * @param {MEMREGION} region
 	 */
 	readSymValue(sym){
+		if(!sym) throw new AppError("Trying to read value of undefined Symbol");
+
 		//TODO struct
 		if(sym.dimension > 0){ // array
 			return this.readArrayValue(sym);
@@ -307,7 +309,7 @@ class Memsim {
 		if(this.references.has(address)){
 			this.references.set(address, this.references.get(address) + 1);
 		}else{
-			throw new Error(`Invalid reference to address ${address}`);
+			throw new AppError(`Invalid reference to address ${address}`);
 		}
 	}
 

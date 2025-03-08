@@ -42,11 +42,7 @@ class Stack {
 	#items;
 
 	constructor(){
-		this.#items = [];
-	}
-
-	get items(){
-		return this.#items;
+		this.items = [];
 	}
 
 	/**
@@ -54,7 +50,7 @@ class Stack {
 	 * @return {Object}
 	 */
 	peek(){
-		return this.#items[this.#items.length - 1];
+		return this.items[this.items.length - 1];
 	}
 
 	/**
@@ -70,12 +66,12 @@ class Stack {
 	 * @return {Object}
 	 */
 	pop(){
-		if(this.#items.length == 0){ 
+		if(this.items.length == 0){ 
 			return; 
 		}
 
-		const item = this.#items[this.#items.length - 1];
-		this.#items.splice(this.#items.length - 1, 1);
+		const item = this.items[this.items.length - 1];
+		this.items.splice(this.items.length - 1, 1);
 		return item;
 	}
 
@@ -83,15 +79,15 @@ class Stack {
 	 * Adds item to top of stack
 	 */
 	push(item){
-		this.#items[this.#items.length] = item;
+		this.items[this.items.length] = item;
 	}
 
 	[Symbol.iterator](){
 		let index = 0; // start from bottom
 		return {
 			next: () => {
-				if (index < this.#items.length) {
-					return { value: this.#items[index++], done: false };
+				if (index < this.items.length) {
+					return { value: this.items[index++], done: false };
 				} else {
 					return { done: true };
 				}
