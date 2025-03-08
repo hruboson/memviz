@@ -306,10 +306,6 @@ class Semantic {
 			throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
 		}
 
-
-		console.log(fncCall);
-		console.log(fncSym);
-		
 		// type checking
 		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
 			this.typeCheck(this.getParameterType(param), arg);
@@ -427,7 +423,6 @@ class Semantic {
 	 */
 	getParameterType(declarator){
 		// not sure but for params it should not be longer than 1
-		console.log(declarator);
 		return declarator[0].type.specifiers;
 	}
 
