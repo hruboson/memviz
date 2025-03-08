@@ -215,12 +215,17 @@ class Memviz {
 				fontFamily: "FiraCode",
 			},
 		*/
+		
+		let value;
+		if(sym.address){
+			value = this.memsim.readSymValue(sym);
+		}
 
-		const value = this.graph.insertVertex({
+		const valueBox = this.graph.insertVertex({
 			parent: parent,
 			position: [Memviz.squareX, symY],
 			size: [Memviz.squareXYlen, Memviz.squareXYlen],
-			value: this.memsim.readSymValue(sym),
+			value: value,
 			style: {
 				// vertex style
 				fillColor: "#1BA1E2", // blue
