@@ -91,6 +91,16 @@ void main(){
 
 const scopes_example = `int a = 1; // initialize symbol a with value 1 (global scope)
 
+void foo(int a){ // global scope is hidden
+    int x = a;
+	printf("%d", a); // prints value passed as an argument
+}
+
+void baz(){
+    int x = a;
+	printf("%d", a); // prints global a
+}
+
 void main(){
 	int a = 2; // scope of new inner a, global a is hidden
 	printf("%d", a);
@@ -101,6 +111,8 @@ void main(){
 
 		int x = 100;
 		printf("%d", x);
+
+		foo(a);
 	} 
 
 	// printf("%d", x); <-- ERROR, x is out of scope
@@ -108,17 +120,10 @@ void main(){
 	// a is once again equal to 2
 	printf("%d", a);
 
+	baz();
+
 	// int a = 2; <-- ERROR, cannot reinitialize variable of the same name
-}
-
-void foo(int a){ // global scope is hidden
-	printf("%d", a); // prints value passed as an argument
-}
-
-void baz(){
-	printf("%d", a); // prints global a
-}
-`;
+}`;
 
 const declaration_example = `void foo();
 
