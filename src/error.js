@@ -31,7 +31,7 @@ class SError extends Error {
  */
 class RTError extends Error {
 	constructor(e, loc=null) {
-		super("Runtime error: " + e);
+		super(e);
 		this.name = "Runtime error";
 	}
 }
