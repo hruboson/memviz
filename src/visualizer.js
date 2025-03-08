@@ -118,6 +118,10 @@ class Memviz {
 	}
 
 	vizStackFrame(sf, y){
+		if(sf.empty()){ // in case of no names in symtable
+			return y;
+		}
+
 		if(sf.symtable.scopeInfo.type == "stmt"){ // in case of compound statement (... {...} ...) keep the function name
 			sf.symtable.scopeInfo.name = sf.parent.symtable.scopeInfo.name + ": " + sf.symtable.scopeInfo.name;
 		}
