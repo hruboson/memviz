@@ -338,7 +338,9 @@ class Interpreter {
 
 	visitIdentifier(id){
 		let sym = this.symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
-		if(sym.isFunction) return id;
+
+		// lookup can return undefined, so check that first (x?.y)
+		if(sym?.isFunction) return id;
 
 		sym = this.#callStack.top().resolve(id.name);
 		return this.memsim.readSymValue(sym);
