@@ -295,11 +295,17 @@ class Memsim {
 				this.heapPointer += size;
 				break;
 			case MEMREGION.BSS:
-				console.error("TODO");
+				addr = this.bssSegment;
+				this.#storeMemory(this.bssSegment, size, MEMREGION.BSS);
+				this.bssSegment += size;
 				break;
 			case MEMREGION.DATA:
-				console.error("TODO");
+				addr = this.dataSegment;
+				this.#storeMemory(this.dataSegment, size, MEMREGION.DATA);
+				this.dataSegment += size;
 				break;
+	        default:
+    	        throw new AppError(`Invalid memory region: ${region}`);
 		}
 
 		return addr;
@@ -388,6 +394,19 @@ class Memsim {
 	 *          Helper functions        *
 	 ***********************************/
 
+	/**
+	 * Determines the memory region of a given address.
+	 * @param {integer} address The memory address to check.
+	 * @returns {MEMREGION} The memory region (HEAP, STACK, BSS, DATA).
+	 * @throws {AppError} If the address does not belong to any valid region.
+	 */
+	getMemoryRegion(address){
+		if (this.memory.has(address)){
+			return this.memory.get(address).region;
+		}else{
+			throw new AppError(`Address ${address} does not belong to any valid memory region.`);
+		}
+	}
 
 	// Print memory for debugging
 	printMemory(){
