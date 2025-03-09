@@ -264,7 +264,7 @@ class Interpreter {
 				result = ret;
 			}
 		}
-		
+
 		this.updateHTML();
 		this.memviz.updateHTML();
 		//this.memsim.printMemory();
@@ -337,7 +337,7 @@ class Interpreter {
 	}
 
 	visitIdentifier(id){
-		const sym = this.symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
+		let sym = this.symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
 		if(sym.isFunction) return id;
 
 		sym = this.#callStack.top().resolve(id.name);
