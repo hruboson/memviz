@@ -108,6 +108,14 @@ class Memviz {
 		return Memviz.squareXYlen/3;
 	}
 
+	static get fontFamily(){
+		return "FiraCode";
+	}
+
+	static get fontColor(){
+		return "white";
+	}
+
 	vizCallStack(){
 		this.clear();
 
@@ -165,9 +173,9 @@ class Memviz {
 
 				// font style
 				fontSize: 14,
-				fontColor: "white",
+				fontColor: Memviz.fontColor,
 
-				fontFamily: "FiraCode",
+				fontFamily: Memviz.fontFamily,
 			},
 		});
 
@@ -183,6 +191,8 @@ class Memviz {
 		//TODO only a demo, add switch for types of symbol (array, pointer, structure, primitive)
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
 		let symY = y;
+
+		const style = this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(sym.address));
 
 		/*const ptrSquare = this.graph.insertVertex({
 			parent: parent,
@@ -230,17 +240,7 @@ class Memviz {
 			position: [Memviz.squareX, symY],
 			size: [Memviz.squareXYlen, Memviz.squareXYlen],
 			value: value,
-			style: {
-				// vertex style
-				fillColor: "#1BA1E2", // blue
-				strokeColor: "#006EAF", // darker blue
-				shape: "rectangle", // Explicitly defining it as a square
-
-				// font style
-				fontSize: 30,
-				fontColor: "white",
-				fontFamily: "FiraCode",
-			},
+			style: style,
 		});
 
 		const labelAbove = this.graph.insertVertex({
@@ -257,8 +257,8 @@ class Memviz {
 
 				// font style
 				fontSize: 14,
-				fontColor: "white",
-				fontFamily: "FiraCode",
+				fontColor: Memviz.fontColor,
+				fontFamily: Memviz.fontFamily,
 			},
 		});
 
@@ -276,12 +276,71 @@ class Memviz {
 
 				// font style
 				fontSize: 14,
-				fontColor: "white",
-				fontFamily: "FiraCode",
+				fontColor: Memviz.fontColor,
+				fontFamily: Memviz.fontFamily,
 			},
 		});
 
 		return symY + height;
+	}
+
+	getStyleFromMEMREGION(memregion){
+		const fontSize = 30;
+		const fontColor = Memviz.fontColor;
+		const fontFamily = Memviz.fontFamily;
+
+		switch(memregion){
+			case MEMREGION.STACK:
+				return {
+					// vertex style
+					fillColor: "#1BA1E2", // blue
+					strokeColor: "#006EAF", // darker blue
+					shape: "rectangle", // Explicitly defining it as a square
+
+					// font style
+					fontSize: fontSize,
+					fontColor: fontColor,
+					fontFamily: fontFamily,
+				}
+			case MEMREGION.HEAP:
+				return {
+					// vertex style
+					fillColor: "#A20025", // red
+					strokeColor: "#750004", // darker red
+					shape: "rectangle", // Explicitly defining it as a square
+
+					// font style
+					fontSize: fontSize,
+					fontColor: fontColor,
+					fontFamily: fontFamily,
+				}
+			case MEMREGION.BSS:
+				return {
+					// vertex style
+					fillColor: "#F0A30A", // yellow
+					strokeColor: "#D68905", // darker yellow
+					shape: "rectangle", // Explicitly defining it as a square
+
+					// font style
+					fontSize: fontSize,
+					fontColor: fontColor,
+					fontFamily: fontFamily,
+				}
+			case MEMREGION.DATA:
+				return {
+					// vertex style
+					fillColor: "#60A917", // green
+					strokeColor: "#2D7600", // darker green
+					shape: "rectangle", // Explicitly defining it as a square
+
+					// font style
+					fontSize: fontSize,
+					fontColor: fontColor,
+					fontFamily: fontFamily,
+				}
+			default:
+				throw new AppError(`Unknown memory region: ${memregion}, cannot deduce vertex style`);
+		}
 	}
 
 	

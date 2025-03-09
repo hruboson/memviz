@@ -238,3 +238,11 @@ const infinite_recursion_example = `int a(){
 int main(){
 	return a();
 }`;
+
+const different_memory_regions_example = `int a;
+int b = "Hello world";
+int c = 1;
+
+int main(){
+	int x = 42;
+}`;

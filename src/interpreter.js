@@ -248,17 +248,16 @@ class Interpreter {
 		let result = new ReturnVoid();
 
 		// initialize global variables
-		/*for(const [name, symbol] of this.#symtableGlobal.objects){
+		for(const [name, symbol] of this.#symtableGlobal.objects){
+			if(symbol.isFunction) continue;
 			if(symbol.isNative) continue; // skip built-in functions
-			console.log(symbol);
 			symbol.astPtr.accept(this);
-		}*/
-
+		}
 
 		if(breakstop > 0){
-			this.pc = mainFnc.astPtr.body.sequence[0]; // get the first construct of the sequence statement (for visualization)
 			try{
-				mainFnc.astPtr.body.accept(this);
+				this.pc = mainFnc.astPtr;
+				mainFnc.astPtr.accept(this, [1, 1]); //TODO args from UI
 			}catch(ret){ // catch return value of main
 				//TODO fix this, I don't think it actually does what it's supposed to, maybe it does but it definitely doesn't check errors
 				result = ret;
@@ -268,7 +267,6 @@ class Interpreter {
 		this.updateHTML();
 		this.memviz.updateHTML();
 		//this.memsim.printMemory();
-		console.log(this.#callStack);
 		console.log("================END================");
 		return result;
 	}
@@ -278,7 +276,9 @@ class Interpreter {
 	 *******************************/
 
 	visitDeclaration(declaration){
-		this.pc = declaration;
+		if(this.#callStack.top().symtable.scopeInfo.type != "global"){ // do not move on global declarations
+			this.pc = declaration;
+		}
 
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
@@ -291,7 +291,19 @@ class Interpreter {
 			value = initializer.accept(this);
 		}
 
-		this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
+		if(this.#callStack.top().symtable.scopeInfo.type == "global"){
+			if(!initializer){
+				this.memsim.setSymValue(symbol, value, MEMREGION.BSS);
+			}else{
+				this.memsim.setSymValue(symbol, value, MEMREGION.DATA);
+			}
+		}else{
+			if(!initializer){
+				this.memsim.setSymValue(symbol, value, MEMREGION.BSS);
+			}else{
+				this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
+			}
+		}
 	}
 
 	visitDeclarator(declarator){
@@ -367,9 +379,11 @@ class Interpreter {
 		let sfParams = new StackFrame(fnc.symtbptr, fnc, this.#callStack.getParentSF(fnc.symtbptr)); // StackFrame creates deep copy of symbol table
 
 		// initialize symbols and assign addresses
-		for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
-			this.memsim.setSymValue(sym, arg.accept(this), MEMREGION.STACK);
-			sym.interpreted = true;
+		if(!sfParams.empty()){
+			for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
+				this.memsim.setSymValue(sym, arg.accept(this), MEMREGION.STACK);
+				sym.interpreted = true;
+			}
 		}
 
 		this.#callStack.push(sfParams);

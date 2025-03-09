@@ -350,7 +350,7 @@ class Memsim {
 		view.setInt32(0, value, true); // little-endian!
 
 		for(let i = 0; i < s; i++){ // alloc every byte separately
-			this.memory.set(addr + i, { value: view.getUint8(i), region: "heap" });
+			this.memory.set(addr + i, { value: view.getUint8(i), region: region });
 		}
 
 		return addr;
@@ -402,7 +402,7 @@ class Memsim {
 	 */
 	getMemoryRegion(address){
 		if (this.memory.has(address)){
-			return this.memory.get(address).region;
+			return this.memory.get(address).region; // for some reason the stored string is lowercase
 		}else{
 			throw new AppError(`Address ${address} does not belong to any valid memory region.`);
 		}
