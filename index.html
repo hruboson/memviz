@@ -223,20 +223,42 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int a = 10;
+						<div id="editor" onChange="resetEditor();">int a = 1; // initialize symbol a with value 1 (global scope)
 
-void main(){
-	int x = a;
+void foo(int a){ // global scope is hidden
+	printf("%d", a); // prints value passed as an argument
 }
 
+void baz(){
+    int x = a;
+	printf("%d", a); // prints global a
+}
 
-/*int main(){
-    int a = 42;
-	int* ptr = &a;
+void main(){
+	int a = 2; // scope of new inner a, global a is hidden
+	printf("%d", a);
+	
+	int i; // uninitialized variable
+	
+	{
+		int a = 3; // new scope, new a
+		printf("%d", a);
 
-	char c[4];
-	char* d = &c[1];
-}*/</div>
+		int x = 100;
+		printf("%d", x);
+
+		foo(a);
+	} 
+
+	// printf("%d", x); //<-- ERROR, x is out of scope
+
+	// a is once again equal to 2
+	printf("%d", a);
+
+	baz();
+
+	// int a = 2; //<-- ERROR, cannot reinitialize variable of the same name
+}</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
 						<pre id="warnings"></pre>

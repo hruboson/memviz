@@ -290,7 +290,7 @@ class Interpreter {
 		if(initializer){
 			value = initializer.accept(this);
 			if(initializer.kind == INITTYPE.EXPR && Array.isArray(value)){
-				//value = this.memsim.initializeString(value, MEMREGION.DATA); //TODO
+				value = this.memsim.initializeArray(symbol.memtype, value, MEMREGION.DATA); // returns address
 			}
 		}
 

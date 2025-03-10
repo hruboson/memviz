@@ -211,7 +211,6 @@ class Sym {
 		}
 
 		let specSet = new Set(specArr);
-		console.log(this.name, specArr);
 
 		// Default type is 'int' if unspecified - but this should never happen
 		if(specSet.size === 0) return DATATYPE.int;
