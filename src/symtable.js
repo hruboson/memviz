@@ -204,25 +204,32 @@ class Sym {
 	 * @note Determined in constructor
 	 */
 	determineMemtype(){
-		let specSet = new Set(this.specifiers);
-
-		// Default type is 'int' if unspecified - but this should never happen
-		if (specSet.size === 0) return DATATYPE.int;
-
-		if (specSet.has("bool")) return DATATYPE.bool;
-		if (specSet.has("char")) return specSet.has("unsigned") ? DATATYPE.uchar : DATATYPE.char;
-		if (specSet.has("short")) return specSet.has("unsigned") ? DATATYPE.ushort : DATATYPE.short;
-		if (specSet.has("int")) return specSet.has("unsigned") ? DATATYPE.uint : DATATYPE.int;
-
-		// Handling 'long', 'long long', and unsigned variations
-		if (specSet.has("long")) {
-			if (specSet.has("long")) return specSet.has("unsigned") ? DATATYPE.ulonglong : DATATYPE.longlong;
-			return specSet.has("unsigned") ? DATATYPE.ulong : DATATYPE.long;
+		let specArr = this.specifiers;
+		if(!Array.isArray(this.specifiers)){
+			console.warn("Wrong type of Sym.specifiers, expected Array, got ", getclass(this.specifiers));
+			specArr = this.specifiers.split(',').filter(s => s.length > 0); 
 		}
 
+		let specSet = new Set(specArr);
+		console.log(this.name, specArr);
+
+		// Default type is 'int' if unspecified - but this should never happen
+		if(specSet.size === 0) return DATATYPE.int;
+
+		if(specSet.has("bool")) return DATATYPE.bool;
+		if(specSet.has("char")) return specSet.has("unsigned") ? DATATYPE.uchar : DATATYPE.char;
+		if(specSet.has("short")) return specSet.has("unsigned") ? DATATYPE.ushort : DATATYPE.short;
+		if(specSet.has("int")) return specSet.has("unsigned") ? DATATYPE.uint : DATATYPE.int;
+
 		// Floating-point types
-		if (specSet.has("float")) return DATATYPE.float;
-		if (specSet.has("double")) return specSet.has("long") ? DATATYPE.longdouble : DATATYPE.double;
+		if(specSet.has("float")) return DATATYPE.float;
+		if(specSet.has("double")) return specSet.has("long") ? DATATYPE.longdouble : DATATYPE.double;
+
+		// Handling 'long', 'long long', and unsigned variations
+		if(specSet.has("long")){
+			if(specSet.has("long")) return specSet.has("unsigned") ? DATATYPE.ulonglong : DATATYPE.longlong;
+			return specSet.has("unsigned") ? DATATYPE.ulong : DATATYPE.long;
+		}
 
 		// Default to int
 		return DATATYPE.int;

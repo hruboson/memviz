@@ -275,7 +275,7 @@ class Memviz {
 			parent: parent, 
 			position: [Memviz.squareX, symY + Memviz.squareXYlen], // Position below the square
 			size: [Memviz.squareXYlen, Memviz.labelHeight],
-			value: sym.specifiers,
+			value: sym.specifiers.join(' '),
 			style: {
 				fillColor: "transparent", // Transparent background
 				strokeColor: "transparent", // No border

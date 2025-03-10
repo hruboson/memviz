@@ -151,7 +151,9 @@ class Memsim {
 			break;
 
 			case DATATYPE.longlong:
-			break;
+				//! remove later, this is only dummy address until all types are taken care of
+				sym.address = sym.address ? this.changeIntValue(sym.address, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+				break;
 
 			case DATATYPE.ulonglong:
 			break;
@@ -163,7 +165,9 @@ class Memsim {
 			break;
 
 			case DATATYPE.longdouble:
-			break;
+				//! remove later, this is only dummy address until all types are taken care of
+				sym.address = sym.address ? this.changeIntValue(sym.address, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+				break;
 
 			default:
 				throw new AppError(`Invalid DATATYPE while setting value of ${sym.identifier}: ${sym.memtype}!`);
@@ -257,6 +261,11 @@ class Memsim {
 
 	readPointerValue(sym){
 
+	}
+
+	initializeArray(memtype, arr, region){
+		console.log(memtype, arr, region);
+		return 69;
 	}
 
 	/******************************

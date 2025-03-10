@@ -77,7 +77,7 @@ class Semantic {
 					}
 
 					const currSymtable = this.symtableStack.peek();
-					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers.toString(), declPtr, dimension, size, parameters, isFunction, astPtr);
+					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers, declPtr, dimension, size, parameters, isFunction, astPtr);
 					symbolName = declChild.identifier.name;
 				}
 				if(declChild.kind == DECLTYPE.FNC){
