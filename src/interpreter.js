@@ -475,7 +475,7 @@ class Interpreter {
 		}
 
 		let formatString = args[0].accept(this);  // Resolve format argument (CExpr will return value)
-		formatString = formatString.slice(0, -1).toString() // string is returned as an array
+		formatString = formatString.slice(0, -1).join('') // string is returned as an array
 		const otherArgs = args.slice(1)
 			.map(arg => arg.accept(this))
 			.filter(arg => arg !== undefined && !Number.isNaN(arg)); // this is probably fault in interpreter (maybe throw an error)

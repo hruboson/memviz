@@ -115,14 +115,14 @@ void main(){
 		foo(a);
 	} 
 
-	// printf("%d", x); <-- ERROR, x is out of scope
+	// printf("%d", x); //<-- ERROR, x is out of scope
 
 	// a is once again equal to 2
 	printf("%d", a);
 
 	baz();
 
-	// int a = 2; <-- ERROR, cannot reinitialize variable of the same name
+	// int a = 2; //<-- ERROR, cannot reinitialize variable of the same name
 }`;
 
 const declaration_example = `void foo();
