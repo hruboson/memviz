@@ -92,7 +92,6 @@ void main(){
 const scopes_example = `int a = 1; // initialize symbol a with value 1 (global scope)
 
 void foo(int a){ // global scope is hidden
-    int x = a;
 	printf("%d", a); // prints value passed as an argument
 }
 
@@ -104,6 +103,8 @@ void baz(){
 void main(){
 	int a = 2; // scope of new inner a, global a is hidden
 	printf("%d", a);
+	
+	int i; // uninitialized variable
 	
 	{
 		int a = 3; // new scope, new a
