@@ -108,6 +108,8 @@ class Memsim {
 			throw new AppError(`Invalid memory while setting MEMREGION of ${sym.name}: ${region}`);
 		}
 
+		// also determine the type (for example char* a = "Hello world")
+
 		//TODO struct
 		if(sym.dimension > 0){ // array
 			this.setArrayValue(sym, value, region);

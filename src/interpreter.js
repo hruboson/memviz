@@ -289,6 +289,9 @@ class Interpreter {
 		let value = null;
 		if(initializer){
 			value = initializer.accept(this);
+			if(initializer.kind == INITTYPE.EXPR && Array.isArray(value)){
+				//value = this.memsim.initializeString(value, MEMREGION.DATA); //TODO
+			}
 		}
 
 		if(this.#callStack.top().symtable.scopeInfo.type == "global"){

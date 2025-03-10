@@ -118,11 +118,16 @@ class Memviz {
 
 	vizCallStack(){
 		this.clear();
+		this.vizMemregions();
 
 		let nextY = 10;
 		for(const sf of this.callStack){
 			nextY = this.vizStackFrame(sf, nextY);
 		}
+	}
+
+	vizMemregions(){
+		//TODO this will be on top of the whole visualization, it will show what color each region has
 	}
 
 	vizStackFrame(sf, y){
@@ -195,6 +200,7 @@ class Memviz {
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
 		let symY = y;
 
+		if(!sym.address) console.warn(sym);
 		const style = this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(sym.address));
 
 		/*const ptrSquare = this.graph.insertVertex({
