@@ -454,7 +454,9 @@ class Interpreter {
 	visitCExpr(expr){
 		switch(expr.type){
 			case "s_literal":
-				return String(expr.value.slice(1,-1));
+				const ret = Array.from(expr.value.slice(1, -1));
+				ret.push('\0');
+				return ret;
 			case "i_constant":
 				return parseInt(expr.value);
 			case "f_constant":
