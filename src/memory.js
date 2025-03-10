@@ -176,7 +176,7 @@ class Memsim {
 
 	setPointerValue(sym, value, region){
 		// pointer is 32 bits
-		sym.addres = sym.address ? this.changeIntValue(sym, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+		sym.address = sym.address ? this.changeIntValue(sym, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
 	}
 
 	/**
