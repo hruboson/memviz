@@ -73,14 +73,26 @@ class StackFrame {
 		if(!name) throw new AppError("Undefined identifier name while resolving in call stack");
 
 		if(this.symtable.objects.get(name)){
-			return this.symtable.objects.get(name);
-
+			const symbol = this.symtable.objects.get(name);
+			if (symbol.interpreted){
+				return symbol;
+			}else{
+				return this.parent.resolve(name);
+			}
 		}else if(this.symtable.tags.get(name)){
-			return this.symtable.tags.get(name);
-
+			const symbol = this.symtable.tags.get(name);
+			if (symbol.interpreted){
+				return symbol;
+			}else{
+				return this.parent.resolve(name);
+			}
 		}else if(this.symtable.labels.get(name)){
-			return this.symtable.labels.get(name);
-
+			const symbol = this.symtable.labels.get(name);
+			if (symbol.interpreted){
+				return symbol;
+			}else{
+				return this.parent.resolve(name);
+			}
 		}else{
 			if(this.parent){
 				return this.parent.resolve(name);

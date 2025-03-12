@@ -241,7 +241,6 @@ class Interpreter {
 	interpret(breakstop){
 		this.resetHTML(); // resets console output
 
-		console.log("===============START===============");
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
@@ -267,7 +266,6 @@ class Interpreter {
 		this.updateHTML();
 		this.memviz.updateHTML();
 		//this.memsim.printMemory();
-		console.log("================END================");
 		return result;
 	}
 
@@ -284,7 +282,6 @@ class Interpreter {
 		const initializer = declaration.initializer;
 
 		const symbol = declarator.accept(this);
-		symbol.interpreted = true;
 
 		let value = null;
 		if(initializer){
@@ -293,6 +290,8 @@ class Interpreter {
 				value = this.memsim.initializeArray(symbol.memtype, value, MEMREGION.DATA); // returns address
 			}
 		}
+
+		symbol.interpreted = true;
 
 		if(this.#callStack.top().symtable.scopeInfo.type == "global"){
 			if(!initializer){
@@ -318,17 +317,17 @@ class Interpreter {
 				while(declarator.kind != DECLTYPE.ID){
 					declarator = declarator.child;
 				}
-				return this.#callStack.top().resolve(declarator.identifier.name);
+				return this.#callStack.top().lookup(NAMESPACE.ORDS, declarator.identifier.name);
 			}
 
 			case DECLTYPE.ID:
-				return this.#callStack.top().resolve(declarator.identifier.name);
+				return this.#callStack.top().lookup(NAMESPACE.ORDS, declarator.identifier.name);
 
 			case DECLTYPE.ARR:{
 				while(declarator.kind != DECLTYPE.ID){
 					declarator = declarator.child;
 				}
-				return this.#callStack.top().resolve(declarator.identifier.name);
+				return this.#callStack.top().lookup(NAMESPACE.ORDS, declarator.identifier.name);
 			}
 		}
 	}
