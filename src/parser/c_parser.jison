@@ -68,7 +68,7 @@ primary_expression
 	: IDENTIFIER { $$ = new Identifier($1, @$); }
 	| constant { $$ = $1; }
 	| string { $$ = $1; }
-	| '(' expression ')' { $$ = $2; }
+	| '(' expression ')' { $$ = $2; } // this is the devil, it is necessary to check every expression for array length
 	/*NOT SUPPORTED-------------------------------------------
 	| generic_selection
 	--------------------------------------------------------*/
@@ -576,12 +576,12 @@ static_assert_declaration
 --------------------------------------------------------*/
 
 statement
-	: labeled_statement
-	| compound_statement
+	: labeled_statement { $$ = $1; }
+	| compound_statement { $$ = $1; }
 	| expression_statement { $$ = $1; }
-	| selection_statement
-	| iteration_statement
-	| jump_statement
+	| selection_statement { $$ = $1; }
+	| iteration_statement { $$ = $1; }
+	| jump_statement { $$ = $1; }
 	;
 
 labeled_statement
