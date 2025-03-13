@@ -171,8 +171,8 @@
 				<button class="btn btn-primary" 		 onclick="execute(editor.getValue(), EXEOPT.COMPILE);" id="execute"><i class="bx bx-sm bx-play"></i></button>
 				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEPREV);" id="prevInstr"><i class="bx bx-sm bx-chevron-left"></i></button>
 				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTENEXT);" id="nextInstr"><i class="bx bx-sm bx-chevron-right"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEALL);" id="endInstr"><i class="bx bx-sm bx-arrow-to-right"></i></button>
 				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEBEG);" id="begInstr"><i class="bx bx-sm bx-arrow-to-left"></i></button>
+				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEALL);" id="endInstr"><i class="bx bx-sm bx-arrow-to-right"></i></button>
 				<button class="btn btn-primary disabled" id="programCounter">Step: ?</button>
 			</div>
 			<div class="col-6 text-end">
@@ -223,42 +223,15 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int a = 1; // initialize symbol a with value 1 (global scope)
-
-void foo(int a){ // global scope is hidden
-    int a = a;
-	printf("%d", a); // prints value passed as an argument
-}
-
-void baz(){
-    int x = a;
-	printf("%d", a); // prints global a
-}
-
-void main(){
-	int a = 2; // scope of new inner a, global a is hidden
-	printf("%d", a);
-	
-	int i; // uninitialized variable
-	
-	{
-		int a = 3; // new scope, new a
-		printf("%d", a);
-
-		int x = 100;
-		printf("%d", x);
-
-		foo(a);
-	} 
-
-	// printf("%d", x); //<-- ERROR, x is out of scope
-
-	// a is once again equal to 2
-	printf("%d", a);
-
-	baz();
-
-	// int a = 2; //<-- ERROR, cannot reinitialize variable of the same name
+						<div id="editor" onChange="resetEditor();">int main(){
+	int i;
+	i = +10;
+	i += 10;
+	i++;
+	++i;
+	i = i + (10 + (20 + 30));
+	i = +i;
+	return i;
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
