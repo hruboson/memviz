@@ -192,6 +192,7 @@ class Interpreter {
 	parse(text){
 		this.#refreshSymbols();
 		this.#ast = this.#parser.parse(text);
+		this.updateHTML();
 		return this;
 	}
 
@@ -206,10 +207,10 @@ class Interpreter {
 
 		// first phase
 		this.#semanticAnalyzer.firstPhase(ast);
-		
+
 		// second phase
 		this.#semanticAnalyzer.secondPhase(); // additional semantic checks after creating symbol table
-		
+
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
 		if(mainFnc){
 			if(mainFnc.type != SYMTYPE.FNC){
@@ -278,18 +279,52 @@ class Interpreter {
 	}
 
     visitBAssignExpr(expr){
+		let lval;
+		let rval;
 
+		if(expr.left.length){
+			for(const subexpr of expr.left){
+				lval = subexpr.accept(this);
+			}
+		}else{
+			lval = expr.left.accept(this);
+		}
+
+		if(expr.right.length){
+			for(const subexpr of expr.right){
+				rval = subexpr.accept(this);
+			}
+		}else{
+			rval = expr.right.accept(this);
+		}
+
+		console.log(lval, expr.op, rval);
 	}
 
     visitBArithExpr(expr){
+		let lval;
+		let rval;
 
+		if(expr.left.length){
+			for(const subexpr of expr.left){
+				lval = subexpr.accept(this);
+			}
+		}else{
+			lval = expr.left.accept(this);
+		}
+
+		if(expr.right.length){
+			for(const subexpr of expr.right){
+				rval = subexpr.accept(this);
+			}
+		}else{
+			rval = expr.right.accept(this);
+		}
+
+		console.log(lval, expr.op, rval);
 	}
 
     visitBCompExpr(expr){
-
-	}
-
-    visitBExpr(expr){
 
 	}
 
@@ -437,7 +472,7 @@ class Interpreter {
 				this.#callStack.pop(); // pop param symtable
 				return null;
 			}
-			
+
 			if(this.#_instrNum > this.#breakstop) return;
 			this.#callStack.pop(); // pop param symtable
 			return ret.value;
@@ -494,6 +529,10 @@ class Interpreter {
 	}
 
     visitMemberAccessExpr(expr){
+
+	}
+
+	visitNOP(nop){
 
 	}
 
@@ -636,7 +675,7 @@ class Interpreter {
 
 		// create new marker
 		/*if(this.pcloclast > 0){
-			let rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted 
+			let rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted
 			let markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
 		}*/
 		let rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // Just interpreted
@@ -656,5 +695,5 @@ class ReturnThrow {
 }
 
 class ReturnVoid {
-	// this could maybe be the NOP class from expr.js?	
+	// this could maybe be the NOP class from expr.js?
 }

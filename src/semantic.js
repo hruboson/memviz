@@ -63,7 +63,7 @@ class Semantic {
 				//? this might be completely wrong check this! Yes it is wrong, it could be function that returns pointer (honestly really check this xd)
 				if(!declPtr){
 					throw new SError(`Function ${symbolName} initialized like a variable`, initializer.loc);
-				}	
+				}
 			}
 		}
 
@@ -145,28 +145,52 @@ class Semantic {
 	}
 
 	visitBAssignExpr(expr){
-		try{
-			expr.left.accept(this);
-			expr.right.accept(this);
-		}catch(e){
-			throw e;
+		let lval;
+		let rval;
+
+		if(expr.left.length){
+			for(const subexpr of expr.left){
+				lval = subexpr.accept(this);
+			}
+		}else{
+			lval = expr.left.accept(this);
 		}
+
+		if(expr.right.length){
+			for(const subexpr of expr.right){
+				rval = subexpr.accept(this);
+			}
+		}else{
+			rval = expr.right.accept(this);
+		}
+
+		console.log(lval, expr.op, rval);
 	}
 
 	visitBArithExpr(expr){
-		try{
-			expr.left.accept(this);
-			expr.right.accept(this);
-		}catch(e){
-			throw e;
+		let lval;
+		let rval;
+
+		if(expr.left.length){
+			for(const subexpr of expr.left){
+				lval = subexpr.accept(this);
+			}
+		}else{
+			lval = expr.left.accept(this);
 		}
+
+		if(expr.right.length){
+			for(const subexpr of expr.right){
+				rval = subexpr.accept(this);
+			}
+		}else{
+			rval = expr.right.accept(this);
+		}
+
+		console.log(lval, expr.op, rval);
 	}
 
     visitBCompExpr(expr){
-
-	}
-
-    visitBExpr(expr){
 
 	}
 
@@ -213,7 +237,7 @@ class Semantic {
 		if(declaration.initializer){
 			initKind = declaration.initializer.accept(this);
 
-			if( ((declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR) || (declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR)) 
+			if( ((declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR) || (declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR))
 				&& (typeof initKind != "string" && declKind != DECLTYPE.ARR)){
 				throw new SError(`Invalid initializer`, declaration.loc);
 			}
@@ -272,7 +296,7 @@ class Semantic {
 		for(const construct of fnc.body.sequence){
 			construct.accept(this);
 		}
-		
+
 		//
 		this.closeScope();
 		this.closeScope();
@@ -285,7 +309,7 @@ class Semantic {
 		var fncSym;
 
 		// https://en.cppreference.com/w/c/language/operator_other#Function_call
-		// so I should first implicitly convert the expression (lvalue) and check if it is pointer-to-function type 
+		// so I should first implicitly convert the expression (lvalue) and check if it is pointer-to-function type
 		// 	-->	https://en.cppreference.com/w/c/language/conversion#Lvalue_conversions
 		try{
 			if(isclass(fncCall.expr, "Identifier")){
@@ -397,6 +421,10 @@ class Semantic {
 	}
 
     visitMemberAccessExpr(expr){
+
+	}
+
+	visitNOP(nop){
 
 	}
 
