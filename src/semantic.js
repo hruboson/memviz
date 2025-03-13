@@ -140,6 +140,72 @@ class Semantic {
 	 *     VISITOR FUNCTIONS       *
 	 *******************************/
 
+	visitArr(arr){
+
+	}
+
+	visitBAssignExpr(expr){
+		try{
+			expr.left.accept(this);
+			expr.right.accept(this);
+		}catch(e){
+			throw e;
+		}
+	}
+
+	visitBArithExpr(expr){
+		try{
+			expr.left.accept(this);
+			expr.right.accept(this);
+		}catch(e){
+			throw e;
+		}
+	}
+
+    visitBCompExpr(expr){
+
+	}
+
+    visitBExpr(expr){
+
+	}
+
+    visitBLogicExpr(expr){
+
+	}
+
+    visitCastExpr(expr){
+
+	}
+
+	visitCExpr(expr){
+		switch(expr.type){
+			case "s_literal":
+				return String(expr.value.slice(1,-1));
+			case "i_constant":
+				return parseInt(expr.value);
+			case "f_constant":
+				return parseFloat(expr.value);
+			default:
+				throw new AppError("wrong expr.type format while analyzing semantics");
+		}
+	}
+
+    visitCondExpr(expr){
+
+	}
+
+	visitCStmt(stmt){
+		let symtable = new Symtable("compound statement", "stmt", this.symtableStack.peek());
+		this.newScope(symtable, stmt);
+
+		for(const construct of stmt.sequence){
+			construct.accept(this);
+		}
+
+		this.closeScope();
+	}
+
 	visitDeclaration(declaration){
 		const declKind = declaration.declarator.accept(this);
 
@@ -169,59 +235,20 @@ class Semantic {
 		}
 	}
 
-	visitInitializer(initializer){
-		switch(initializer.kind){
-			case INITTYPE.EXPR:
-				return initializer.expr.accept(this);
-			case INITTYPE.ARR:{
-				const jsArr = initializer.toJSArray(this);
+    visitDesignator(designator){
 
-				function checkDimensions(arr, depth=0){
-					if(!Array.isArray(arr) || typeof arr == "string"){ // end on primitive values
-						return;
-					}
-
-					// check if all arrays at this level have the same length
-					const size = arr.length;
-					for(let i = 1; i < size; i++){
-						if (!Array.isArray(arr[i])) {
-							continue;
-						}
-
-						if(arr[i].length != arr[0].length){
-							let expectedLen = arr[0].length;
-							if(!arr[0].length) expectedLen = 1;
-							throw new SError(`Dimension mismatch: Expected ${expectedLen} elements, but found ${arr[i].length}`, initializer.loc);
-						}
-					}
-
-					// recursively check sub arrays
-					for(let i = 0; i < size; i++){
-						checkDimensions(arr[i], depth + 1);
-					}
-				}
-
-				// throws SError
-				checkDimensions(jsArr);
-				return INITTYPE.ARR;
-			}
-			case INITTYPE.STRUCT:
-				return INITTYPE.STRUCT;
-			// no more nested, was taken care of while creating the AST
-			default:
-				throw new AppError(`Unknown initializer kind (semantic): ${initializer.kind}`);
-		}
 	}
 
-	visitCStmt(stmt){
-		let symtable = new Symtable("compound statement", "stmt", this.symtableStack.peek());
-		this.newScope(symtable, stmt);
+    visitEStmt(stmt){
 
-		for(const construct of stmt.sequence){
-			construct.accept(this);
-		}
+	}
 
-		this.closeScope();
+    visitEnum(enumerator){
+
+	}
+
+    visitExpr(expr){
+
 	}
 
 	visitFnc(fnc){
@@ -251,9 +278,6 @@ class Semantic {
 		this.closeScope();
 	}
 
-	visitTypedef(typedef){
-		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, false, typedef.type.specifiers);
-	}
 
 	visitFncCallExpr(fncCall){
 		var fncName;
@@ -312,39 +336,8 @@ class Semantic {
 		}
 	}
 
-	visitBAssignExpr(expr){
-		try{
-			expr.left.accept(this);
-			expr.right.accept(this);
-		}catch(e){
-			throw e;
-		}
-	}
+    visitIStmt(stmt){
 
-	visitBArithExpr(expr){
-		try{
-			expr.left.accept(this);
-			expr.right.accept(this);
-		}catch(e){
-			throw e;
-		}
-	}
-
-	visitUExpr(expr){
-
-	}
-
-	visitCExpr(expr){
-		switch(expr.type){
-			case "s_literal":
-				return String(expr.value.slice(1,-1));
-			case "i_constant":
-				return parseInt(expr.value);
-			case "f_constant":
-				return parseFloat(expr.value);
-			default:
-				throw new AppError("wrong expr.type format while interpreting");
-		}
 	}
 
 	visitIdentifier(identifier){
@@ -353,6 +346,66 @@ class Semantic {
 		}catch(e){
 			throw new SError(e.details, identifier.loc);
 		}
+	}
+
+	visitInitializer(initializer){
+		switch(initializer.kind){
+			case INITTYPE.EXPR:
+				return initializer.expr.accept(this);
+			case INITTYPE.ARR:{
+				const jsArr = initializer.toJSArray(this);
+
+				function checkDimensions(arr, depth=0){
+					if(!Array.isArray(arr) || typeof arr == "string"){ // end on primitive values
+						return;
+					}
+
+					// check if all arrays at this level have the same length
+					const size = arr.length;
+					for(let i = 1; i < size; i++){
+						if (!Array.isArray(arr[i])) {
+							continue;
+						}
+
+						if(arr[i].length != arr[0].length){
+							let expectedLen = arr[0].length;
+							if(!arr[0].length) expectedLen = 1;
+							throw new SError(`Dimension mismatch: Expected ${expectedLen} elements, but found ${arr[i].length}`, initializer.loc);
+						}
+					}
+
+					// recursively check sub arrays
+					for(let i = 0; i < size; i++){
+						checkDimensions(arr[i], depth + 1);
+					}
+				}
+
+				// throws SError
+				checkDimensions(jsArr);
+				return INITTYPE.ARR;
+			}
+			case INITTYPE.STRUCT:
+				return INITTYPE.STRUCT;
+			// no more nested, was taken care of while creating the AST
+			default:
+				throw new AppError(`Unknown initializer kind (semantic): ${initializer.kind}`);
+		}
+	}
+
+    visitJStmt(stmt){
+
+	}
+
+    visitMemberAccessExpr(expr){
+
+	}
+
+    visitPointer(ptr){
+
+	}
+
+    visitPtrMemberAccessExpr(expr){
+
 	}
 
 	visitReturn(ret){
@@ -385,6 +438,35 @@ class Semantic {
 		}catch(e){
 			console.error(e);
 		}
+	}
+
+    visitSStmt(stmt){
+
+	}
+
+    visitStruct(struct){
+
+	}
+
+    visitSubscriptExpr(expr){
+
+	}
+
+    visitTagname(tagname){
+
+	}
+
+	visitTypedef(typedef){
+		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, false, typedef.type.specifiers);
+	}
+
+
+    visitUExpr(expr){
+
+	}
+
+    visitUnion(union){
+
 	}
 
 	/**********************

@@ -2,6 +2,44 @@
 
 Any new visitor class should implement all of these functions for correct functionality:
 
+Alphabetically sorted:
+
+- visitArr  
+- visitBAssignExpr  
+- visitBArithExpr  
+- visitBCompExpr  
+- visitBExpr  
+- visitBLogicExpr  
+- visitCastExpr  
+- visitCExpr  
+- visitCondExpr  
+- visitCStmt  
+- visitDeclaration  
+- visitDeclarator  
+- visitDesignator  
+- visitEStmt  
+- visitEnum  
+- visitExpr  
+- visitFnc  
+- visitFncCallExpr  
+- visitIStmt  
+- visitIdentifier  
+- visitInitializer  
+- visitJStmt  
+- visitMemberAccessExpr  
+- visitPointer  
+- visitPtrMemberAccessExpr  
+- visitReturn  
+- visitSStmt  
+- visitStruct  
+- visitSubscriptExpr  
+- visitTagname  
+- visitTypedef  
+- visitUExpr  
+- visitUnion  
+
+Sorted by file name:
+
 - visitArr
 - visitDesignator
 - visitInitializer

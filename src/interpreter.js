@@ -273,6 +273,68 @@ class Interpreter {
 	 *     VISITOR FUNCTIONS       *
 	 *******************************/
 
+	visitArr(arr){
+
+	}
+
+    visitBAssignExpr(expr){
+
+	}
+
+    visitBArithExpr(expr){
+
+	}
+
+    visitBCompExpr(expr){
+
+	}
+
+    visitBExpr(expr){
+
+	}
+
+    visitBLogicExpr(expr){
+
+	}
+
+    visitCastExpr(expr){
+
+	}
+
+	visitCExpr(expr){
+		switch(expr.type){
+			case "s_literal":
+				const ret = Array.from(expr.value.slice(1, -1));
+				ret.push('\0');
+				return ret;
+			case "i_constant":
+				return parseInt(expr.value);
+			case "f_constant":
+				return parseFloat(expr.value);
+			default:
+				throw new AppError("wrong expr.type format while interpreting");
+		}
+	}
+
+    visitCondExpr(expr){
+
+	}
+
+	visitCStmt(stmt){
+		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.getParentSF(stmt.symtbptr)); // StackFrame creates deep copy of symbol table
+		this.#callStack.push(sf);
+
+		for(const construct of stmt.sequence){
+			if(this.#_instrNum > this.#breakstop) return;
+			construct.accept(this);
+
+			this.updateHTML();
+		}
+
+		if(this.#_instrNum > this.#breakstop) return;
+		this.#callStack.pop();
+	}
+
 	visitDeclaration(declaration){
 		if(this.#callStack.top().symtable.scopeInfo.type != "global"){ // do not move on global declarations
 			this.pc = declaration;
@@ -332,47 +394,20 @@ class Interpreter {
 		}
 	}
 
-	visitInitializer(initializer){
-		switch(initializer.kind){
-			case INITTYPE.EXPR:
-				return initializer.expr.accept(this);
-			case INITTYPE.ARR:
-				return initializer.toJSArray(this);
-			case INITTYPE.STRUCT:
-				break;
-			// no more nested, was taken care of while creating the AST
-			default:
-				throw new AppError(`Unknown initializer kind (interpreter): ${initializer.kind}`);
-		}
-	}
-
-	visitTypedef(typedef){
+    visitDesignator(designator){
 
 	}
 
-	visitIdentifier(id){
-		let sym = this.symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
+    visitEStmt(stmt){
 
-		// lookup can return undefined, so check that first (x?.y)
-		if(sym?.isFunction) return id;
-
-		sym = this.#callStack.top().resolve(id.name);
-		return this.memsim.readSymValue(sym);
 	}
 
-	visitCStmt(stmt){
-		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.getParentSF(stmt.symtbptr)); // StackFrame creates deep copy of symbol table
-		this.#callStack.push(sf);
+    visitEnum(enumerator){
 
-		for(const construct of stmt.sequence){
-			if(this.#_instrNum > this.#breakstop) return;
-			construct.accept(this);
+	}
 
-			this.updateHTML();
-		}
+    visitExpr(expr){
 
-		if(this.#_instrNum > this.#breakstop) return;
-		this.#callStack.pop();
 	}
 
 	visitFnc(fnc, args){
@@ -426,6 +461,50 @@ class Interpreter {
 		return fncPtr.astPtr.accept(this, callExpr.arguments);
 	}
 
+    visitIStmt(stmt){
+
+	}
+
+	visitIdentifier(id){
+		let sym = this.symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
+
+		// lookup can return undefined, so check that first (x?.y)
+		if(sym?.isFunction) return id;
+
+		sym = this.#callStack.top().resolve(id.name);
+		return this.memsim.readSymValue(sym);
+	}
+
+	visitInitializer(initializer){
+		switch(initializer.kind){
+			case INITTYPE.EXPR:
+				return initializer.expr.accept(this);
+			case INITTYPE.ARR:
+				return initializer.toJSArray(this);
+			case INITTYPE.STRUCT:
+				break;
+			// no more nested, was taken care of while creating the AST
+			default:
+				throw new AppError(`Unknown initializer kind (interpreter): ${initializer.kind}`);
+		}
+	}
+
+    visitJStmt(stmt){
+
+	}
+
+    visitMemberAccessExpr(expr){
+
+	}
+
+    visitPointer(ptr){
+
+	}
+
+    visitPtrMemberAccessExpr(expr){
+
+	}
+
 	visitReturn(ret){
 		if(this.#_instrNum > this.#breakstop) return;
 		this.pc = ret;
@@ -453,21 +532,37 @@ class Interpreter {
 		throw new ReturnThrow(expr);
 	}
 
-	visitCExpr(expr){
-		switch(expr.type){
-			case "s_literal":
-				const ret = Array.from(expr.value.slice(1, -1));
-				ret.push('\0');
-				return ret;
-			case "i_constant":
-				return parseInt(expr.value);
-			case "f_constant":
-				return parseFloat(expr.value);
-			default:
-				throw new AppError("wrong expr.type format while interpreting");
-		}
+    visitSStmt(stmt){
+
 	}
 
+    visitStruct(struct){
+
+	}
+
+    visitSubscriptExpr(expr){
+
+	}
+
+    visitTagname(tagname){
+
+	}
+
+    visitTypedef(typedef){
+
+	}
+
+    visitUExpr(expr){
+
+	}
+
+    visitUnion(union){
+
+	}
+
+	/******************************
+	 * Built-in visitor funcitons *
+	 *****************************/
 	visitPrintF(printF, args){
 		if(args.length < 1){
 			throw new RTError("printf requires at least one argument (format string)");
@@ -499,27 +594,13 @@ class Interpreter {
 		return 0; // printf in C returns 0 by default
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/************************************
 	 *          Helper functions        *
 	 ***********************************/
 
 	/**
 	 * Determines and returns size of a type in bytes
+	 * @! CURRENTLY NOT USED!!!
 	 */
 	sizeof(str){
 		switch(str){
