@@ -26,10 +26,6 @@ class Expr extends Construct {
 		super();
 		this.loc = loc;
 	}
-
-	accept(visitor){
-		return visitor.visitExpr(this);
-	}
 }
 
 class NOP extends Construct {
@@ -39,7 +35,7 @@ class NOP extends Construct {
 	}
 
 	accept(visitor){
-		return;
+		return visitor.visitNOP(this);
 	}
 }
 
