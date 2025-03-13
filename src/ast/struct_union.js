@@ -34,6 +34,10 @@ class Struct {
 		this.tagname = tagname;
 		this.loc = loc;
 	}
+
+	accept(visitor){
+		return visitor.visitStruct(this);
+	}
 }
 
 /**
@@ -60,5 +64,9 @@ class Union {
 		this.declarations = declarations;
 		this.tagname = tagname;
 		this.loc = loc;
+	}
+
+	accept(visitor){
+		return visitor.visitUnion(this);
 	}
 }

@@ -77,6 +77,10 @@ class Designator {
 		this.designator = designator;
 		this.loc = loc;
 	}
+
+	accept(visitor){
+		return visitor.visitDesignator(this);
+	}
 }
 
 /**
