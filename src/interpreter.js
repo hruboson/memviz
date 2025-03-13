@@ -102,6 +102,7 @@ class Interpreter {
 
 	/**
 	 * Sets the program counter to point at current construct being interpreted and also sets the pcloc/pcloclast which are used for visualizing program state
+	 * PC should be mostly only set in statements (and most of that in CStmt)
 	 * @public
 	 * @param {Construct} Construct which just got interpreted
 	 */
@@ -361,6 +362,7 @@ class Interpreter {
 
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) return;
+			this.pc = construct;
 			construct.accept(this);
 
 			this.updateHTML();
@@ -371,10 +373,6 @@ class Interpreter {
 	}
 
 	visitDeclaration(declaration){
-		if(this.#callStack.top().symtable.scopeInfo.type != "global"){ // do not move on global declarations
-			this.pc = declaration;
-		}
-
 		const declarator = declaration.declarator;
 		const initializer = declaration.initializer;
 
@@ -486,7 +484,6 @@ class Interpreter {
 		var callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
 
 		if(this.#_instrNum > this.#breakstop) return;
-		this.pc = callExpr;
 
 		if(!callee.name){
 			throw new RTError("Callee is not an identifier", callExpr);
@@ -546,7 +543,6 @@ class Interpreter {
 
 	visitReturn(ret){
 		if(this.#_instrNum > this.#breakstop) return;
-		this.pc = ret;
 
 		// return only most right-hand expression, evaluate rest
 		// when expression is returned get the right-most operand to return and evaluate the left-hand operand
