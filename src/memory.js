@@ -123,59 +123,59 @@ class Memsim {
 	setPrimitiveValue(sym, value, region){
 		switch(sym.memtype){
 			case DATATYPE.bool:
-				sym.address = sym.address ? this.changeBoolValue(sym.address, value, sym.astPtr.loc) : this.setBoolValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeBoolValue(sym, value, region, sym.astPtr.loc) : this.setBoolValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.char:
-				sym.address = sym.address ? this.changeCharValue(sym.address, value, sym.astPtr.loc) : this.setCharValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeCharValue(sym, value, region, sym.astPtr.loc) : this.setCharValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.uchar:
-				sym.address = sym.address ? this.changeUCharValue(sym.address, value, sym.astPtr.loc) : this.setUCharValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeUCharValue(sym, value, region, sym.astPtr.loc) : this.setUCharValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.short:
-				sym.address = sym.address ? this.changeShortValue(sym.address, value, sym.astPtr.loc) : this.setShortValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeShortValue(sym, value, region, sym.astPtr.loc) : this.setShortValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.ushort:
-				sym.address = sym.address ? this.changeUShortValue(sym.address, value, sym.astPtr.loc) : this.setUShortValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeUShortValue(sym, value, region, sym.astPtr.loc) : this.setUShortValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.int:
-				sym.address = sym.address ? this.changeIntValue(sym.address, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeIntValue(sym, value, region, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.uint:
-				sym.address = sym.address ? this.changeUIntValue(sym.address, value, sym.astPtr.loc) : this.setUIntValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeUIntValue(sym, value, region, sym.astPtr.loc) : this.setUIntValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.long:
-				sym.address = sym.address ? this.changeLongValue(sym.address, value, sym.astPtr.loc) : this.setLongValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeLongValue(sym, value, region, sym.astPtr.loc) : this.setLongValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.ulong:
-				sym.address = sym.address ? this.changeULongValue(sym.address, value, sym.astPtr.loc) : this.setULongValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeULongValue(sym, value, region, sym.astPtr.loc) : this.setULongValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.longlong:
-				sym.address = sym.address ? this.changeLongLongValue(sym.address, value, sym.astPtr.loc) : this.setLongLongValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeLongLongValue(sym, value, region, sym.astPtr.loc) : this.setLongLongValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.ulonglong:
-				sym.address = sym.address ? this.changeULongLongValue(sym.address, value, sym.astPtr.loc) : this.setULongLongValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeULongLongValue(sym, value, region, sym.astPtr.loc) : this.setULongLongValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.float:
-				sym.address = sym.address ? this.changeFloatValue(sym.address, value, sym.astPtr.loc) : this.setFloatValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeFloatValue(sym, value, region, sym.astPtr.loc) : this.setFloatValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.double:
-				sym.address = sym.address ? this.changeDoubleValue(sym.address, value, sym.astPtr.loc) : this.setDoubleValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeDoubleValue(sym, value, region, sym.astPtr.loc) : this.setDoubleValue(value, region, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.longdouble:
-				sym.address = sym.address ? this.changeLongDoubleValue(sym.address, value, sym.astPtr.loc) : this.setLongDoubleValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeLongDoubleValue(sym, value, region, sym.astPtr.loc) : this.setLongDoubleValue(value, region, sym.astPtr.loc);
 				break;
 
 			default:
@@ -190,7 +190,7 @@ class Memsim {
 
 	setPointerValue(sym, value, region){
 		// pointer is 32 bits
-		sym.address = sym.address ? this.changeIntValue(sym, value, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+		sym.address = sym.address ? this.changeIntValue(sym, value, region, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
 	}
 
 	/**
@@ -372,7 +372,7 @@ class Memsim {
 		return addr;
 	}
 
-	changeBoolValue(address, value, loc){
+	changeBoolValue(address, value, region, loc){
 		const s = CHARSIZE;
 		const memorySpace = new ArrayBuffer(s);
 		const view = new DataView(memorySpace);
@@ -396,7 +396,7 @@ class Memsim {
 
 		const memorySpace = new ArrayBuffer(s);
 		const view = new DataView(memorySpace);
-		view.setInt32(0, value, true); // little-endian!
+		view.setInt32(0, value, region, true); // little-endian!
 
 		for(let i = 0; i < s; i++){ // alloc every byte separately
 			this.memory.set(addr + i, { value: view.getUint8(i), region: region });
@@ -405,22 +405,24 @@ class Memsim {
 		return addr;
 	}
 
-	changeIntValue(value, loc){
+	changeIntValue(sym, value, region, loc){
 		if(value < INT_MIN || value > INT_MAX){
 			this.#warningSystem.add(`Integer overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
 			value = value & 0xFFFFFFFF; // truncate to 32 bits
 		}
 
-		/*const s = INTSIZE;
-		const addr = this.#allocRegion(region, s);
+		const s = INTSIZE;
+		if(!sym.address){
+			sym.address = this.#allocRegion(sym.region, s);
+		}
 
 		const memorySpace = new ArrayBuffer(s);
 		const view = new DataView(memorySpace);
-		view.setInt32(0, value, true); // little-endian!
+		view.setInt32(0, value, region, true); // little-endian!
 
 		for(let i = 0; i < s; i++){ // alloc every byte separately
-			this.memory.set(addr + i, { value: view.getUint8(i), region: "heap" });
-		}*/
+			this.memory.set(sym.address + i, { value: view.getUint8(i), region: region });
+		}
 
 		return sym.address;
 	}

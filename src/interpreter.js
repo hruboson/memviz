@@ -280,16 +280,9 @@ class Interpreter {
 	}
 
     visitBAssignExpr(expr){
-		let lval;
-		let rval;
-
-		if(expr.left.length){
-			for(const subexpr of expr.left){
-				lval = subexpr.accept(this);
-			}
-		}else{
-			lval = expr.left.accept(this);
-		}
+		let lval; // lval should always derive to value of symbol on left side
+		let rval; // rval should always derive to constant
+		let symbol;
 
 		if(expr.right.length){
 			for(const subexpr of expr.right){
@@ -299,21 +292,67 @@ class Interpreter {
 			rval = expr.right.accept(this);
 		}
 
-		console.log(lval, expr.op, rval);
+		// check rval type
+		console.log(rval);
+
+		if(expr.left.length){
+			for(const subexpr of expr.left){
+				if(isclass(subexpr, "Identifier")){
+					symbol = this.#callStack.top().resolve(subexpr.name);
+				}
+				lval = subexpr.accept(this);
+			}
+		}else{
+			if(isclass(expr.left, "Identifier")){
+				symbol = this.#callStack.top().resolve(expr.left.name);
+			}
+			lval = expr.left.accept(this);
+		}
+
+		// check lval type
+		if(symbol.isFunction){ // check this in semantics!
+			
+		}
+		
+		// concrete operations
+		switch(expr.op){
+			case '=':
+				this.memsim.setSymValue(symbol, rval, MEMREGION.STACK);
+				break;
+			case '+=':
+				this.memsim.setSymValue(symbol, rval + lval, MEMREGION.STACK);
+				break;
+			case '-=':
+				this.memsim.setSymValue(symbol, rval - lval, MEMREGION.STACK);
+				break;
+			case '*=':
+				break;
+			case '/=':
+				break;
+			case '%=':
+				break;
+			case '&=':
+				break;
+			case '|=':
+				break;
+			case '^=':
+				break;
+			case '<<=':
+				break;
+			case '>>=':
+				break;
+
+			default:
+				throw new AppError("Unknown operator of expression: ", expr);
+		}
+
+		return this.memsim.readSymValue(symbol);
 	}
 
     visitBArithExpr(expr){
 		let lval;
 		let rval;
 
-		if(expr.left.length){
-			for(const subexpr of expr.left){
-				lval = subexpr.accept(this);
-			}
-		}else{
-			lval = expr.left.accept(this);
-		}
-
 		if(expr.right.length){
 			for(const subexpr of expr.right){
 				rval = subexpr.accept(this);
@@ -322,7 +361,40 @@ class Interpreter {
 			rval = expr.right.accept(this);
 		}
 
-		console.log(lval, expr.op, rval);
+		if(expr.left.length){
+			for(const subexpr of expr.left){
+				lval = subexpr.accept(this);
+			}
+		}else{
+			lval = expr.left.accept(this);
+		}
+
+		// concrete operations
+		switch(expr.op){
+			case '+':
+				return lval + rval;
+			case '-':
+				return lval - rval;
+			case '*':
+				return lval * rval;
+			case '/':
+				return Math.floor(lval / rval);
+			case '%':
+				return lval % rval;
+			case '&':
+				return lval & rval;
+			case '|':
+				return lval | rval;
+			case '^':
+				return lval ^ rval;
+			case '<<':
+				return lval << rval;
+			case '>>':
+				return lval >> rval;
+
+			default:
+				throw new AppError(`Unknown operator of expression: ${expr.op}`, expr.loc);
+		}
 	}
 
     visitBCompExpr(expr){
@@ -439,10 +511,6 @@ class Interpreter {
 
 	}
 
-    visitExpr(expr){
-
-	}
-
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) return;
 
@@ -517,7 +585,7 @@ class Interpreter {
 				break;
 			// no more nested, was taken care of while creating the AST
 			default:
-				throw new AppError(`Unknown initializer kind (interpreter): ${initializer.kind}`);
+				throw new AppError(`Unknown initializer kind (interpreter): ${initializer.kind}`, initializer.loc);
 		}
 	}
 
@@ -588,7 +656,34 @@ class Interpreter {
 	}
 
     visitUExpr(expr){
+		//TODO POSTFIX AND PREFIX DIFFERENTIATION
+		let lval;
+		let symbol;
 
+		if(isclass(expr.expr, "Identifier")){ // for ++ and -- operator
+			symbol = this.#callStack.top().resolve(expr.expr.name);
+		}
+
+		switch(expr.op){
+			case '+':
+				return expr.expr.accept(this);
+			case '-':
+				return -expr.expr.accept(this);
+			case '++':
+				lval = expr.expr.accept(this);
+				this.memsim.setSymValue(symbol, lval + 1, MEMREGION.STACK);
+				break;
+			case '--':
+				lval = expr.expr.accept(this);
+				this.memsim.setSymValue(symbol, lval - 1, MEMREGION.STACK);
+				break;
+			case '!':
+				return !expr.expr.accept(this);
+			case '~':
+				return ~expr.expr.accept(this);
+			default:
+				throw new AppError(`Unknown operator of UExpr: ${expr.op}`, expr.loc);
+		}
 	}
 
     visitUnion(union){

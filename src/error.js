@@ -42,8 +42,13 @@ class RTError extends Error {
  * @param {string} e Error message
  */
 class AppError extends Error {
-	constructor(e){
-		const msg = `Application Error: \n\n${e}`;
+	constructor(e, loc=null){
+		let msg;
+		if(!loc){
+			msg = `Application Error: \n\n${e}`;
+		}else{
+			msg = `Application Error: \n\n${e} on line ${loc.first_line}`;
+		}
 		console.error(msg);
 		super(msg);
 	}
