@@ -585,9 +585,9 @@ statement
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement
-	| CASE constant_expression ':' statement
-	| DEFAULT ':' statement
+	: IDENTIFIER ':' statement { $$ = new LStmt($1, $3); }
+	| CASE constant_expression ':' statement  { $$ = new CaseStmt($2, $4); }
+	| DEFAULT ':' statement { $$ = new CaseStmt(null, $3); }
 	;
 
 compound_statement
@@ -611,24 +611,24 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement ELSE statement
-	| IF '(' expression ')' statement
-	| SWITCH '(' expression ')' statement
+	: IF '(' expression ')' statement ELSE statement { $$ = new IfStmt($3, $5, $7, @$); }
+	| IF '(' expression ')' statement { $$ = new IfStmt($3, $5, null, @$); }
+	| SWITCH '(' expression ')' statement { $$ = new SwitchStmt($3, $5, @$); }
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
-	| FOR '(' declaration expression_statement ')' statement
-	| FOR '(' declaration expression_statement expression ')' statement
+	: WHILE '(' expression ')' statement { $$ = new WhileLoop($3, $5, @$); }
+	| DO statement WHILE '(' expression ')' ';' { $$ = new DoWhileLoop($5, $2, @$); }
+	| FOR '(' expression_statement expression_statement ')' statement { $$ = new ForLoop($3, $4, null, $6, @$); }
+	| FOR '(' expression_statement expression_statement expression ')' statement { $$ = new ForLoop($3, $4, $5, $7, @$); }
+	| FOR '(' declaration expression_statement ')' statement { $$ = new ForLoop($3, $4, null, $6, @$); }
+	| FOR '(' declaration expression_statement expression ')' statement { $$ = new ForLoop($3, $4, $5, $7, @$); }
 	;
 
 jump_statement
-	: GOTO IDENTIFIER ';'
-	| CONTINUE ';'
-	| BREAK ';'
+	: GOTO IDENTIFIER ';' { $$ = new Goto(new LabelName($2), @$); }
+	| CONTINUE ';' { $$ = new Continue(@$); }
+	| BREAK ';' { $$ = new Break(@$); }
 	| RETURN ';' { $$ = new Return(null, @$); }
 	| RETURN expression ';' { $$ = new Return($2, @$); }
 	;

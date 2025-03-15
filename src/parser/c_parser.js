@@ -337,6 +337,15 @@ break;
 case 181:
  this.$ = new Designator(new Identifier($$[$0], this._$)); 
 break;
+case 188:
+ this.$ = new LStmt($$[$0-2], $$[$0]); 
+break;
+case 189:
+ this.$ = new CaseStmt($$[$0-2], $$[$0]); 
+break;
+case 190:
+ this.$ = new CaseStmt(null, $$[$0]); 
+break;
 case 191:
  this.$ = new CStmt([], this._$); 
 break;
@@ -351,6 +360,36 @@ case 197:
 break;
 case 198:
  this.$ = Array.isArray($$[$0-1]) ? $$[$0-1] : [$$[$0-1]]; 
+break;
+case 199:
+ this.$ = new IfStmt($$[$0-4], $$[$0-2], $$[$0], this._$); 
+break;
+case 200:
+ this.$ = new IfStmt($$[$0-2], $$[$0], null, this._$); 
+break;
+case 201:
+ this.$ = new SwitchStmt($$[$0-2], $$[$0], this._$); 
+break;
+case 202:
+ this.$ = new WhileLoop($$[$0-2], $$[$0], this._$); 
+break;
+case 203:
+ this.$ = new DoWhileLoop($$[$0-2], $$[$0-5], this._$); 
+break;
+case 204: case 206:
+ this.$ = new ForLoop($$[$0-3], $$[$0-2], null, $$[$0], this._$); 
+break;
+case 205: case 207:
+ this.$ = new ForLoop($$[$0-4], $$[$0-3], $$[$0-2], $$[$0], this._$); 
+break;
+case 208:
+ this.$ = new Goto(new LabelName($$[$0-1]), this._$); 
+break;
+case 209:
+ this.$ = new Continue(this._$); 
+break;
+case 210:
+ this.$ = new Break(this._$); 
 break;
 case 211:
  this.$ = new Return(null, this._$); 

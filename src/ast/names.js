@@ -34,6 +34,31 @@ class Identifier extends Construct {
 	}
 }
 
+class LabelName extends Construct {
+
+	/**
+	 * Name of the label
+	 * @type {string}
+	 */
+	name;
+
+	/**
+	 * Line of code
+	 * @type {Object}
+	 */
+	loc;
+	
+	constructor(name, loc){
+		super();
+		this.name = name;
+		this.loc = loc;
+	}
+
+	accept(visitor){
+		return visitor.visitLabelName(this);
+	}
+}
+
 /**
  * Used for structs, unions and enums
  * @description Creates record in tag name space
