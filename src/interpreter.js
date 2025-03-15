@@ -587,7 +587,6 @@ class Interpreter {
 			loop.itexpr.accept(this);
 		}
 
-		console.log(loop.cond);
 
 		let condition;
 		if(Array.isArray(loop.cond)){
@@ -597,8 +596,6 @@ class Interpreter {
 		}else{
 			condition = loop.cond.accept(this);
 		}
-
-		console.log(condition);
 
 		while(condition){
 			loop.body.accept(this);
