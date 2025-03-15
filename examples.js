@@ -187,7 +187,10 @@ const expressions_example = `int main(){
 	i++;
 	++i;
 	i = i + (10 + (20 + 30));
-	i = +i;
+	i = -i;
+
+	int guess;
+	guess = guess + (guess = 420, 69 + (guess = 666, 20 + 30));
 	return i;
 }`;
 
@@ -246,4 +249,73 @@ int c = 1;
 
 int main(){
 	int x = 42;
+}`;
+
+const if_example = `int main(){
+	if(1){
+		printf("Yay");
+	}else{
+		printf("Nope");
+	}
+
+	if(0){
+		printf("Nope");
+	}else{
+		printf("Yay");
+	}
+}`;
+
+const switch_example = `int main(){
+    int day = 6;
+
+    switch (day) {
+        case 1:
+            printf("Monday\\n");
+            break;
+        case 2:
+            printf("Tuesday\\n");
+            break;
+        case 3:
+            printf("Wednesday\\n");
+            break;
+        case 4:
+            printf("Thursday\\n");
+            break;
+        case 5:
+            printf("Friday\\n");
+            break;
+        case 6:
+            printf("Saturday\\n");
+            break;
+        case 7:
+            printf("Sunday\\n");
+            break;
+        default:
+            printf("Invalid input! Please enter a number between 1 and 7.\\n");
+            break;
+    }
+
+    return 0;
+}`;
+
+
+
+const for_loop_example = `int main(){
+	for(int i = 1; i < 5; i++){
+		printf("%d", i);
+	}
+}`;
+
+const while_loop_example = `int main(){
+	int x = 0;
+	while(x < 5){
+		printf("%d", x);
+		x++;
+	}
+	
+	int y = 0;
+	do{
+		printf("%d", y);
+		y++;
+	}while(y < 5);
 }`;

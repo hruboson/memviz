@@ -198,6 +198,10 @@ class Semantic {
 
 	}
 
+	visitBreak(br){
+
+	}
+
     visitCastExpr(expr){
 
 	}
@@ -216,6 +220,10 @@ class Semantic {
 	}
 
     visitCondExpr(expr){
+
+	}
+
+	visitContinue(cont){
 
 	}
 
@@ -263,15 +271,11 @@ class Semantic {
 
 	}
 
-    visitEStmt(stmt){
+	visitDoWhileLoop(loop){
 
 	}
 
     visitEnum(enumerator){
-
-	}
-
-    visitExpr(expr){
 
 	}
 
@@ -360,6 +364,41 @@ class Semantic {
 		}
 	}
 
+	visitForLoop(loop){
+		// init
+		if(Array.isArray(loop.init)){
+			for(const subexpr of loop.init){
+				subexpr.accept(this);
+			}
+		}else{
+			loop.init.accept(this);
+		}
+
+		// condition
+		if(Array.isArray(loop.cond)){
+			for(const subexpr of loop.cond){
+				subexpr.accept(this);
+			}
+		}else{
+			loop.cond.accept(this);
+		}
+
+		// iteration expression
+		if(Array.isArray(loop.itexpr)){
+			for(const subexpr of loop.itexpr){
+				subexpr.accept(this);
+			}
+		}else{
+			loop.itexpr.accept(this);
+		}
+
+		loop.body.accept(this);
+	}
+
+	visitGoto(gt){
+
+	}
+
     visitIStmt(stmt){
 
 	}
@@ -370,6 +409,19 @@ class Semantic {
 		}catch(e){
 			throw new SError(e.details, identifier.loc);
 		}
+	}
+
+	visitIfStmt(stmt){
+		if(Array.isArray(stmt.expr)){
+			for(const subexpr of stmt.expr){
+				subexpr.accept(this);
+			}
+		}else{
+			stmt.expr.accept(this);
+		}
+
+		stmt.sfalse.accept(this);
+		stmt.strue.accept(this);
 	}
 
 	visitInitializer(initializer){
@@ -417,6 +469,14 @@ class Semantic {
 	}
 
     visitJStmt(stmt){
+
+	}
+
+	visitLabelName(label){
+
+	}
+
+	visitLStmt(label){
 
 	}
 
@@ -480,6 +540,10 @@ class Semantic {
 
 	}
 
+	visitSwitchStmt(stmt){
+
+	}
+
     visitTagname(tagname){
 
 	}
@@ -494,6 +558,10 @@ class Semantic {
 	}
 
     visitUnion(union){
+
+	}
+
+	visitWhileLoop(loop){
 
 	}
 

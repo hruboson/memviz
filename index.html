@@ -209,8 +209,11 @@
 						<button class="dropdown-item" type="button">malloc</button>
 						<button class="dropdown-item" type="button">free</button>
 						<div class="dropdown-divider"></div>
-						<button class="dropdown-item" type="button">while loop</button>
-						<button class="dropdown-item" type="button">for loop</button>
+						<button class="dropdown-item" type="button" onclick="setExample(while_loop_example)">while loop</button>
+						<button class="dropdown-item" type="button" onclick="setExample(for_loop_example)">for loop</button>
+						<div class="dropdown-divider"></div>
+						<button class="dropdown-item" type="button" onclick="setExample(if_example)">if statement</button>
+						<button class="dropdown-item" type="button" onclick="setExample(switch_example)">switch statement</button>
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(tree_example)">tree</button>
 						<button class="dropdown-item" type="button" onclick="setExample(infinite_recursion_example)">infinite recursion</button>
@@ -224,14 +227,21 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main(){
-	int i;
-	i = +10;
-	i += 10;
-	i++;
-	++i;
-	i = i + (10 + (20 + 30));
-	i = +i;
-	return i;
+	for(int i = 1; i < 5; i++){
+		printf("%d", i);
+	}
+	
+	int x = 0;
+	while(x < 5){
+		printf("%d", x);
+		x++;
+	}
+	
+	int y = 0;
+	do{
+		printf("%d", y);
+		y++;
+	}while(y < 5);
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">

@@ -284,7 +284,7 @@ class Interpreter {
 		let rval; // rval should always derive to constant
 		let symbol;
 
-		if(expr.right.length){
+		if(Array.isArray(expr.right)){
 			for(const subexpr of expr.right){
 				rval = subexpr.accept(this);
 			}
@@ -293,9 +293,8 @@ class Interpreter {
 		}
 
 		// check rval type
-		console.log(rval);
 
-		if(expr.left.length){
+		if(Array.isArray(expr.left)){
 			for(const subexpr of expr.left){
 				if(isclass(subexpr, "Identifier")){
 					symbol = this.#callStack.top().resolve(subexpr.name);
@@ -353,7 +352,7 @@ class Interpreter {
 		let lval;
 		let rval;
 
-		if(expr.right.length){
+		if(Array.isArray(expr.right)){
 			for(const subexpr of expr.right){
 				rval = subexpr.accept(this);
 			}
@@ -361,7 +360,7 @@ class Interpreter {
 			rval = expr.right.accept(this);
 		}
 
-		if(expr.left.length){
+		if(Array.isArray(expr.left)){
 			for(const subexpr of expr.left){
 				lval = subexpr.accept(this);
 			}
@@ -405,6 +404,10 @@ class Interpreter {
 
 	}
 
+	visitBreak(br){
+
+	}
+
     visitCastExpr(expr){
 
 	}
@@ -425,6 +428,10 @@ class Interpreter {
 	}
 
     visitCondExpr(expr){
+
+	}
+
+	visitContinue(cont){
 
 	}
 
@@ -503,7 +510,7 @@ class Interpreter {
 
 	}
 
-    visitEStmt(stmt){
+    visitDoWhileLoop(loop){
 
 	}
 
@@ -561,6 +568,55 @@ class Interpreter {
 		return fncPtr.astPtr.accept(this, callExpr.arguments);
 	}
 
+	visitForLoop(loop){
+		// init
+		if(Array.isArray(loop.init)){
+			for(const subexpr of loop.init){
+				subexpr.accept(this);
+			}
+		}else{
+			loop.init.accept(this);
+		}
+
+		// iteration expression
+		if(Array.isArray(loop.itexpr)){
+			for(const subexpr of loop.itexpr){
+				subexpr.accept(this);
+			}
+		}else{
+			loop.itexpr.accept(this);
+		}
+
+		console.log(loop.cond);
+
+		let condition;
+		if(Array.isArray(loop.cond)){
+			for(const subexpr of loop.cond){
+				condition = subexpr.accept(this);
+			}
+		}else{
+			condition = loop.cond.accept(this);
+		}
+
+		console.log(condition);
+
+		while(condition){
+			loop.body.accept(this);
+
+			if(Array.isArray(loop.cond)){
+				for(const subexpr of loop.cond){
+					condition = subexpr.accept(this);
+				}
+			}else{
+				condition = loop.cond.accept(this);
+			}
+		}
+	}
+
+	visitGoto(gt){
+
+	}
+
     visitIStmt(stmt){
 
 	}
@@ -573,6 +629,15 @@ class Interpreter {
 
 		sym = this.#callStack.top().resolve(id.name);
 		return this.memsim.readSymValue(sym);
+	}
+
+	visitIfStmt(stmt){
+		if(stmt.expr == 0){
+			stmt.sfalse.attachSymtable();
+			stmt.sfalse.accept(this);
+		}else{
+			stmt.strue.accept(this);
+		}
 	}
 
 	visitInitializer(initializer){
@@ -590,6 +655,14 @@ class Interpreter {
 	}
 
     visitJStmt(stmt){
+
+	}
+
+	visitLabelName(label){
+
+	}
+
+	visitLStmt(stmt){
 
 	}
 
@@ -618,7 +691,7 @@ class Interpreter {
 		// check if function has void signature if yes just to this (ignore return value) ---V the function should be on callstack -> DO THAT FIRST (I know it's a pain in the ass)
 		if(expr == null) throw new ReturnThrow(ret.loc, new ReturnVoid()); // in case of empty return (void return)
 
-		if(expr.length > 1){
+		if(Array.isArray(expr) > 1){
 			for(let i = 0; i < expr.length - 1; i++){
 				if(this.#_instrNum > this.#breakstop) return;
 				expr[i].accept(this);
@@ -644,6 +717,10 @@ class Interpreter {
 	}
 
     visitSubscriptExpr(expr){
+
+	}
+
+	visitSwitchStmt(stmt){
 
 	}
 
@@ -687,6 +764,10 @@ class Interpreter {
 	}
 
     visitUnion(union){
+
+	}
+
+	visitWhileLoop(loop){
 
 	}
 
