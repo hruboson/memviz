@@ -6,6 +6,12 @@
 	<title>Mocha Tests</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+	
+	<!-- dummy libs -->
+	<!-- json viewer (for debug reasons) -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.1.2/jsoneditor.min.css" integrity="sha512-8G+Vb2+10BSrSo+wupdzJIylDLpGtEYniQhp0rsbTigPG7Onn2S08Ai/KEGlxN2Ncx9fGqVHtRehMuOjPb9f8g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.1.2/jsoneditor.min.js" integrity="sha512-j78GVmoaez3SedgGMQfYAQ1LFaBGy0KyOJuJKcseERaJt+Ws1p+0gDJso8txo1pq7QGibquf6cGHzl9CgXpGdg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 
 	<!-- maxGraph -->
 	<script src="lib/maxgraph/maxgraph.bundle.js" type="text/javascript" charset="utf-8"></script>
@@ -56,5 +62,12 @@
 	<script class="mocha-exec">
 		mocha.run();
 	</script>
+
+	<!-- dummy elements -->
+	<div id="ast" style="display:none"></div>
+	<div id="typedefs" style="display:none"></div>
+	<div id="programCounter" style="display:none"></div>
+	<div id="symtable" style="display:none"></div>
+	<div id="warnings" style="display:none"></div>
 </body>
 </html>
