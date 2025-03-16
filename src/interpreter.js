@@ -193,7 +193,6 @@ class Interpreter {
 	parse(text){
 		this.#refreshSymbols();
 		this.#ast = this.#parser.parse(text);
-		this.updateHTML();
 		return this;
 	}
 
@@ -401,7 +400,19 @@ class Interpreter {
 	}
 
     visitBLogicExpr(expr){
+		let rval = this.visitExprArray(expr.right);
+		let lval = this.visitExprArray(expr.left);
 
+		// concrete operations
+		switch(expr.op){
+			case '||':
+				return lval || rval;
+			case '&&':
+				return lval && rval;
+
+			default:
+				throw new AppError(`Unknown operator of expression: ${expr.op}`, expr.loc);
+		}
 	}
 
 	visitBreak(br){
@@ -443,8 +454,6 @@ class Interpreter {
 			if(this.#_instrNum > this.#breakstop) return;
 			this.pc = construct;
 			construct.accept(this);
-
-			this.updateHTML();
 		}
 
 		if(this.#_instrNum > this.#breakstop) return;
@@ -630,7 +639,8 @@ class Interpreter {
 	}
 
 	visitIfStmt(stmt){
-		if(stmt.expr == 0){
+		let decision = this.visitExprArray(stmt.expr);
+		if(decision == false){
 			if(stmt.sfalse){ // it can be null in case of no else
 				stmt.sfalse.accept(this);
 			}

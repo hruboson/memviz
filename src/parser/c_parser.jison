@@ -223,12 +223,12 @@ inclusive_or_expression
 
 logical_and_expression
 	: inclusive_or_expression { $$ = $1; }
-	| logical_and_expression AND_OP inclusive_or_expression { $$ = new BArithExpr($1, $2, $3, @$); }
+	| logical_and_expression AND_OP inclusive_or_expression { $$ = new BLogicExpr($1, $2, $3, @$); }
 	;
 
 logical_or_expression
 	: logical_and_expression { $$ = $1; }
-	| logical_or_expression OR_OP logical_and_expression { $$ = new BArithExpr($1, $2, $3, @$); }
+	| logical_or_expression OR_OP logical_and_expression { $$ = new BLogicExpr($1, $2, $3, @$); }
 	;
 
 conditional_expression

@@ -145,11 +145,14 @@ break;
 case 34:
  this.$ = new CastExpr($$[$0-2], $$[$0], this._$); 
 break;
-case 36: case 37: case 38: case 40: case 41: case 43: case 44: case 54: case 56: case 58: case 60: case 62:
+case 36: case 37: case 38: case 40: case 41: case 43: case 44: case 54: case 56: case 58:
  this.$ = new BArithExpr($$[$0-2], $$[$0-1], $$[$0], this._$); 
 break;
 case 46: case 47: case 48: case 49: case 51: case 52:
  this.$ = new BCompExpr($$[$0-2], $$[$0-1], $$[$0], this._$); 
+break;
+case 60: case 62:
+ this.$ = new BLogicExpr($$[$0-2], $$[$0-1], $$[$0], this._$); 
 break;
 case 64:
  this.$ = new CondExpr($$[$0-4], $$[$0-2], $$[$0], this._$); 
