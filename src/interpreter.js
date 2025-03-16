@@ -567,7 +567,6 @@ class Interpreter {
 	}
 
 	visitForLoop(loop){
-		console.log(loop.symtbptr);
 		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
 		this.#callStack.push(sf);
 
@@ -575,10 +574,10 @@ class Interpreter {
 		this.visitExprArray(loop.init);
 
 		let condition;
-		loop: for(;;){ // the for loop is there only as a label (just like goto)
+		loop: for(;;){ // the for loop is there only as a label
 			// evaluate at the beginning of every new loop run
-			this.pc = loop; //?? question - should this be stopped and shown the interpretation of for head separately??
-			if(this.#_instrNum > this.#breakstop) return; //?? same
+			this.pc = loop; //?? question - should this be stopped and shown the interpretation of for head separately ??
+			if(this.#_instrNum > this.#breakstop) return; //?? same ??
 			condition = this.visitExprArray(loop.cond);
 
 			if(condition){
