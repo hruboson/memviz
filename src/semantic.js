@@ -365,6 +365,9 @@ class Semantic {
 	}
 
 	visitForLoop(loop){
+		let symtable = new Symtable("for loop", "stmt", this.symtableStack.peek());
+		this.newScope(symtable, loop);
+
 		// init
 		if(Array.isArray(loop.init)){
 			for(const subexpr of loop.init){
@@ -392,7 +395,13 @@ class Semantic {
 			loop.itexpr.accept(this);
 		}
 
-		loop.body.accept(this);
+		if(isclass(loop.body, "CStmt")){
+			for(const construct of loop.body.sequence){
+				construct.accept(this);
+			}
+		}
+
+		this.closeScope();
 	}
 
 	visitGoto(gt){

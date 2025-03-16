@@ -567,34 +567,49 @@ class Interpreter {
 	}
 
 	visitForLoop(loop){
+		console.log(loop.symtbptr);
+		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
+		this.#callStack.push(sf);
+
 		// init
 		this.visitExprArray(loop.init);
 
 		let condition;
-		let i = 1;
 		loop: for(;;){ // the for loop is there only as a label (just like goto)
 			// evaluate at the beginning of every new loop run
+			this.pc = loop; //?? question - should this be stopped and shown the interpretation of for head separately??
+			if(this.#_instrNum > this.#breakstop) return; //?? same
 			condition = this.visitExprArray(loop.cond);
 
 			if(condition){
 				if(this.#_instrNum > this.#breakstop) return;
-				loop.body.accept(this);
+				if(isclass(loop.body, "CStmt")){
+					for(const construct of loop.body.sequence){
+						if(this.#_instrNum > this.#breakstop) return;
+						this.pc = construct;
+						construct.accept(this);
+					}
+				}else{
+					if(this.#_instrNum > this.#breakstop) return;
+					this.pc = loop.body;
+					loop.body.accept(this);
+				}
 
 				// check if iteration expression should be interpreted
 				condition = this.visitExprArray(loop.cond);
 				if(!condition) return;
-				//TODO FIX LOOP EXPRESSION GOING FOR ONE MORE THAT SUPPOSED TO
 
 				// iteration expression
 				if(this.#_instrNum > this.#breakstop) return;
-				console.log(condition);
 				this.visitExprArray(loop.itexpr);
 
 				continue loop;
 			}else{
-				return;
+				break;
 			}
 		}
+
+		this.#callStack.pop();
 	}
 
 	visitGoto(gt){
