@@ -301,8 +301,15 @@ const switch_example = `int main(){
 
 
 const for_loop_example = `int main(){
-	for(int i = 1; i < 5; i++){
-		printf("%d", i);
+	for(int x = 0; x < 5; x++){
+    	for(int y = 0; y < 5; y++){
+    	    if((y < 1 || y > 3) || (x < 1 || x > 3)){
+    		    printf("X");
+    	    }else{
+    	        printf(" ");
+    	    }
+    	}
+    	printf("\\n");
 	}
 }`;
 
