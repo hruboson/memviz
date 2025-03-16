@@ -631,8 +631,9 @@ class Interpreter {
 
 	visitIfStmt(stmt){
 		if(stmt.expr == 0){
-			stmt.sfalse.attachSymtable();
-			stmt.sfalse.accept(this);
+			if(stmt.sfalse){ // it can be null in case of no else
+				stmt.sfalse.accept(this);
+			}
 		}else{
 			stmt.strue.accept(this);
 		}

@@ -429,7 +429,9 @@ class Semantic {
 			stmt.expr.accept(this);
 		}
 
-		stmt.sfalse.accept(this);
+		if(stmt.sfalse){ // null in case of no else
+			stmt.sfalse.accept(this);
+		}
 		stmt.strue.accept(this);
 	}
 
