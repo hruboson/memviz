@@ -284,15 +284,10 @@ class Interpreter {
 		let rval; // rval should always derive to constant
 		let symbol;
 
-		if(Array.isArray(expr.right)){
-			for(const subexpr of expr.right){
-				rval = subexpr.accept(this);
-			}
-		}else{
-			rval = expr.right.accept(this);
-		}
+		rval = this.visitExprArray(expr.right);
 
 		// check rval type
+		// todo
 
 		if(Array.isArray(expr.left)){
 			for(const subexpr of expr.left){
@@ -342,31 +337,15 @@ class Interpreter {
 				break;
 
 			default:
-				throw new AppError("Unknown operator of expression: ", expr);
+				throw new AppError(`Unknown operator of expression: ${expr}`, expr.loc);
 		}
 
 		return this.memsim.readSymValue(symbol);
 	}
 
     visitBArithExpr(expr){
-		let lval;
-		let rval;
-
-		if(Array.isArray(expr.right)){
-			for(const subexpr of expr.right){
-				rval = subexpr.accept(this);
-			}
-		}else{
-			rval = expr.right.accept(this);
-		}
-
-		if(Array.isArray(expr.left)){
-			for(const subexpr of expr.left){
-				lval = subexpr.accept(this);
-			}
-		}else{
-			lval = expr.left.accept(this);
-		}
+		let rval = this.visitExprArray(expr.right);
+		let lval = this.visitExprArray(expr.left);
 
 		// concrete operations
 		switch(expr.op){
@@ -397,6 +376,27 @@ class Interpreter {
 	}
 
     visitBCompExpr(expr){
+		let rval = this.visitExprArray(expr.right);
+		let lval = this.visitExprArray(expr.left);
+
+		// concrete operations
+		switch(expr.op){
+			case '==':
+				return lval == rval;
+			case '!=':
+				return lval != rval;
+			case '<':
+				return lval < rval;
+			case '>':
+				return lval > rval;
+			case '<=':
+				return lval <= rval;
+			case '>=':
+				return lval >= rval;
+
+			default:
+				throw new AppError(`Unknown operator of expression: ${expr.op}`, expr.loc);
+		}
 
 	}
 
@@ -558,8 +558,6 @@ class Interpreter {
 	visitFncCallExpr(callExpr){
 		var callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
 
-		if(this.#_instrNum > this.#breakstop) return;
-
 		if(!callee.name){
 			throw new RTError("Callee is not an identifier", callExpr);
 		}
@@ -570,42 +568,31 @@ class Interpreter {
 
 	visitForLoop(loop){
 		// init
-		if(Array.isArray(loop.init)){
-			for(const subexpr of loop.init){
-				subexpr.accept(this);
-			}
-		}else{
-			loop.init.accept(this);
-		}
-
-		// iteration expression
-		if(Array.isArray(loop.itexpr)){
-			for(const subexpr of loop.itexpr){
-				subexpr.accept(this);
-			}
-		}else{
-			loop.itexpr.accept(this);
-		}
-
+		this.visitExprArray(loop.init);
 
 		let condition;
-		if(Array.isArray(loop.cond)){
-			for(const subexpr of loop.cond){
-				condition = subexpr.accept(this);
-			}
-		}else{
-			condition = loop.cond.accept(this);
-		}
+		let i = 1;
+		loop: for(;;){ // the for loop is there only as a label (just like goto)
+			// evaluate at the beginning of every new loop run
+			condition = this.visitExprArray(loop.cond);
 
-		while(condition){
-			loop.body.accept(this);
+			if(condition){
+				if(this.#_instrNum > this.#breakstop) return;
+				loop.body.accept(this);
 
-			if(Array.isArray(loop.cond)){
-				for(const subexpr of loop.cond){
-					condition = subexpr.accept(this);
-				}
+				// check if iteration expression should be interpreted
+				condition = this.visitExprArray(loop.cond);
+				if(!condition) return;
+				//TODO FIX LOOP EXPRESSION GOING FOR ONE MORE THAT SUPPOSED TO
+
+				// iteration expression
+				if(this.#_instrNum > this.#breakstop) return;
+				console.log(condition);
+				this.visitExprArray(loop.itexpr);
+
+				continue loop;
 			}else{
-				condition = loop.cond.accept(this);
+				return;
 			}
 		}
 	}
@@ -805,6 +792,23 @@ class Interpreter {
 	/************************************
 	 *          Helper functions        *
 	 ***********************************/
+
+	/**
+	 * All expression could be returned as an array, that is by design of the C language.
+	 * @param {Array.<Expr>} expr
+	 */
+	visitExprArray(expr){
+		let ret;
+		if(Array.isArray(expr)){
+			for(const subexpr of expr){
+				ret = subexpr.accept(this);
+			}
+		}else{
+			ret = expr.accept(this);
+		}
+
+		return ret;
+	}
 
 	/**
 	 * Determines and returns size of a type in bytes
