@@ -136,11 +136,11 @@ class Memviz {
 		}
 
 		if(sf.symtable.scopeInfo.type == "stmt"){ // in case of compound statement (... {...} ...) keep the function name
-			sf.symtable.scopeInfo.name = sf.parent.symtable.scopeInfo.name + ": " + sf.symtable.scopeInfo.name;
+			sf.symtable.scopeInfo.name = sf.parent.symtable.scopeInfo.name + " > " + sf.symtable.scopeInfo.name;
 		}
 
 		if(sf.symtable.scopeInfo.type == "function params"){
-			sf.symtable.scopeInfo.name = sf.symtable.scopeInfo.name + ": parameters";
+			sf.symtable.scopeInfo.name = sf.symtable.scopeInfo.name + " > parameters";
 		}
 
 		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([name, sym]) => sym.type !== "FNC" && sym.interpreted);
