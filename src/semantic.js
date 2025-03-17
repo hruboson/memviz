@@ -272,7 +272,25 @@ class Semantic {
 	}
 
 	visitDoWhileLoop(loop){
+		let symtable = new Symtable("do-while loop", "stmt", this.symtableStack.peek());
+		this.newScope(symtable, loop);
 
+		// condition
+		if(Array.isArray(loop.cond)){
+			for(const subexpr of loop.cond){
+				subexpr.accept(this);
+			}
+		}else{
+			loop.cond.accept(this);
+		}
+
+		if(isclass(loop.body, "CStmt")){
+			for(const construct of loop.body.sequence){
+				construct.accept(this);
+			}
+		}
+
+		this.closeScope();
 	}
 
     visitEnum(enumerator){
@@ -573,7 +591,25 @@ class Semantic {
 	}
 
 	visitWhileLoop(loop){
+		let symtable = new Symtable("while loop", "stmt", this.symtableStack.peek());
+		this.newScope(symtable, loop);
 
+		// condition
+		if(Array.isArray(loop.cond)){
+			for(const subexpr of loop.cond){
+				subexpr.accept(this);
+			}
+		}else{
+			loop.cond.accept(this);
+		}
+
+		if(isclass(loop.body, "CStmt")){
+			for(const construct of loop.body.sequence){
+				construct.accept(this);
+			}
+		}
+
+		this.closeScope();
 	}
 
 	/**********************

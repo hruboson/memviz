@@ -520,7 +520,43 @@ class Interpreter {
 	}
 
     visitDoWhileLoop(loop){
+		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
+		this.#callStack.push(sf);
 
+		let condition = true;
+		loop: for(;;){ // the for loop is there only as a label
+			if(condition){
+				if(this.#_instrNum > this.#breakstop) return;
+				if(isclass(loop.body, "CStmt")){
+					for(const construct of loop.body.sequence){
+						if(this.#_instrNum > this.#breakstop) return;
+						this.pc = construct;
+						construct.accept(this);
+					}
+				}else{
+					if(this.#_instrNum > this.#breakstop) return;
+					this.pc = loop.body;
+					loop.body.accept(this);
+				}
+
+				// check if iteration expression should be interpreted
+				// evaluate at the end of every new body run
+				if(this.#_instrNum > this.#breakstop) return;
+				if(Array.isArray(loop.cond)){
+					this.pc = loop.cond[0];
+				}else{
+					this.pc = loop.cond;
+				}
+				condition = this.visitExprArray(loop.cond);
+				if(!condition) break;
+
+				continue loop;
+			}else{
+				break;
+			}
+		}
+
+		this.#callStack.pop();
 	}
 
     visitEnum(enumerator){
@@ -585,8 +621,8 @@ class Interpreter {
 		let condition;
 		loop: for(;;){ // the for loop is there only as a label
 			// evaluate at the beginning of every new loop run
-			this.pc = loop; //?? question - should this be stopped and shown the interpretation of for head separately ??
 			if(this.#_instrNum > this.#breakstop) return; //?? same ??
+			this.pc = loop; //?? question - should this be stopped and shown the interpretation of for head separately ??
 			condition = this.visitExprArray(loop.cond);
 
 			if(condition){
@@ -605,7 +641,7 @@ class Interpreter {
 
 				// check if iteration expression should be interpreted
 				condition = this.visitExprArray(loop.cond);
-				if(!condition) return;
+				if(!condition) break;
 
 				// iteration expression
 				if(this.#_instrNum > this.#breakstop) return;
@@ -777,7 +813,41 @@ class Interpreter {
 	}
 
 	visitWhileLoop(loop){
+		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
+		this.#callStack.push(sf);
 
+		let condition;
+		loop: for(;;){ // the for loop is there only as a label
+			// evaluate at the beginning of every new loop run
+			if(this.#_instrNum > this.#breakstop) return;
+			this.pc = loop;
+			condition = this.visitExprArray(loop.cond);
+
+			if(condition){
+				if(this.#_instrNum > this.#breakstop) return;
+				if(isclass(loop.body, "CStmt")){
+					for(const construct of loop.body.sequence){
+						if(this.#_instrNum > this.#breakstop) return;
+						this.pc = construct;
+						construct.accept(this);
+					}
+				}else{
+					if(this.#_instrNum > this.#breakstop) return;
+					this.pc = loop.body;
+					loop.body.accept(this);
+				}
+
+				// check if iteration expression should be interpreted
+				condition = this.visitExprArray(loop.cond);
+				if(!condition) break;
+
+				continue loop;
+			}else{
+				break;
+			}
+		}
+
+		this.#callStack.pop();
 	}
 
 	/******************************
