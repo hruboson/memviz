@@ -681,7 +681,11 @@ class Interpreter {
 				stmt.sfalse.accept(this);
 			}
 		}else{
-			stmt.strue.accept(this);
+			if(isclass(stmt.strue, "CStmt")){ // in case of brackets around statement (...if(true){...}...)
+				stmt.strue.accept(this);
+			}else{ // in case of no brackets (...if(true) printf()...)
+				this.visitExprArray(stmt.strue);
+			}
 		}
 	}
 

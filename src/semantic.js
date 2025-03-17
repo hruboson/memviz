@@ -450,7 +450,18 @@ class Semantic {
 		if(stmt.sfalse){ // null in case of no else
 			stmt.sfalse.accept(this);
 		}
-		stmt.strue.accept(this);
+
+		if(isclass(stmt.strue, "CStmt")){ // in case of brackets around statement (...if(true){...}...)
+			stmt.strue.accept(this);
+		}else{ // in case of no brackets (...if(true) printf()...)
+			if(Array.isArray(stmt.strue)){
+				for(const subexpr of stmt.strue){
+					subexpr.accept(this);
+				}
+			}else{
+				stmt.strue.accept(this);
+			}
+		}
 	}
 
 	visitInitializer(initializer){
