@@ -313,26 +313,34 @@ class Interpreter {
 				this.memsim.setSymValue(symbol, rval, MEMREGION.STACK);
 				break;
 			case '+=':
-				this.memsim.setSymValue(symbol, rval + lval, MEMREGION.STACK);
+				this.memsim.setSymValue(symbol, lval + rval, MEMREGION.STACK);
 				break;
 			case '-=':
-				this.memsim.setSymValue(symbol, rval - lval, MEMREGION.STACK);
+				this.memsim.setSymValue(symbol, lval - rval, MEMREGION.STACK);
 				break;
 			case '*=':
+				this.memsim.setSymValue(symbol, lval * rval, MEMREGION.STACK);
 				break;
 			case '/=':
+				this.memsim.setSymValue(symbol, lval / rval, MEMREGION.STACK);
 				break;
 			case '%=':
+				this.memsim.setSymValue(symbol, lval % rval, MEMREGION.STACK);
 				break;
 			case '&=':
+				this.memsim.setSymValue(symbol, lval & rval, MEMREGION.STACK);
 				break;
 			case '|=':
+				this.memsim.setSymValue(symbol, lval | rval, MEMREGION.STACK);
 				break;
 			case '^=':
+				this.memsim.setSymValue(symbol, lval ^ rval, MEMREGION.STACK);
 				break;
 			case '<<=':
+				this.memsim.setSymValue(symbol, lval << rval, MEMREGION.STACK);
 				break;
 			case '>>=':
+				this.memsim.setSymValue(symbol, lval >> rval, MEMREGION.STACK);
 				break;
 
 			default:
