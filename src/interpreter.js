@@ -202,22 +202,27 @@ class Interpreter {
 	 * @param {AST} ast
 	 */
 	semantic(ast){
-		// add native functions to global symtable (global scope)
-		this.#semanticAnalyzer.addNativeFunctions(this.#symtableGlobal);
+		try{
+			// add native functions to global symtable (global scope)
+			this.#semanticAnalyzer.addNativeFunctions(this.#symtableGlobal);
 
-		// first phase
-		this.#semanticAnalyzer.firstPhase(ast);
+			// first phase
+			this.#semanticAnalyzer.firstPhase(ast);
 
-		// second phase
-		this.#semanticAnalyzer.secondPhase(); // additional semantic checks after creating symbol table
+			// second phase
+			this.#semanticAnalyzer.secondPhase(); // additional semantic checks after creating symbol table
 
-		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
-		if(mainFnc){
-			if(mainFnc.type != SYMTYPE.FNC){
-				throw new SError("main is not a function");
+			const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
+			if(mainFnc){
+				if(mainFnc.type != SYMTYPE.FNC){
+					throw new SError("main is not a function");
+				}
+			}else{
+				throw new SError("undefined reference to main()")
 			}
-		}else{
-			throw new SError("undefined reference to main()")
+		}catch(err){
+			this.updateHTML(err);
+			throw err;
 		}
 
 		this.#callStack.push(new StackFrame(this.#symtableGlobal), null, null); // add global symtable to call stack
@@ -245,7 +250,7 @@ class Interpreter {
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
-		let result = new ReturnVoid();
+		let result;
 
 		// initialize global variables
 		for(const [name, symbol] of this.#symtableGlobal.objects){
@@ -257,14 +262,14 @@ class Interpreter {
 		if(breakstop > 0){
 			try{
 				this.pc = mainFnc.astPtr;
-				mainFnc.astPtr.accept(this, [1, 1]); //TODO args from UI
+				result = mainFnc.astPtr.accept(this, [1, 1]); //TODO args from UI
 			}catch(ret){ // catch return value of main
 				//TODO fix this, I don't think it actually does what it's supposed to, maybe it does but it definitely doesn't check errors
 				result = ret;
 			}
 		}
 
-		this.updateHTML();
+		this.updateHTML(result);
 		this.memviz.updateHTML();
 		this.memsim.printMemory();
 		return result;
@@ -595,6 +600,7 @@ class Interpreter {
 
 			if(this.#_instrNum > this.#breakstop) return;
 			if(fnc.returnType.includes("void")) return null; // force return void on functions with specifier void
+
 			if(isclass(ret.value, "ReturnVoid")){
 				if(this.#_instrNum > this.#breakstop) return;
 				this.#callStack.pop(); // pop param symtable
@@ -942,9 +948,10 @@ class Interpreter {
 
 	/**
 	 * Updates HTML to display interpreter output and generated structure
+	 * @param {Object|integer|string} result Result of main
 	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
-	updateHTML(){
+	updateHTML(result){
 		JSONEDITeditorAST.set(JSON.parse(JSON.stringify(this.#ast))); // due to symtable now being attached to nodes, I cannot print it because of recursive references
 		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
 		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2); // old way of printing AST
@@ -952,6 +959,37 @@ class Interpreter {
 		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
+
+
+		const resultDiv = document.getElementById("result");
+		// reset result element
+		resultDiv.innerHTML = "";
+		const classes = resultDiv.classList;
+		const classesToRemove = Array.from(classes).filter(className => className.startsWith("bg-"));
+		classesToRemove.forEach(className => resultDiv.classList.remove(className))
+		
+		// add result/error depending on type returned from main (result arg)
+		if(result != undefined && result != null){;
+			resultDiv.innerHTML = "Result: \n";
+			if(isclass(result, "ReturnVoid")){
+				resultDiv.innerHTML += "void";
+				resultDiv.classList.add("bg-success");
+			}else if(isclass(result, "SError") || isclass(result, "RTError")){
+				// make text "on line x" bold
+				const regex = /on line \d+/g;
+				const formattedText = result.message.replace(regex, (match) => {
+					return `<kbd class="fw-bolder">${match}</kbd>`;
+				});
+				resultDiv.innerHTML += formattedText;
+				resultDiv.classList.add("bg-danger");
+			}else if(isclass(result, "AppError") || result instanceof Error){
+				resultDiv.classList.add("bg-secondary");
+				resultDiv.innerHTML += "App Error. Who shot himself in the foot? The developer.\nTry sending him this message: \n<kbd>" + result + "</kbd>";
+			}else{
+				resultDiv.innerHTML += result;
+				resultDiv.classList.add("bg-success");
+			}
+		}
 
 		unhighlight(); // global function, defined in index.html
 

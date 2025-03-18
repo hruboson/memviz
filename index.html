@@ -91,6 +91,10 @@
 			overflow-y: auto;
 		}
 
+		.hide-if-empty:empty{
+			display: none;
+		}
+
 		body{
 			background-color: #272822;
 			overflow: hidden;
@@ -232,13 +236,15 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int main(){
-	unsigned char y;
-	y = -10;
+						<div id="editor" onChange="resetEditor();">unsigned char y = -10;
+
+int main(){
+
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
-						<pre id="warnings"></pre>
+						<pre id="warnings" class="bg-warning text-black rounded p-3 m-3 hide-if-empty"></pre>
+						<pre id="result" class="rounded p-3 m-3 hide-if-empty"></pre>
 						<pre id="output"></pre>
 					</div>
 				</div>
@@ -604,9 +610,9 @@ Split(["#split-ve", "#split-console"], {
 			const result = interpreter.interpret(breakEditor);
 			console.info("Main result: ", result);
 
-			interpreter.updateHTML();
+			interpreter.updateHTML(result);
 		}catch(e){
-			document.getElementById("output").innerHTML = e.message;
+			console.error(e);
 		}
 	}
 </script>
