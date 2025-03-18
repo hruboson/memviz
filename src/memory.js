@@ -397,7 +397,7 @@ class Memsim {
 	setCharValue(value, region, loc) {
 		// Check for overflow
 		if(value < CHAR_MIN || value > CHAR_MAX){
-			this.#warningSystem.add(`Char overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			this.#warningSystem.add(`Char overflow, truncating value!`, WTYPE.OVERFLOW, loc);
 			value = value & 0xFF; // truncate to 8 bits
 		}
 
@@ -463,7 +463,7 @@ class Memsim {
 	setUCharValue(value, region, loc) {
 		// Check for overflow
 		if(value < 0 || value > UCHAR_MAX){
-			this.#warningSystem.add(`Char overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			this.#warningSystem.add(`Unsigned char overflow, truncating value!`, WTYPE.OVERFLOW, loc);
 			value = value & 0xFF; // truncate to 8 bits
 		}
 
@@ -488,7 +488,7 @@ class Memsim {
 	changeUCharValue(sym, value, region, loc){
 		// Check for overflow
 		if(value < 0 || value > UCHAR_MAX){
-			this.#warningSystem.add(`Char overflow at memory address 0x${sym.address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			this.#warningSystem.add(`Unsigned char overflow at memory address 0x${sym.address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
 			value = value & 0xFF; // Truncate to 8 bits
 		}
 
@@ -530,7 +530,7 @@ class Memsim {
 
 	setIntValue(value, region, loc){
 		if(value < INT_MIN || value > INT_MAX){
-			this.#warningSystem.add(`Integer overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			this.#warningSystem.add(`Integer overflow, truncating value!`, WTYPE.OVERFLOW, loc);
 			value = value & 0xFFFFFFFF; // truncate to 32 bits
 		}
 
