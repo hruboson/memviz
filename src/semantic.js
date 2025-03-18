@@ -163,8 +163,6 @@ class Semantic {
 		}else{
 			rval = expr.right.accept(this);
 		}
-
-		console.log(lval, expr.op, rval);
 	}
 
 	visitBArithExpr(expr){
@@ -186,8 +184,6 @@ class Semantic {
 		}else{
 			rval = expr.right.accept(this);
 		}
-
-		console.log(lval, expr.op, rval);
 	}
 
     visitBCompExpr(expr){
