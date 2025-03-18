@@ -593,6 +593,8 @@ class Interpreter {
 				throw ret;
 			}
 
+			if(this.#_instrNum > this.#breakstop) return;
+			if(fnc.returnType.includes("void")) return null; // force return void on functions with specifier void
 			if(isclass(ret.value, "ReturnVoid")){
 				if(this.#_instrNum > this.#breakstop) return;
 				this.#callStack.pop(); // pop param symtable
