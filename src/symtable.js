@@ -352,7 +352,7 @@ class Symtable {
 				const sym = this.lookup(namespace, name);
 				if(sym){
 					if(sym.initialized){
-						throw new SError(`redefinition of ${name}`);
+						throw new SError(`redefinition of ${name}`, astPtr.loc);
 					}else{
 						// allow function declaration - definition
 						if(type == SYMTYPE.FNC){
@@ -363,7 +363,7 @@ class Symtable {
 							return;
 						}
 
-						throw new SError(`redefinition of ${name}`);
+						throw new SError(`redefinition of ${name}`, astPtr.loc);
 					}
 				}
 
@@ -376,7 +376,7 @@ class Symtable {
 			case NAMESPACE.LABELS:
 				break;
 			default:
-				throw new AppError("Wrong namespace type while inserting symbol!");
+				throw new AppError("Wrong namespace type while inserting symbol!", astPtr.loc);
 		}
 	}
 

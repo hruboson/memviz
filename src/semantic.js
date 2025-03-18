@@ -259,7 +259,7 @@ class Semantic {
 			case DECLTYPE.ARR:
 				return DECLTYPE.ARR;
 			default:
-				throw new AppError(`Unknown declarator kind (semantic): ${initializer.kind}`);
+				throw new AppError(`Unknown declarator kind (semantic): ${initializer.kind}`, declarator.loc);
 		}
 	}
 
@@ -500,7 +500,7 @@ class Semantic {
 				return INITTYPE.STRUCT;
 			// no more nested, was taken care of while creating the AST
 			default:
-				throw new AppError(`Unknown initializer kind (semantic): ${initializer.kind}`);
+				throw new AppError(`Unknown initializer kind (semantic): ${initializer.kind}`, initializer.loc);
 		}
 	}
 
@@ -716,6 +716,6 @@ class Semantic {
 		}
 
 		console.error(expression);
-		throw new AppError(`Invalid expression structure`);
+		throw new AppError(`Invalid expression structure`, expression.loc);
 	}
 }
