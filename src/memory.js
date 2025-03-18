@@ -487,7 +487,7 @@ class Memsim {
 
 	changeUCharValue(sym, value, region, loc){
 		// Check for overflow
-		if(value < CHAR_MIN || value > CHAR_MAX){
+		if(value < 0 || value > UCHAR_MAX){
 			this.#warningSystem.add(`Char overflow at memory address 0x${sym.address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
 			value = value & 0xFF; // Truncate to 8 bits
 		}
