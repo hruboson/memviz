@@ -266,7 +266,7 @@ class Interpreter {
 
 		this.updateHTML();
 		this.memviz.updateHTML();
-		//this.memsim.printMemory();
+		this.memsim.printMemory();
 		return result;
 	}
 
@@ -486,13 +486,13 @@ class Interpreter {
 
 		if(this.#callStack.top().symtable.scopeInfo.type == "global"){
 			if(!initializer){
-				this.memsim.setSymValue(symbol, value, MEMREGION.BSS);
+				this.memsim.setSymValue(symbol, 0, MEMREGION.BSS);
 			}else{
 				this.memsim.setSymValue(symbol, value, MEMREGION.DATA);
 			}
 		}else{
 			if(!initializer){
-				this.memsim.setSymValue(symbol, value, MEMREGION.BSS);
+				this.memsim.setSymValue(symbol, null, MEMREGION.BSS);
 			}else{
 				this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
 			}

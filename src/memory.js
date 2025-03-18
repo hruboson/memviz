@@ -222,10 +222,10 @@ class Memsim {
 			break;
 
 			case DATATYPE.char:
-			break;
+				return this.readCharValue(sym.address);
 
 			case DATATYPE.uchar:
-			break;
+				return this.readUCharValue(sym.address);
 
 			case DATATYPE.short:
 			break;
@@ -285,7 +285,7 @@ class Memsim {
 	#storeMemory(address, size, region, value, type){
 		for (let i = 0; i < size; i++) {
 			this.memory.set(address + i, { 
-				value: value !== undefined ? value : 0, 
+				value: value !== undefined ? value : undefined, 
 				region: region 
 			});
 
@@ -358,6 +358,11 @@ class Memsim {
 	/*****************************
 	 * Primitive types functions *
 	 *****************************/
+
+	//////////
+	// BOOL //
+	//////////
+
 	setBoolValue(value, region, loc){
 		const s = CHARSIZE;
 		const addr = this.#allocRegion(region, s);
@@ -385,6 +390,144 @@ class Memsim {
 		return address;
 	}
 
+	//////////
+	// CHAR //
+	//////////
+
+	setCharValue(value, region, loc) {
+		// Check for overflow
+		if(value < CHAR_MIN || value > CHAR_MAX){
+			this.#warningSystem.add(`Char overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			value = value & 0xFF; // truncate to 8 bits
+		}
+
+		const s = CHARSIZE;
+		const addr = this.#allocRegion(region, s);
+
+		const memorySpace = new ArrayBuffer(s);
+		const view = new DataView(memorySpace);
+		view.setInt8(0, value); // store the char value (signed 8-bit integer)
+
+		for(let i = 0; i < s; i++){ 
+			if(value == undefined || value == null){ // in case of no initializer, set address but no value
+				this.memory.set(addr + i, { value: undefined, region: region });
+			}else{
+				this.memory.set(addr + i, { value: view.getUint8(i), region: region });
+			}
+		}
+
+		return addr;
+	}
+
+	changeCharValue(sym, value, region, loc){
+		// Check for overflow
+		if(value < CHAR_MIN || value > CHAR_MAX){
+			this.#warningSystem.add(`Char overflow at memory address 0x${sym.address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			value = value & 0xFF; // Truncate to 8 bits
+		}
+
+		const s = CHARSIZE;
+		if (!sym.address){
+			sym.address = this.#allocRegion(sym.region, s);
+		}
+
+		const memorySpace = new ArrayBuffer(s);
+		const view = new DataView(memorySpace);
+		view.setInt8(0, value); // store the char value (signed 8-bit integer)
+
+		for(let i = 0; i < s; i++){ // update every byte separately
+			this.memory.set(sym.address + i, { value: view.getUint8(i), region: region });
+		}
+
+		return sym.address;
+	}
+
+	readCharValue(addr){
+		const s = CHARSIZE;
+		const buffer = new ArrayBuffer(s);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < s; i++){
+			if (!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
+			if (this.memory.get(addr + i).value == undefined) return undefined; // handle uninitialized memory
+			view.setUint8(i, this.memory.get(addr + i).value);
+		}
+
+		return view.getInt8(0); // read the char value (signed 8-bit integer)
+	}
+
+	///////////
+	// UCHAR //
+	///////////
+
+	setUCharValue(value, region, loc) {
+		// Check for overflow
+		if(value < 0 || value > UCHAR_MAX){
+			this.#warningSystem.add(`Char overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			value = value & 0xFF; // truncate to 8 bits
+		}
+
+		const s = CHARSIZE;
+		const addr = this.#allocRegion(region, s);
+
+		const memorySpace = new ArrayBuffer(s);
+		const view = new DataView(memorySpace);
+		view.setUint8(0, value); // store the char value (unsigned 8-bit integer)
+
+		for(let i = 0; i < s; i++){ 
+			if(value == undefined || value == null){ // in case of no initializer, set address but no value
+				this.memory.set(addr + i, { value: undefined, region: region });
+			}else{
+				this.memory.set(addr + i, { value: view.getUint8(i), region: region });
+			}
+		}
+
+		return addr;
+	}
+
+	changeUCharValue(sym, value, region, loc){
+		// Check for overflow
+		if(value < CHAR_MIN || value > CHAR_MAX){
+			this.#warningSystem.add(`Char overflow at memory address 0x${sym.address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
+			value = value & 0xFF; // Truncate to 8 bits
+		}
+
+		const s = CHARSIZE;
+		if (!sym.address){
+			sym.address = this.#allocRegion(sym.region, s);
+		}
+
+		const memorySpace = new ArrayBuffer(s);
+		const view = new DataView(memorySpace);
+		view.setUint8(0, value); // store the char value (unsigned 8-bit integer)
+
+		for(let i = 0; i < s; i++){ // update every byte separately
+			this.memory.set(sym.address + i, { value: view.getUint8(i), region: region });
+		}
+
+		return sym.address;
+	}
+
+	readUCharValue(addr){
+		const s = CHARSIZE;
+		const buffer = new ArrayBuffer(s);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < s; i++){
+			if (!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
+			if (this.memory.get(addr + i).value == undefined) return undefined; // handle uninitialized memory
+			view.setUint8(i, this.memory.get(addr + i).value);
+		}
+
+		return view.getUint8(0); // read the char value (unsigned 8-bit integer)
+	}
+
+
+
+	/////////
+	// INT //
+	/////////
+
 	setIntValue(value, region, loc){
 		if(value < INT_MIN || value > INT_MAX){
 			this.#warningSystem.add(`Integer overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
@@ -399,7 +542,11 @@ class Memsim {
 		view.setInt32(0, value, region, true); // little-endian!
 
 		for(let i = 0; i < s; i++){ // alloc every byte separately
-			this.memory.set(addr + i, { value: view.getUint8(i), region: region });
+			if(value == undefined || value == null){ // in case of no initializer, set address but no value (not even 0)
+				this.memory.set(addr + i, { value: undefined, region: region });
+			}else{
+				this.memory.set(addr + i, { value: view.getUint8(i), region: region });
+			}
 		}
 
 		return addr;
@@ -434,6 +581,7 @@ class Memsim {
 
 		for(let i = 0; i < s; i++){
 			if(!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
+			if(this.memory.get(addr + i).value == undefined) return undefined;
 			view.setUint8(i, this.memory.get(addr + i).value);
 		}
 
@@ -463,7 +611,7 @@ class Memsim {
 	printMemory(){
 		console.log("Memory Dump:");
 		this.memory.forEach((data, addr) => {
-			console.log(`${addr}: value=${data.value.toString(2)}, region=${data.region}`);
+			console.log(data.value == undefined ? `${addr}: value=${data.value}, region=${data.region}` : `${addr}: value=${data.value.toString(2)}, region=${data.region}`);
 		});
 	}
 }
