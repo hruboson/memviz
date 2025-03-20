@@ -334,18 +334,21 @@ class Memviz {
 			style: style,
 		});
 
-		const circle = this.graph.insertVertex({
-			parent: valueBox, // The square is the parent
-			position: [(Memviz.squareXYlen/2)-(Memviz.circleXYlen/2), (Memviz.squareXYlen/2)-(Memviz.circleXYlen/2)], // Position relative to the square
-			size: [Memviz.circleXYlen, Memviz.circleXYlen], // Circle size (adjust for best fit)
-			style: {
-				fillColor: "white",
-				strokeColor: "white",
-				fontSize: 14,
-				labelPosition: "center",
-				shape: "ellipse", // Makes it a circle
-			},
-		});
+		let circle;
+		if(pointingTo){
+			circle = this.graph.insertVertex({
+				parent: valueBox, // The square is the parent
+				position: [(Memviz.squareXYlen/2)-(Memviz.circleXYlen/2), (Memviz.squareXYlen/2)-(Memviz.circleXYlen/2)], // Position relative to the square
+				size: [Memviz.circleXYlen, Memviz.circleXYlen], // Circle size (adjust for best fit)
+				style: {
+					fillColor: "white",
+					strokeColor: "white",
+					fontSize: 14,
+					labelPosition: "center",
+					shape: "ellipse", // Makes it a circle
+				},
+			});
+		}
 
 		const labelAbove = this.graph.insertVertex({
 			parent: parent, 
