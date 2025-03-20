@@ -258,8 +258,10 @@ class Semantic {
 				return DECLTYPE.ID;
 			case DECLTYPE.ARR:
 				return DECLTYPE.ARR;
+			case DECLTYPE.FNC:
+				return DECLTYPE.FNC;
 			default:
-				throw new AppError(`Unknown declarator kind (semantic): ${initializer.kind}`, declarator.loc);
+				throw new AppError(`Unknown declarator kind (semantic): ${declarator.kind}`, declarator.loc);
 		}
 	}
 
