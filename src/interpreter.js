@@ -600,8 +600,9 @@ class Interpreter {
 				throw ret;
 			}
 
-			if(this.#_instrNum > this.#breakstop) return;
-			if(fnc.returnType.includes("void")) return null; // force return void on functions with specifier void
+			// TODO fix function returning pointer to void function e.g. void (*getFunction())(void)
+			//if(this.#_instrNum > this.#breakstop) return;
+			//if(fnc.returnType.includes("void")) return null; // force return void on functions with specifier void
 
 			if(isclass(ret.value, "ReturnVoid")){
 				if(this.#_instrNum > this.#breakstop) return;
@@ -619,8 +620,9 @@ class Interpreter {
 	}
 
 	visitFncCallExpr(callExpr){
-		var callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
+		let callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
 
+		if(this.#_instrNum > this.#breakstop) return;
 		if(!callee.name){
 			throw new RTError("Callee is not an identifier", callExpr);
 		}
@@ -755,21 +757,26 @@ class Interpreter {
 		// return only most right-hand expression, evaluate rest
 		// when expression is returned get the right-most operand to return and evaluate the left-hand operand
 		var expr = ret.expr;
-		// check if function has void signature if yes just to this (ignore return value) ---V the function should be on callstack -> DO THAT FIRST (I know it's a pain in the ass)
-		if(expr == null) throw new ReturnThrow(ret.loc, new ReturnVoid()); // in case of empty return (void return)
+		// check if function has void signature if yes just to this (ignore return value)
+		if(expr == null) throw new ReturnThrow(new ReturnVoid(ret.loc)); // in case of empty return (void return)
 
 		if(Array.isArray(expr) > 1){
 			for(let i = 0; i < expr.length - 1; i++){
 				if(this.#_instrNum > this.#breakstop) return;
+				this.pc = expr[i];
 				expr[i].accept(this);
 			}
 
 			expr = expr[expr.length - 1];
 		}else if(expr.length == 1){
+			if(this.#_instrNum > this.#breakstop) return;
+			this.pc = expr;
 			expr = expr[expr.length - 1];
 		}
 
-		expr = expr.accept(this); // resolve the last expression
+		expr = this.visitExprArray(expr); // resolve the expression (last is returned)
+		if(this.#_instrNum > this.#breakstop) return;
+		this.pc = expr;
 
 		if(this.#_instrNum > this.#breakstop) return;
 		throw new ReturnThrow(expr);
@@ -830,7 +837,6 @@ class Interpreter {
 			case '&': {
 				const id = expr.expr;
 				const obj = this.#callStack.top().resolve(id.name);
-				console.log(obj.address);
 				return obj.address;
 			} 
 			default:
@@ -1025,5 +1031,8 @@ class ReturnThrow {
 }
 
 class ReturnVoid {
+	constructor(loc){
+		this.loc = loc;
+	}
 	// this could maybe be the NOP class from expr.js?
 }
