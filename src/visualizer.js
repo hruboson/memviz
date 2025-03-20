@@ -4,39 +4,72 @@
  */
 
 /**
- * @class Memviz
- * @description Main visualization class, handles mostly memory visualization
- * Basically visualizing the call stack and each of its stack frames (symbol tables)
- */
-
-/**
  * @global
  */
 const mxg = window.mxg; // core of the MaxGraph library
 
 /**
+ * @class VizCellValue
+ * @description Symbol record of visualizer. Contains address of the symbol and pointer to cell (vertex) corresponding to the visualization. <-- refactor this description
+ * @param {integer} address
+ * @param {mxg.Cell} cell
+ */
+class VizCellValue {
+	constructor(address, cell){
+		this.address = address;
+		this.cell = cell;
+	}
+}
+
+/**
+ * @class VizCellPointer
+ * @description Pointer representation in visualizer. VizCellPointer will always points to VizCellValue
+ * @param {integer} address
+ * @param {mxg.Cell} cell
+ */
+class VizCellPointer {
+	constructor(address, cell){
+		this.address = address;
+		this.cell = cell;
+	}
+}
+
+/**
+ * @class VizPointerPair
+ * @param {VizCellPointer} pointedFrom
+ * @param {VizCellValue} pointedTo
+ */
+class VizPointerPair extends Pair {
+	constructor(from, to){
+		super(from, to);
+
+		// aliases for better clarity
+		this.from = this.first;
+		this.to = this.second;
+	}
+}
+
+/**
  * @class Memviz
+ * @description Main visualization class, handles memory visualization. Basically visualizing the call stack and each of its stack frames (symbol tables).
  * @param {CallStack} callStack
  * @param {Element} container HTML element to print to - get it by doing document.getElementById
  */
 class Memviz {
 	
 	constructor(memsim, callStack, container){
-		if(!(container instanceof Element)) throw new Error(`Container must be a HTML element!`);
+		if(!(container instanceof Element)) throw new AppError(`Container must be a HTML element!`);
 
 		this.memsim = memsim;
 		this.callStack = callStack;
 		this.container = container;
 
-		this.graph = new mxg.Graph(this.container); // main "canvas"
-		this.root = this.graph.getDefaultParent(); // default parent
-
-		this.clear();
+		this.init();
 	}
 
-	clear(){
-		//this.graph.model.clear();
-		this.container.innerHTML = ""; // clear output
+	init(){
+		//this.graph.model.init();
+		this.container.innerHTML = ""; // init output
 		this.graph = new mxg.Graph(this.container);
 		this.root = this.graph.getDefaultParent();
 	}
@@ -54,9 +87,19 @@ class Memviz {
 
 	/**
 	 * Map of addresses and their visual representation instances
-	 * @type {Map.<Integer, Object>}
+	 * @type {Map.<Integer, VizCellValue>}
 	 */
 	symbols = new Map();
+
+	/**
+	 * Pairs of symbols pointing to each other
+	 * @type {Array.<VizPointerPair.<VizCellPointer, VizCellValue>>}
+	 */
+	pointerPairs = [];
+
+	/**********************
+	 * STYLING AND SIZING *
+	 **********************/
 
 	/**
 	 * Height and width of one memory unit (square)
@@ -127,17 +170,15 @@ class Memviz {
 	 **********************/
 
 	vizCallStack(){
-		this.clear();
+		this.init();
 		this.vizMemregions();
 
 		let nextY = 10;
 		for(const sf of this.callStack){
 			nextY = this.vizStackFrame(sf, nextY);
 		}
-	}
 
-	vizMemregions(){
-		//TODO this will be on top of the whole visualization, it will show what color each region has
+		this.vizPointers();
 	}
 
 	vizStackFrame(sf, y){
@@ -310,7 +351,7 @@ class Memviz {
 			},
 		});
 
-		this.symbols.set(sym.address, valueBox);
+		this.symbols.set(sym.address, new VizCellValue(sym.address, valueBox));
 
 		return y + height;
 	}
@@ -380,28 +421,51 @@ class Memviz {
 			},
 		});
 
-		const edge = this.graph.insertEdge({
-			parent: parent,
-			source: circle,
-			target: this.symbols.get(pointingTo),
-			style: {
-				edgeStyle: "straightEdgeStyle", // Straight edge
-				strokeColor: "white",
-				rounded: true,
-				entryX: 0, // Left side of value vertex
-				entryY: 0, // Top side of value vertex
-			},
-		});
+		if(pointingTo){
+			this.pointerPairs.push(
+				new VizPointerPair(
+					new VizCellPointer(sym.address, circle),
+					new VizCellValue(pointingTo, null) // will be determined at the end of call stack visualization
+				)
+			);
+		}
 
-		this.symbols.set(sym.address, valueBox);
+		this.symbols.set(sym.address, new VizCellValue(sym.address, valueBox));
 
 		return y + height;
 	}
 
 	vizArrayValue(sym, parent, style, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
+	}
 
+	vizMemregions(){
+		//TODO this will be on top of the whole visualization, it will show what color each region has
+	}
 
+	vizPointers(){
+		const root = this.root;
+
+		for(let pair of this.pointerPairs){
+			// first determine where to point
+			const targetCellValue = this.symbols.get(pair.to.address);
+			pair.to.cell = targetCellValue.cell;
+
+			const edge = this.graph.insertEdge({
+				parent: root,
+				source: pair.from.cell,
+				target: pair.to.cell,
+				style: {
+					edgeStyle: "straightEdgeStyle",
+					strokeColor: "white",
+					rounded: true,
+					entryX: 0, // Left side of value vertex
+					entryY: 0, // Top side of value vertex
+				},
+			});
+
+			this.graph.refresh();
+		}
 	}
 
 	/********************

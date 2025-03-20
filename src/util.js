@@ -173,3 +173,21 @@ function getArraySizes(jsArray){
 
     return sizes;
 }
+
+/**
+ * Equivalent to std::pair from C++
+ * @param {Object} first
+ * @param {Object} second
+ */
+class Pair {
+	constructor(first, second){
+		this.first = first;
+		this.second = second;
+	}
+
+	swap(){
+		const tmp = this.first;
+		this.first = this.second;
+		this.second = tmp;
+	}
+}
