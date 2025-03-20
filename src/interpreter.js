@@ -327,9 +327,11 @@ class Interpreter {
 				this.memsim.setSymValue(symbol, lval * rval, MEMREGION.STACK);
 				break;
 			case '/=':
+				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				this.memsim.setSymValue(symbol, lval / rval, MEMREGION.STACK);
 				break;
 			case '%=':
+				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				this.memsim.setSymValue(symbol, lval % rval, MEMREGION.STACK);
 				break;
 			case '&=':
@@ -368,8 +370,10 @@ class Interpreter {
 			case '*':
 				return lval * rval;
 			case '/':
+				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				return Math.floor(lval / rval);
 			case '%':
+				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				return lval % rval;
 			case '&':
 				return lval & rval;

@@ -31,7 +31,12 @@ class SError extends Error {
  */
 class RTError extends Error {
 	constructor(e, loc=null) {
-		super(e);
+		if(!loc){
+			super(`Runtime error: ${e}`);
+		}else{
+			const line = loc.first_line;
+			super(`Runtime error: ${e} on line ${line}`);
+		}
 		this.name = "Runtime error";
 	}
 }
