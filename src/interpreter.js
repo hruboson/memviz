@@ -602,6 +602,8 @@ class Interpreter {
 
 			if(this.#_instrNum > this.#breakstop) return;
 			if(fnc.returnType.includes("void")) return null; // force return void on functions with specifier void
+			//TODO check functions returning void functions e.g. void (*getFunction())(void)
+			//if(fnc.returnType.includes("void")) return null; // force return void on functions with specifier void
 
 			if(isclass(ret.value, "ReturnVoid")){
 				if(this.#_instrNum > this.#breakstop) return;
@@ -620,6 +622,7 @@ class Interpreter {
 
 	visitFncCallExpr(callExpr){
 		var callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
+		let callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
 
 		if(!callee.name){
 			throw new RTError("Callee is not an identifier", callExpr);
@@ -758,18 +761,7 @@ class Interpreter {
 		// check if function has void signature if yes just to this (ignore return value) ---V the function should be on callstack -> DO THAT FIRST (I know it's a pain in the ass)
 		if(expr == null) throw new ReturnThrow(ret.loc, new ReturnVoid()); // in case of empty return (void return)
 
-		if(Array.isArray(expr) > 1){
-			for(let i = 0; i < expr.length - 1; i++){
-				if(this.#_instrNum > this.#breakstop) return;
-				expr[i].accept(this);
-			}
-
-			expr = expr[expr.length - 1];
-		}else if(expr.length == 1){
-			expr = expr[expr.length - 1];
-		}
-
-		expr = expr.accept(this); // resolve the last expression
+		expr = this.visitExprArray(expr); // resolve the last expression
 
 		if(this.#_instrNum > this.#breakstop) return;
 		throw new ReturnThrow(expr);
@@ -830,7 +822,6 @@ class Interpreter {
 			case '&': {
 				const id = expr.expr;
 				const obj = this.#callStack.top().resolve(id.name);
-				console.log(obj.address);
 				return obj.address;
 			} 
 			default:
