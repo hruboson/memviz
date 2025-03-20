@@ -27,7 +27,7 @@ class Semantic {
 
 		for (const [name, symbol] of gSymtable.objects) {
 			if (symbol.isFunction && !symbol.initialized) {
-				throw new SError(`function '${name}' declared but never defined`, symbol.astPtr.loc);
+				throw new SError(`Function '${name}' declared but never defined`, symbol.astPtr.loc);
 			}
 		}
 	}
@@ -352,11 +352,11 @@ class Semantic {
 
 
 		if(!fncSym){
-			throw new SError(`undeclared function ${fncName}`, fncCall.loc);
+			throw new SError(`Undeclared function ${fncName}`, fncCall.loc);
 		}
 
 		if(!fncSym.isFunction){
-			throw new SError(`called object ${fncName} is not a function or function pointer`, fncCall.loc);
+			throw new SError(`Called object ${fncName} is not a function or function pointer`, fncCall.loc);
 		}
 
 		// semantic checks for each subtree of argument
@@ -369,9 +369,9 @@ class Semantic {
 		}
 
 		if(fncCall.arguments.length > fncSym.parameters.length){
-			throw new SError(`too many arguments to function ${fncName}`, fncCall.loc);
+			throw new SError(`Too many arguments to function ${fncName}`, fncCall.loc);
 		}else if(fncCall.arguments.length < fncSym.parameters.length){
-			throw new SError(`too few arguments to function ${fncName}`, fncCall.loc);
+			throw new SError(`Too few arguments to function ${fncName}`, fncCall.loc);
 		}
 
 		// type checking
@@ -547,7 +547,7 @@ class Semantic {
 			const funcSymbol = this.symtableStack.peek().resolve(funcName);
 
 			if(funcSymbol.specifiers == "void" && funcSymbol.pointer == false && ret.expr != null){
-				this.warningSystem.add(`return with a value, in function returning void`, WTYPE.RETURNTYPE, ret.loc);
+				this.warningSystem.add(`Return with a value, in function returning void`, WTYPE.RETURNTYPE, ret.loc);
 			}
 
 			if(!funcSymbol.specifiers.includes("void")){
