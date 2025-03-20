@@ -321,6 +321,7 @@ class Memviz {
 		if(sym.address){
 			pointingTo = this.memsim.readSymValue(sym);
 		}
+		console.log(sym);
 
 		const valueBox = this.graph.insertVertex({
 			parent: parent,

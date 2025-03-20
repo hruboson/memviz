@@ -97,6 +97,7 @@ class Semantic {
 					let ptr = declChild.ptr;
 					do{
 						indirection += 1;
+						console.log(indirection, ptr);
 						ptr = ptr.child;
 					}while(ptr != null);
 					declPtr = true;
