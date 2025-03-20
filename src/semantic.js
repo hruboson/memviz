@@ -17,17 +17,22 @@ class Semantic {
 	}
 
 	firstPhase(ast){
+		this.calledFunctions = [];
 		for(const construct of ast){
 			construct.accept(this);
 		}
 	}
 
-	secondPhase(){
-		const gSymtable = this.symtableStack.peek();
+	/**
+	 * List of called functions
+	 * @type {Array.<Symbol>}
+	 */
+	calledFunctions = [];
 
-		for (const [name, symbol] of gSymtable.objects) {
+	secondPhase(){
+		for (const symbol of this.calledFunctions) {
 			if (symbol.isFunction && !symbol.initialized) {
-				throw new SError(`Function '${name}' declared but never defined`, symbol.astPtr.loc);
+				throw new SError(`Function '${symbol.name}' declared but never defined`, symbol.astPtr.loc);
 			}
 		}
 	}
@@ -378,6 +383,8 @@ class Semantic {
 		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
 			this.typeCheck(this.getParameterType(param), arg);
 		}
+
+		this.calledFunctions.push(fncSym);
 	}
 
 	visitForLoop(loop){
