@@ -241,7 +241,6 @@ class Interpreter {
 	 * Interprets ast (for now, maybe do IC later -- like much much later)
 	 * @throws {RTError|AppError|InternalError} Runtime error
 	 * @param {AST} ast
-	 * @TODO catch what main returns (int)
 	 * @return {integer} result of main function
 	 */
 	interpret(breakstop){
@@ -264,7 +263,6 @@ class Interpreter {
 				this.pc = mainFnc.astPtr;
 				result = mainFnc.astPtr.accept(this, [1, 1]); //TODO args from UI
 			}catch(ret){ // catch return value of main
-				//TODO fix this, I don't think it actually does what it's supposed to, maybe it does but it definitely doesn't check errors
 				result = ret;
 			}
 		}
