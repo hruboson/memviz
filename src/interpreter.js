@@ -825,6 +825,14 @@ class Interpreter {
 				return !expr.expr.accept(this);
 			case '~':
 				return ~expr.expr.accept(this);
+			case '*':
+				return null; // TODO
+			case '&': {
+				const id = expr.expr;
+				const obj = this.#callStack.top().resolve(id.name);
+				console.log(obj.address);
+				return obj.address;
+			} 
 			default:
 				throw new AppError(`Unknown operator of UExpr: ${expr.op}`, expr.loc);
 		}

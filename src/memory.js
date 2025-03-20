@@ -143,7 +143,7 @@ class Memsim {
 				break;
 
 			case DATATYPE.int:
-				sym.address = sym.address ? this.changeIntValue(sym, value, region, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+				sym.address = sym.address ? this.changeIntValue(sym, value, region, sym.astPtr.loc) : this.setIntValue(value, region, sym, sym.astPtr.loc);
 				break;
 
 			case DATATYPE.uint:
@@ -182,6 +182,7 @@ class Memsim {
 				throw new AppError(`Invalid DATATYPE while setting value of ${sym.identifier}: ${sym.memtype}!`);
 		}
 	}
+
 	setArrayValue(sym, value, region){
 		// determine derived type of array
 		const memtype = sym.memtype;
@@ -268,7 +269,7 @@ class Memsim {
 	}
 
 	readPointerValue(sym){
-
+		return this.readIntValue(sym.address);
 	}
 
 	initializeArray(memtype, arr, region){
@@ -282,12 +283,19 @@ class Memsim {
 	 * Low-level memory functions *
 	 *****************************/
 
-	#storeMemory(address, size, region, value, type){
+	#storeMemory(address, size, region, view){
 		for (let i = 0; i < size; i++) {
-			this.memory.set(address + i, { 
-				value: value !== undefined ? value : undefined, 
-				region: region 
-			});
+			if(view == undefined || view == null){ // in case of no initializer, set address but no value (not even 0)
+				this.memory.set(address + i, { 
+					value: undefined, 
+					region: region,
+				});
+			}else{
+				this.memory.set(address + i, { 
+					value: view.getUint8(i),
+					region: region, 
+				});
+			}
 
 			this.references.set(address + i, 0); // initialize reference counter
 		}
@@ -371,7 +379,7 @@ class Memsim {
 		view.setUint8(0, value ? 1 : 0); // Store 1 for true, 0 for false
 
 		for(let i = 0; i < s; i++){
-			this.memory.set(addr + i, { value: view.getUint8(i), region: region });
+			this.memory.set(addr + i, { value: view.getUint8(i), region: region, symbol: sym });
 		}
 
 		return addr;
@@ -538,16 +546,11 @@ class Memsim {
 		const addr = this.#allocRegion(region, s);
 
 		const memorySpace = new ArrayBuffer(s);
-		const view = new DataView(memorySpace);
+		let view = new DataView(memorySpace);
 		view.setInt32(0, value, region, true); // little-endian!
+		if(value == undefined || value == null) view = undefined; // uninitialized object
 
-		for(let i = 0; i < s; i++){ // alloc every byte separately
-			if(value == undefined || value == null){ // in case of no initializer, set address but no value (not even 0)
-				this.memory.set(addr + i, { value: undefined, region: region });
-			}else{
-				this.memory.set(addr + i, { value: view.getUint8(i), region: region });
-			}
-		}
+		this.#storeMemory(addr, s, region, view);
 
 		return addr;
 	}

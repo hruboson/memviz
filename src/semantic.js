@@ -60,7 +60,7 @@ class Semantic {
 		var isFunction = false;
 		var namespace = NAMESPACE.ORDS;
 		var initialized = initializer ? true : false;
-
+		var indirection = 0;
 
 
 		if(isclass(initializer, "Initializer")){
@@ -82,7 +82,7 @@ class Semantic {
 					}
 
 					const currSymtable = this.symtableStack.peek();
-					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers, declPtr, dimension, size, parameters, isFunction, astPtr);
+					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers, declPtr, dimension, size, indirection, parameters, isFunction, astPtr);
 					symbolName = declChild.identifier.name;
 				}
 				if(declChild.kind == DECLTYPE.FNC){
@@ -94,6 +94,12 @@ class Semantic {
 					}
 				}
 				if(declChild.kind == DECLTYPE.PTR){
+					let ptr = declChild.ptr;
+					do{
+						indirection += 1;
+						console.log(indirection, ptr);
+						ptr = ptr.child;
+					}while(ptr != null);
 					declPtr = true;
 				}
 				if(declChild.kind == DECLTYPE.ARR){
@@ -599,7 +605,21 @@ class Semantic {
 
 
     visitUExpr(expr){
-
+		// TODO
+		switch(expr.op){
+			case '+':
+			case '-':
+			case '++':
+			case '--':
+			case '!':
+			case '~':
+			case '*':
+				break;
+			case '&': {
+				if(!isclass(expr.expr, "Identifier")) throw new SError("Lvalue (object, variable, ...) required for '&' operand", expr.loc);
+				break;
+			} 
+		}
 	}
 
     visitUnion(union){
@@ -650,6 +670,7 @@ class Semantic {
 			false,                     // not a pointer
 			0,                         // not an array
 			0,						   // not an array so 0 size
+			0,						   // not a pointer so 0 indirection
 			[new Declarator(DECLTYPE.ID, null, {name: "formatstr"})],
 			true,                      // isFunction
 			new NATIVE_printf(),       // no AST, built-in function pointer

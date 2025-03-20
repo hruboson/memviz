@@ -53,6 +53,12 @@ class Memviz {
 	#callStack;
 
 	/**
+	 * Map of addresses and their visual representation instances
+	 * @type {Map.<Integer, Object>}
+	 */
+	symbols = new Map();
+
+	/**
 	 * Height and width of one memory unit (square)
 	 * @static
 	 */
@@ -115,6 +121,10 @@ class Memviz {
 	static get fontColor(){
 		return "white";
 	}
+
+	/**********************
+	 * CORE VIZ FUNCTIONS *
+	 **********************/
 
 	vizCallStack(){
 		this.clear();
@@ -197,11 +207,17 @@ class Memviz {
 
 	vizSym(sym, parent, y){
 		//TODO only a demo, add switch for types of symbol (array, pointer, structure, primitive)
-		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
-		let symY = y;
 
 		if(!sym.address) console.warn(sym);
 		const style = this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(sym.address));
+
+		if(sym.dimension > 0){ // array
+			return this.vizArrayValue(sym, parent, style, y);
+		}else if(sym.pointer){
+			return this.vizPointerValue(sym, parent, style, y);
+		}else {
+			return this.vizPrimitiveValue(sym, parent, style, y);
+		}
 
 		/*const ptrSquare = this.graph.insertVertex({
 			parent: parent,
@@ -238,7 +254,11 @@ class Memviz {
 				fontFamily: "FiraCode",
 			},
 		*/
-		
+	}
+
+	vizPrimitiveValue(sym, parent, style, y){
+		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
+
 		let value;
 		if(sym.address){
 			value = this.memsim.readSymValue(sym);
@@ -246,7 +266,7 @@ class Memviz {
 
 		const valueBox = this.graph.insertVertex({
 			parent: parent,
-			position: [Memviz.squareX, symY],
+			position: [Memviz.squareX, y],
 			size: [Memviz.squareXYlen, Memviz.squareXYlen],
 			value: value,
 			style: style,
@@ -254,7 +274,7 @@ class Memviz {
 
 		const labelAbove = this.graph.insertVertex({
 			parent: parent, 
-			position: [Memviz.squareX, symY - Memviz.labelHeight],
+			position: [Memviz.squareX, y - Memviz.labelHeight],
 			size: [Memviz.squareXYlen, Memviz.labelHeight],
 			value: sym.name,
 			style: {
@@ -273,7 +293,7 @@ class Memviz {
 
 		const labelBelow = this.graph.insertVertex({
 			parent: parent, 
-			position: [Memviz.squareX, symY + Memviz.squareXYlen], // Position below the square
+			position: [Memviz.squareX, y + Memviz.squareXYlen], // Position below the square
 			size: [Memviz.squareXYlen, Memviz.labelHeight],
 			value: sym.specifiers.join(' '),
 			style: {
@@ -290,8 +310,104 @@ class Memviz {
 			},
 		});
 
-		return symY + height;
+		this.symbols.set(sym.address, valueBox);
+
+		return y + height;
 	}
+
+	vizPointerValue(sym, parent, style, y){
+		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
+		let pointingTo;
+		if(sym.address){
+			pointingTo = this.memsim.readSymValue(sym);
+		}
+		console.log(sym);
+
+		const valueBox = this.graph.insertVertex({
+			parent: parent,
+			position: [Memviz.squareX, y],
+			size: [Memviz.squareXYlen, Memviz.squareXYlen],
+			style: style,
+		});
+
+		const circle = this.graph.insertVertex({
+			parent: valueBox, // The square is the parent
+			position: [(Memviz.squareXYlen/2)-(Memviz.circleXYlen/2), (Memviz.squareXYlen/2)-(Memviz.circleXYlen/2)], // Position relative to the square
+			size: [Memviz.circleXYlen, Memviz.circleXYlen], // Circle size (adjust for best fit)
+			style: {
+				fillColor: "white",
+				strokeColor: "white",
+				fontSize: 14,
+				labelPosition: "center",
+				shape: "ellipse", // Makes it a circle
+			},
+		});
+
+		const labelAbove = this.graph.insertVertex({
+			parent: parent, 
+			position: [Memviz.squareX, y - Memviz.labelHeight],
+			size: [Memviz.squareXYlen, Memviz.labelHeight],
+			value: sym.name,
+			style: {
+				fillColor: "transparent",
+				strokeColor: "transparent",
+				labelPosition: "center",
+				verticalLabelPosition: "middle",
+				align: "left",
+
+				// font style
+				fontSize: 14,
+				fontColor: Memviz.fontColor,
+				fontFamily: Memviz.fontFamily,
+			},
+		});
+
+		const labelBelow = this.graph.insertVertex({
+			parent: parent, 
+			position: [Memviz.squareX, y + Memviz.squareXYlen], // Position below the square
+			size: [Memviz.squareXYlen, Memviz.labelHeight],
+			value: '*'.repeat(sym.indirection) + sym.specifiers.join(' '),
+			style: {
+				fillColor: "transparent", // Transparent background
+				strokeColor: "transparent", // No border
+				labelPosition: "center",
+				verticalLabelPosition: "middle",
+				align: "right",
+
+				// font style
+				fontSize: 14,
+				fontColor: Memviz.fontColor,
+				fontFamily: Memviz.fontFamily,
+			},
+		});
+
+		const edge = this.graph.insertEdge({
+			parent: parent,
+			source: circle,
+			target: this.symbols.get(pointingTo),
+			style: {
+				edgeStyle: "straightEdgeStyle", // Straight edge
+				strokeColor: "white",
+				rounded: true,
+				entryX: 0, // Left side of value vertex
+				entryY: 0, // Top side of value vertex
+			},
+		});
+
+		this.symbols.set(sym.address, valueBox);
+
+		return y + height;
+	}
+
+	vizArrayValue(sym, parent, style, y){
+		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
+
+
+	}
+
+	/********************
+	 * HELPER FUNCTIONS *
+	 ********************/
 
 	getStyleFromMEMREGION(memregion){
 		const fontSize = 30;

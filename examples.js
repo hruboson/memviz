@@ -194,6 +194,15 @@ const expressions_example = `int main(){
 	return i;
 }`;
 
+const pointer_dereferencing_example = `int main(){
+	int x = 10; // value
+	
+	int *p; // pointer to value
+	p = &x;
+	
+	int **pp = &p; // pointer to pointer to value
+}`;
+
 const function_pointer_example = `int a(){
 	return 1;
 }

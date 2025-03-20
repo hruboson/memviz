@@ -124,12 +124,22 @@ class Sym {
 
 	/**
 	 * Array sizes in case of array symbol
-	 * @type {Array.<integer>}
+	 * @type {Array.<integer>|Array.<char>}
 	 * @example
 	 * 	int[] = {1, 2, 3}; // size = [3]
 	 * 	int[][] = { {1, 2, 3}, {3, 4, 5} }; // size = [2, 3]
 	 */
 	size;
+
+	/**
+	 * Pointer indirection level
+	 * @type {integer}
+	 * @example
+	 * 	int x = 10; // indirection = 0
+	 * 	int *p = &x; // indirection = 1
+	 * 	int **p = &p; // indirection = 2
+	 */
+	indirection = 0;
 
 	/**
 	 * Symbolizes whether symbol is a pointer
@@ -179,13 +189,14 @@ class Sym {
 	 */
 	isNative;
 
-	constructor(name, type, initialized, specifiers, pointer, dimension=0, size=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
+	constructor(name, type, initialized, specifiers, pointer, dimension=0, size=0, indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
 		this.pointer = pointer;
 		this.dimension = dimension;
 		this.size = size;
+		this.indirection = indirection;
 		this.initialized = initialized;
 		this.parameters = parameters;
 		this.isFunction = isFunction;
@@ -340,13 +351,19 @@ class Symtable {
 	 * Inserts symbol into symbol table
 	 * @param {NAMESPACE} namespace Name space to add the identifier to
 	 * @param {SYMTYPE} type
+	 * @param {bool} initialized
 	 * @param {string} name Symbol name (identifier)
 	 * @param {Array.<string>} specifiers
 	 * @param {bool} pointer
 	 * @param {integer} dimension
+	 * @param {integer} size
+	 * @param {integer} indirection
 	 * @param {Array.<Declarator>} parameters
+	 * @param {bool} isFunction
+	 * @param {Construct} astPtr
+	 * @param {bool} isNative
 	 */
-	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, size=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
+	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, size=0, indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
 		switch(namespace){
 			case NAMESPACE.ORDS:
 				const sym = this.lookup(namespace, name);
@@ -367,7 +384,7 @@ class Symtable {
 					}
 				}
 
-				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, size, parameters, isFunction, astPtr, isNative));
+				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, size, indirection, parameters, isFunction, astPtr, isNative));
 				break;
 			case NAMESPACE.TAGS:
 				break;

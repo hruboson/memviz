@@ -201,6 +201,7 @@
 						<button class="dropdown-item" type="button" onclick="setExample(simple_variables_example)">variables</button>
 						<button class="dropdown-item" type="button" onclick="setExample(simple_array_example)">arrays</button>
 						<button class="dropdown-item" type="button" onclick="setExample(expressions_example)">expresssions</button>
+						<button class="dropdown-item" type="button" onclick="setExample(pointer_dereferencing_example)">pointers</button>
 						<button class="dropdown-item" type="button" onclick="setExample(function_simple_example)">functions</button>
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(scopes_example)">scopes</button>
@@ -236,10 +237,13 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">unsigned char y = -10;
-
-int main(){
-
+						<div id="editor" onChange="resetEditor();">int main(){
+	int x = 10; // value
+	
+	int *p; // pointer to value
+	p = &x;
+	
+	int **pp = &p; // pointer to pointer to value
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
