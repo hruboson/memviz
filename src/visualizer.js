@@ -428,6 +428,8 @@ class Memviz {
 					rounded: true,
 					entryX: 0, // Left side of value vertex
 					entryY: 0, // Top side of value vertex
+					exitX: 0.5,  // Middle of the source cell
+					exitY: 0.5,    // Top of the source cell
 				},
 			});
 
