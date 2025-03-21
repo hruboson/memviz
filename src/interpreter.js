@@ -966,8 +966,10 @@ class Interpreter {
 	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
 	updateHTML(result){
-		JSONEDITeditorAST.set(JSON.parse(JSON.stringify(this.#ast))); // due to symtable now being attached to nodes, I cannot print it because of recursive references
-		JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
+		if(JSONEDITeditorAST && JSONEDITeditorTYPEDEFS){
+			JSONEDITeditorAST.set(JSON.parse(JSON.stringify(this.#ast))); // due to symtable now being attached to nodes, I cannot print it because of recursive references
+			JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
+		}
 		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2); // old way of printing AST
 		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
 		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
@@ -1018,7 +1020,9 @@ class Interpreter {
 	}
 
 	resetHTML(){
-		document.getElementById("console-output").innerHTML = "";
+		if(document.getElementById("console-output")){
+			document.getElementById("console-output").innerHTML = "";
+		}
 	}
 }
 

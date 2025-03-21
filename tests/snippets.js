@@ -503,3 +503,19 @@ const wrong_array_initializer_size = `int main(){
         { {5, 6, 7}, {8, 9} }  // semantic error
     };
 }`;
+
+const expressions_shenanigans = `int main(){
+	int i;
+	i = +10;
+	i += 10;
+	i++;
+	++i;
+	i = i + (10 + (20 + 30));
+	i = -i;
+	printf("%d", i);
+
+	int guess;
+	guess = guess + (guess = 420, 69 + (guess = 666, 20 + 30));
+	printf("%d", guess);
+	return i;
+}`;

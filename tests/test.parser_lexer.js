@@ -1,8 +1,3 @@
-const dummyDiv = document.createElement("div");
-dummyDiv.setAttribute("id", "output");
-dummyDiv.style.display = "none";
-document.body.appendChild(dummyDiv);
-
 function parse(input){
 	var interpreter = new Interpreter();
 

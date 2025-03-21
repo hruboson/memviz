@@ -49,25 +49,51 @@
 
 </head>
 <body>
-	<div id="mocha" />
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/8.0.1/mocha.min.js"></script> <!-- newer versions unfortunately dont work as a standalone (without node) -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.2.0/chai.min.js"></script>
-	
-	<script class="mocha-init">
-		mocha.setup('bdd');
-		mocha.checkLeaks();
-	</script>
-	<script src="tests/test.parser_lexer.js"></script>
-	<script src="tests/test.util.js"></script>
-	<script class="mocha-exec">
-		mocha.run();
-	</script>
-
 	<!-- dummy elements -->
 	<div id="ast" style="display:none"></div>
 	<div id="typedefs" style="display:none"></div>
 	<div id="programCounter" style="display:none"></div>
 	<div id="symtable" style="display:none"></div>
 	<div id="warnings" style="display:none"></div>
+	<div id="output" style="display:none"></div>
+	<div id="console-output" style="display:none"></div>
+	<div id="result" style="display:none"></div>
+	<div id="editor" style="display:none"></div>
+
+	<div id="mocha" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/8.0.1/mocha.min.js"></script> <!-- newer versions unfortunately dont work as a standalone (without node) -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.2.0/chai.min.js"></script>
+	
+	<script>
+		// dummy vars and functions
+		var JSONEDITcontainerAST = document.getElementById("ast");
+		var JSONEDITcontainerTYPEDEFS = document.getElementById("typedefs");
+		var JSONEDIToptions = {
+			mode: "view",
+			modes: ["view", "code", "tree", "preview"],
+			theme: "ace/theme/monokai", // doesn't work for some reason
+		};
+		var JSONEDITeditorAST = new JSONEditor(JSONEDITcontainerAST, JSONEDIToptions);
+		var JSONEDITeditorTYPEDEFS = new JSONEditor(JSONEDITcontainerTYPEDEFS, JSONEDIToptions);
+
+
+		var editor = ace.edit("editor");
+
+		function unhighlight(){
+			return null;
+		}
+	</script>
+
+	<script class="mocha-init">
+		mocha.setup('bdd');
+		mocha.checkLeaks();
+	</script>
+	<script src="tests/test.parser_lexer.js"></script>
+	<script src="tests/test.util.js"></script>
+	<script src="tests/test.interpreter.js"></script>
+	<script src="tests/test.semantic.js"></script>
+	<script class="mocha-exec">
+		mocha.run();
+	</script>
 </body>
 </html>
