@@ -769,13 +769,13 @@ class Interpreter {
 			expr = expr[expr.length - 1];
 		}else if(expr.length == 1){
 			if(this.#_instrNum > this.#breakstop) return;
-			this.pc = expr;
+			this.pc = expr[expr.length - 1];
 			expr = expr[expr.length - 1];
 		}
 
 		expr = this.visitExprArray(expr); // resolve the expression (last is returned)
 		if(this.#_instrNum > this.#breakstop) return;
-		this.pc = expr;
+		this.pc = ret;
 
 		if(this.#_instrNum > this.#breakstop) return;
 		throw new ReturnThrow(expr);
