@@ -46,17 +46,11 @@ class Interpreter {
 	 * @type {Symtable}
 	 */
 	#symtableGlobal;
-	get symtableGlobal(){
-		return this.#symtableGlobal;
-	}
 
 	/**
 	 * Symtable stack (mostly for printing reason)
 	 */
 	#symtableStack;
-	get symtableStack(){
-		return this.#symtableStack;
-	}
 
 	/**
 	 * Call stack
@@ -81,6 +75,12 @@ class Interpreter {
 	 * @type {Memviz}
 	 */
 	memviz;
+
+	/**
+	 * Interpreter output (console)
+	 * @type {string}
+	 */
+	output = "";
 
 	/**
 	 * Warning system
@@ -684,7 +684,7 @@ class Interpreter {
 	}
 
 	visitIdentifier(id){
-		let sym = this.symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
+		let sym = this.#symtableGlobal.lookup(NAMESPACE.ORDS, id.name);
 
 		// lookup can return undefined, so check that first (x?.y)
 		if(sym?.isFunction) return id;
@@ -914,8 +914,7 @@ class Interpreter {
 		output = output.replace(/\\n/g, "<br>"); // replace \n for <br>, maybe add tab and other special characters in the future :-) would be nice, complete list is in jisonlex ES
 		output = output.replace(/\\\\/g, "\\"); // replace \\ for \
 
-		// TODO make some nicer interface for console and visualizer output
-		document.getElementById("console-output").innerHTML += output;
+		this.output += output;
 		return 0; // printf in C returns 0 by default
 	}
 
@@ -974,9 +973,10 @@ class Interpreter {
 		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
-
+		document.getElementById("console-output").innerHTML = this.output;
 
 		const resultDiv = document.getElementById("result");
+
 		// reset result element
 		resultDiv.innerHTML = "";
 		const classes = resultDiv.classList;
