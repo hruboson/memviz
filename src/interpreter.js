@@ -622,6 +622,7 @@ class Interpreter {
 	visitFncCallExpr(callExpr){
 		let callee = callExpr.expr.accept(this); // callee should in the end derive to (return) identifier or pointer to the function
 
+		if(!callee) return; // this can happen if the code returns because of breakstops (and this is probably the easiest fix I found)
 		if(!callee.name){
 			throw new RTError("Callee is not an identifier", callExpr);
 		}
