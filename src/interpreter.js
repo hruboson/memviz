@@ -253,8 +253,9 @@ class Interpreter {
 
 		// initialize global variables
 		for(const [name, symbol] of this.#symtableGlobal.objects){
-			if(symbol.isFunction) continue;
+			if(symbol.isFunction) continue; // skip functions
 			if(symbol.isNative) continue; // skip built-in functions
+			if(symbol.type == "TYPEDEF") continue; // skip typedefs
 			symbol.astPtr.accept(this);
 		}
 
