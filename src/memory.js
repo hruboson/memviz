@@ -552,7 +552,7 @@ class Memsim {
 			view.setInt32(0, value, region, true); // little-endian!
 		}
 
-		this.#storeMemory(addr, s, region, view);
+		this.#storeMemory(addr, size, region, view);
 
 		return addr;
 	}
@@ -574,11 +574,11 @@ class Memsim {
 	}
 
 	readIntValue(addr) {
-		const s = INTSIZE;
-		const buffer = new ArrayBuffer(s);
+		const size = INTSIZE;
+		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
 
-		for(let i = 0; i < s; i++){
+		for(let i = 0; i < size; i++){
 			if(!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
 			if(this.memory.get(addr + i).value == undefined) return undefined;
 			view.setUint8(i, this.memory.get(addr + i).value);
