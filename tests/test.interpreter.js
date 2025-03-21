@@ -6,7 +6,7 @@ function interpretAll(input){
 	return interpreter.output;
 }
 
-describe('interpreter correct', () => {
+describe('printf/console output', () => {
 	it('prints hello world', () => {
 		chai.assert.equal(interpretAll(hello_world), "Hello world");
 	})
