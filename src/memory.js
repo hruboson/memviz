@@ -537,18 +537,20 @@ class Memsim {
 	/////////
 
 	setIntValue(value, region, loc){
-		if(value < INT_MIN || value > INT_MAX){
-			this.#warningSystem.add(`Integer overflow, truncating value!`, WTYPE.OVERFLOW, loc);
-			value = value & 0xFFFFFFFF; // truncate to 32 bits
+		value = this.checkValueOverflow(value, INT_MIN, INT_MAX, 0xFFFFFFFF, "Integer", loc);
+
+		const size = INTSIZE;
+		const addr = this.#allocRegion(region, size);
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value == undefined || value == null){ 
+			view = undefined; // uninitialized object
+		}else{
+			view = new DataView(memorySpace);
+			view.setInt32(0, value, region, true); // little-endian!
 		}
-
-		const s = INTSIZE;
-		const addr = this.#allocRegion(region, s);
-
-		const memorySpace = new ArrayBuffer(s);
-		let view = new DataView(memorySpace);
-		view.setInt32(0, value, region, true); // little-endian!
-		if(value == undefined || value == null) view = undefined; // uninitialized object
 
 		this.#storeMemory(addr, s, region, view);
 
@@ -556,21 +558,15 @@ class Memsim {
 	}
 
 	changeIntValue(sym, value, region, loc){
-		if(value < INT_MIN || value > INT_MAX){
-			this.#warningSystem.add(`Integer overflow at memory address 0x${addr.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
-			value = value & 0xFFFFFFFF; // truncate to 32 bits
-		}
+		value = this.checkValueOverflow(value, INT_MIN, INT_MAX, 0xFFFFFFFF, "Integer", loc);
 
-		const s = INTSIZE;
-		if(!sym.address){
-			sym.address = this.#allocRegion(sym.region, s);
-		}
+		const size = INTSIZE;
 
-		const memorySpace = new ArrayBuffer(s);
+		const memorySpace = new ArrayBuffer(size);
 		const view = new DataView(memorySpace);
 		view.setInt32(0, value, region, true); // little-endian!
 
-		for(let i = 0; i < s; i++){ // alloc every byte separately
+		for(let i = 0; i < size; i++){ // alloc every byte separately
 			this.memory.set(sym.address + i, { value: view.getUint8(i), region: region });
 		}
 
@@ -595,6 +591,24 @@ class Memsim {
 	/************************************
 	 *          Helper functions        *
 	 ***********************************/
+
+	/**
+	 * Check if value is not over limits
+	 * @param {Number} value
+	 * @param {Number} min
+	 * @param {Number} max
+	 * @param {integer} mask
+	 * @param {string} mask Only for messaging purposes
+	 * @param {Object} loc
+	 */
+	checkValueOverflow(value, min, max, mask, type, loc){
+		if(value < min || value > max){
+			this.#warningSystem.add(`${type} overflow, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
+			return value = value & mask; // truncate to n bits
+		}
+
+		return value;
+	}
 
 	/**
 	 * Determines the memory region of a given address.
