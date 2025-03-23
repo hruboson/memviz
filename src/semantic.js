@@ -613,9 +613,11 @@ class Semantic {
 			case '!':
 			case '~':
 			case '*':
+				expr.expr.accept(this);
 				break;
 			case '&': {
-				if(!isclass(expr.expr, "Identifier")) throw new SError("Lvalue (object, variable, ...) required for '&' operand", expr.loc);
+				const lvalue = expr.expr.accept(this);
+				//if(!isclass(expr.expr, "Identifier")) throw new SError("Lvalue (object, variable, ...) required for '&' operand", expr.loc);
 				break;
 			} 
 		}

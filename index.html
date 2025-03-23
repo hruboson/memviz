@@ -237,16 +237,17 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int main(){
-	int x = 10; // value
-	
-	int *p; // pointer to value
-	p = &x;
-	
-	int **pp = &p; // pointer to pointer to value
-	
-	p = &pp;
-	pp = p;
+						<div id="editor" onChange="resetEditor();">int main() {
+	int x[] = {10, 20, 30};
+	int* p = &x[1]; // pointer into middle
+	char* fruit[3] = { 
+		"apples",
+		"bananas",
+		"cherries"
+	};
+
+	printf("I have %d %s\n", *p, fruit[1]);
+	return 0;
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
