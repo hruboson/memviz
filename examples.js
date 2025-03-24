@@ -335,3 +335,19 @@ const while_loop_example = `int main(){
 		y++;
 	}while(y < 5);
 }`;
+
+const pointer_arithmetic_example = `int main(){
+	int q = 10;
+	int s = 5;
+	int* p = &q;
+	int a[3];
+
+	printf("Address of a: %p\\n",    a);
+	printf("Address of a[1]: %p\\n", &a[1]);
+	printf("Address of a[2]: %p\\n", &a[2]);
+	printf("Address of q: %p\\n",    &q);
+	printf("Address of s: %p\\n",    &s);
+
+	printf("s: %d\\n",    s);
+	printf("s using q pointer: %d\\n ", *(p-1));
+}`;
