@@ -903,14 +903,15 @@ class Interpreter {
 
 		let i = 0;
 
-		let output = formatString.replace(/%[dsf]/g, match => { // currently supported: %d, %s, %f
+		let output = formatString.replace(/%[dfsp]/g, match => { // currently supported: %d, %s, %f, %p
 			if (i >= otherArgs.length) {
 				throw new RTError("Not enough arguments for printf");
 			}
-			return match === "%d" ? parseInt(otherArgs[i++]) :
-				match === "%f" ? parseFloat(otherArgs[i++]) :
+			return  match === "%d" ? parseInt(otherArgs[i++]) :
+					match === "%f" ? parseFloat(otherArgs[i++]) :
 					match === "%s" ? String(otherArgs[i++]) :
-						match;
+					match === "%p" ? "0x" + otherArgs[i++].toString(16) :
+					match;
 		});
 
 		output = output.replace(/\\n/g, "<br>"); // replace \n for <br>, maybe add tab and other special characters in the future :-) would be nice, complete list is in jisonlex ES
