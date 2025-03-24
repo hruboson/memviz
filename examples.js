@@ -92,6 +92,7 @@ void main(){
 const scopes_example = `int a = 1; // initialize symbol a with value 1 (global scope)
 
 void foo(int a){ // global scope is hidden
+    int a = a;
 	printf("%d", a); // prints value passed as an argument
 }
 
