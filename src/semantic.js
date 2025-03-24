@@ -613,7 +613,7 @@ class Semantic {
 			case '!':
 			case '~':
 			case '*':
-				expr.expr.accept(this);
+				//expr.expr.accept(this);
 				break;
 			case '&': {
 				const lvalue = expr.expr.accept(this);

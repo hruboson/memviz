@@ -69,6 +69,28 @@ const MEMREGION = {
 }
 
 /**
+ * Memory types sizes. Lookup table for DATATYPE.
+ * @global
+ * @typedef MEMSIZES
+ */
+const MEMSIZES = {
+	bool: CHARSIZE,
+	char: CHARSIZE,
+	uchar: CHARSIZE,
+	short: SHORTSIZE,
+	ushort: SHORTSIZE,
+	int: INTSIZE,
+	uint: INTSIZE,
+	long: LONGSIZE,
+	ulong: LONGSIZE,
+	longlong: LONGLONGSIZE,
+	ulonglong: LONGLONGSIZE,
+	float: FLOATSIZE,
+	double: DOUBLESIZE,
+	longdouble: LONGDOUBLESIZE,
+}
+
+/**
  * @class Memsim
  * @description Memory simulation class, handles calls from interpreter
  */
@@ -114,69 +136,55 @@ class Memsim {
 		if(sym.dimension > 0){ // array
 			this.setArrayValue(sym, value, region);
 		}else if(sym.pointer){
-			this.setPointerValue(sym, value, region);
+			sym.address = this.setPointerValue(sym, value, region);
 		}else { 
-			this.setPrimitiveValue(sym, value, region);
+			sym.address = this.setPrimitiveValue(sym, value, region);
 		}
 	}
 
 	setPrimitiveValue(sym, value, region){
 		switch(sym.memtype){
 			case DATATYPE.bool:
-				sym.address = sym.address ? this.changeBoolValue(sym, value, region, sym.astPtr.loc) : this.setBoolValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setBoolValue(value, region, sym.address);
 
 			case DATATYPE.char:
-				sym.address = sym.address ? this.changeCharValue(sym, value, region, sym.astPtr.loc) : this.setCharValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setCharValue(value, region, sym.address);
 
 			case DATATYPE.uchar:
-				sym.address = sym.address ? this.changeUCharValue(sym, value, region, sym.astPtr.loc) : this.setUCharValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setUCharValue(value, region, sym.address);
 
 			case DATATYPE.short:
-				sym.address = sym.address ? this.changeShortValue(sym, value, region, sym.astPtr.loc) : this.setShortValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setShortValue(value, region, sym.address);
 
 			case DATATYPE.ushort:
-				sym.address = sym.address ? this.changeUShortValue(sym, value, region, sym.astPtr.loc) : this.setUShortValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setUShortValue(value, region, sym.address);
 
 			case DATATYPE.int:
-				sym.address = sym.address ? this.changeIntValue(sym, value, region, sym.astPtr.loc) : this.setIntValue(value, region, sym, sym.astPtr.loc);
-				break;
+				return this.setIntValue(value, region, sym.address);
 
 			case DATATYPE.uint:
-				sym.address = sym.address ? this.changeUIntValue(sym, value, region, sym.astPtr.loc) : this.setUIntValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setUIntValue(value, region, sym.address);
 
 			case DATATYPE.long:
-				sym.address = sym.address ? this.changeLongValue(sym, value, region, sym.astPtr.loc) : this.setLongValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setLongValue(value, region, sym.address);
 
 			case DATATYPE.ulong:
-				sym.address = sym.address ? this.changeULongValue(sym, value, region, sym.astPtr.loc) : this.setULongValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setULongValue(value, region, sym.address);
 
 			case DATATYPE.longlong:
-				sym.address = sym.address ? this.changeLongLongValue(sym, value, region, sym.astPtr.loc) : this.setLongLongValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setLongLongValue(value, region, sym.address);
 
 			case DATATYPE.ulonglong:
-				sym.address = sym.address ? this.changeULongLongValue(sym, value, region, sym.astPtr.loc) : this.setULongLongValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setULongLongValue(value, region, sym.address);
 
 			case DATATYPE.float:
-				sym.address = sym.address ? this.changeFloatValue(sym, value, region, sym.astPtr.loc) : this.setFloatValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setFloatValue(value, region, sym.address);
 
 			case DATATYPE.double:
-				sym.address = sym.address ? this.changeDoubleValue(sym, value, region, sym.astPtr.loc) : this.setDoubleValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setDoubleValue(value, region, sym.address);
 
 			case DATATYPE.longdouble:
-				sym.address = sym.address ? this.changeLongDoubleValue(sym, value, region, sym.astPtr.loc) : this.setLongDoubleValue(value, region, sym.astPtr.loc);
-				break;
+				return this.setLongDoubleValue(value, region, sym.address);
 
 			default:
 				throw new AppError(`Invalid DATATYPE while setting value of ${sym.identifier}: ${sym.memtype}!`);
@@ -187,11 +195,35 @@ class Memsim {
 		// determine derived type of array
 		const memtype = sym.memtype;
 		const dimension = sym.dimension;
+		const size = sym.size;
+
+		if(!value){
+			sym.address = this.#allocRegion(region, MEMSIZES[memtype]);
+		}else{
+			sym.address = this.allocArray(value, memtype, region);
+		}
+	}
+
+	// returns address of first element
+	allocArray(arr, memtype, region){
+		let firstAddress = null;
+
+		for(let s = 0; s < arr.length; s++){
+			if(Array.isArray(arr[s])){
+				firstAddress = firstAddress ? firstAddress : this.allocArray(arr[s], memtype, region);
+			}else{
+				const dummySym = { memtype: memtype, address: null, identifier: "array" };
+				const allocatedAddress = this.setPrimitiveValue(dummySym, arr[s], region);
+				firstAddress = firstAddress ? firstAddress : allocatedAddress;
+			}
+		}
+
+		return firstAddress;
 	}
 
 	setPointerValue(sym, value, region){
 		// pointer is 32 bits
-		sym.address = sym.address ? this.changeIntValue(sym, value, region, sym.astPtr.loc) : this.setIntValue(value, region, sym.astPtr.loc);
+		return this.setIntValue(value, region, sym.address);
 	}
 
 	/**
@@ -265,7 +297,21 @@ class Memsim {
 	}
 
 	readArrayValue(sym){
+		let arr = [];
+		
+		const size = sym.size.reduce((res, item) => res *= item);
+		for(let i = 0; i < size; i++){ // this will create flat array
+			const addr = sym.address - i * MEMSIZES[sym.memtype]; // TODO for heap and data
+			const dummySym = { memtype: sym.memtype, address: addr };
+			const value = this.readPrimitiveValue(dummySym);
+			arr.push(value);
+		}
 
+		if(sym.dimension > 1){ // reshape
+			arr = this.reshapeArray(arr, sym.size);
+		}
+
+		return arr;
 	}
 
 	readPointerValue(sym){
@@ -365,89 +411,66 @@ class Memsim {
 
 	/*****************************
 	 * Primitive types functions *
-	 *****************************/
+	 *****************************
+	 * - all values are stored as little endian using the ArrayBuffer and DataView classes of JS
+	 */
 
 	//////////
 	// BOOL //
 	//////////
 
-	setBoolValue(value, region, loc){
-		const s = CHARSIZE;
-		const addr = this.#allocRegion(region, s);
-		const memorySpace = new ArrayBuffer(s);
-		const view = new DataView(memorySpace);
-		view.setUint8(0, value ? 1 : 0); // Store 1 for true, 0 for false
+	setBoolValue(value, region, address){
+		value = this.checkValueOverflow(value, 0, 1, 1, "Boolean");
 
-		for(let i = 0; i < s; i++){
-			this.memory.set(addr + i, { value: view.getUint8(i), region: region, symbol: sym });
+		const size = CHARSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
 		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value == undefined || value == null){ 
+			view = undefined; // uninitialized object
+		}else{
+			view = new DataView(memorySpace);
+			view.setUint8(0, value, region, true);
+		}
+
+		this.#storeMemory(addr, size, region, view);
 
 		return addr;
-	}
-
-	changeBoolValue(address, value, region, loc){
-		const s = CHARSIZE;
-		const memorySpace = new ArrayBuffer(s);
-		const view = new DataView(memorySpace);
-		view.setUint8(0, value ? 1 : 0);
-
-		for(let i = 0; i < s; i++){
-			this.memory.set(address + i, { value: view.getUint8(i), region: this.getMemoryRegion(address) });
-		}
-
-		return address;
 	}
 
 	//////////
 	// CHAR //
 	//////////
 
-	setCharValue(value, region, loc) {
-		// Check for overflow
-		if(value < CHAR_MIN || value > CHAR_MAX){
-			this.#warningSystem.add(`Char overflow, truncating value!`, WTYPE.OVERFLOW, loc);
-			value = value & 0xFF; // truncate to 8 bits
+	setCharValue(value, region, address) {
+		value = this.checkValueOverflow(value, CHAR_MIN, CHAR_MAX, 0xFF, "Char");
+
+		const size = CHARSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
 		}
 
-		const s = CHARSIZE;
-		const addr = this.#allocRegion(region, s);
+		const memorySpace = new ArrayBuffer(size);
+		let view;
 
-		const memorySpace = new ArrayBuffer(s);
-		const view = new DataView(memorySpace);
-		view.setInt8(0, value); // store the char value (signed 8-bit integer)
-
-		for(let i = 0; i < s; i++){ 
-			if(value == undefined || value == null){ // in case of no initializer, set address but no value
-				this.memory.set(addr + i, { value: undefined, region: region });
-			}else{
-				this.memory.set(addr + i, { value: view.getUint8(i), region: region });
-			}
+		if(value == undefined || value == null){ 
+			view = undefined; // uninitialized object
+		}else{
+			view = new DataView(memorySpace);
+			view.setUint8(0, value, region, true);
 		}
+
+		this.#storeMemory(addr, size, region, view);
 
 		return addr;
-	}
-
-	changeCharValue(sym, value, region, loc){
-		// Check for overflow
-		if(value < CHAR_MIN || value > CHAR_MAX){
-			this.#warningSystem.add(`Char overflow at memory address 0x${sym.address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
-			value = value & 0xFF; // Truncate to 8 bits
-		}
-
-		const s = CHARSIZE;
-		if (!sym.address){
-			sym.address = this.#allocRegion(sym.region, s);
-		}
-
-		const memorySpace = new ArrayBuffer(s);
-		const view = new DataView(memorySpace);
-		view.setInt8(0, value); // store the char value (signed 8-bit integer)
-
-		for(let i = 0; i < s; i++){ // update every byte separately
-			this.memory.set(sym.address + i, { value: view.getUint8(i), region: region });
-		}
-
-		return sym.address;
 	}
 
 	readCharValue(addr){
@@ -468,53 +491,31 @@ class Memsim {
 	// UCHAR //
 	///////////
 
-	setUCharValue(value, region, loc) {
-		// Check for overflow
-		if(value < 0 || value > UCHAR_MAX){
-			this.#warningSystem.add(`Unsigned char overflow, truncating value!`, WTYPE.OVERFLOW, loc);
-			value = value & 0xFF; // truncate to 8 bits
+	setUCharValue(value, region, address) {
+		value = this.checkValueOverflow(value, 0, UCHAR_MAX, 0xFF, "UChar");
+
+		const size = CHARSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
 		}
 
-		const s = CHARSIZE;
-		const addr = this.#allocRegion(region, s);
+		const memorySpace = new ArrayBuffer(size);
+		let view;
 
-		const memorySpace = new ArrayBuffer(s);
-		const view = new DataView(memorySpace);
-		view.setUint8(0, value); // store the char value (unsigned 8-bit integer)
-
-		for(let i = 0; i < s; i++){ 
-			if(value == undefined || value == null){ // in case of no initializer, set address but no value
-				this.memory.set(addr + i, { value: undefined, region: region });
-			}else{
-				this.memory.set(addr + i, { value: view.getUint8(i), region: region });
-			}
+		if(value == undefined || value == null){ 
+			view = undefined; // uninitialized object
+		}else{
+			view = new DataView(memorySpace);
+			view.setUint8(0, value, region, true);
 		}
+
+		this.#storeMemory(addr, size, region, view);
 
 		return addr;
 	}
-
-	changeUCharValue(sym, value, region, loc){
-		// Check for overflow
-		if(value < 0 || value > UCHAR_MAX){
-			this.#warningSystem.add(`Unsigned char overflow at memory address 0x${sym.address.toString(16)}, truncating value!`, WTYPE.OVERFLOW, loc);
-			value = value & 0xFF; // Truncate to 8 bits
-		}
-
-		const s = CHARSIZE;
-		if (!sym.address){
-			sym.address = this.#allocRegion(sym.region, s);
-		}
-
-		const memorySpace = new ArrayBuffer(s);
-		const view = new DataView(memorySpace);
-		view.setUint8(0, value); // store the char value (unsigned 8-bit integer)
-
-		for(let i = 0; i < s; i++){ // update every byte separately
-			this.memory.set(sym.address + i, { value: view.getUint8(i), region: region });
-		}
-
-		return sym.address;
-	}
+	
 
 	readUCharValue(addr){
 		const s = CHARSIZE;
@@ -536,11 +537,15 @@ class Memsim {
 	// INT //
 	/////////
 
-	setIntValue(value, region, loc){
-		value = this.checkValueOverflow(value, INT_MIN, INT_MAX, 0xFFFFFFFF, "Integer", loc);
+	setIntValue(value, region, address){
+		value = this.checkValueOverflow(value, INT_MIN, INT_MAX, 0xFFFFFFFF, "Integer");
 
 		const size = INTSIZE;
-		const addr = this.#allocRegion(region, size);
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
 
 		const memorySpace = new ArrayBuffer(size);
 		let view;
@@ -549,28 +554,12 @@ class Memsim {
 			view = undefined; // uninitialized object
 		}else{
 			view = new DataView(memorySpace);
-			view.setInt32(0, value, region, true); // little-endian!
+			view.setInt32(0, value, region, true);
 		}
 
 		this.#storeMemory(addr, size, region, view);
 
 		return addr;
-	}
-
-	changeIntValue(sym, value, region, loc){
-		value = this.checkValueOverflow(value, INT_MIN, INT_MAX, 0xFFFFFFFF, "Integer", loc);
-
-		const size = INTSIZE;
-
-		const memorySpace = new ArrayBuffer(size);
-		const view = new DataView(memorySpace);
-		view.setInt32(0, value, region, true); // little-endian!
-
-		for(let i = 0; i < size; i++){ // alloc every byte separately
-			this.memory.set(sym.address + i, { value: view.getUint8(i), region: region });
-		}
-
-		return sym.address;
 	}
 
 	readIntValue(addr) {
@@ -593,7 +582,7 @@ class Memsim {
 	 ***********************************/
 
 	/**
-	 * Check if value is not over limits
+	 * Check if value is over limits
 	 * @param {Number} value
 	 * @param {Number} min
 	 * @param {Number} max
@@ -601,13 +590,43 @@ class Memsim {
 	 * @param {string} mask Only for messaging purposes
 	 * @param {Object} loc
 	 */
-	checkValueOverflow(value, min, max, mask, type, loc){
+	checkValueOverflow(value, min, max, mask, type, loc=undefined){
 		if(value < min || value > max){
 			this.#warningSystem.add(`${type} overflow, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
 			return value = value & mask; // truncate to n bits
 		}
 
 		return value;
+	}
+
+	/**
+	 * Reshapes a flat array into a multi-dimensional array based on dimensions.
+	 * @param {number[]} flatArray The flattened input array (e.g., [1010, 10100, 11110]).
+	 * @param {number[]} dimensions The shape of the output array (e.g., [3] or [2, 3]). This is the size member in Symbol
+	 * @returns {Array} The multi-dimensional array.
+	 */
+	reshapeArray(flatArray, dimensions){
+		let result = flatArray;
+		// build dimensions from innermost to outermost
+		for(let i = dimensions.length - 1; i >= 0; i--){
+			const dimSize = dimensions[i];
+			result = this.chunkArray(result, dimSize);
+		}
+		return result[0]; // Remove outer nesting
+	}
+
+	/**
+	 * Splits an array into chunks of size `chunkSize`.
+	 * @param {Array} arr 
+	 * @param {number} chunkSize Size of each chunk.
+	 * @returns {Array[]} Array of chunks.
+	 */
+	chunkArray(arr, chunkSize){
+		const chunks = [];
+		for(let i = 0; i < arr.length; i += chunkSize){
+			chunks.push(arr.slice(i, i + chunkSize));
+		}
+		return chunks;
 	}
 
 	/**

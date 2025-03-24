@@ -404,6 +404,72 @@ class Memviz {
 
 	vizArrayValue(sym, parent, style, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
+
+		let value;
+		if(sym.address){
+			value = this.memsim.readSymValue(sym);
+		}
+
+		this.vizArrayRecursive(sym, parent, style, y, value);
+
+		return y + height;
+	}
+
+	vizArrayRecursive(sym, parent, style, y, arr){
+		for (var i = 0; i < arr.length; i++){
+			if (Array.isArray(arr[i])){
+				this.vizArrayRecursive(arr[i]);
+			}else{
+				const valueBox = this.graph.insertVertex({
+					parent: parent,
+					position: [Memviz.squareX + ((Memviz.squareXYlen * i)), y],
+					size: [Memviz.squareXYlen, Memviz.squareXYlen],
+					value: arr[i],
+					style: style,
+				});
+
+				const labelAbove = this.graph.insertVertex({
+					parent: parent, 
+					position: [Memviz.squareX + ((Memviz.squareXYlen * i)), y - Memviz.labelHeight],
+					size: [Memviz.squareXYlen, Memviz.labelHeight],
+					value: sym.name + `[${i}]`,
+					style: {
+						fillColor: "transparent",
+						strokeColor: "transparent",
+						labelPosition: "center",
+						verticalLabelPosition: "middle",
+						align: "left",
+
+						// font style
+						fontSize: 14,
+						fontColor: Memviz.fontColor,
+						fontFamily: Memviz.fontFamily,
+					},
+				});
+
+				const labelBelow = this.graph.insertVertex({
+					parent: parent, 
+					position: [Memviz.squareX + ((Memviz.squareXYlen * i)), y + Memviz.squareXYlen], // Position below the square
+					size: [Memviz.squareXYlen, Memviz.labelHeight],
+					value: sym.specifiers.join(' '),
+					style: {
+						fillColor: "transparent", // Transparent background
+						strokeColor: "transparent", // No border
+						labelPosition: "center",
+						verticalLabelPosition: "middle",
+						align: "right",
+
+						// font style
+						fontSize: 14,
+						fontColor: Memviz.fontColor,
+						fontFamily: Memviz.fontFamily,
+					},
+				});	
+
+				// don't forget to add the address to global array for visualization
+				this.symbols.set(sym.address - i * MEMSIZES[sym.memtype], new VizCellValue(sym.address - i * MEMSIZES[sym.memtype], valueBox));
+			}
+		}
 	}
 
 	vizMemregions(){
@@ -412,7 +478,6 @@ class Memviz {
 
 	vizPointers(){
 		const root = this.root;
-
 		for(let pair of this.pointerPairs){
 			// first determine where to point
 			const targetCellValue = this.symbols.get(pair.to.address);

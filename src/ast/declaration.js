@@ -216,7 +216,7 @@ class Initializer extends Construct {
 			case INITTYPE.ARR:
 				return this.arr.map(el => el.toJSArray(visitor)); // recursion -> maybe change to iterative for better performance
 			default:
-				throw new AppError(`Unknown initializer kind: ${this.kind}`);
+				throw new AppError(`Unknown initializer kind: ${this.kind}`, this.loc);
 		}
 	}
 }

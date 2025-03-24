@@ -279,7 +279,7 @@ class Interpreter {
 	 *******************************/
 
 	visitArr(arr){
-
+		console.log("array", arr);
 	}
 
     visitBAssignExpr(expr){
@@ -485,9 +485,6 @@ class Interpreter {
 		let value = null;
 		if(initializer){
 			value = initializer.accept(this);
-			if(initializer.kind == INITTYPE.EXPR && Array.isArray(value)){
-				value = this.memsim.initializeArray(symbol.memtype, value, MEMREGION.DATA); // returns address
-			}
 		}
 
 		symbol.interpreted = true;
@@ -792,7 +789,6 @@ class Interpreter {
 	}
 
     visitSubscriptExpr(expr){
-
 	}
 
 	visitSwitchStmt(stmt){
@@ -836,9 +832,24 @@ class Interpreter {
 			case '*':
 				return null; // TODO
 			case '&': {
-				const id = expr.expr;
-				const obj = this.#callStack.top().resolve(id.name);
-				return obj.address;
+				// in the end returns the address
+				let ret;
+
+				//TODO this is all kind of whacky
+
+				if(isclass(expr.expr, "Identifier")){
+					ret = this.#callStack.top().resolve(expr.expr.name).address;
+				}else if(isclass(expr.expr, "SubscriptExpr")){ 
+					ret = this.#callStack.top().resolve(expr.expr.pointer.name);
+					const memtype = ret.memtype;
+					ret = ret.address;
+
+					ret -= (this.visitExprArray(expr.expr.expr) * MEMSIZES[memtype]);
+				}else{
+					ret = expr.expr.accept(this); // this might be wrong
+				}
+
+				return ret;
 			} 
 			default:
 				throw new AppError(`Unknown operator of UExpr: ${expr.op}`, expr.loc);
@@ -898,8 +909,7 @@ class Interpreter {
 		let formatString = args[0].accept(this);  // Resolve format argument (CExpr will return value)
 		formatString = formatString.slice(0, -1).join('') // string is returned as an array
 		const otherArgs = args.slice(1)
-			.map(arg => arg.accept(this))
-			.filter(arg => arg !== undefined && !Number.isNaN(arg)); // this is probably fault in interpreter (maybe throw an error)
+			.map(arg => arg.accept(this));
 
 		let i = 0;
 
