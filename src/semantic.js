@@ -496,7 +496,8 @@ class Semantic {
 						if(arr[i].length != arr[0].length){
 							let expectedLen = arr[0].length;
 							if(!arr[0].length) expectedLen = 1;
-							throw new SError(`Dimension mismatch: Expected ${expectedLen} elements, but found ${arr[i].length}`, initializer.loc);
+							// this is wrong if there are designators in there (for now skip this check):
+							//throw new SError(`Dimension mismatch: Expected ${expectedLen} elements, but found ${arr[i].length}`, initializer.loc);
 						}
 					}
 

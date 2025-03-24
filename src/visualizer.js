@@ -410,66 +410,76 @@ class Memviz {
 			value = this.memsim.readSymValue(sym);
 		}
 
-		this.vizArrayRecursive(sym, parent, style, y, value);
+		this.vizArrayRecursive(sym, parent, style, y, 0, value);
 
 		return y + height;
 	}
 
-	vizArrayRecursive(sym, parent, style, y, arr){
+	vizArrayRecursive(sym, parent, style, y, numberOfElements, arr, currentIndices=[]){
+		let n = numberOfElements;
 		for (var i = 0; i < arr.length; i++){
+			const newIndices = [...currentIndices, i];
 			if (Array.isArray(arr[i])){
-				this.vizArrayRecursive(arr[i]);
+				n = this.vizArrayRecursive(sym, parent, style, y, n, arr[i], newIndices);
 			}else{
-				const valueBox = this.graph.insertVertex({
-					parent: parent,
-					position: [Memviz.squareX + ((Memviz.squareXYlen * i)), y],
-					size: [Memviz.squareXYlen, Memviz.squareXYlen],
-					value: arr[i],
-					style: style,
-				});
+				let valueBox;
+				if(sym.pointer){
+				}else{
+					valueBox = this.graph.insertVertex({
+						parent: parent,
+						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y],
+						size: [Memviz.squareXYlen, Memviz.squareXYlen],
+						value: arr[i],
+						style: style,
+					});
+					
+                	const labelText = sym.name + newIndices.map(idx => `[${idx}]`).join('');
+					const labelAbove = this.graph.insertVertex({
+						parent: parent, 
+						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y - Memviz.labelHeight],
+						size: [Memviz.squareXYlen, Memviz.labelHeight],
+						value: labelText,
+						style: {
+							fillColor: "transparent",
+							strokeColor: "transparent",
+							labelPosition: "center",
+							verticalLabelPosition: "middle",
+							align: "left",
 
-				const labelAbove = this.graph.insertVertex({
-					parent: parent, 
-					position: [Memviz.squareX + ((Memviz.squareXYlen * i)), y - Memviz.labelHeight],
-					size: [Memviz.squareXYlen, Memviz.labelHeight],
-					value: sym.name + `[${i}]`,
-					style: {
-						fillColor: "transparent",
-						strokeColor: "transparent",
-						labelPosition: "center",
-						verticalLabelPosition: "middle",
-						align: "left",
+							// font style
+							fontSize: 10,
+							fontColor: Memviz.fontColor,
+							fontFamily: Memviz.fontFamily,
+						},
+					});
 
-						// font style
-						fontSize: 14,
-						fontColor: Memviz.fontColor,
-						fontFamily: Memviz.fontFamily,
-					},
-				});
+					const labelBelow = this.graph.insertVertex({
+						parent: parent, 
+						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y + Memviz.squareXYlen], // Position below the square
+						size: [Memviz.squareXYlen, Memviz.labelHeight],
+						value: sym.specifiers.join(' '),
+						style: {
+							fillColor: "transparent", // Transparent background
+							strokeColor: "transparent", // No border
+							labelPosition: "center",
+							verticalLabelPosition: "middle",
+							align: "right",
 
-				const labelBelow = this.graph.insertVertex({
-					parent: parent, 
-					position: [Memviz.squareX + ((Memviz.squareXYlen * i)), y + Memviz.squareXYlen], // Position below the square
-					size: [Memviz.squareXYlen, Memviz.labelHeight],
-					value: sym.specifiers.join(' '),
-					style: {
-						fillColor: "transparent", // Transparent background
-						strokeColor: "transparent", // No border
-						labelPosition: "center",
-						verticalLabelPosition: "middle",
-						align: "right",
+							// font style
+							fontSize: 14,
+							fontColor: Memviz.fontColor,
+							fontFamily: Memviz.fontFamily,
+						},
+					});
 
-						// font style
-						fontSize: 14,
-						fontColor: Memviz.fontColor,
-						fontFamily: Memviz.fontFamily,
-					},
-				});	
+					n++;
+				}
 
 				// don't forget to add the address to global array for visualization
 				this.symbols.set(sym.address - i * MEMSIZES[sym.memtype], new VizCellValue(sym.address - i * MEMSIZES[sym.memtype], valueBox));
 			}
 		}
+		return n;
 	}
 
 	vizMemregions(){
