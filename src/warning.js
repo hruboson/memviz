@@ -100,7 +100,11 @@ class WarningSystem {
 		const header = `<h5><u>Warnings: </u></h5>`;
 		var prt = header; 
 		for(const warning of this.#list){
-			prt += `${warning.msg} [${warning.type}] <kbd class="fw-bolder">on line ${warning.loc.first_line}</kbd><br>`;
+			if(warning.loc){
+				prt += `${warning.msg} [${warning.type}] <kbd class="fw-bolder">on line ${warning.loc?.first_line}</kbd><br>`;
+			}else{
+				prt += `${warning.msg} [${warning.type}]<br>`;
+			}
 		}
 
 		return prt;
