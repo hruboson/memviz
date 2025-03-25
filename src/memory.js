@@ -200,28 +200,27 @@ class Memsim {
 		if(!value){
 			sym.address = this.#allocRegion(region, MEMSIZES[memtype]*sym.size.reduce((res, item) => res *= item));
 		}else{
-			sym.address = this.allocArray(value, memtype, region);
+			sym.addresses = this.allocArray(value, memtype, region);
+			sym.address = sym.addresses[0];
 		}
-
-		console.log(this.memory);
 	}
 
 	// returns address of first element
 	allocArray(arr, memtype, region){
-		let firstAddress = null;
+		let addresses = [];
 
 		for(let s = 0; s < arr.length; s++){
 			if(Array.isArray(arr[s])){
 				const allocatedAddress = this.allocArray(arr[s], memtype, region);
-				firstAddress = firstAddress ? firstAddress : allocatedAddress;
+				addresses.push(...allocatedAddress);
 			}else{
 				const dummySym = { memtype: memtype, address: null, identifier: "array" };
 				const allocatedAddress = this.setPrimitiveValue(dummySym, arr[s], region);
-				firstAddress = firstAddress ? firstAddress : allocatedAddress;
+				addresses.push(allocatedAddress);
 			}
 		}
 
-		return firstAddress;
+		return addresses;
 	}
 
 	setPointerValue(sym, value, region){

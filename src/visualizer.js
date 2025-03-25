@@ -472,11 +472,11 @@ class Memviz {
 						},
 					});
 
+					// don't forget to add the address to global array for visualization
+					this.symbols.set(sym.addresses[n], new VizCellValue(sym.addresses[n], valueBox));
+
 					n++;
 				}
-
-				// don't forget to add the address to global array for visualization
-				this.symbols.set(sym.address - i * MEMSIZES[sym.memtype], new VizCellValue(sym.address - i * MEMSIZES[sym.memtype], valueBox));
 			}
 		}
 		return n;

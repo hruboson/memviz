@@ -166,6 +166,14 @@ class Sym {
 	address;
 
 	/**
+	 * Array of hexadecimal numbers. This field is set in case of array.
+	 * @type {integer}
+	 * @example
+	 * 	int x[][][] = {{{10, 20, 30}, {10, 20, 30}}, {{10, 20, 30}, {10, 20, 30}}}; -> addresses == [4996,4992,4988,4984,4980,4976,4972,4968,4964,4960,4956,4952] (array on stack)
+	 */
+	addresses = [];
+
+	/**
 	 * In case of function, stores parameters
 	 * @type {Array.<Declarator>}
 	 */
