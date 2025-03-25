@@ -1063,14 +1063,11 @@ class Interpreter {
 			}
 		}
 
-		unhighlight(); // global function, defined in index.html
-
 		// create new marker
 		/*if(this.pcloclast > 0){
 			let rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted
 			let markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
 		}*/
-		console.log(this.pclocColStart, this.pclocColEnd);
 		let rangeTBI = new Range(this.pcloc - 1, this.pclocColStart, this.pcloc - 1, this.pclocColEnd); // Just interpreted
 		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeJI", "fullLine"); // "fullLine"/"text" last arg for whole line/part of line being highlighted
 	}

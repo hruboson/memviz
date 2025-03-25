@@ -576,6 +576,7 @@ Split(["#split-ve", "#split-console"], {
 	 */
 	function execute(input, flag){
 		var interpreter = new Interpreter();
+		unhighlight();
 		try{
 			switch(flag){
 				case EXEOPT.COMPILE:
