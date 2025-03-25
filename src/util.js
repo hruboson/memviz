@@ -201,3 +201,22 @@ class Pair {
 		this.second = tmp;
 	}
 }
+
+/**
+ * Converts a flat array index into a multi-dimensional index based on the given sizes.
+ * @param {integer} flatIndex The one-dimensional index to convert.
+ * @param {Array.<integer>} sizes An array representing the size of each dimension.
+ * @returns {Array.<integer>} An array of indices corresponding to the multi-dimensional representation.
+ */
+function flatIndexToDimensionalIndices(flatIndex, sizes){
+	const indices = [];
+	let remaining = flatIndex;
+
+	// calculate indices from inner to outer dimensions
+	for(let i = 0; i < sizes.length; i++){
+		indices.push(remaining % sizes[i]);
+		remaining = Math.floor(remaining / sizes[i]);
+	}
+
+	return indices.reverse(); // reverse to get [outer][middle][inner] order
+}

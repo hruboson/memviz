@@ -303,7 +303,7 @@ class Interpreter {
 
 		this.updateHTML(result);
 		this.memviz.updateHTML();
-		this.memsim.printMemory();
+		//this.memsim.printMemory();
 		return result;
 	}
 
@@ -826,6 +826,31 @@ class Interpreter {
 	}
 
     visitSubscriptExpr(expr){
+		let indices = [this.visitExprArray(expr.expr)];
+		let exprCopy = expr.pointer;
+		let symbol;
+
+		while(exprCopy != null){
+			let val;
+			if(exprCopy.expr){
+				val = this.visitExprArray(exprCopy.expr);
+			}else{  // last in the chain is identifier
+				val = this.visitExprArray(exprCopy);
+				if(has(val, "address")) symbol = val;
+				break;
+			}
+
+			indices.push(val);
+			exprCopy = exprCopy.pointer;
+		};
+
+		const flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
+
+		const dummySym = structuredClone(symbol);
+		dummySym.dimension = 0;
+		dummySym.address = symbol.addresses[flatIndex];
+
+		return dummySym;
 	}
 
 	visitSwitchStmt(stmt){
@@ -843,55 +868,38 @@ class Interpreter {
     visitUExpr(expr){
 		//TODO POSTFIX AND PREFIX DIFFERENTIATION
 		let symbol = this.visitExprArray(expr.expr);
-		let val;
-
-
-		if(has(symbol, "address")){
-			val = this.memsim.readSymValue(symbol); // get the value
-		}else{
-			val = symbol; // keep value returned from expr evaluation (literal)
-		}
 
 		switch(expr.op){
 			case '+':
-				return val;
+				return this.memsim.readSymValue(symbol);
 			case '-':
-				return -val;
+				return -this.memsim.readSymValue(symbol);
 			case '++':
-				this.memsim.setSymValue(symbol, val + 1, MEMREGION.STACK);
+				this.memsim.setSymValue(symbol, this.memsim.readSymValue(symbol) + 1, MEMREGION.STACK);
 				break;
 			case '--':
-				this.memsim.setSymValue(symbol, val - 1, MEMREGION.STACK);
+				this.memsim.setSymValue(symbol, this.memsim.readSymValue(symbol) - 1, MEMREGION.STACK);
 				break;
 			case '!':
-				return !val;
+				return !this.memsim.readSymValue(symbol);
 			case '~':
-				return ~val;
-			case '*':
-				return null; // TODO
-			case '&': {
-				// in the end returns the address
-				let ret;
-
-				//TODO this is all kind of whacky
-
-				if(isclass(expr.expr, "Identifier")){
-					ret = this.#callStack.top().resolve(expr.expr.name).address;
-				}else if(isclass(expr.expr, "SubscriptExpr")){ 
-					console.log(expr.expr);
-					// todo fix this -> just recurse until you find pointer.name
-					// the expressions will then go into array like [0, 0, 1] to get the second element of three dimensional array
-					// expressions are acquired from highest dimension to the lowest (x[0][0][1]) -> first 0, second 0, third 1
-					ret = this.#callStack.top().resolve(expr.expr.pointer.name);
-					const memtype = ret.memtype;
-					ret = ret.address;
-
-					ret -= (this.visitExprArray(expr.expr.expr) * MEMSIZES[memtype]);
-				}else{
-					ret = expr.expr.accept(this); // this might be wrong
+				return ~this.memsim.readSymValue(symbol);
+			case '*': {
+				if(has(symbol, "address")){
+					/* Hmmm, this kind of works, but I think having
+					 * separate readValueAtAddress(memsize) function
+					 * would be nicer tbh */
+					const dummySym = {
+						memtype: symbol.memtype,
+						address: this.memsim.readSymValue(symbol)
+					}
+					return this.memsim.readPrimitiveValue(dummySym);
 				}
-
-				return ret;
+				throw new RTError(`Value ${symbol} does not have an address`, expr.loc);
+			}
+			case '&': {
+				if(has(symbol, "address")) return symbol.address;
+				throw new RTError(`Value ${symbol} does not have an address`, expr.loc);
 			} 
 			default:
 				throw new AppError(`Unknown operator of UExpr: ${expr.op}`, expr.loc);

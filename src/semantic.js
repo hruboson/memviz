@@ -127,7 +127,7 @@ class Semantic {
 
 						size[dimension] = exprValue; // should always be constant expression
 					}else{ // calculate (only for the outer-most array)
-						if(dimension != dimensionBrackets - 1) throw new SError(`Array type has incomplete element type '${specifiers}[]`, declarator.loc);
+						if(dimension != dimensionBrackets - 1) throw new SError(`Array type has incomplete element type '${specifiers}[]'`, declarator.loc);
 						size[dimension] = initializer.arr.length;
 					}
 					dimension += 1;
