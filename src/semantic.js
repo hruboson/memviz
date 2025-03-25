@@ -102,13 +102,15 @@ class Semantic {
 					declPtr = true;
 				}
 				if(declChild.kind == DECLTYPE.ARR){
-					if(declChild.arrSizeExp){
+					if(declChild.arrSizeExp){ // get size from expression in brackets
 						const exprValue = declChild.arrSizeExp.accept(this);
 						if(exprValue < 0){
 							throw new SError(`Invalid array size`, declarator.loc);
 						}
 
 						size[dimension] = exprValue; // should always be constant expression
+					}else{ // calculate (only for the outer-most array)
+						size[dimension] = initializer.arr.length;
 					}
 					dimension += 1;
 				}
