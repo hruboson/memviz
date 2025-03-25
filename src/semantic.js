@@ -157,15 +157,30 @@ class Semantic {
 	visitBAssignExpr(expr){
 		let lval;
 		let rval;
+		let symbol;
+		const currSymtable = this.symtableStack.peek();;
 
-		if(expr.left.length){
+		// check rval type
+		// todo
+		if(Array.isArray(expr.left)){
 			for(const subexpr of expr.left){
+				if(isclass(subexpr, "Identifier")){
+					symbol = currSymtable.resolve(subexpr.name);
+				}
 				lval = subexpr.accept(this);
 			}
 		}else{
+			if(isclass(expr.left, "Identifier")){
+				symbol = currSymtable.resolve(expr.left.name);
+			}
 			lval = expr.left.accept(this);
 		}
 
+		// check lval type
+		if(symbol.isFunction){
+			
+		}
+		
 		if(expr.right.length){
 			for(const subexpr of expr.right){
 				rval = subexpr.accept(this);

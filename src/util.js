@@ -118,6 +118,16 @@ function getclass(obj){
 }
 
 /**
+ * Check if object has property. Return true if it does, otherwise return false
+ * @param {Object} obj
+ * @param {string} field
+ */
+function has(obj, field){
+	if(typeof obj !== "object" || obj === null) return false;
+	return obj.hasOwnProperty(field);
+}
+
+/**
  * Zips any number of iterables. It will always zip() the largest Iterable returning undefined for shorter arrays.
  * @param  {...Iterable<any>} iterables
  * @see {https://stackoverflow.com/questions/22015684/zip-arrays-in-javascript#72221748}

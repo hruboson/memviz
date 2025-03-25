@@ -285,32 +285,20 @@ class Interpreter {
     visitBAssignExpr(expr){
 		let lval; // lval should always derive to value of symbol on left side
 		let rval; // rval should always derive to constant
-		let symbol;
+		let symbol; // symbol to store the value to
 
 		rval = this.visitExprArray(expr.right);
+		lval = this.visitExprArray(expr.left);
 
-		// check rval type
-		// todo
-
-		if(Array.isArray(expr.left)){
-			for(const subexpr of expr.left){
-				if(isclass(subexpr, "Identifier")){
-					symbol = this.#callStack.top().resolve(subexpr.name);
-				}
-				lval = subexpr.accept(this);
-			}
-		}else{
-			if(isclass(expr.left, "Identifier")){
-				symbol = this.#callStack.top().resolve(expr.left.name);
-			}
-			lval = expr.left.accept(this);
+		if(has(lval, "address")){
+			symbol = lval;
+			lval = this.memsim.readSymValue(lval); // get the value
 		}
 
-		// check lval type
-		if(symbol.isFunction){ // check this in semantics!
-			
+		if(has(rval, "address")){
+			rval = this.memsim.readSymValue(rval); // get the value
 		}
-		
+
 		// concrete operations
 		switch(expr.op){
 			case '=':
@@ -360,6 +348,14 @@ class Interpreter {
 		let rval = this.visitExprArray(expr.right);
 		let lval = this.visitExprArray(expr.left);
 
+		if(has(lval, "address")){
+			lval = this.memsim.readSymValue(lval); // get the value
+		}
+
+		if(has(rval, "address")){
+			rval = this.memsim.readSymValue(rval); // get the value
+		}
+
 		// concrete operations
 		switch(expr.op){
 			case '+':
@@ -394,6 +390,14 @@ class Interpreter {
 		let rval = this.visitExprArray(expr.right);
 		let lval = this.visitExprArray(expr.left);
 
+		if(has(lval, "address")){
+			lval = this.memsim.readSymValue(lval); // get the value
+		}
+
+		if(has(rval, "address")){
+			rval = this.memsim.readSymValue(rval); // get the value
+		}
+
 		// concrete operations
 		switch(expr.op){
 			case '==':
@@ -418,6 +422,14 @@ class Interpreter {
     visitBLogicExpr(expr){
 		let rval = this.visitExprArray(expr.right);
 		let lval = this.visitExprArray(expr.left);
+
+		if(has(lval, "address")){
+			lval = this.memsim.readSymValue(lval); // get the value
+		}
+
+		if(has(rval, "address")){
+			rval = this.memsim.readSymValue(rval); // get the value
+		}
 
 		// concrete operations
 		switch(expr.op){
@@ -584,7 +596,9 @@ class Interpreter {
 		// initialize symbols and assign addresses
 		if(!sfParams.empty()){
 			for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
-				this.memsim.setSymValue(sym, arg.accept(this), MEMREGION.STACK);
+				let val = this.visitExprArray(arg);
+				if(has(val, "address")) val = this.memsim.readSymValue(val);
+				this.memsim.setSymValue(sym, val, MEMREGION.STACK);
 				sym.interpreted = true;
 			}
 		}
@@ -689,7 +703,7 @@ class Interpreter {
 		if(sym?.isFunction) return id;
 
 		sym = this.#callStack.top().resolve(id.name);
-		return this.memsim.readSymValue(sym);
+		return sym;
 	}
 
 	visitIfStmt(stmt){
@@ -710,7 +724,9 @@ class Interpreter {
 	visitInitializer(initializer){
 		switch(initializer.kind){
 			case INITTYPE.EXPR:
-				return initializer.expr.accept(this);
+				let val = this.visitExprArray(initializer.expr);
+				if(has(val, "address")) val = this.memsim.readSymValue(val);
+				return val;
 			case INITTYPE.ARR:
 				return initializer.toJSArray(this);
 			case INITTYPE.STRUCT:
@@ -805,30 +821,31 @@ class Interpreter {
 
     visitUExpr(expr){
 		//TODO POSTFIX AND PREFIX DIFFERENTIATION
-		let lval;
-		let symbol;
+		let symbol = this.visitExprArray(expr.expr);
+		let val;
 
-		if(isclass(expr.expr, "Identifier")){ // for ++ and -- operator
-			symbol = this.#callStack.top().resolve(expr.expr.name);
+
+		if(has(symbol, "address")){
+			val = this.memsim.readSymValue(symbol); // get the value
+		}else{
+			val = symbol; // keep value returned from expr evaluation (literal)
 		}
 
 		switch(expr.op){
 			case '+':
-				return expr.expr.accept(this);
+				return val;
 			case '-':
-				return -expr.expr.accept(this);
+				return -val;
 			case '++':
-				lval = expr.expr.accept(this);
-				this.memsim.setSymValue(symbol, lval + 1, MEMREGION.STACK);
+				this.memsim.setSymValue(symbol, val + 1, MEMREGION.STACK);
 				break;
 			case '--':
-				lval = expr.expr.accept(this);
-				this.memsim.setSymValue(symbol, lval - 1, MEMREGION.STACK);
+				this.memsim.setSymValue(symbol, val - 1, MEMREGION.STACK);
 				break;
 			case '!':
-				return !expr.expr.accept(this);
+				return !val;
 			case '~':
-				return ~expr.expr.accept(this);
+				return ~val;
 			case '*':
 				return null; // TODO
 			case '&': {
@@ -840,6 +857,10 @@ class Interpreter {
 				if(isclass(expr.expr, "Identifier")){
 					ret = this.#callStack.top().resolve(expr.expr.name).address;
 				}else if(isclass(expr.expr, "SubscriptExpr")){ 
+					console.log(expr.expr);
+					// todo fix this -> just recurse until you find pointer.name
+					// the expressions will then go into array like [0, 0, 1] to get the second element of three dimensional array
+					// expressions are acquired from highest dimension to the lowest (x[0][0][1]) -> first 0, second 0, third 1
 					ret = this.#callStack.top().resolve(expr.expr.pointer.name);
 					const memtype = ret.memtype;
 					ret = ret.address;
@@ -908,8 +929,8 @@ class Interpreter {
 
 		let formatString = args[0].accept(this);  // Resolve format argument (CExpr will return value)
 		formatString = formatString.slice(0, -1).join('') // string is returned as an array
-		const otherArgs = args.slice(1)
-			.map(arg => arg.accept(this));
+		let otherArgs = args.slice(1).map(arg => arg.accept(this));
+		otherArgs = otherArgs.map(arg => has(arg, "address") ? this.memsim.readSymValue(arg) : arg);
 
 		let i = 0;
 
