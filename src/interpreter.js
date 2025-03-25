@@ -774,25 +774,13 @@ class Interpreter {
 		// check if function has void signature if yes just to this (ignore return value)
 		if(expr == null) throw new ReturnThrow(new ReturnVoid(ret.loc)); // in case of empty return (void return)
 
-		if(Array.isArray(expr) > 1){
-			for(let i = 0; i < expr.length - 1; i++){
-				if(this.#_instrNum > this.#breakstop) return;
-				this.pc = expr[i];
-				expr[i].accept(this);
-			}
-
-			expr = expr[expr.length - 1];
-		}else if(expr.length == 1){
-			if(this.#_instrNum > this.#breakstop) return;
-			this.pc = expr[expr.length - 1];
-			expr = expr[expr.length - 1];
-		}
-
 		expr = this.visitExprArray(expr); // resolve the expression (last is returned)
+		if(has(expr, "address")) expr = this.memsim.readSymValue(expr);
+
+		// this breakstop is causing some weird behavior at the end of main, maybe remove it
 		if(this.#_instrNum > this.#breakstop) return;
 		this.pc = ret;
 
-		if(this.#_instrNum > this.#breakstop) return;
 		throw new ReturnThrow(expr);
 	}
 
