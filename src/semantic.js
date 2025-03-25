@@ -55,6 +55,7 @@ class Semantic {
 		var declPtr = false;
 		var symbolName = ""; // return value
 		var dimension = 0;
+		var dimensionBrackets = 0;
 		var size = [];
 		var parameters = null;
 		var isFunction = false;
@@ -71,6 +72,22 @@ class Semantic {
 				}
 			}
 		}
+
+		// calculate number of brackets from declarator (x[][] = 2, x[][][] = 3, ...)
+		let declCopy = declarator;
+		do{
+			switch(declCopy.kind){
+				case DECLTYPE.ID: 
+				case DECLTYPE.FNC: 
+				case DECLTYPE.PTR:
+				case DECLTYPE.STRUCT:
+				case DECLTYPE.NESTED:
+					break;
+				case DECLTYPE.ARR:
+					dimensionBrackets += 1;
+			}
+			declCopy = declCopy.child;
+		}while(declCopy != null);
 
 		do{
 			try {
@@ -110,6 +127,7 @@ class Semantic {
 
 						size[dimension] = exprValue; // should always be constant expression
 					}else{ // calculate (only for the outer-most array)
+						if(dimension != dimensionBrackets - 1) throw new SError(`Array type has incomplete element type '${specifiers}[]`, declarator.loc);
 						size[dimension] = initializer.arr.length;
 					}
 					dimension += 1;
