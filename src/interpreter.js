@@ -114,7 +114,10 @@ class Interpreter {
 				this.#_pcloclast = this.#_pcloc;
 			}
 
+			// never set these values outside of this function
 			this.#_pcloc = construct.loc.first_line;
+			this.#_pclocColStart = construct.loc.first_column;
+			this.#_pclocColEnd = construct.loc.last_column;
 		}
 	}
 
@@ -139,6 +142,36 @@ class Interpreter {
 	set pcloc(integer){
 		// NEVER SET IT MANUALLY, you've been warned
 		console.warning("NEVER SET PCLOC or PCLOCLAST MANUALLY!!!");
+	}
+
+	/**
+	 * Program counter column corresponding to currently interpreted construct in code.
+	 * @private
+	 * @type {integer}
+	 * @see {pc}
+	 */
+	#_pclocColStart = 0;
+	get pclocColStart(){
+		return this.#_pclocColStart;
+	}
+	set pclocColStart(integer){
+		// NEVER SET IT MANUALLY, you've been warned
+		console.warning("NEVER SET PCLOCCOLSTART or PCLOCCOLEND MANUALLY!!!");
+	}
+
+	/**
+	 * Program counter column corresponding to currently interpreted construct in code.
+	 * @private
+	 * @type {integer}
+	 * @see {pc}
+	 */
+	#_pclocColEnd = 0;
+	get pclocColEnd(){
+		return this.#_pclocColEnd;
+	}
+	set pclocColEnd(integer){
+		// NEVER SET IT MANUALLY, you've been warned
+		console.warning("NEVER SET PCLOCCOLSTART or PCLOCCOLEND MANUALLY!!!");
 	}
 
 	/**
@@ -1037,8 +1070,9 @@ class Interpreter {
 			let rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted
 			let markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
 		}*/
-		let rangeTBI = new Range(this.pcloc - 1, 0, this.pcloc - 1, 1); // Just interpreted
-		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeJI", "fullLine");
+		console.log(this.pclocColStart, this.pclocColEnd);
+		let rangeTBI = new Range(this.pcloc - 1, this.pclocColStart, this.pcloc - 1, this.pclocColEnd); // Just interpreted
+		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeJI", "fullLine"); // "fullLine"/"text" last arg for whole line/part of line being highlighted
 	}
 
 	resetHTML(){
