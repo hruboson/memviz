@@ -68,10 +68,12 @@ class Memviz {
 	}
 
 	init(){
-		//this.graph.model.init();
 		this.container.innerHTML = ""; // init output
 		this.graph = new mxg.Graph(this.container);
 		this.root = this.graph.getDefaultParent();
+
+		//this.graph.getStylesheet().styles.set("smoothCurveEdge", smoothCurveEdge); TODO different edge style
+		this.setGraphOptions();
 	}
 
 	setGraphOptions(){
@@ -499,7 +501,7 @@ class Memviz {
 				source: pair.from.cell,
 				target: pair.to.cell,
 				style: {
-					edgeStyle: "straightEdgeStyle",
+					edgeStyle: "smoothCurveEdge",
 					strokeColor: "white",
 					rounded: true,
 					entryX: 0, // Left side of value vertex
