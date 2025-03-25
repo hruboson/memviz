@@ -425,6 +425,81 @@ class Memviz {
 			}else{
 				let valueBox;
 				if(sym.pointer){
+					let pointingTo = arr[i];
+
+					const valueBox = this.graph.insertVertex({
+						parent: parent,
+						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y],
+						size: [Memviz.squareXYlen, Memviz.squareXYlen],
+						style: style,
+					});
+
+					let circle;
+					if(pointingTo){
+						circle = this.graph.insertVertex({
+							parent: valueBox, // The square is the parent
+							position: [(Memviz.squareXYlen/2)-(Memviz.circleXYlen/2), (Memviz.squareXYlen/2)-(Memviz.circleXYlen/2)], // Position relative to the square
+							size: [Memviz.circleXYlen, Memviz.circleXYlen], // Circle size (adjust for best fit)
+							style: {
+								fillColor: "white",
+								strokeColor: "white",
+								fontSize: 14,
+								labelPosition: "center",
+								shape: "ellipse", // Makes it a circle
+							},
+						});
+					}
+
+					const indices = flatIndexToDimensionalIndices(n, sym.size);
+					const labelText = sym.name + indices.map(idx => `[${idx}]`).join('');
+					const labelAbove = this.graph.insertVertex({
+						parent: parent, 
+						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y - Memviz.labelHeight],
+						size: [Memviz.squareXYlen, Memviz.labelHeight],
+						value: labelText,
+						style: {
+							fillColor: "transparent",
+							strokeColor: "transparent",
+							labelPosition: "center",
+							verticalLabelPosition: "middle",
+							align: "left",
+
+							// font style
+							fontSize: 14,
+							fontColor: Memviz.fontColor,
+							fontFamily: Memviz.fontFamily,
+						},
+					});
+
+					const labelBelow = this.graph.insertVertex({
+						parent: parent, 
+						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y + Memviz.squareXYlen], // Position below the square
+						size: [Memviz.squareXYlen, Memviz.labelHeight],
+						value: '*'.repeat(sym.indirection) + sym.specifiers.join(' '),
+						style: {
+							fillColor: "transparent", // Transparent background
+							strokeColor: "transparent", // No border
+							labelPosition: "center",
+							verticalLabelPosition: "middle",
+							align: "right",
+
+							// font style
+							fontSize: 14,
+							fontColor: Memviz.fontColor,
+							fontFamily: Memviz.fontFamily,
+						},
+					});
+
+					if(pointingTo){
+						this.pointerPairs.push(
+							new VizPointerPair(
+								new VizCellPointer(sym.addresses[n], circle),
+								new VizCellValue(pointingTo, null) // will be determined at the end of call stack visualization
+							)
+						);
+					}
+
+					this.symbols.set(sym.addresses[n], new VizCellValue(sym.addresses[n], valueBox));
 				}else{
 					valueBox = this.graph.insertVertex({
 						parent: parent,
@@ -477,9 +552,9 @@ class Memviz {
 
 					// don't forget to add the address to global array for visualization
 					this.symbols.set(sym.addresses[n], new VizCellValue(sym.addresses[n], valueBox));
-
-					n++;
 				}
+
+				n++;
 			}
 		}
 		return n;

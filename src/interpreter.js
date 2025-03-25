@@ -761,7 +761,12 @@ class Interpreter {
 				if(has(val, "address")) val = this.memsim.readSymValue(val);
 				return val;
 			case INITTYPE.ARR:
-				return initializer.toJSArray(this);
+				const arr = initializer.toJSArray(this);
+				console.log(arr);
+				for(let val of arr){
+					if(has(val, "address")) val = this.memsim.readSymValue(val);
+				}
+				return arr;
 			case INITTYPE.STRUCT:
 				break;
 			// no more nested, was taken care of while creating the AST
