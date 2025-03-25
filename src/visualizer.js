@@ -415,12 +415,11 @@ class Memviz {
 		return y + height;
 	}
 
-	vizArrayRecursive(sym, parent, style, y, numberOfElements, arr, currentIndices=[]){
+	vizArrayRecursive(sym, parent, style, y, numberOfElements, arr){
 		let n = numberOfElements;
 		for (var i = 0; i < arr.length; i++){
-			const newIndices = [...currentIndices, i];
 			if (Array.isArray(arr[i])){
-				n = this.vizArrayRecursive(sym, parent, style, y, n, arr[i], newIndices);
+				n = this.vizArrayRecursive(sym, parent, style, y, n, arr[i]);
 			}else{
 				let valueBox;
 				if(sym.pointer){
@@ -432,8 +431,10 @@ class Memviz {
 						value: arr[i],
 						style: style,
 					});
-					
-                	const labelText = sym.name + newIndices.map(idx => `[${idx}]`).join('');
+
+					const indices = flatIndexToDimensionalIndices(n, sym.size);
+					const labelText = sym.name + indices.map(idx => `[${idx}]`).join('');
+
 					const labelAbove = this.graph.insertVertex({
 						parent: parent, 
 						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y - Memviz.labelHeight],
