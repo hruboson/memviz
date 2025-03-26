@@ -49,11 +49,15 @@ class Interpreter {
 
 	/**
 	 * Symtable stack (mostly for printing reason)
+	 * @private
+	 * @type {Stack}
 	 */
 	#symtableStack;
 
 	/**
 	 * Call stack
+	 * @private
+	 * @type {CallStack}
 	 */
 	#callStack;
 
@@ -67,18 +71,21 @@ class Interpreter {
 	/**
 	 * Memory simulator
 	 * @type {Memsim}
+	 * @public
 	 */
 	memsim;
 
 	/**
 	 * Memory visualizer
 	 * @type {Memviz}
+	 * @public
 	 */
 	memviz;
 
 	/**
 	 * Interpreter output (console)
 	 * @type {string}
+	 * @public
 	 */
 	output = "";
 
@@ -320,8 +327,8 @@ class Interpreter {
 		let rval; // rval should always derive to constant
 		let symbol; // symbol to store the value to
 
-		rval = this.visitExprArray(expr.right);
-		lval = this.visitExprArray(expr.left);
+		rval = this.evaluateExprArray(expr.right);
+		lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
 			symbol = lval;
@@ -378,8 +385,8 @@ class Interpreter {
 	}
 
     visitBArithExpr(expr){
-		let rval = this.visitExprArray(expr.right);
-		let lval = this.visitExprArray(expr.left);
+		let rval = this.evaluateExprArray(expr.right);
+		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
 			lval = this.memsim.readSymValue(lval); // get the value
@@ -420,8 +427,8 @@ class Interpreter {
 	}
 
     visitBCompExpr(expr){
-		let rval = this.visitExprArray(expr.right);
-		let lval = this.visitExprArray(expr.left);
+		let rval = this.evaluateExprArray(expr.right);
+		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
 			lval = this.memsim.readSymValue(lval); // get the value
@@ -453,8 +460,8 @@ class Interpreter {
 	}
 
     visitBLogicExpr(expr){
-		let rval = this.visitExprArray(expr.right);
-		let lval = this.visitExprArray(expr.left);
+		let rval = this.evaluateExprArray(expr.right);
+		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
 			lval = this.memsim.readSymValue(lval); // get the value
@@ -605,7 +612,7 @@ class Interpreter {
 				}else{
 					this.pc = loop.cond;
 				}
-				condition = this.visitExprArray(loop.cond);
+				condition = this.evaluateExprArray(loop.cond);
 				if(!condition) break;
 
 				continue loop;
@@ -629,7 +636,7 @@ class Interpreter {
 		// initialize symbols and assign addresses
 		if(!sfParams.empty()){
 			for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
-				let val = this.visitExprArray(arg);
+				let val = this.evaluateExprArray(arg);
 				if(has(val, "address")) val = this.memsim.readSymValue(val);
 				this.memsim.setSymValue(sym, val, MEMREGION.STACK);
 				sym.interpreted = true;
@@ -681,14 +688,14 @@ class Interpreter {
 		this.#callStack.push(sf);
 
 		// init
-		this.visitExprArray(loop.init);
+		this.evaluateExprArray(loop.init);
 
 		let condition;
 		loop: for(;;){ // the for loop is there only as a label
 			// evaluate at the beginning of every new loop run
 			if(this.#_instrNum > this.#breakstop) return; //?? same ??
 			this.pc = loop; //?? question - should this be stopped and shown the interpretation of for head separately ??
-			condition = this.visitExprArray(loop.cond);
+			condition = this.evaluateExprArray(loop.cond);
 
 			if(condition){
 				if(this.#_instrNum > this.#breakstop) return;
@@ -705,12 +712,12 @@ class Interpreter {
 				}
 
 				// check if iteration expression should be interpreted
-				condition = this.visitExprArray(loop.cond);
+				condition = this.evaluateExprArray(loop.cond);
 				if(!condition) break;
 
 				// iteration expression
 				if(this.#_instrNum > this.#breakstop) return;
-				this.visitExprArray(loop.itexpr);
+				this.evaluateExprArray(loop.itexpr);
 
 				continue loop;
 			}else{
@@ -740,7 +747,7 @@ class Interpreter {
 	}
 
 	visitIfStmt(stmt){
-		let decision = this.visitExprArray(stmt.expr);
+		let decision = this.evaluateExprArray(stmt.expr);
 		if(decision == false){
 			if(stmt.sfalse){ // it can be null in case of no else
 				stmt.sfalse.accept(this);
@@ -749,7 +756,7 @@ class Interpreter {
 			if(isclass(stmt.strue, "CStmt")){ // in case of brackets around statement (...if(true){...}...)
 				stmt.strue.accept(this);
 			}else{ // in case of no brackets (...if(true) printf()...)
-				this.visitExprArray(stmt.strue);
+				this.evaluateExprArray(stmt.strue);
 			}
 		}
 	}
@@ -757,7 +764,7 @@ class Interpreter {
 	visitInitializer(initializer){
 		switch(initializer.kind){
 			case INITTYPE.EXPR:
-				let val = this.visitExprArray(initializer.expr);
+				let val = this.evaluateExprArray(initializer.expr);
 				if(has(val, "address")) val = this.memsim.readSymValue(val);
 				return val;
 			case INITTYPE.ARR:
@@ -812,7 +819,7 @@ class Interpreter {
 		// check if function has void signature if yes just to this (ignore return value)
 		if(expr == null) throw new ReturnThrow(new ReturnVoid(ret.loc)); // in case of empty return (void return)
 
-		expr = this.visitExprArray(expr); // resolve the expression (last is returned)
+		expr = this.evaluateExprArray(expr); // resolve the expression (last is returned)
 		if(has(expr, "address")) expr = this.memsim.readSymValue(expr);
 
 		// this breakstop is causing some weird behavior at the end of main, maybe remove it
@@ -831,16 +838,16 @@ class Interpreter {
 	}
 
     visitSubscriptExpr(expr){
-		let indices = [this.visitExprArray(expr.expr)];
+		let indices = [this.evaluateExprArray(expr.expr)];
 		let exprCopy = expr.pointer;
 		let symbol;
 
 		while(exprCopy != null){
 			let val;
 			if(exprCopy.expr){
-				val = this.visitExprArray(exprCopy.expr);
+				val = this.evaluateExprArray(exprCopy.expr);
 			}else{  // last in the chain is identifier
-				val = this.visitExprArray(exprCopy);
+				val = this.evaluateExprArray(exprCopy);
 				if(has(val, "address")) symbol = val;
 				break;
 			}
@@ -872,7 +879,7 @@ class Interpreter {
 
     visitUExpr(expr){
 		//TODO POSTFIX AND PREFIX DIFFERENTIATION
-		let symbol = this.visitExprArray(expr.expr);
+		let symbol = this.evaluateExprArray(expr.expr);
 
 		switch(expr.op){
 			case '+':
@@ -924,7 +931,7 @@ class Interpreter {
 			// evaluate at the beginning of every new loop run
 			if(this.#_instrNum > this.#breakstop) return;
 			this.pc = loop;
-			condition = this.visitExprArray(loop.cond);
+			condition = this.evaluateExprArray(loop.cond);
 
 			if(condition){
 				if(this.#_instrNum > this.#breakstop) return;
@@ -941,7 +948,7 @@ class Interpreter {
 				}
 
 				// check if iteration expression should be interpreted
-				condition = this.visitExprArray(loop.cond);
+				condition = this.evaluateExprArray(loop.cond);
 				if(!condition) break;
 
 				continue loop;
@@ -992,9 +999,11 @@ class Interpreter {
 
 	/**
 	 * All expression could be returned as an array, that is by design of the C language.
+	 * This function exists to make it easier to evaluate any expression in interpreter.
 	 * @param {Array.<Expr>} expr
+	 * @return {}
 	 */
-	visitExprArray(expr){
+	evaluateExprArray(expr){
 		let ret;
 		if(Array.isArray(expr)){
 			for(const subexpr of expr){
@@ -1009,15 +1018,11 @@ class Interpreter {
 
 	/**
 	 * Determines and returns size of a type in bytes
-	 * @! CURRENTLY NOT USED!!!
+	 * @param {DATATYPE} datatype
+	 * @return {integer}
 	 */
-	sizeof(str){
-		switch(str){
-			case "int":
-				return INTSIZE; // defined in memory.js
-			default:
-				return CHARSIZE;
-		}
+	sizeof(datatype){
+		return MEMSIZES[datatype];
 	}
 
 	/**
@@ -1085,6 +1090,11 @@ class Interpreter {
 		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeJI", "fullLine"); // "fullLine"/"text" last arg for whole line/part of line being highlighted
 	}
 
+	/**
+	 * Resets the HTML content to empty string.
+	 * @public
+	 * @todo If needed, pass the element (HTML) ids as arguments
+	 */
 	resetHTML(){
 		if(document.getElementById("console-output")){
 			document.getElementById("console-output").innerHTML = "";
@@ -1092,6 +1102,11 @@ class Interpreter {
 	}
 }
 
+/**
+ * @class ReturnThrow
+ * @description Class which can be thrown to return a value from function. Use in visitReturn.
+ * @param {Construct} construct
+ */
 class ReturnThrow {
 	constructor(construct){
 		this.loc = construct.loc;
@@ -1099,6 +1114,11 @@ class ReturnThrow {
 	}
 }
 
+/**
+ * @class ReturnThrow
+ * @description Class which can be thrown to return a value from function. Use in visitReturn.
+ * @param {Object} loc
+ */
 class ReturnVoid {
 	constructor(loc){
 		this.loc = loc;

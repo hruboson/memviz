@@ -16,6 +16,11 @@ class Semantic {
 		this.warningSystem = warningSystem;
 	}
 
+	/**
+	 * First phase of semantic which checks every construct for semantic rules.
+	 * @param {AST} ast
+	 * @throws {SError}
+	 */
 	firstPhase(ast){
 		this.calledFunctions = [];
 		for(const construct of ast){
@@ -29,6 +34,10 @@ class Semantic {
 	 */
 	calledFunctions = [];
 
+	/**
+	 * Second phase of semantic which checks declarations of functions.
+	 * @throws {SError}
+	 */
 	secondPhase(){
 		for (const symbol of this.calledFunctions) {
 			if (symbol.isFunction && !symbol.initialized) {
@@ -761,11 +770,11 @@ class Semantic {
 	 * Infers the type of an expression.
 	 * @param {Object} expression The expression object to analyze
 	 * @returns {string} The inferred C type of the expression
-	 * @throws {Error} Throws an error if the expression type is unknown
+	 * @throws {AppError} Throws an error if the expression type is unknown
 	 */
 	inferType(expression) {
-		if(expression.cType == "CExpr") {
-			switch(expression.type) {
+		if(expression.cType == "CExpr"){
+			switch(expression.type){
 				case "s_literal": return "char*";
 				case "i_constant":
 					if(expression.value.endsWith("LL")) return "int long long";  // Long long int

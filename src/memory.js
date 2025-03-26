@@ -40,7 +40,7 @@ const LLONG_MAX = 9223372036854775807n;
 const ULLONG_MAX = 18446744073709551615n;
 
 // Floating-Point Types (IEEE 754 Standard)
-// Floating point size in C can vary, but we assume standard 32-bit float and 64-bit double
+// Floating point size in C can vary, but let's assume standard 32-bit float and 64-bit double
 
 // Float (32-bit)
 const FLOATSIZE = 4;
@@ -58,8 +58,9 @@ const LONGDOUBLESIZE = 128;
 /**
  * Memory regions
  * @description Memory regions enum
- * @global
  * @typedef MEMREGION
+ * @global
+ * @const
  */
 const MEMREGION = {
 	HEAP: "HEAP",
@@ -70,8 +71,9 @@ const MEMREGION = {
 
 /**
  * Memory types sizes. Lookup table for DATATYPE.
- * @global
  * @typedef MEMSIZES
+ * @global
+ * @const
  */
 const MEMSIZES = {
 	bool: CHARSIZE,
@@ -93,19 +95,33 @@ const MEMSIZES = {
 /**
  * @class Memsim
  * @description Memory simulation class, handles calls from interpreter
+ * @param {WarningSystem} warningSystem
+ * @param {integer} [1024] heapSize
+ * @param {integer} [1000] heapPointer
+ * @param {integer} [1024] stackSize
+ * @param {integer} [5000] stackPointer
+ * @param {integer} [512] dataSize
+ * @param {integer} [2000] dataPointer
+ * @param {integer} [512] bssSize
+ * @param {integer} [3000] bssPointer
  */
 class Memsim {
 
+	/**
+	 * Warning system passed from interpreter.
+	 * @type {WarningSystem}
+	 * @private
+	 */
 	#warningSystem;
 
-	constructor(warningSystem, heapSize = 1024, stackSize = 1024, dataSize = 512, bssSize = 512){
+	constructor(warningSystem, heapSize = 1024, heapPointer = 1000, stackSize = 1024, stackPointer = 5000, dataSize = 512, dataPointer = 2000, bssSize = 512, bssPointer = 3000){
 		this.#warningSystem = warningSystem;
 		this.memory = new Map(); // Simulated memory
 		this.references = new Map(); // Reference counter
-		this.heapPointer = 1000; // Heap starts at 1000
-		this.stackPointer = 5000; // Stack starts at 5000 and grows downward
-		this.dataSegment = 2000;  // Initialized global variables
-		this.bssSegment = 3000;   // Uninitialized global variables
+		this.heapPointer = heapPointer;
+		this.stackPointer = stackPointer;
+		this.dataSegment = dataPointer;
+		this.bssSegment = bssPointer;
 
 		this.heapSize = heapSize;
 		this.stackSize = stackSize;
@@ -142,6 +158,13 @@ class Memsim {
 		}
 	}
 
+	/**
+	 * High-level memory function. Allocates and sets memory value depending on type of symbol passed as an argument.
+	 * @param {Symbol} sym
+	 * @param {number} value
+	 * @param {MEMREGION} region
+	 * @return {integer} Address of allocated memory
+	 */
 	setPrimitiveValue(sym, value, region){
 		switch(sym.memtype){
 			case DATATYPE.bool:
@@ -191,6 +214,12 @@ class Memsim {
 		}
 	}
 
+	/**
+	 * High-level memory function. Allocates space for the array and returns the first address. Also sets the Sym.addresses field with allocated addresses.
+	 * @param {Symbol} sym
+	 * @param {Array} value JS array
+	 * @param {MEMREGION} region
+	 */
 	setArrayValue(sym, value, region){
 		// determine derived type of array
 		const memtype = sym.memtype;
@@ -205,7 +234,13 @@ class Memsim {
 		}
 	}
 
-	// returns address of first element
+	/**
+	 * Allocates the whole array in recursive manner. This is needed to correctly allocate all dimensions. Returns the first address allocated.
+	 * @param {Array} arr
+	 * @param {DATATYPE} memtype
+	 * @param {MEMREGION} region
+	 * @return {integer} address
+	 */
 	allocArray(arr, memtype, region){
 		let addresses = [];
 
@@ -223,6 +258,14 @@ class Memsim {
 		return addresses;
 	}
 
+	/**
+	 * Allocates and sets memory for a pointer symbol. Returns address of the allocated memory.
+	 * @note Pointer in my architecture is a 32bit integer... it's just that simple.
+	 * @praam {Symbol} sym
+	 * @param {integer} value
+	 * @param {MEMREGION} region
+	 * @return {integer} address
+	 */
 	setPointerValue(sym, value, region){
 		// pointer is 32 bits
 		return this.setIntValue(value, region, sym.address);
@@ -331,6 +374,13 @@ class Memsim {
 	 * Low-level memory functions *
 	 *****************************/
 
+	/**
+	 * Sets memory on given address of given size in given region.
+	 * @param {integer} address
+	 * @parma {integer} size
+	 * @param {MEMREGION} region
+	 * @param {DataView} view DataView with the actual data. They should be stored as Uint8.
+	 */
 	#storeMemory(address, size, region, view){
 		for (let i = 0; i < size; i++) {
 			if(view == undefined || view == null){ // in case of no initializer, set address but no value (not even 0)
@@ -589,7 +639,7 @@ class Memsim {
 	 * @param {Number} min
 	 * @param {Number} max
 	 * @param {integer} mask
-	 * @param {string} mask Only for messaging purposes
+	 * @param {string} type Only for messaging purposes
 	 * @param {Object} loc
 	 */
 	checkValueOverflow(value, min, max, mask, type, loc=undefined){
@@ -645,7 +695,10 @@ class Memsim {
 		}
 	}
 
-	// Print memory for debugging
+	/**
+	 * Memory dump of the simulator.
+	 * @public
+	 */
 	printMemory(){
 		console.log("Memory Dump:");
 		this.memory.forEach((data, addr) => {

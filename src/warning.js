@@ -60,6 +60,7 @@ class Warning {
 
 /**
  * @class WarningSystem
+ * @description Handles all warnings. Any part of the interpreter can add warning.
  */
 class WarningSystem {
 	/**

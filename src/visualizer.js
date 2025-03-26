@@ -4,9 +4,12 @@
  */
 
 /**
+ * Core of the maxGraph library
  * @global
+ * @const
+ * @ignore
  */
-const mxg = window.mxg; // core of the MaxGraph library
+const mxg = window.mxg;
 
 /**
  * @class VizCellValue
@@ -36,6 +39,7 @@ class VizCellPointer {
 
 /**
  * @class VizPointerPair
+ * @description Adds convenient aliases to the Pair class.
  * @param {VizCellPointer} pointedFrom
  * @param {VizCellValue} pointedTo
  */
@@ -52,6 +56,7 @@ class VizPointerPair extends Pair {
 /**
  * @class Memviz
  * @description Main visualization class, handles memory visualization. Basically visualizing the call stack and each of its stack frames (symbol tables).
+ * @param {Memsim} memsim
  * @param {CallStack} callStack
  * @param {Element} container HTML element to print to - get it by doing document.getElementById
  */
@@ -64,28 +69,44 @@ class Memviz {
 		this.callStack = callStack;
 		this.container = container;
 
-		this.init();
+		this.#init();
 	}
 
-	init(){
+	/**
+	 * Initializes all structures and sets graph options
+	 * @private
+	 */
+	#init(){
 		this.container.innerHTML = ""; // init output
 		this.graph = new mxg.Graph(this.container);
 		this.root = this.graph.getDefaultParent();
 
 		//this.graph.getStylesheet().styles.set("smoothCurveEdge", smoothCurveEdge); TODO different edge style
-		this.setGraphOptions();
+		this.#setGraphOptions();
 	}
 
-	setGraphOptions(){
+	/**
+	 * Sets graph options
+	 * @private
+	 */
+	#setGraphOptions(){
 		this.graph.setEnabled(false);
 		mxg.InternalEvent.disableContextMenu(this.container);
 	}
 
+	/**
+	 * Starts visualization. Outputs to container.
+	 * @public
+	 */
 	updateHTML(){
 		this.vizCallStack();
 	}
 
-	#callStack;
+	/**
+	 * Call stack acquired from interpreter.
+	 * @type {CallStack}
+	 */
+	callStack;
 
 	/**
 	 * Map of addresses and their visual representation instances
@@ -105,6 +126,7 @@ class Memviz {
 
 	/**
 	 * Height and width of one memory unit (square)
+	 * @returns {Number}
 	 * @static
 	 */
 	static get squareXYlen(){
@@ -113,6 +135,7 @@ class Memviz {
 
 	/**
 	 * Height and width of pointer circle (inside of memory unit)
+	 * @returns {Number}
 	 * @static
 	 */
 	static get circleXYlen(){
@@ -121,6 +144,7 @@ class Memviz {
 
 	/**
 	 * Starting X position of first element in stack frame
+	 * @returns {Number}
 	 * @static
 	 */
 	static get squareX(){
@@ -129,6 +153,7 @@ class Memviz {
 	
 	/**
 	 * Starting Y position of the first element in stack frame
+	 * @returns {Number}
 	 * @static
 	 */
 	static get rowY(){
@@ -137,6 +162,7 @@ class Memviz {
 
 	/**
 	 * Starting X position of the first stack frame (global)
+	 * @returns {Number}
 	 * @static
 	 */
 	static get sfX(){
@@ -145,6 +171,7 @@ class Memviz {
 
 	/**
 	 * Starting Y position of the first stack frame (global)
+	 * @returns {Number}
 	 * @static
 	 */
 	static get sfY(){
@@ -153,16 +180,27 @@ class Memviz {
 
 	/**
 	 * Height of label above and below of memory unit
+	 * @returns {Number}
 	 * @static
 	 */
 	static get labelHeight(){
 		return Memviz.squareXYlen/3;
 	}
 
+	/**
+	 * Font family. Is set to all visualized elements.
+	 * @returns {string}
+	 * @static
+	 */
 	static get fontFamily(){
 		return "FiraCode";
 	}
 
+	/**
+	 * Font color. Is set to all visualized elements.
+	 * @returns {string}
+	 * @static
+	 */
 	static get fontColor(){
 		return "white";
 	}
@@ -171,6 +209,10 @@ class Memviz {
 	 * CORE VIZ FUNCTIONS *
 	 **********************/
 
+	/**
+	 * Visualizes the whole call stack.
+	 * @function
+	 */
 	vizCallStack(){
 		this.init();
 		this.vizMemregions();
@@ -183,6 +225,13 @@ class Memviz {
 		this.vizPointers();
 	}
 
+	/**
+	 * Visualizes one stack frame.
+	 * @function
+	 * @param {StackFrame} sf
+	 * @param {Number} y Y coordinate to visualize the stack frame.
+	 * @returns {Number} newY Used to calculate the position of next stack frame.
+	 */
 	vizStackFrame(sf, y){
 		if(sf.empty()){ // in case of no names in symtable
 			return y;
@@ -248,6 +297,12 @@ class Memviz {
 		return sfY + height;
 	}
 
+	/**
+	 * Visualizes single symbol from stack frame.
+	 * @param {Symbol} sym
+	 * @param {Cell} parent This will be the symbols stack frame.
+	 * @param {Number} y
+	 */
 	vizSym(sym, parent, y){
 		//TODO only a demo, add switch for types of symbol (array, pointer, structure, primitive)
 
@@ -263,6 +318,13 @@ class Memviz {
 		}
 	}
 
+	/**
+	 * Visualizes primitive value.
+	 * @param {Symbol} sym
+	 * @param {Cell} parent
+	 * @param {Object} style
+	 * @param {Number} y
+	 */
 	vizPrimitiveValue(sym, parent, style, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
 
@@ -322,6 +384,13 @@ class Memviz {
 		return y + height;
 	}
 
+	/**
+	 * Visualizes pointer value.
+	 * @param {Symbol} sym
+	 * @param {Cell} parent
+	 * @param {Object} style
+	 * @param {Number} y
+	 */
 	vizPointerValue(sym, parent, style, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
 		let pointingTo;
@@ -404,6 +473,13 @@ class Memviz {
 		return y + height;
 	}
 
+	/**
+	 * Visualizes array.
+	 * @param {Symbol} sym
+	 * @param {Cell} parent
+	 * @param {Object} style
+	 * @param {Number} y
+	 */
 	vizArrayValue(sym, parent, style, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
 
@@ -417,6 +493,15 @@ class Memviz {
 		return y + height;
 	}
 
+	/**
+	 * Recursively visualizes each element of an array.
+	 * @param {Symbol} sym
+	 * @param {Cell} parent
+	 * @param {Object} style
+	 * @param {Number} y
+	 * @param {integer} numberOfElements
+	 * @param {Array} arr
+	 */
 	vizArrayRecursive(sym, parent, style, y, numberOfElements, arr){
 		let n = numberOfElements;
 		for (var i = 0; i < arr.length; i++){
@@ -560,10 +645,18 @@ class Memviz {
 		return n;
 	}
 
+	/**
+	 * Visualizes the hint at top of visualizer. This visualizes the memory regions and their colors
+	 * @todo implement
+	 */
 	vizMemregions(){
 		//TODO this will be on top of the whole visualization, it will show what color each region has
 	}
 
+	/**
+	 * Creates edges of pointers pointing to values.
+	 * @function
+	 */
 	vizPointers(){
 		const root = this.root;
 		for(let pair of this.pointerPairs){
@@ -594,6 +687,11 @@ class Memviz {
 	 * HELPER FUNCTIONS *
 	 ********************/
 
+	/**
+	 * Returns style based on memregion.
+	 * @param {MEMREGION} memregion
+	 * @return {Object} style Can be used while inserting vertex to the graph.
+	 */
 	getStyleFromMEMREGION(memregion){
 		const fontSize = 30;
 		const fontColor = Memviz.fontColor;

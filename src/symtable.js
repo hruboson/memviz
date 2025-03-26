@@ -40,8 +40,9 @@ class ScopeInfo {
 /**
  * Enum for possible types of symbols
  * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.1} 
- * @global
  * @typedef SYMTYPE
+ * @global
+ * @const
  */
 const SYMTYPE = {
 	OBJ: "OBJ",
@@ -54,8 +55,9 @@ const SYMTYPE = {
 
 /**
  * Enum for possible fundamental data types of symbol
- * @global
  * @typedef DATATYPE
+ * @global
+ * @const
  * @see {memory.js} for sizes
  */
 const DATATYPE = {
@@ -255,6 +257,8 @@ class Sym {
 
 	/**
 	 * Override to avoid recursion
+	 * @description Convert this to ordinary Object without recursive references.
+	 * @return {Object}
 	 */
     toJSON() {
         return {
@@ -274,8 +278,9 @@ class Sym {
 /**
  * Types of name spaces
  * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.3}
- * @global
  * @typedef NAMESPACE
+ * @global
+ * @const
  */
 const NAMESPACE = {
 	ORDS: "ORDS", // ordinary identifiers

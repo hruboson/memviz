@@ -102,6 +102,10 @@ class StackFrame {
 		}
 	}
 
+	/**
+	 * Checks whether symtables are empty.
+	 * @return {bool}
+	 */
 	empty(){
 		return (this.symtable.objects.size == 0 && this.symtable.tags.size == 0 && this.symtable.labels.size == 0) ? true : false;
 	}
