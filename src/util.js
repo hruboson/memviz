@@ -130,7 +130,7 @@ function has(obj, field){
 /**
  * Zips any number of iterables. It will always zip() the largest Iterable returning undefined for shorter arrays.
  * @param  {...Iterable<any>} iterables
- * @see {https://stackoverflow.com/questions/22015684/zip-arrays-in-javascript#72221748}
+ * @see {@link https://stackoverflow.com/questions/22015684/zip-arrays-in-javascript#72221748}
  * @example 
  * 	
  * 	const a = zip(this.#currSymtable.objects, args); 
