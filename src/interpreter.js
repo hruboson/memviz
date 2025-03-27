@@ -879,39 +879,51 @@ class Interpreter {
 
     visitUExpr(expr){
 		//TODO POSTFIX AND PREFIX DIFFERENTIATION
-		let symbol = this.evaluateExprArray(expr.expr);
+		let value = this.evaluateExprArray(expr.expr);
 
 		switch(expr.op){
 			case '+':
-				return this.memsim.readSymValue(symbol);
+				if(has(value, "address")) return this.memsim.readSymValue(value);
+				return value;
 			case '-':
-				return -this.memsim.readSymValue(symbol);
+				if(has(value, "address")) return -this.memsim.readSymValue(value);
+				return -value;
 			case '++':
-				this.memsim.setSymValue(symbol, this.memsim.readSymValue(symbol) + 1, MEMREGION.STACK);
-				break;
+				if(has(value, "address")){
+					const currValue = this.memsim.readSymValue(value);
+					this.memsim.setSymValue(value, currValue + 1, MEMREGION.STACK); 
+					return currValue + 1;
+				}
+				return value + 1;
 			case '--':
-				this.memsim.setSymValue(symbol, this.memsim.readSymValue(symbol) - 1, MEMREGION.STACK);
-				break;
+				if(has(value, "address")){
+					const currValue = this.memsim.readSymValue(value);
+					this.memsim.setSymValue(value, currValue - 1, MEMREGION.STACK); 
+					return currValue - 1;
+				}
+				return value - 1;
 			case '!':
-				return !this.memsim.readSymValue(symbol);
+				if(has(value, "address")) return !this.memsim.readSymValue(value);
+				return !value;
 			case '~':
-				return ~this.memsim.readSymValue(symbol);
+				if(has(value, "address")) return ~this.memsim.readSymValue(value);
+				return ~value;
 			case '*': {
-				if(has(symbol, "address")){
+				if(has(value, "address")){
 					/* Hmmm, this kind of works, but I think having
 					 * separate readValueAtAddress(memsize) function
 					 * would be nicer tbh */
 					const dummySym = {
-						memtype: symbol.memtype,
-						address: this.memsim.readSymValue(symbol)
+						memtype: value.memtype,
+						address: this.memsim.readSymValue(value)
 					}
 					return this.memsim.readPrimitiveValue(dummySym);
 				}
-				throw new RTError(`Value ${symbol} does not have an address`, expr.loc);
+				throw new RTError(`Value ${value} does not have an address`, expr.loc);
 			}
 			case '&': {
-				if(has(symbol, "address")) return symbol.address;
-				throw new RTError(`Value ${symbol} does not have an address`, expr.loc);
+				if(has(value, "address")) return value.address;
+				throw new RTError(`Value ${value} does not have an address`, expr.loc);
 			} 
 			default:
 				throw new AppError(`Unknown operator of UExpr: ${expr.op}`, expr.loc);
