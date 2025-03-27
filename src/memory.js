@@ -96,14 +96,14 @@ const MEMSIZES = {
  * @class Memsim
  * @description Memory simulation class, handles calls from interpreter
  * @param {WarningSystem} warningSystem
- * @param {integer} [1024] heapSize
- * @param {integer} [1000] heapPointer
- * @param {integer} [1024] stackSize
- * @param {integer} [5000] stackPointer
- * @param {integer} [512] dataSize
- * @param {integer} [2000] dataPointer
- * @param {integer} [512] bssSize
- * @param {integer} [3000] bssPointer
+ * @param {integer} [heapSize=1024]
+ * @param {integer} [heapPointer=1000]
+ * @param {integer} [stackSize=1024]
+ * @param {integer} [stackPointer=5000]
+ * @param {integer} [dataSize=512]
+ * @param {integer} [dataPointer=2000]
+ * @param {integer} [bssSize=512]
+ * @param {integer} [bssPointer=3000]
  */
 class Memsim {
 
