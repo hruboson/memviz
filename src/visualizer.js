@@ -214,7 +214,7 @@ class Memviz {
 	 * @function
 	 */
 	vizCallStack(){
-		this.init();
+		this.#init();
 		this.vizMemregions();
 
 		let nextY = 10;
