@@ -98,7 +98,7 @@ WS  [\s\t\v\n\f]
 "0"{O}*{IS}?					{ return 'I_CONSTANT'; }
 {CP}?"'"([^'\\\n]|{ES})+"'"		{ return 'I_CONSTANT'; }
 
-({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return 'STRING_LITERAL'; }
+({SP}?\"([^"\\\n]|{ES})*\")+	{ return 'STRING_LITERAL'; }
 
 {L}({L}|{D})*		{ 
 						if(parser.yy.symbols.types.includes(yytext)){
