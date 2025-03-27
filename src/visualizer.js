@@ -662,6 +662,7 @@ class Memviz {
 		for(let pair of this.pointerPairs){
 			// first determine where to point
 			const targetCellValue = this.symbols.get(pair.to.address);
+			if(!targetCellValue){ console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); return; };
 			pair.to.cell = targetCellValue.cell;
 
 			const edge = this.graph.insertEdge({
