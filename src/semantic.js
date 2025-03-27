@@ -7,8 +7,8 @@
  * Semantic analyzer for interpreter
  * @description Acts as a visitor for AST structures.
  * @class Semantic
- * @param {Stack} Stack of symbol tables (reference to Interpreter symtableStack)
- * @param {WarningSystem}
+ * @param {Stack} symtableStack Stack of symbol tables (reference to Interpreter symtableStack)
+ * @param {WarningSystem} warningSystem
  */
 class Semantic {
 	constructor(symtableStack, warningSystem){
