@@ -5,9 +5,69 @@
 
 /**
  * @class CallStack
- * @inheritdoc
+ * @todo rename this class
  */
-class CallStack extends Stack {
+class CallStack{
+
+	/**
+	 * Stack of stack frames
+	 * @private
+	 * @type {Array}
+	 */
+	#sFrames;
+
+	/**
+	 * Heap frame
+	 */
+	hFrame;
+
+	/**
+	 * Data frame
+	 */
+	dFrame;
+
+	constructor(){
+		this.#sFrames = [];
+		this.hFrame = new HeapFrame();
+		this.dFrame = new DataFrame();
+	}
+
+	/**
+	 * Returns the top-most item in stack
+	 * @return {Object}
+	 */
+	peekSFrame(){
+		return this.#sFrames[this.#sFrames.length - 1];
+	}
+
+	/**
+	 * Alias for peek()
+	 * @return {Object}
+	 */
+	topSFrame(){
+		return this.peekSFrame();
+	}
+
+	/**
+	 * Removes the top-most item in stack and returns it
+	 * @return {Object}
+	 */
+	popSFrame(){
+		if(this.#sFrames.length == 0){ 
+			return; 
+		}
+
+		const item = this.#sFrames[this.#sFrames.length - 1];
+		this.#sFrames.splice(this.#sFrames.length - 1, 1);
+		return item;
+	}
+
+	/**
+	 * Adds item to top of stack
+	 */
+	pushSFrame(item){
+		this.#sFrames[this.#sFrames.length] = item;
+	}
 
 	/**
 	 * Retrives StackFrame from CallStack with the symtable corresponding to current top StackFrame symtable
@@ -16,12 +76,28 @@ class CallStack extends Stack {
 	getParentSF(symtbptr){
 		const lookingFor = symtbptr.parent.scopeInfo.name;
 
-		for (let i = this.items.length - 1; i >= 0; i--) {
-			if (this.items[i].symtable.scopeInfo.name == lookingFor) {
-				return this.items[i];
+		for (let i = this.#sFrames.length - 1; i >= 0; i--) {
+			if (this.#sFrames[i].symtable.scopeInfo.name == lookingFor) {
+				return this.#sFrames[i];
 			}
 		}
 		return undefined;
+	}
+
+	/**
+	 * Iterator defaults to stack frames
+	 */
+	[Symbol.iterator](){
+		let index = 0; // start from bottom
+		return {
+			next: () => {
+				if (index < this.#sFrames.length) {
+					return { value: this.#sFrames[index++], done: false };
+				} else {
+					return { done: true };
+				}
+			}
+		};
 	}
 }
 
@@ -109,4 +185,12 @@ class StackFrame {
 	empty(){
 		return (this.symtable.objects.size == 0 && this.symtable.tags.size == 0 && this.symtable.labels.size == 0) ? true : false;
 	}
+}
+
+class HeapFrame{
+
+}
+
+class DataFrame{
+
 }

@@ -265,7 +265,7 @@ class Interpreter {
 			throw err;
 		}
 
-		this.#callStack.push(new StackFrame(this.#symtableGlobal), null, null); // add global symtable to call stack
+		this.#callStack.pushSFrame(new StackFrame(this.#symtableGlobal), null, null); // add global symtable to call stack
 	}
 
 	/**
@@ -297,6 +297,11 @@ class Interpreter {
 			if(symbol.isNative) continue; // skip built-in functions
 			if(symbol.type == "TYPEDEF") continue; // skip typedefs
 			symbol.astPtr.accept(this);
+		}
+
+		// initialize strings
+		for(const [key, str] of this.#semanticAnalyzer.stringTable){
+			console.log(str);
 		}
 
 		if(breakstop > 0){
@@ -516,7 +521,7 @@ class Interpreter {
 
 	visitCStmt(stmt){
 		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.getParentSF(stmt.symtbptr)); // StackFrame creates deep copy of symbol table
-		this.#callStack.push(sf);
+		this.#callStack.pushSFrame(sf);
 
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) return;
@@ -525,7 +530,7 @@ class Interpreter {
 		}
 
 		if(this.#_instrNum > this.#breakstop) return;
-		this.#callStack.pop();
+		this.#callStack.popSFrame();
 	}
 
 	visitDeclaration(declaration){
@@ -541,7 +546,7 @@ class Interpreter {
 
 		symbol.interpreted = true;
 
-		if(this.#callStack.top().symtable.scopeInfo.type == "global"){
+		if(this.#callStack.topSFrame().symtable.scopeInfo.type == "global"){
 			if(!initializer){
 				this.memsim.setSymValue(symbol, 0, MEMREGION.BSS);
 			}else{
@@ -565,17 +570,17 @@ class Interpreter {
 				while(declarator.kind != DECLTYPE.ID){
 					declarator = declarator.child;
 				}
-				return this.#callStack.top().lookup(NAMESPACE.ORDS, declarator.identifier.name);
+				return this.#callStack.topSFrame().lookup(NAMESPACE.ORDS, declarator.identifier.name);
 			}
 
 			case DECLTYPE.ID:
-				return this.#callStack.top().lookup(NAMESPACE.ORDS, declarator.identifier.name);
+				return this.#callStack.topSFrame().lookup(NAMESPACE.ORDS, declarator.identifier.name);
 
 			case DECLTYPE.ARR:{
 				while(declarator.kind != DECLTYPE.ID){
 					declarator = declarator.child;
 				}
-				return this.#callStack.top().lookup(NAMESPACE.ORDS, declarator.identifier.name);
+				return this.#callStack.topSFrame().lookup(NAMESPACE.ORDS, declarator.identifier.name);
 			}
 		}
 	}
@@ -586,7 +591,7 @@ class Interpreter {
 
     visitDoWhileLoop(loop){
 		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
-		this.#callStack.push(sf);
+		this.#callStack.pushSFrame(sf);
 
 		let condition = true;
 		loop: for(;;){ // the for loop is there only as a label
@@ -621,7 +626,7 @@ class Interpreter {
 			}
 		}
 
-		this.#callStack.pop();
+		this.#callStack.popSFrame();
 	}
 
     visitEnum(enumerator){
@@ -643,7 +648,7 @@ class Interpreter {
 			}
 		}
 
-		this.#callStack.push(sfParams);
+		this.#callStack.pushSFrame(sfParams);
 
 		try{
 			fnc.body.accept(this); // run body
@@ -658,17 +663,17 @@ class Interpreter {
 
 			if(isclass(ret.value, "ReturnVoid")){
 				if(this.#_instrNum > this.#breakstop) return;
-				this.#callStack.pop(); // pop param symtable
+				this.#callStack.popSFrame(); // pop param symtable
 				return null;
 			}
 
 			if(this.#_instrNum > this.#breakstop) return;
-			this.#callStack.pop(); // pop param symtable
+			this.#callStack.popSFrame(); // pop param symtable
 			return ret.value;
 		}
 
 		if(this.#_instrNum > this.#breakstop) return;
-		this.#callStack.pop(); // pop param symtable
+		this.#callStack.popSFrame(); // pop param symtable
 	}
 
 	visitFncCallExpr(callExpr){
@@ -685,7 +690,7 @@ class Interpreter {
 
 	visitForLoop(loop){
 		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
-		this.#callStack.push(sf);
+		this.#callStack.pushSFrame(sf);
 
 		// init
 		this.evaluateExprArray(loop.init);
@@ -725,7 +730,7 @@ class Interpreter {
 			}
 		}
 
-		this.#callStack.pop();
+		this.#callStack.popSFrame();
 	}
 
 	visitGoto(gt){
@@ -742,7 +747,7 @@ class Interpreter {
 		// lookup can return undefined, so check that first (x?.y)
 		if(sym?.isFunction) return id;
 
-		sym = this.#callStack.top().resolve(id.name);
+		sym = this.#callStack.topSFrame().resolve(id.name);
 		return sym;
 	}
 
@@ -936,7 +941,7 @@ class Interpreter {
 
 	visitWhileLoop(loop){
 		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
-		this.#callStack.push(sf);
+		this.#callStack.pushSFrame(sf);
 
 		let condition;
 		loop: for(;;){ // the for loop is there only as a label
@@ -969,7 +974,7 @@ class Interpreter {
 			}
 		}
 
-		this.#callStack.pop();
+		this.#callStack.popSFrame();
 	}
 
 	/******************************
