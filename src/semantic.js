@@ -4,6 +4,76 @@
  */
 
 /**
+ * @class StringRecord
+ * @param {string} str
+ * @note Uses the btoa function to encode a string (hash-like)
+ */
+class StringRecord{
+	constructor(str){
+		this.str = str;
+		this.encoded = btoa(str);
+		this.address = null;
+		this.addresses = [];
+		this.region = MEMREGION.DATA;
+	}
+
+	toCArray(){
+		let arr = Array.from(this.str);
+		arr.push('\0');
+		arr = arr.map(function(c){
+			return c.charCodeAt(0);
+		});
+		return arr;
+	}
+}
+
+/**
+ * @class StringTable
+ * @note Uses the btoa function to encode a string (hash-like)
+ */
+class StringTable{
+	constructor(){
+		this.strings = new Map();
+	}
+
+	/**
+	 * Adds new record to string table
+	 * @param {StringRecord} sr
+	 */
+	add(sr){
+		if(!this.has(sr)){
+			this.strings.set(sr.encoded, sr);
+		}
+	}
+
+	/**
+	 * Check if table already has record about a string
+	 * @param {StringRecord} sr
+	 */
+	has(sr){
+		if(this.strings.has(sr.encoded)) return true;
+		return false;
+	}
+
+	/**
+	 * Retrieves record from the table based on its hash (btoa)
+	 * @param {string} encoded
+	 */
+	get(str){
+		return this.strings.get(btoa(str));
+	}
+
+	/**
+	 * Iterator
+	 */
+	*[Symbol.iterator]() {
+		for (const str of this.strings.entries()) {
+			yield str; // yields [string, StringRecord]
+		}
+	}
+}
+
+/**
  * Semantic analyzer for interpreter
  * @description Acts as a visitor for AST structures.
  * @class Semantic
@@ -174,6 +244,12 @@ class Semantic {
 		this.symtableStack.pop();
 	}
 
+	/**
+	 * Stores information about string literals
+	 * @type {StringTable}
+	 */
+	stringTable = new StringTable();
+
 
 	/*******************************
 	 *     VISITOR FUNCTIONS       *
@@ -187,7 +263,7 @@ class Semantic {
 		let lval;
 		let rval;
 		let symbol;
-		const currSymtable = this.symtableStack.peek();;
+		const currSymtable = this.symtableStack.peek();
 
 		// check rval type
 		// todo
@@ -259,7 +335,9 @@ class Semantic {
 	visitCExpr(expr){
 		switch(expr.type){
 			case "s_literal":
-				return String(expr.value.slice(1,-1));
+				const sr = new StringRecord(expr.value.slice(1, -1));
+				this.stringTable.add(sr);
+				return sr.str;
 			case "i_constant":
 				return parseInt(expr.value);
 			case "f_constant":
@@ -298,6 +376,17 @@ class Semantic {
 			if( ((declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR) || (declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR))
 				&& (typeof initKind != "string" && declKind != DECLTYPE.ARR)){
 				throw new SError(`Invalid initializer`, declaration.loc);
+			}
+		}
+
+		// change string location
+		if(declaration.initializer && declaration.initializer.kind == INITTYPE.EXPR){
+			if(declaration.declarator.kind == DECLTYPE.ARR){
+				// string allocated on stack
+				if(typeof initKind == "string"){
+					let sr = this.stringTable.get(initKind);
+					sr.region = MEMREGION.STACK;
+				}
 			}
 		}
 
