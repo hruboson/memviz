@@ -383,10 +383,11 @@ class Semantic {
 		if(declaration.initializer && declaration.initializer.kind == INITTYPE.EXPR){
 			if(declaration.declarator.kind == DECLTYPE.ARR){
 				// string allocated on stack
-				if(typeof initKind == "string"){
+				//TODO just make a note of it and then read from the address
+				/**if(typeof initKind == "string"){
 					let sr = this.stringTable.get(initKind);
 					sr.region = MEMREGION.STACK;
-				}
+				}*/
 			}
 		}
 

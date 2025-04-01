@@ -18,8 +18,8 @@ class Interpreter {
 
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
-		this.#callStack = new CallStack();
 		this.memsim = new Memsim(this.#warningSystem);
+		this.#callStack = new CallStack(this.memsim);
 		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output")); // TODO pass the element id as string parameter for interpreter
 	}
 
@@ -300,8 +300,18 @@ class Interpreter {
 		}
 
 		// initialize strings
-		for(const [key, str] of this.#semanticAnalyzer.stringTable){
-			console.log(str);
+		for(const [key, stringRecord] of this.#semanticAnalyzer.stringTable){
+			const record = new MemoryRecord();
+			record.size = [stringRecord.toCArray().length];
+			record.memtype = DATATYPE.uchar;
+
+			this.memsim.setRecordValue(record, stringRecord.toCArray(), MEMREGION.DATA);
+
+			this.#callStack.dFrame.add(record);
+
+			// also set string address so we can find it in memory in visitCExpr
+			stringRecord.address = record.address;
+			stringRecord.addresses = record.addresses;
 		}
 
 		if(breakstop > 0){
@@ -315,7 +325,7 @@ class Interpreter {
 
 		this.updateHTML(result);
 		this.memviz.updateHTML();
-		//this.memsim.printMemory();
+		this.memsim.printMemory();
 		return result;
 	}
 
@@ -337,56 +347,56 @@ class Interpreter {
 
 		if(has(lval, "address")){
 			symbol = lval;
-			lval = this.memsim.readSymValue(lval); // get the value
+			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readSymValue(rval); // get the value
+			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
 		// concrete operations
 		switch(expr.op){
 			case '=':
-				this.memsim.setSymValue(symbol, rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, rval, MEMREGION.STACK);
 				break;
 			case '+=':
-				this.memsim.setSymValue(symbol, lval + rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval + rval, MEMREGION.STACK);
 				break;
 			case '-=':
-				this.memsim.setSymValue(symbol, lval - rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval - rval, MEMREGION.STACK);
 				break;
 			case '*=':
-				this.memsim.setSymValue(symbol, lval * rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval * rval, MEMREGION.STACK);
 				break;
 			case '/=':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				this.memsim.setSymValue(symbol, lval / rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval / rval, MEMREGION.STACK);
 				break;
 			case '%=':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				this.memsim.setSymValue(symbol, lval % rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval % rval, MEMREGION.STACK);
 				break;
 			case '&=':
-				this.memsim.setSymValue(symbol, lval & rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval & rval, MEMREGION.STACK);
 				break;
 			case '|=':
-				this.memsim.setSymValue(symbol, lval | rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval | rval, MEMREGION.STACK);
 				break;
 			case '^=':
-				this.memsim.setSymValue(symbol, lval ^ rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval ^ rval, MEMREGION.STACK);
 				break;
 			case '<<=':
-				this.memsim.setSymValue(symbol, lval << rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval << rval, MEMREGION.STACK);
 				break;
 			case '>>=':
-				this.memsim.setSymValue(symbol, lval >> rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval >> rval, MEMREGION.STACK);
 				break;
 
 			default:
 				throw new AppError(`Unknown operator of expression: ${expr}`, expr.loc);
 		}
 
-		return this.memsim.readSymValue(symbol);
+		return this.memsim.readRecordValue(symbol);
 	}
 
     visitBArithExpr(expr){
@@ -394,11 +404,11 @@ class Interpreter {
 		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
-			lval = this.memsim.readSymValue(lval); // get the value
+			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readSymValue(rval); // get the value
+			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
 		// concrete operations
@@ -436,11 +446,11 @@ class Interpreter {
 		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
-			lval = this.memsim.readSymValue(lval); // get the value
+			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readSymValue(rval); // get the value
+			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
 		// concrete operations
@@ -469,11 +479,11 @@ class Interpreter {
 		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
-			lval = this.memsim.readSymValue(lval); // get the value
+			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readSymValue(rval); // get the value
+			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
 		// concrete operations
@@ -499,9 +509,10 @@ class Interpreter {
 	visitCExpr(expr){
 		switch(expr.type){
 			case "s_literal":
-				const ret = Array.from(expr.value.slice(1, -1));
-				ret.push('\0');
-				return ret;
+				const str = expr.value.slice(1, -1);
+				const addr = this.#semanticAnalyzer.stringTable.get(str).address;
+				const record = this.#callStack.dFrame.get(addr);
+				return record;
 			case "i_constant":
 				return parseInt(expr.value);
 			case "f_constant":
@@ -548,15 +559,15 @@ class Interpreter {
 
 		if(this.#callStack.topSFrame().symtable.scopeInfo.type == "global"){
 			if(!initializer){
-				this.memsim.setSymValue(symbol, 0, MEMREGION.BSS);
+				this.memsim.setRecordValue(symbol, 0, MEMREGION.BSS);
 			}else{
-				this.memsim.setSymValue(symbol, value, MEMREGION.DATA);
+				this.memsim.setRecordValue(symbol, value, MEMREGION.DATA);
 			}
 		}else{
 			if(!initializer){
-				this.memsim.setSymValue(symbol, null, MEMREGION.BSS);
+				this.memsim.setRecordValue(symbol, null, MEMREGION.BSS);
 			}else{
-				this.memsim.setSymValue(symbol, value, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, value, MEMREGION.STACK);
 			}
 		}
 	}
@@ -642,8 +653,8 @@ class Interpreter {
 		if(!sfParams.empty()){
 			for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
 				let val = this.evaluateExprArray(arg);
-				if(has(val, "address")) val = this.memsim.readSymValue(val);
-				this.memsim.setSymValue(sym, val, MEMREGION.STACK);
+				if(has(val, "address")) val = this.memsim.readRecordValue(val);
+				this.memsim.setRecordValue(sym, val, MEMREGION.STACK);
 				sym.interpreted = true;
 			}
 		}
@@ -767,16 +778,17 @@ class Interpreter {
 	}
 
 	visitInitializer(initializer){
+		let val;
 		switch(initializer.kind){
 			case INITTYPE.EXPR:
-				let val = this.evaluateExprArray(initializer.expr);
-				if(has(val, "address")) val = this.memsim.readSymValue(val);
+				val = this.evaluateExprArray(initializer.expr);
+				if(initializer.expr.cType == "CExpr" && initializer.expr.type == "s_literal") return val.address;
+				if(has(val, "address")) return this.memsim.readRecordValue(val);
 				return val;
 			case INITTYPE.ARR:
-				const arr = initializer.toJSArray(this);
-				console.log(arr);
-				for(let val of arr){
-					if(has(val, "address")) val = this.memsim.readSymValue(val);
+				let arr = [];
+				for(const item of initializer.arr){
+					arr.push(item.accept(this));
 				}
 				return arr;
 			case INITTYPE.STRUCT:
@@ -825,7 +837,7 @@ class Interpreter {
 		if(expr == null) throw new ReturnThrow(new ReturnVoid(ret.loc)); // in case of empty return (void return)
 
 		expr = this.evaluateExprArray(expr); // resolve the expression (last is returned)
-		if(has(expr, "address")) expr = this.memsim.readSymValue(expr);
+		if(has(expr, "address")) expr = this.memsim.readRecordValue(expr);
 
 		// this breakstop is causing some weird behavior at the end of main, maybe remove it
 		if(this.#_instrNum > this.#breakstop) return;
@@ -863,10 +875,12 @@ class Interpreter {
 
 		const flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
 
-		const dummySym = structuredClone(symbol);
+		const dummySym = new MemoryRecord();
 		dummySym.dimension = 0;
 		dummySym.address = symbol.addresses[flatIndex];
+		dummySym.indirection = symbol.indirection;
 
+		console.log(dummySym);
 		return dummySym;
 	}
 
@@ -888,30 +902,30 @@ class Interpreter {
 
 		switch(expr.op){
 			case '+':
-				if(has(value, "address")) return this.memsim.readSymValue(value);
+				if(has(value, "address")) return this.memsim.readRecordValue(value);
 				return value;
 			case '-':
-				if(has(value, "address")) return -this.memsim.readSymValue(value);
+				if(has(value, "address")) return -this.memsim.readRecordValue(value);
 				return -value;
 			case '++':
 				if(has(value, "address")){
-					const currValue = this.memsim.readSymValue(value);
-					this.memsim.setSymValue(value, currValue + 1, MEMREGION.STACK); 
+					const currValue = this.memsim.readRecordValue(value);
+					this.memsim.setRecordValue(value, currValue + 1, MEMREGION.STACK); 
 					return currValue + 1;
 				}
 				return value + 1;
 			case '--':
 				if(has(value, "address")){
-					const currValue = this.memsim.readSymValue(value);
-					this.memsim.setSymValue(value, currValue - 1, MEMREGION.STACK); 
+					const currValue = this.memsim.readRecordValue(value);
+					this.memsim.setRecordValue(value, currValue - 1, MEMREGION.STACK); 
 					return currValue - 1;
 				}
 				return value - 1;
 			case '!':
-				if(has(value, "address")) return !this.memsim.readSymValue(value);
+				if(has(value, "address")) return !this.memsim.readRecordValue(value);
 				return !value;
 			case '~':
-				if(has(value, "address")) return ~this.memsim.readSymValue(value);
+				if(has(value, "address")) return ~this.memsim.readRecordValue(value);
 				return ~value;
 			case '*': {
 				if(has(value, "address")){
@@ -920,7 +934,7 @@ class Interpreter {
 					 * would be nicer tbh */
 					const dummySym = {
 						memtype: value.memtype,
-						address: this.memsim.readSymValue(value)
+						address: this.memsim.readRecordValue(value)
 					}
 					return this.memsim.readPrimitiveValue(dummySym);
 				}
@@ -985,22 +999,39 @@ class Interpreter {
 			throw new RTError("printf requires at least one argument (format string)");
 		}
 
-		let formatString = args[0].accept(this);  // Resolve format argument (CExpr will return value)
-		formatString = formatString.slice(0, -1).join('') // string is returned as an array
+		let formatString = args[0].accept(this);  // Resolve format argument
+		formatString = this.memsim.readRecordValue(formatString);
+		formatString = CArrayToJsString(formatString);
+		console.log(formatString);
+		//formatString = //formatString.slice(0, -1).join('') // string is returned as an array
 		let otherArgs = args.slice(1).map(arg => arg.accept(this));
-		otherArgs = otherArgs.map(arg => has(arg, "address") ? this.memsim.readSymValue(arg) : arg);
+		otherArgs = otherArgs.map(arg => has(arg, "address") ? this.memsim.readRecordValue(arg) : arg);
 
 		let i = 0;
 
 		let output = formatString.replace(/%[dfsp]/g, match => { // currently supported: %d, %s, %f, %p
-			if (i >= otherArgs.length) {
+			if(i >= otherArgs.length){
 				throw new RTError("Not enough arguments for printf");
 			}
-			return  match === "%d" ? parseInt(otherArgs[i++]) :
-					match === "%f" ? parseFloat(otherArgs[i++]) :
-					match === "%s" ? String(otherArgs[i++]) :
-					match === "%p" ? "0x" + otherArgs[i++].toString(16) :
-					match;
+
+			if(match == "%d"){
+				return parseInt(otherArgs[i++]);
+			}
+
+			if(match == "%f"){
+				return parseFloat(otherArgs[i++]);
+			}
+
+			if (match == "%s") {
+				const record = this.#callStack.findMemoryRecord(otherArgs[i++]);
+				return CArrayToJsString(this.memsim.readRecordValue(record));
+			}
+
+			if (match == "%p") {
+				return "0x" + otherArgs[i++].toString(16);
+			}
+
+			return match;
 		});
 
 		output = output.replace(/\\n/g, "<br>"); // replace \n for <br>, maybe add tab and other special characters in the future :-) would be nice, complete list is in jisonlex ES

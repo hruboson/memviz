@@ -220,3 +220,25 @@ function flatIndexToDimensionalIndices(flatIndex, sizes){
 
 	return indices.reverse(); // reverse to get [outer][middle][inner] order
 }
+
+/**
+ * Converts array of chars to string
+ * @param {Array.<integer>}
+ * @returns String
+ */
+function CArrayToJsString(arr){
+	return arr
+		.slice(0, arr.indexOf(0)) // stop at null terminator (if exists)
+		.map(c => String.fromCharCode(c)) //cconvert integers to characters
+		.join(''); // join into a single string
+}
+
+/**
+ * Converts char (integer) to Javascript text (string/char)
+ * @param {integer}
+ * @returns String
+ */
+function CCharToJsString(c){
+	if(c == 0) return "\\0";
+	return String.fromCharCode(c);
+}

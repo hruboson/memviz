@@ -91,7 +91,7 @@ const DATATYPE = {
  * @param {Construct} astPtr Pointer to AST
  * @param {bool} isNative Specifies if function is native or user defined
  */
-class Sym {
+class Sym extends MemoryRecord{
 
 	/**
 	 * Name (identifier) of the symbol
@@ -106,42 +106,10 @@ class Sym {
 	type;
 
 	/**
-	 * Data type
-	 * @type {DATATYPE}
-	 * @description Derived from specifiers
-	 */
-	memtype;
-
-	/**
 	 * Specifiers of symbol
 	 * @type {Array.<string>}
 	 */
 	specifiers;
-
-	/**
-	 * Dimension of an array
-	 * @type {integer}
-	 */
-	dimension;
-
-	/**
-	 * Array sizes in case of array symbol
-	 * @type {Array.<integer>|Array.<char>}
-	 * @example
-	 * 	int[] = {1, 2, 3}; // size = [3]
-	 * 	int[][] = { {1, 2, 3}, {3, 4, 5} }; // size = [2, 3]
-	 */
-	size;
-
-	/**
-	 * Pointer indirection level
-	 * @type {integer}
-	 * @example
-	 * 	int x = 10; // indirection = 0
-	 * 	int *p = &x; // indirection = 1
-	 * 	int **p = &p; // indirection = 2
-	 */
-	indirection = 0;
 
 	/**
 	 * Symbolizes whether symbol is a pointer
@@ -160,20 +128,6 @@ class Sym {
 	 * @type {bool}
 	 */
 	interpreted = false;
-
-	/**
-	 * Hexadecimal number specifying where in memory the symbol is stored
-	 * @type {integer}
-	 */
-	address;
-
-	/**
-	 * Array of hexadecimal numbers. This field is set in case of array.
-	 * @type {integer}
-	 * @example
-	 * 	int x[][][] = {{{10, 20, 30}, {10, 20, 30}}, {{10, 20, 30}, {10, 20, 30}}}; -> addresses == [4996,4992,4988,4984,4980,4976,4972,4968,4964,4960,4956,4952] (array on stack)
-	 */
-	addresses = [];
 
 	/**
 	 * In case of function, stores parameters
@@ -199,7 +153,8 @@ class Sym {
 	 */
 	isNative;
 
-	constructor(name, type, initialized, specifiers, pointer, dimension=0, size=0, indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
+	constructor(name, type, initialized, specifiers, pointer, dimension=0, size=[], indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
+		super();
 		this.name = name;
 		this.type = type;
 		this.specifiers = specifiers;
@@ -213,6 +168,7 @@ class Sym {
 		this.isNative = isNative;
 		this.astPtr = astPtr; // is this 100% pointer??? otherwise it's super inefficient (I'm not sure how JS pointers work)
 		this.memtype = this.determineMemtype();
+		if(indirection > 0) this.memtype = DATATYPE.int;
 	}
 
 	initialize(){

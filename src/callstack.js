@@ -5,6 +5,7 @@
 
 /**
  * @class CallStack
+ * @param {Memsim} memsim Memory manager to deallocate stack symbols
  * @todo rename this class
  */
 class CallStack{
@@ -17,6 +18,12 @@ class CallStack{
 	#sFrames;
 
 	/**
+	 * Instance of Memsim, will be used to automatically free stack symbols
+	 * @type {Memsim}
+	 */
+	#memsim;
+
+	/**
 	 * Heap frame
 	 */
 	hFrame;
@@ -26,40 +33,69 @@ class CallStack{
 	 */
 	dFrame;
 
-	constructor(){
+	constructor(memsim){
 		this.#sFrames = [];
+		this.#memsim = memsim;
 		this.hFrame = new HeapFrame();
 		this.dFrame = new DataFrame();
 	}
 
 	/**
+	 * Finds memory record by its address
+	 */
+	findMemoryRecord(address){
+		let record;
+		/*TODO
+		for(record of this.hFrame){
+
+		}*/
+		for(record of this.dFrame){
+			if(record.address == address) return record;
+		}
+		for(const frame of this.sFrames){
+			for(record of frame){
+				if(record.address == address) return record;
+			}
+		}
+	}
+
+	/**
 	 * Returns the top-most item in stack
-	 * @return {Object}
+	 * @return {StackFrame}
 	 */
 	peekSFrame(){
 		return this.#sFrames[this.#sFrames.length - 1];
 	}
 
 	/**
-	 * Alias for peek()
-	 * @return {Object}
+	 * Alias for peekSFrame()
+	 * @return {StackFrame}
 	 */
 	topSFrame(){
 		return this.peekSFrame();
 	}
 
 	/**
-	 * Removes the top-most item in stack and returns it
-	 * @return {Object}
+	 * Removes the top-most item in stack of stack frames and returns it
+	 * @return {StackFrame}
 	 */
 	popSFrame(){
 		if(this.#sFrames.length == 0){ 
 			return; 
 		}
 
-		const item = this.#sFrames[this.#sFrames.length - 1];
+		const sFrame = this.#sFrames[this.#sFrames.length - 1];
+
+		// deallocate all objects
+		console.log(this.#memsim);
+		for(const [name, sym] of sFrame.symtable.objects){
+			if(sym.address){
+				this.#memsim.free(sym.address, sym.memsize, MEMREGION.STACK);
+			}
+		}
+
 		this.#sFrames.splice(this.#sFrames.length - 1, 1);
-		return item;
+		return sFrame;
 	}
 
 	/**
@@ -193,4 +229,30 @@ class HeapFrame{
 
 class DataFrame{
 
+	records = [];
+
+	add(record){
+		this.records.push(record);
+	}
+
+	get(address){
+		for(const r of this.records){
+			if(r.address == address) return r;
+		}
+		return false;
+	}
+
+	[Symbol.iterator](){
+		let index = 0; // start from bottom
+		return {
+			next: () => {
+				if (index < this.records.length) {
+					return { value: this.records[index++], done: false };
+				} else {
+					return { done: true };
+				}
+			}
+		};
+	}
 }
+

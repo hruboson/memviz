@@ -93,6 +93,76 @@ const MEMSIZES = {
 }
 
 /**
+ * @class MemoryRecord
+ */
+class MemoryRecord{
+
+	/**
+	 * Hexadecimal number specifying where in memory the symbol is stored
+	 * @type {integer}
+	 */
+	address;
+
+	/**
+	 * Array of hexadecimal numbers. This field is set in case of array.
+	 * @type {integer}
+	 * @example
+	 * 	int x[][][] = {{{10, 20, 30}, {10, 20, 30}}, {{10, 20, 30}, {10, 20, 30}}}; -> addresses == [4996,4992,4988,4984,4980,4976,4972,4968,4964,4960,4956,4952] (array on stack)
+	 */
+	addresses = [];
+
+	/**
+	 * Dimension of an array
+	 * @type {integer}
+	 */
+	dimension;
+
+	/**
+	 * Array sizes in case of array symbol
+	 * @type {Array.<integer>|Array.<char>}
+	 * @example
+	 * 	int a = 1; // size = []
+	 * 	int[] = {1, 2, 3}; // size = [3]
+	 * 	int[][] = { {1, 2, 3}, {3, 4, 5} }; // size = [2, 3]
+	 */
+	size = [];
+
+	/**
+	 * Pointer indirection level
+	 * @type {integer}
+	 * @example
+	 * 	int x = 10; // indirection = 0
+	 * 	int *p = &x; // indirection = 1
+	 * 	int **p = &p; // indirection = 2
+	 */
+	indirection = 0;
+	set indirection(indirection){
+		if(indirection > 0) this.memtype = DATATYPE.int;
+		this.indirection = indirection;
+	}
+
+	memsize; // size in bytes
+
+	/**
+	 * Data type
+	 * @type {DATATYPE}
+	 * @description Derived from specifiers
+	 */
+	memtype;
+
+	/**
+	 * Region in which the record is allocated
+	 * Can be acquired with address through getMemoryRegion
+	 * @type {MEMREGION}
+	 */
+	memregion;
+
+	constructor(){
+		this.memsize = this.size.length > 0 ? this.size.reduce((res, item) => res *= MEMSIZES[this.memtype]*item) : MEMSIZES[this.memtype];
+	}
+}
+
+/**
  * @class Memsim
  * @description Memory simulation class, handles calls from interpreter
  * @param {WarningSystem} warningSystem
@@ -136,101 +206,102 @@ class Memsim {
 	 ******************************/
 
 	/**
-	 * High-level memory function which determines and sets memory to a symbol
-	 * @param {Symbol} sym
+	 * High-level memory function which determines and sets memory to a memory record
+	 * @param {MemoryRecord} record
 	 * @param {integer|character|double|Array|Object}
 	 * @param {MEMREGION} region
 	 */
-	setSymValue(sym, value, region){
+	setRecordValue(record, value, region){
 		if (!Object.values(MEMREGION).includes(region)) {
-			throw new AppError(`Invalid memory while setting MEMREGION of ${sym.name}: ${region}`);
+			throw new AppError(`Invalid memory while setting MEMREGION: ${region}`);
 		}
 
-		// also determine the type (for example char* a = "Hello world")
+		record.memregion = region;
 
 		//TODO struct
-		if(sym.dimension > 0){ // array
-			this.setArrayValue(sym, value, region);
-		}else if(sym.pointer){
-			sym.address = this.setPointerValue(sym, value, region);
+		if(record.size.length > 0){ // array
+			this.setArrayValue(record, value, region);
+		}else if(record.indirection > 0){
+			record.address = this.setPointerValue(record, value, region);
 		}else { 
-			sym.address = this.setPrimitiveValue(sym, value, region);
+			record.address = this.setPrimitiveValue(record, value, region);
 		}
 	}
 
 	/**
 	 * High-level memory function. Allocates and sets memory value depending on type of symbol passed as an argument.
-	 * @param {Symbol} sym
+	 * @param {MemoryRecord} record
 	 * @param {number} value
 	 * @param {MEMREGION} region
 	 * @return {integer} Address of allocated memory
 	 */
-	setPrimitiveValue(sym, value, region){
-		switch(sym.memtype){
+	setPrimitiveValue(record, value, region){
+		switch(record.memtype){
 			case DATATYPE.bool:
-				return this.setBoolValue(value, region, sym.address);
+				return this.setBoolValue(value, region, record.address);
 
 			case DATATYPE.char:
-				return this.setCharValue(value, region, sym.address);
+				return this.setCharValue(value, region, record.address);
 
 			case DATATYPE.uchar:
-				return this.setUCharValue(value, region, sym.address);
+				return this.setUCharValue(value, region, record.address);
 
 			case DATATYPE.short:
-				return this.setShortValue(value, region, sym.address);
+				return this.setShortValue(value, region, record.address);
 
 			case DATATYPE.ushort:
-				return this.setUShortValue(value, region, sym.address);
+				return this.setUShortValue(value, region, record.address);
 
 			case DATATYPE.int:
-				return this.setIntValue(value, region, sym.address);
+				return this.setIntValue(value, region, record.address);
 
 			case DATATYPE.uint:
-				return this.setUIntValue(value, region, sym.address);
+				return this.setUIntValue(value, region, record.address);
 
 			case DATATYPE.long:
-				return this.setLongValue(value, region, sym.address);
+				return this.setLongValue(value, region, record.address);
 
 			case DATATYPE.ulong:
-				return this.setULongValue(value, region, sym.address);
+				return this.setULongValue(value, region, record.address);
 
 			case DATATYPE.longlong:
-				return this.setLongLongValue(value, region, sym.address);
+				return this.setLongLongValue(value, region, record.address);
 
 			case DATATYPE.ulonglong:
-				return this.setULongLongValue(value, region, sym.address);
+				return this.setULongLongValue(value, region, record.address);
 
 			case DATATYPE.float:
-				return this.setFloatValue(value, region, sym.address);
+				return this.setFloatValue(value, region, record.address);
 
 			case DATATYPE.double:
-				return this.setDoubleValue(value, region, sym.address);
+				return this.setDoubleValue(value, region, record.address);
 
 			case DATATYPE.longdouble:
-				return this.setLongDoubleValue(value, region, sym.address);
+				return this.setLongDoubleValue(value, region, record.address);
 
 			default:
-				throw new AppError(`Invalid DATATYPE while setting value of ${sym.identifier}: ${sym.memtype}!`);
+				throw new AppError(`Invalid DATATYPE while setting value of primitive object: ${record.type}!`);
 		}
 	}
 
 	/**
 	 * High-level memory function. Allocates space for the array and returns the first address. Also sets the Sym.addresses field with allocated addresses.
-	 * @param {Symbol} sym
+	 * @param {MemoryRecord} record
 	 * @param {Array} value JS array
 	 * @param {MEMREGION} region
 	 */
-	setArrayValue(sym, value, region){
+	setArrayValue(record, value, region){
 		// determine derived type of array
-		const memtype = sym.memtype;
-		const dimension = sym.dimension;
-		const size = sym.size;
+		const memtype = record.memtype;
+		const dimension = record.dimension;
+		const size = record.size;
+		const memsize = record.memsize;
 
 		if(!value){
-			sym.address = this.#allocRegion(region, MEMSIZES[memtype]*sym.size.reduce((res, item) => res *= item));
+			record.address = this.#allocRegion(region, memsize);
 		}else{
-			sym.addresses = this.allocArray(value, memtype, region);
-			sym.address = sym.addresses[0];
+			record.addresses = this.allocArray(value, memtype, region);
+			record.address = record.addresses[0];
 		}
 	}
 
@@ -259,51 +330,51 @@ class Memsim {
 	}
 
 	/**
-	 * Allocates and sets memory for a pointer symbol. Returns address of the allocated memory.
+	 * Allocates and sets memory for a pointer record. Returns address of the allocated memory.
 	 * @note Pointer in my architecture is a 32bit integer... it's just that simple.
-	 * @praam {Symbol} sym
+	 * @praam {MemoryRecord} record
 	 * @param {integer} value
 	 * @param {MEMREGION} region
 	 * @return {integer} address
 	 */
-	setPointerValue(sym, value, region){
+	setPointerValue(record, value, region){
 		// pointer is 32 bits
-		return this.setIntValue(value, region, sym.address);
+		return this.setIntValue(value, region, record.address);
 	}
 
 	/**
-	 * High-level memory function which determines and reads memory of a symbol
-	 * @param {Symbol} sym
+	 * High-level memory function which determines and reads memory of a record
+	 * @param {MemoryRecord} record
 	 * @param {integer|character|double|Array|Object}
 	 * @param {MEMREGION} region
 	 */
-	readSymValue(sym){
-		if(!sym) throw new AppError("Trying to read value of undefined Symbol");
-		if(sym.address == undefined || isNaN(sym.address)){
-			console.error(sym);
-			throw new RTError(`Cannot read from a symbol with no address: ${sym.name}`);
+	readRecordValue(record){
+		if(!record) throw new AppError("Trying to read value of undefined record");
+		if(record.address == undefined || isNaN(record.address)){
+			console.error(record);
+			throw new RTError(`Cannot read from a record with no address: ${record.address}`);
 		}
 
 		//TODO struct
-		if(sym.dimension > 0){ // array
-			return this.readArrayValue(sym);
-		}else if(sym.pointer){
-			return this.readPointerValue(sym);
+		if(record.size.length > 0){ // array
+			return this.readArrayValue(record);
+		}else if(record.indirection > 0){
+			return this.readPointerValue(record);
 		}else {
-			return this.readPrimitiveValue(sym);
+			return this.readPrimitiveValue(record);
 		}
 	}
 
-	readPrimitiveValue(sym){
-		switch(sym.memtype){
+	readPrimitiveValue(record){
+		switch(record.memtype){
 			case DATATYPE.bool:
 			break;
 
 			case DATATYPE.char:
-				return this.readCharValue(sym.address);
+				return this.readCharValue(record.address);
 
 			case DATATYPE.uchar:
-				return this.readUCharValue(sym.address);
+				return this.readUCharValue(record.address);
 
 			case DATATYPE.short:
 			break;
@@ -312,7 +383,7 @@ class Memsim {
 			break;
 
 			case DATATYPE.int:
-				return this.readIntValue(sym.address);
+				return this.readIntValue(record.address);
 
 			case DATATYPE.uint:
 			break;
@@ -341,31 +412,26 @@ class Memsim {
 
 	}
 
-	readArrayValue(sym){
+	readArrayValue(record){
 		let arr = [];
 		
-		const size = sym.size.reduce((res, item) => res *= item);
+		const size = record.size.reduce((res, item) => res *= item);
 		for(let i = 0; i < size; i++){ // this will create flat array
-			const addr = sym.address - i * MEMSIZES[sym.memtype]; // TODO for heap and data
-			const dummySym = { memtype: sym.memtype, address: addr };
-			const value = this.readPrimitiveValue(dummySym);
+			const addr = record.memregion == MEMREGION.STACK ? record.address - i * MEMSIZES[record.memtype] : record.address + i * MEMSIZES[record.memtype];
+			const dummyrecord = { memtype: record.memtype, address: addr };
+			const value = this.readPrimitiveValue(dummyrecord);
 			arr.push(value);
 		}
 
-		if(sym.dimension > 1){ // reshape
-			arr = this.reshapeArray(arr, sym.size);
+		if(record.dimension > 1){ // reshape
+			arr = this.reshapeArray(arr, record.size);
 		}
 
 		return arr;
 	}
 
-	readPointerValue(sym){
-		return this.readIntValue(sym.address);
-	}
-
-	initializeArray(memtype, arr, region){
-		console.log(memtype, arr, region);
-		return 69;
+	readPointerValue(record){
+		return this.readIntValue(record.address);
 	}
 
 	/******************************
@@ -377,7 +443,7 @@ class Memsim {
 	/**
 	 * Sets memory on given address of given size in given region.
 	 * @param {integer} address
-	 * @parma {integer} size
+	 * @parma {integer} size Size in bytes
 	 * @param {MEMREGION} region
 	 * @param {DataView} view DataView with the actual data. They should be stored as Uint8.
 	 */
@@ -434,6 +500,17 @@ class Memsim {
 		}
 
 		return addr;
+	}
+
+	/**
+	 * Marks memory as unused
+	 * @param {integer} address
+	 * @param {integer} size Size in bytes
+	 * @param {MEMREGION} [region=null]
+	 */
+	free(address, size, region=null){
+		if(!region) region = this.getMemoryRegion(address);
+		console.log(region);
 	}
 
 	/**
