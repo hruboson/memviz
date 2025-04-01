@@ -12,3 +12,23 @@ class NATIVE_printf{
 		visitor.visitPrintF(this, args);
 	}
 }
+
+/**
+ * @class NATIVE_malloc
+ * @description Custom "node" for built-in malloc function. Is visitable by visitor.
+ */
+class NATIVE_malloc{
+	accept(visitor, arg){
+		visitor.visitMalloc(this, arg);
+	}
+}
+
+/**
+ * @class NATIVE_free
+ * @description Custom "node" for built-in free function. Is visitable by visitor.
+ */
+class NATIVE_free{
+	accept(visitor, arg){
+		visitor.visitFree(this, arg);
+	}
+}

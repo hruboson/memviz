@@ -784,6 +784,18 @@ class Semantic {
 		this.closeScope();
 	}
 
+	visitPrintF(printf, formatstr){ // todo variable length of arguments
+
+	}
+
+	visitMalloc(malloc, arg){
+
+	}
+
+	visitFree(free, arg){
+
+	}
+
 	/**********************
 	 *  HELPER FUNCTIONS  *
 	 *********************/
@@ -810,6 +822,38 @@ class Semantic {
 			[new Declarator(DECLTYPE.ID, null, {name: "formatstr"})],
 			true,                      // isFunction
 			new NATIVE_printf(),       // no AST, built-in function pointer
+			true                       // isNative
+		);
+
+		symtableGlobal.insert(
+			NAMESPACE.ORDS,
+			SYMTYPE.FNC,
+			true,                      // initialized
+			"malloc",                  // function name
+			["void*"],                   // return type (C's printf returns int)
+			true,
+			0,                         // not an array
+			0,						   // not an array so 0 size
+			1,
+			[new Declarator(DECLTYPE.ID, null, {name: "size"})],
+			true,                      // isFunction
+			new NATIVE_malloc(),       // no AST, built-in function pointer
+			true                       // isNative
+		);
+
+		symtableGlobal.insert(
+			NAMESPACE.ORDS,
+			SYMTYPE.FNC,
+			true,                      // initialized
+			"free",                  // function name
+			["void"],                   // return type (C's printf returns int)
+			false,
+			0,                         // not an array
+			0,						   // not an array so 0 size
+			0,
+			[new Declarator(DECLTYPE.ID, null, {name: "address"})],
+			true,                      // isFunction
+			new NATIVE_free(),       // no AST, built-in function pointer
 			true                       // isNative
 		);
 	}

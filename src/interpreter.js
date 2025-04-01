@@ -1042,6 +1042,15 @@ class Interpreter {
 		return 0; // printf in C returns 0 by default
 	}
 
+	visitMalloc(malloc, arg){
+		console.log(arg);
+		return 69;
+	}
+
+	visitFree(free, arg){
+		console.log(arg);
+	}
+
 	/************************************
 	 *          Helper functions        *
 	 ***********************************/
