@@ -698,11 +698,10 @@ class Interpreter {
 		const fncPtr = this.#symtableGlobal.lookup(NAMESPACE.ORDS, callee.name);
 		let args = [];
 		for(let arg of callExpr.arguments){
-			arg = this.evaluateExprArray(arg);
 			if(has(arg, "address")){
 				args.push(this.memsim.readRecordValue(arg));
 			}else{
-				args.push(arg);
+				args.push(this.evaluateExprArray(arg));
 			}
 		}
 
@@ -1013,12 +1012,9 @@ class Interpreter {
 			throw new RTError("printf requires at least one argument (format string)");
 		}
 
-		let formatString = args[0].accept(this);  // Resolve format argument
-		formatString = this.memsim.readRecordValue(formatString);
+		let formatString = this.memsim.readRecordValue(args[0]);
 		formatString = CArrayToJsString(formatString);
-		console.log(formatString);
-		//formatString = //formatString.slice(0, -1).join('') // string is returned as an array
-		let otherArgs = args.slice(1).map(arg => arg.accept(this));
+		let otherArgs = args.slice(1);
 		otherArgs = otherArgs.map(arg => has(arg, "address") ? this.memsim.readRecordValue(arg) : arg);
 
 		let i = 0;
