@@ -538,7 +538,6 @@ class Interpreter {
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.pc = construct;
-			console.log(this.#callStack.topSFrame().symtable);
 			construct.accept(this);
 		}
 
