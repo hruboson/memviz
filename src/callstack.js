@@ -87,12 +87,12 @@ class CallStack{
 		const sFrame = this.#sFrames[this.#sFrames.length - 1];
 
 		// deallocate all objects
-		console.log(this.#memsim);
+		/*console.log(this.#memsim);
 		for(const [name, sym] of sFrame.symtable.objects){
 			if(sym.address){
 				this.#memsim.free(sym.address, sym.memsize, MEMREGION.STACK);
 			}
-		}
+		}*/
 
 		this.#sFrames.splice(this.#sFrames.length - 1, 1);
 		return sFrame;

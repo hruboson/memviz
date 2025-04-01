@@ -538,7 +538,13 @@ class Interpreter {
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.pc = construct;
-			construct.accept(this);
+			try{
+				construct.accept(this);
+			}catch(t){ // construct can return prematurely
+				if(isclass(t, "StopFlag")) throw t; // if it is just stop flag, throw it immediately, otherwise pop frame and throw result
+				this.#callStack.popSFrame();
+				throw t;
+			}
 		}
 
 		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
@@ -645,6 +651,7 @@ class Interpreter {
 
 	}
 
+	//TODO FNC is not popping sfParams properly in some cases, no clue why (see the quadratic equation example)
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 
@@ -662,6 +669,8 @@ class Interpreter {
 
 		try{
 			fnc.body.accept(this); // run body
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame(); // pop param symtable
 		}catch(ret){ // catch return
 			if(ret instanceof Error){ // in case of too much recursion, run-time errors, ...
 				throw ret;
@@ -681,9 +690,6 @@ class Interpreter {
 			this.#callStack.popSFrame(); // pop param symtable
 			return ret.value;
 		}
-
-		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-		this.#callStack.popSFrame(); // pop param symtable
 	}
 
 	visitFncCallExpr(callExpr){
@@ -705,7 +711,6 @@ class Interpreter {
 		}
 
 		const ret = fncPtr.astPtr.accept(this, args);
-		//this.#callStack.popSFrame(); // pop param symtable
 		return ret;
 
 	}
@@ -841,6 +846,7 @@ class Interpreter {
 
 	visitReturn(ret){
 		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+		this.pc = ret;
 
 		// return only most right-hand expression, evaluate rest
 		// when expression is returned get the right-most operand to return and evaluate the left-hand operand
@@ -852,8 +858,8 @@ class Interpreter {
 		if(has(expr, "address")) expr = this.memsim.readRecordValue(expr);
 
 		// this breakstop is causing some weird behavior at the end of main, maybe remove it
-		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-		this.pc = ret;
+		/*if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+		this.pc = ret;*/
 
 		throw new ReturnThrow(expr);
 	}
