@@ -653,9 +653,7 @@ class Interpreter {
 		// initialize symbols and assign addresses
 		if(!sfParams.empty()){
 			for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
-				let val = this.evaluateExprArray(arg);
-				if(has(val, "address")) val = this.memsim.readRecordValue(val);
-				this.memsim.setRecordValue(sym, val, MEMREGION.STACK);
+				this.memsim.setRecordValue(sym, arg, MEMREGION.STACK);
 				sym.interpreted = true;
 			}
 		}
@@ -697,7 +695,15 @@ class Interpreter {
 		}
 
 		const fncPtr = this.#symtableGlobal.lookup(NAMESPACE.ORDS, callee.name);
-		return fncPtr.astPtr.accept(this, callExpr.arguments);
+		let args = [];
+		for(const arg of callExpr.arguments){
+			args.push(this.evaluateExprArray(arg));
+		}
+
+		const ret = fncPtr.astPtr.accept(this, args);
+		//this.#callStack.popSFrame(); // pop param symtable
+		return ret;
+
 	}
 
 	visitForLoop(loop){
