@@ -582,6 +582,7 @@ class Semantic {
 		}
 	}
 
+	// TODO ELSE IF
 	visitIfStmt(stmt){
 		if(Array.isArray(stmt.expr)){
 			for(const subexpr of stmt.expr){
@@ -592,11 +593,21 @@ class Semantic {
 		}
 
 		if(stmt.sfalse){ // null in case of no else
-			stmt.sfalse.accept(this);
+			let symtable = new Symtable("if > false", "stmt", this.symtableStack.peek());
+			this.newScope(symtable, stmt.sfalse);
+			for(const construct of stmt.sfalse.sequence){
+				construct.accept(this);
+			}
+			this.closeScope();
 		}
 
 		if(isclass(stmt.strue, "CStmt")){ // in case of brackets around statement (...if(true){...}...)
-			stmt.strue.accept(this);
+			let symtable = new Symtable("if > true", "stmt", this.symtableStack.peek());
+			this.newScope(symtable, stmt.strue);
+			for(const construct of stmt.strue.sequence){
+				construct.accept(this);
+			}
+			this.closeScope();
 		}else{ // in case of no brackets (...if(true) printf()...)
 			if(Array.isArray(stmt.strue)){
 				for(const subexpr of stmt.strue){
