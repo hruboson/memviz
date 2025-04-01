@@ -696,8 +696,13 @@ class Interpreter {
 
 		const fncPtr = this.#symtableGlobal.lookup(NAMESPACE.ORDS, callee.name);
 		let args = [];
-		for(const arg of callExpr.arguments){
-			args.push(this.evaluateExprArray(arg));
+		for(let arg of callExpr.arguments){
+			arg = this.evaluateExprArray(arg);
+			if(has(arg, "address")){
+				args.push(this.memsim.readRecordValue(arg));
+			}else{
+				args.push(arg);
+			}
 		}
 
 		const ret = fncPtr.astPtr.accept(this, args);
