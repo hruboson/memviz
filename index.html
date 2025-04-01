@@ -337,35 +337,81 @@
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
-					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" id="rubberduckVisibility" autocomplete="off">
-						<label class="form-check-label" for="rubberduckVisibility">Rubber duck</label>
-						<script>
-							const checkboxRubberduck = document.getElementById("rubberduckVisibility");
-							checkboxRubberduck.addEventListener("change", (event) => {
-								if (event.currentTarget.checked) {
-									document.getElementById("rubberduck").style.visibility = "visible";
-								} else {
-									document.getElementById("rubberduck").style.visibility = "hidden";
-								}
-							});
-						</script>
-					</div>
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-5">
+								<div class="form-check form-switch">
+									<input class="form-check-input" type="checkbox" id="rubberduckVisibility" autocomplete="off">
+									<label class="form-check-label" for="rubberduckVisibility">Rubber duck</label>
+									<script>
+										const checkboxRubberduck = document.getElementById("rubberduckVisibility");
+										checkboxRubberduck.addEventListener("change", (event) => {
+											if (event.currentTarget.checked) {
+												document.getElementById("rubberduck").style.visibility = "visible";
+											} else {
+												document.getElementById("rubberduck").style.visibility = "hidden";
+											}
+										});
+									</script>
+								</div>
+								<div class="form-check form-switch">
+									<input class="form-check-input" type="checkbox" id="debugMode" autocomplete="off">
+									<label class="form-check-label" for="debugMode">Debug mode</label>
+									<script>
+										const checkboxDebugMode = document.getElementById("debugMode");
+										checkboxDebugMode.addEventListener("change", (event) => {
+											if (event.currentTarget.checked) {
+												document.getElementById("debugInfo").style.visibility = "visible";
+											} else {
+												document.getElementById("debugInfo").style.visibility = "hidden";
+											}
+										});
+									</script>
+								</div>
+							</div>
 
-					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" id="debugMode" autocomplete="off">
-						<label class="form-check-label" for="debugMode">Debug mode</label>
-						<script>
-							const checkboxDebugMode = document.getElementById("debugMode");
-							checkboxDebugMode.addEventListener("change", (event) => {
-								if (event.currentTarget.checked) {
-									document.getElementById("debugInfo").style.visibility = "visible";
-								} else {
-									document.getElementById("debugInfo").style.visibility = "hidden";
-								}
-							});
-						</script>
-					</div>
+							<div class="col-7">
+								<div class="mb-3">
+									<label for="visualizationStyle" class="form-label">Visualization Style</label>
+									<select class="form-select" id="visualizationStyle">
+										<option value="memVizStyleMemoryRow">Memory row</option>
+										<option value="memVizStyleSemantic" selected>Semantic</option>
+									</select>
+								</div>
+								<!--div class="mb-3"> For now dont let user choose the sizes
+									<label for="heapSize" class="form-label">Heap Size</label>
+									<input type="number" class="form-control" id="heapSize" min="0" value="1024">
+								</div>
+								<div class="mb-3">
+									<label for="heapAddress" class="form-label">Heap address</label>
+									<input type="number" class="form-control" id="heapAddress" min="0" value="1024">
+								</div>
+								<div class="mb-3">
+									<label for="stackSize" class="form-label">Stack Size</label>
+									<input type="number" class="form-control" id="stackSize" min="0" value="1024">
+								</div>
+								<div class="mb-3">
+									<label for="stackAddress" class="form-label">Stack address</label>
+									<input type="number" class="form-control" id="stackAddress" min="0" value="1024">
+								</div>
+								<div class="mb-3">
+									<label for="dataSize" class="form-label">Data Size</label>
+									<input type="number" class="form-control" id="dataSize" min="0" value="1024">
+								</div>
+								<div class="mb-3">
+									<label for="dataAddress" class="form-label">Data address</label>
+									<input type="number" class="form-control" id="dataAddress" min="0" value="1024">
+								</div>
+								<div class="mb-3">
+									<label for="bssSize" class="form-label">BSS Size</label>
+									<input type="number" class="form-control" id="bssSize" min="0" value="1024">
+								</div>
+								<div class="mb-3">
+									<label for="bssAddress" class="form-label">BSS address</label>
+									<input type="number" class="form-control" id="bssAddress" min="0" value="1024">
+								</div>-->
+							</div>
+						</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -578,7 +624,8 @@ Split(["#split-ve", "#split-console"], {
 	 * @todo refactor or completely change the behaviour, this shit is gonna haunt me for ages if I leave it as is
 	 */
 	function execute(input, flag){
-		var interpreter = new Interpreter();
+		const memVizStyle = document.getElementById("visualizationStyle").value;
+		var interpreter = new Interpreter(memVizStyle);
 		unhighlight();
 		try{
 			switch(flag){

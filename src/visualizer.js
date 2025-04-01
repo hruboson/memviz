@@ -62,12 +62,13 @@ class VizPointerPair extends Pair {
  */
 class Memviz {
 	
-	constructor(memsim, callStack, container){
+	constructor(memVizStyle, memsim, callStack, container){
 		if(!(container instanceof Element)) throw new AppError(`Container must be a HTML element!`);
 
 		this.memsim = memsim;
 		this.callStack = callStack;
 		this.container = container;
+		this.memVizStyle = memVizStyle;
 
 		this.#init();
 	}
@@ -99,6 +100,7 @@ class Memviz {
 	 * @public
 	 */
 	updateHTML(){
+		console.log(this.memVizStyle);
 		this.vizMemoryRecords();
 	}
 
@@ -644,7 +646,6 @@ class Memviz {
 
 					this.symbols.set(sym.addresses[n], new VizCellValue(sym.addresses[n], valueBox));
 				}else{
-					console.log(arr[i]);
 					valueBox = this.graph.insertVertex({
 						parent: parent,
 						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y],
