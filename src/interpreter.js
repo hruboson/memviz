@@ -536,12 +536,13 @@ class Interpreter {
 		this.#callStack.pushSFrame(sf);
 
 		for(const construct of stmt.sequence){
-			if(this.#_instrNum > this.#breakstop) return;
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.pc = construct;
+			console.log(this.#callStack.topSFrame().symtable);
 			construct.accept(this);
 		}
 
-		if(this.#_instrNum > this.#breakstop) return;
+		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 		this.#callStack.popSFrame();
 	}
 
@@ -608,22 +609,22 @@ class Interpreter {
 		let condition = true;
 		loop: for(;;){ // the for loop is there only as a label
 			if(condition){
-				if(this.#_instrNum > this.#breakstop) return;
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 				if(isclass(loop.body, "CStmt")){
 					for(const construct of loop.body.sequence){
-						if(this.#_instrNum > this.#breakstop) return;
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 						this.pc = construct;
 						construct.accept(this);
 					}
 				}else{
-					if(this.#_instrNum > this.#breakstop) return;
+					if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 					this.pc = loop.body;
 					loop.body.accept(this);
 				}
 
 				// check if iteration expression should be interpreted
 				// evaluate at the end of every new body run
-				if(this.#_instrNum > this.#breakstop) return;
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 				if(Array.isArray(loop.cond)){
 					this.pc = loop.cond[0];
 				}else{
@@ -646,7 +647,7 @@ class Interpreter {
 	}
 
 	visitFnc(fnc, args){
-		if(this.#_instrNum > this.#breakstop) return;
+		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 
 		let sfParams = new StackFrame(fnc.symtbptr, fnc, this.#callStack.getParentSF(fnc.symtbptr)); // StackFrame creates deep copy of symbol table
 
@@ -668,21 +669,21 @@ class Interpreter {
 			}
 
 			// TODO fix function returning pointer to void function e.g. void (*getFunction())(void)
-			//if(this.#_instrNum > this.#breakstop) return;
+			//if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			//if(fnc.returnType.includes("void")) return null; // force return void on functions with specifier void
 
 			if(isclass(ret.value, "ReturnVoid")){
-				if(this.#_instrNum > this.#breakstop) return;
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 				this.#callStack.popSFrame(); // pop param symtable
 				return null;
 			}
 
-			if(this.#_instrNum > this.#breakstop) return;
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.#callStack.popSFrame(); // pop param symtable
 			return ret.value;
 		}
 
-		if(this.#_instrNum > this.#breakstop) return;
+		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 		this.#callStack.popSFrame(); // pop param symtable
 	}
 
@@ -721,20 +722,20 @@ class Interpreter {
 		let condition;
 		loop: for(;;){ // the for loop is there only as a label
 			// evaluate at the beginning of every new loop run
-			if(this.#_instrNum > this.#breakstop) return; //?? same ??
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag(); //?? same ??
 			this.pc = loop; //?? question - should this be stopped and shown the interpretation of for head separately ??
 			condition = this.evaluateExprArray(loop.cond);
 
 			if(condition){
-				if(this.#_instrNum > this.#breakstop) return;
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 				if(isclass(loop.body, "CStmt")){
 					for(const construct of loop.body.sequence){
-						if(this.#_instrNum > this.#breakstop) return;
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 						this.pc = construct;
 						construct.accept(this);
 					}
 				}else{
-					if(this.#_instrNum > this.#breakstop) return;
+					if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 					this.pc = loop.body;
 					loop.body.accept(this);
 				}
@@ -744,7 +745,7 @@ class Interpreter {
 				if(!condition) break;
 
 				// iteration expression
-				if(this.#_instrNum > this.#breakstop) return;
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 				this.evaluateExprArray(loop.itexpr);
 
 				continue loop;
@@ -774,6 +775,7 @@ class Interpreter {
 		return sym;
 	}
 
+	// TODO ELSE IF
 	visitIfStmt(stmt){
 		let decision = this.evaluateExprArray(stmt.expr);
 		if(decision == false){
@@ -840,7 +842,7 @@ class Interpreter {
 	}
 
 	visitReturn(ret){
-		if(this.#_instrNum > this.#breakstop) return;
+		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 
 		// return only most right-hand expression, evaluate rest
 		// when expression is returned get the right-most operand to return and evaluate the left-hand operand
@@ -852,7 +854,7 @@ class Interpreter {
 		if(has(expr, "address")) expr = this.memsim.readRecordValue(expr);
 
 		// this breakstop is causing some weird behavior at the end of main, maybe remove it
-		if(this.#_instrNum > this.#breakstop) return;
+		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 		this.pc = ret;
 
 		throw new ReturnThrow(expr);
@@ -972,20 +974,20 @@ class Interpreter {
 		let condition;
 		loop: for(;;){ // the for loop is there only as a label
 			// evaluate at the beginning of every new loop run
-			if(this.#_instrNum > this.#breakstop) return;
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.pc = loop;
 			condition = this.evaluateExprArray(loop.cond);
 
 			if(condition){
-				if(this.#_instrNum > this.#breakstop) return;
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 				if(isclass(loop.body, "CStmt")){
 					for(const construct of loop.body.sequence){
-						if(this.#_instrNum > this.#breakstop) return;
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 						this.pc = construct;
 						construct.accept(this);
 					}
 				}else{
-					if(this.#_instrNum > this.#breakstop) return;
+					if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 					this.pc = loop.body;
 					loop.body.accept(this);
 				}
@@ -1193,4 +1195,14 @@ class ReturnVoid {
 		this.loc = loc;
 	}
 	// this could maybe be the NOP class from expr.js?
+}
+
+/**
+ * @class StopFlag
+ * @description Will be thrown if the interpreter should no longer interpret (single-stepping)
+ */
+class StopFlag {
+	constructor(){
+
+	}
 }
