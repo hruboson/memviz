@@ -1131,7 +1131,7 @@ class Interpreter {
 		classesToRemove.forEach(className => resultDiv.classList.remove(className))
 		
 		// add result/error depending on type returned from main (result arg)
-		if(result != undefined && result != null){;
+		if(result != undefined && result != null && !isclass(result, "StopFlag")){;
 			resultDiv.innerHTML = "Result: \n";
 			if(isclass(result, "ReturnVoid")){
 				resultDiv.innerHTML += "void";
