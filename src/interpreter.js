@@ -326,7 +326,7 @@ class Interpreter {
 
 		this.updateHTML(result);
 		this.memviz.updateHTML();
-		//this.memsim.printMemory();
+		this.memsim.printMemory();
 		return result;
 	}
 
@@ -560,6 +560,12 @@ class Interpreter {
 		let value = null;
 		if(initializer){
 			value = initializer.accept(this);
+			
+			// there could be a better way... tbh I have no idea why this is even allowed
+			if(symbol.indirection < 1 && symbol.size.length > 0 && !Array.isArray(value)){ // non pointer arrays initialized with string (char hello[] = "Hello world";)
+				value = this.#callStack.findMemoryRecord(value);
+				value = this.memsim.readRecordValue(value);
+			}
 		}
 
 		symbol.interpreted = true;
@@ -898,7 +904,6 @@ class Interpreter {
 		dummySym.address = symbol.addresses[flatIndex];
 		dummySym.indirection = symbol.indirection;
 
-		console.log(dummySym);
 		return dummySym;
 	}
 

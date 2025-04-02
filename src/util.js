@@ -227,6 +227,11 @@ function flatIndexToDimensionalIndices(flatIndex, sizes){
  * @returns String
  */
 function CArrayToJsString(arr){
+	if(!Array.isArray(arr)){
+		console.error(arr);
+		throw new AppError("Trying to read array value which is not an array value");
+	}
+
 	return arr
 		.slice(0, arr.indexOf(0)) // stop at null terminator (if exists)
 		.map(c => String.fromCharCode(c)) //cconvert integers to characters

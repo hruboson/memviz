@@ -52,8 +52,9 @@ class CallStack{
 		for(record of this.dFrame){
 			if(record.address == address) return record;
 		}
-		for(const frame of this.sFrames){
-			for(record of frame){
+		for(const frame of this.#sFrames){
+			for(record of frame.symtable.objects.values().filter(obj => obj.type == SYMTYPE.OBJ)){
+				console.log(address, record.address);
 				if(record.address == address) return record;
 			}
 		}

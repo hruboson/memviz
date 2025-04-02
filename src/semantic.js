@@ -57,11 +57,24 @@ class StringTable{
 
 	/**
 	 * Retrieves record from the table based on its hash (btoa)
-	 * @param {string} encoded
+	 * @param {string} str
 	 */
 	get(str){
 		return this.strings.get(btoa(str));
 	}
+
+    /**
+     * Filters string records based on a predicate function (same as Array filter)
+     * @param {function(StringRecord): boolean} predicate 
+     * @returns {Iterable<[string, StringRecord]>}
+     */
+    *filter(predicate) {
+        for (const [key, stringRecord] of this.strings) {
+            if (predicate(stringRecord)) {
+                yield [key, stringRecord];
+            }
+        }
+    }
 
 	/**
 	 * Iterator
@@ -207,7 +220,14 @@ class Semantic {
 						size[dimension] = exprValue; // should always be constant expression
 					}else{ // calculate (only for the outer-most array)
 						if(dimension != dimensionBrackets - 1) throw new SError(`Array type has incomplete element type '${specifiers}[]'`, declarator.loc);
-						size[dimension] = initializer.arr.length;
+						if(initializer.arr){
+							size[dimension] = initializer.arr.length;
+						}else{
+							// automatic size of array from string
+							if(initializer.expr?.type == "s_literal"){
+								size[dimension] = initializer.expr.value.length - 1;
+							}
+						}
 					}
 					dimension += 1;
 				}
@@ -384,10 +404,10 @@ class Semantic {
 			if(declaration.declarator.kind == DECLTYPE.ARR){
 				// string allocated on stack
 				//TODO just make a note of it and then read from the address
-				/**if(typeof initKind == "string"){
+				if(typeof initKind == "string"){
 					let sr = this.stringTable.get(initKind);
 					sr.region = MEMREGION.STACK;
-				}*/
+				}
 			}
 		}
 
