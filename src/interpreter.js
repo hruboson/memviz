@@ -443,6 +443,7 @@ class Interpreter {
 		// concrete operations
 		switch(expr.op){
 			case '+':
+				if(Array.isArray(lval)) return lval[rval];
 				return lval + rval*coeVar;
 			case '-':
 				return lval - rval*coeVar;
