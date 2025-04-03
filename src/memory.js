@@ -793,36 +793,36 @@ class Memsim {
 	 * @public
 	 */
 	printMemory(){
- if (this.memory.size === 0) return "All memory freed";
+		if (this.memory.size === 0) return "All memory freed";
 
-    // Ensure we have a minimum width for alignment
-    const addrWidth = Math.max(5, ...Array.from(this.memory.keys()).map(addr => addr.toString().length));
-    const hexAddrWidth = 6;  // "0x" + 4 hex digits
-    const valueWidth = 8;    // 8-bit binary
-    const hexValueWidth = 4; // Hex value (0xFF)
-    const regionWidth = 10;  // Memory region name
+		// alignment measurements
+		const addrWidth = Math.max(5, ...Array.from(this.memory.keys()).map(addr => addr.toString().length));
+		const hexAddrWidth = 6;  // "0x" + 4 hex digits
+		const valueWidth = 8;    // 8-bit binary
+		const hexValueWidth = 4; // hex value (0xFF)
+		const regionWidth = 10;  // memory region name
 
-    // Calculate the required spacing for each column.
-    const spaceForAddr = addrWidth - 7; // Space for address column
-    const spaceForHexAddr = hexAddrWidth - 6; // Space for hex address column
-    const spaceForBinary = valueWidth - 8; // Space for binary column
-    const spaceForHexValue = hexValueWidth - 4; // Space for hex value column
-    const spaceForRegion = regionWidth - 10; // Space for region column
+		// calculate max spacing
+		const spaceForAddr = addrWidth - 7; // space for address column
+		const spaceForHexAddr = hexAddrWidth - 6; // space for hex address column
+		const spaceForBinary = valueWidth - 8; // space for binary column
+		const spaceForHexValue = hexValueWidth - 4; // space for hex value column
+		const spaceForRegion = regionWidth - 10; // space for region column
 
-    // Header row
-    let dump = `Addr | Hex Addr | Binary   | Hex  | Region\n`;
-    dump += "-".repeat(addrWidth + hexAddrWidth + valueWidth + hexValueWidth + regionWidth + 13) + "\n";
+		// header
+		let dump = `Addr | Hex Addr | Binary   | Hex  | Region\n`;
+		dump += "-".repeat(addrWidth + hexAddrWidth + valueWidth + hexValueWidth + regionWidth + 13) + "\n";
 
-    this.memory.forEach((data, addr) => {
-        let hexAddr = "0x" + addr.toString(16).toUpperCase().padStart(4, '0');
-        let binValue = data.value !== undefined ? data.value.toString(2).padStart(valueWidth, '0') : " ".repeat(valueWidth);
-        let hexValue = data.value !== undefined ? "0x" + data.value.toString(16).toUpperCase().padStart(2, '0') : " ".repeat(hexValueWidth);
-        let region = data.region.toString().padEnd(regionWidth);
+		this.memory.forEach((data, addr) => {
+			let hexAddr = "0x" + addr.toString(16).toUpperCase().padStart(4, '0');
+			let binValue = data.value !== undefined ? data.value.toString(2).padStart(valueWidth, '0') : " ".repeat(valueWidth);
+			let hexValue = data.value !== undefined ? "0x" + data.value.toString(16).toUpperCase().padStart(2, '0') : " ".repeat(hexValueWidth);
+			let region = data.region.toString().padEnd(regionWidth);
 
-        // Add the row with padding
-        dump += addr.toString().padEnd(addrWidth, ' ') + " | " + hexAddr + " | " + binValue + " | " + hexValue + " | " + region + "\n";
-    });
+			// add the row with padding
+			dump += addr.toString().padEnd(addrWidth, ' ') + " | " + hexAddr + " | " + binValue + " | " + hexValue + " | " + region + "\n";
+		});
 
-    return dump;
+		return dump;
 	}
 }
