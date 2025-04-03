@@ -225,6 +225,7 @@ class Memsim {
 			record.address = this.setPointerValue(record, value, region);
 		}else { 
 			record.address = this.setPrimitiveValue(record, value, region);
+			console.log(record);
 		}
 	}
 
@@ -296,37 +297,17 @@ class Memsim {
 		const dimension = record.dimension;
 		const size = record.size;
 		const memsize = record.memsize;
+		const flatValue = value.flat(Infinity);
 
-		if(!value){
-			record.address = this.#allocRegion(region, memsize);
-		}else{
-			record.addresses = this.allocArray(value, memtype, region);
-			record.address = record.addresses[0];
-		}
-	}
+		record.address = this.#allocRegion(region, memsize);
 
-	/**
-	 * Allocates the whole array in recursive manner. This is needed to correctly allocate all dimensions. Returns the first address allocated.
-	 * @param {Array} arr
-	 * @param {DATATYPE} memtype
-	 * @param {MEMREGION} region
-	 * @return {integer} address
-	 */
-	allocArray(arr, memtype, region){
-		let addresses = [];
-
-		for(let s = 0; s < arr.length; s++){
-			if(Array.isArray(arr[s])){
-				const allocatedAddress = this.allocArray(arr[s], memtype, region);
-				addresses.push(...allocatedAddress);
-			}else{
-				const dummySym = { memtype: memtype, address: null, identifier: "array" };
-				const allocatedAddress = this.setPrimitiveValue(dummySym, arr[s], region);
-				addresses.push(allocatedAddress);
+		if(value){
+			for(let i = 0; i < flatValue.length; i++){
+				const dummySym = { memtype: memtype, address: record.address + i*MEMSIZES[memtype], identifier: "array" };
+				const address = this.setPrimitiveValue(dummySym, flatValue[i], region);
+				record.addresses.push(address);
 			}
 		}
-
-		return addresses;
 	}
 
 	/**
@@ -415,9 +396,11 @@ class Memsim {
 	readArrayValue(record){
 		let arr = [];
 		
-		const size = record.size.reduce((res, item) => res *= item);
-		for(let i = 0; i < size; i++){ // this will create flat array
-			const addr = record.memregion == MEMREGION.STACK ? record.address - i * MEMSIZES[record.memtype] : record.address + i * MEMSIZES[record.memtype];
+		const noElements = record.size.reduce((res, item) => res *= item);
+
+		// here the record.addresses could be used
+		for(let i = 0; i < noElements; i++){
+			const addr = record.address + i * MEMSIZES[record.memtype];
 			const dummyrecord = { memtype: record.memtype, address: addr };
 			const value = this.readPrimitiveValue(dummyrecord);
 			arr.push(value);
@@ -503,13 +486,47 @@ class Memsim {
 	}
 
 	/**
-	 * Marks memory as unused
+	 * Frees (deletes) memory from memory map
 	 * @param {integer} address
 	 * @param {integer} size Size in bytes
 	 * @param {MEMREGION} [region=null]
 	 */
 	free(address, size, region=null){
+		if(address == undefined || address == null) throw new AppError(`Trying to free undefined address with size ${size} from ${region}`);
 		if(!region) region = this.getMemoryRegion(address);
+
+		// validate the range is fully within the region
+		for(let i = 0; i < size; i++){
+			const currentAddr = address + i;
+
+			// check if address exists in memory
+			if(!this.memory.has(currentAddr)){
+				throw new RTError(`Invalid memory address ${currentAddr} in free()`);
+			}
+
+			// verify region consistency
+			// I curently don't change memory address when changing region of MemoryRecord
+			// TODO
+			/*const memRegion = this.memory.get(currentAddr).region;
+			if(memRegion != region){
+				throw new RTError(`Memory region mismatch at ${currentAddr} (expected ${region}, found ${memRegion})`);
+			}*/
+		}
+
+		// Mark memory as freed
+		for(let i = 0; i < size; i++){
+			const currentAddr = address + i;
+			this.memory.delete(currentAddr);
+			//this.references.delete(currentAddr);
+		}
+
+		// move memory pointer
+		if(region == MEMREGION.STACK){
+			if (address == this.stackPointer){
+				this.stackPointer += size;
+			}
+			// Note: We don't handle "holes" in stack memory - that would require more complex management
+		}
 	}
 
 	/**
@@ -776,9 +793,36 @@ class Memsim {
 	 * @public
 	 */
 	printMemory(){
-		console.log("Memory Dump:");
-		this.memory.forEach((data, addr) => {
-			console.log(data.value == undefined ? `${addr}: value=${data.value}, region=${data.region}` : `${addr}: value=${data.value.toString(2)}, region=${data.region}`);
-		});
+ if (this.memory.size === 0) return "All memory freed";
+
+    // Ensure we have a minimum width for alignment
+    const addrWidth = Math.max(5, ...Array.from(this.memory.keys()).map(addr => addr.toString().length));
+    const hexAddrWidth = 6;  // "0x" + 4 hex digits
+    const valueWidth = 8;    // 8-bit binary
+    const hexValueWidth = 4; // Hex value (0xFF)
+    const regionWidth = 10;  // Memory region name
+
+    // Calculate the required spacing for each column.
+    const spaceForAddr = addrWidth - 7; // Space for address column
+    const spaceForHexAddr = hexAddrWidth - 6; // Space for hex address column
+    const spaceForBinary = valueWidth - 8; // Space for binary column
+    const spaceForHexValue = hexValueWidth - 4; // Space for hex value column
+    const spaceForRegion = regionWidth - 10; // Space for region column
+
+    // Header row
+    let dump = `Dec Addr${" ".repeat(Math.max(0, spaceForAddr))} | Hex Addr | Binary   | Hex  | Region\n`;
+    dump += "-".repeat(addrWidth + hexAddrWidth + valueWidth + hexValueWidth + regionWidth + 13) + "\n";
+
+    this.memory.forEach((data, addr) => {
+        let hexAddr = "0x" + addr.toString(16).toUpperCase().padStart(4, '0');
+        let binValue = data.value !== undefined ? data.value.toString(2).padStart(valueWidth, '0') : " ".repeat(valueWidth);
+        let hexValue = data.value !== undefined ? "0x" + data.value.toString(16).toUpperCase().padStart(2, '0') : " ".repeat(hexValueWidth);
+        let region = data.region.toString().padEnd(regionWidth);
+
+        // Add the row with padding
+        dump += addr.toString().padEnd(addrWidth, ' ') + " | " + hexAddr + " | " + binValue + " | " + hexValue + " | " + region + "\n";
+    });
+
+    return dump;
 	}
 }

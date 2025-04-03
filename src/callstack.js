@@ -76,6 +76,10 @@ class CallStack{
 		return this.peekSFrame();
 	}
 
+	bottomSFrame(){
+		return this.#sFrames[0];
+	}
+
 	/**
 	 * Removes the top-most item in stack of stack frames and returns it
 	 * @return {StackFrame}
@@ -224,7 +228,31 @@ class StackFrame {
 }
 
 class HeapFrame{
+	records = [];
 
+	add(record){
+		this.records.push(record);
+	}
+
+	get(address){
+		for(const r of this.records){
+			if(r.address == address) return r;
+		}
+		return false;
+	}
+
+	[Symbol.iterator](){
+		let index = 0; // start from bottom
+		return {
+			next: () => {
+				if (index < this.records.length) {
+					return { value: this.records[index++], done: false };
+				} else {
+					return { done: true };
+				}
+			}
+		};
+	}
 }
 
 class DataFrame{

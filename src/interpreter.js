@@ -293,11 +293,11 @@ class Interpreter {
 		let result;
 
 		// initialize global variables
-		for(const [name, symbol] of this.#symtableGlobal.objects){
-			if(symbol.isFunction) continue; // skip functions
-			if(symbol.isNative) continue; // skip built-in functions
-			if(symbol.type == "TYPEDEF") continue; // skip typedefs
-			symbol.astPtr.accept(this);
+		for(const [name, record] of this.#symtableGlobal.objects){
+			if(record.isFunction) continue; // skip functions
+			if(record.isNative) continue; // skip built-in functions
+			if(record.type == "TYPEDEF") continue; // skip typedefs
+			record.astPtr.accept(this);
 		}
 
 		// initialize strings
@@ -327,7 +327,30 @@ class Interpreter {
 
 		this.updateHTML(result);
 		this.memviz.updateHTML();
-		this.memsim.printMemory();
+		console.log(this.memsim.printMemory());
+
+		/**
+		 * free all remaining automatic storage memory
+		 */
+
+		// globals
+		for(const [key, record] of this.#callStack.bottomSFrame().symtable.objects){ // bottom sFrame is basically global scope (globals)
+			if(record.isFunction) continue; // skip functions
+			if(record.isNative) continue; // skip built-in functions
+			if(record.type == "TYPEDEF") continue; // skip typedefs
+			this.memsim.free(record.address, record.memsize, record.region);
+		}
+		
+		// .data
+		for(const record of this.#callStack.dFrame){
+			this.memsim.free(record.address, record.memsize, record.region);
+		}
+
+		// .heap
+		for(const record of this.#callStack.hFrame){
+			this.memsim.free(record.address, record.memsize, record.region);
+		}
+
 		return result;
 	}
 
