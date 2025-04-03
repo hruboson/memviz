@@ -20,14 +20,14 @@ should clear them up.
 |-------------------------------------------------------------|--------------------------------------------------------------------------|-----------|--------------|
 | [BArithExpr](./src/ast/expr.js), [UExpr](./src/ast/expr.js) | The operands of operations ~, <<, >>, &, ^, \| must have the type of int. In case they are not they are converted (promoted) to integer type (integer promotion). If the right operand is negative or greater or greater or equal to the width of the promoted left operand, the behavior is *undefined* | §6.5.7 | |
 | [BAssignExpr](./src/ast/expr.js) | The expression must have a type compatible with type of the object | §6.5 | |
-| [SubscriptExpr](./src/ast/expr.js)\* | Definition of `[]` operator is that `E1[E2]` is identical to `(*((E1)+(E2)))` | §6.5.2.1 | |
+| [SubscriptExpr](./src/ast/expr.js)\* | Definition of `[]` operator is that `E1[E2]` is identical to `(*((E1)+(E2)))` | §6.5.2.1 | Yes |
 | [FncCallExpr](./src/ast/expr.js) | The number of arguments in function call shall agree with the number of parameters | §6.5.2.2 | Yes |
-| [UExpr](./src/ast/expr.js)\* | The result of **postfix** `++, --` operators is the value of the operand | §6.5.2.5 | |
+| [UExpr](./src/ast/expr.js)\* | The result of **postfix** `++, --` operators is the value of the operand | §6.5.2.5 | Yes |
 | [Initializer](./src/ast/declaration.js)\* | The size of an uspecified size shall be determined by the initializer list | §6.5.2.5 | |
 | [Declaration](./src/ast/declaration.js)\* | The result of the declaration is pointer to the object `int *p = (int []){2, 4};` | §6.5.2.5 | |
 | [UExpr](./src/ast/expr.js)\* | The result of a **prefix** `++, --` operators is the incremented value of the operand | §6.5.3.1 | |
-| [UExpr](./src/ast/expr.js) | The operand of `&` is function name, result of `[]`, `*` operator or an object | §6.5.3.2 | |
-| [UExpr](./src/ast/expr.js) | The operand of `*` is pointer type | §6.5.3.2 | |
+| [UExpr](./src/ast/expr.js) | The operand of `&` is function name, result of `[]`, `*` operator or an object | §6.5.3.2 | Yes |
+| [UExpr](./src/ast/expr.js) | The operand of `*` is pointer type | §6.5.3.2 | Yes |
 | [BArithExpr](./src/ast/expr.js)\* | If the operand of `*, %` is a 0, the behavior is undefined | §6.5.5 | Throw an RTError | 
 | [BArithExpr](./src/ast/expr.js)\* | When integers are divided the result is quotient, any fractional part is discarded | §6.5.6 | Yes |
 
