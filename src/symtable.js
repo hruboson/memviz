@@ -169,6 +169,7 @@ class Sym extends MemoryRecord{
 		this.astPtr = astPtr; // is this 100% pointer??? otherwise it's super inefficient (I'm not sure how JS pointers work)
 		this.memtype = this.determineMemtype();
 		if(indirection > 0) this.memtype = DATATYPE.int;
+		this.determineSize();
 	}
 
 	initialize(){

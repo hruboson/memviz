@@ -136,12 +136,8 @@ class MemoryRecord{
 	 * 	int **p = &p; // indirection = 2
 	 */
 	indirection = 0;
-	set indirection(indirection){
-		if(indirection > 0) this.memtype = DATATYPE.int;
-		this.indirection = indirection;
-	}
 
-	memsize; // size in bytes
+	memsize; // size of memory object in bytes
 
 	/**
 	 * Data type
@@ -158,7 +154,11 @@ class MemoryRecord{
 	memregion;
 
 	constructor(){
-		this.memsize = this.size.length > 0 ? this.size.reduce((res, item) => res *= MEMSIZES[this.memtype]*item) : MEMSIZES[this.memtype];
+		
+	}
+
+	determineSize(){
+		this.memsize = this.size.length > 0 ? this.size.reduce((res, item) => res *= item) * MEMSIZES[this.memtype] : MEMSIZES[this.memtype];
 	}
 }
 
@@ -510,7 +510,6 @@ class Memsim {
 	 */
 	free(address, size, region=null){
 		if(!region) region = this.getMemoryRegion(address);
-		console.log(region);
 	}
 
 	/**

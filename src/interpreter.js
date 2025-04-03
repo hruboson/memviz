@@ -305,6 +305,7 @@ class Interpreter {
 			const record = new MemoryRecord();
 			record.size = [stringRecord.toCArray().length];
 			record.memtype = DATATYPE.uchar;
+			record.determineSize();
 
 			this.memsim.setRecordValue(record, stringRecord.toCArray(), MEMREGION.DATA);
 
