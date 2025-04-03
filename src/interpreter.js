@@ -379,6 +379,10 @@ class Interpreter {
 			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
+		if(isclass(rval, "PointerValue")){
+			rval = rval.value;
+		}
+
 		// concrete operations
 		switch(expr.op){
 			case '=':
@@ -428,6 +432,18 @@ class Interpreter {
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
 		let coeVar = 1; // for pointer arithmetic
+
+		// special case for pointer arithmetic
+		if(isclass(lval, "PointerValue")){
+			switch(expr.op){
+				case '+':
+					return lval.value + MEMSIZES[lval.memtype];
+				case '-':
+					return lval.value - MEMSIZES[lval.memtype];
+				default:
+					throw new AppError("This should have been handled in semantic!");
+			}
+		}
 
 		if(has(lval, "address")){
 			if(lval.indirection > 0){
@@ -479,8 +495,16 @@ class Interpreter {
 			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
+		if(isclass(lval, "PointerValue")){
+			lval = lval.value;
+		}
+
 		if(has(rval, "address")){
 			rval = this.memsim.readRecordValue(rval); // get the value
+		}
+
+		if(isclass(rval, "PointerValue")){
+			rval = rval.value;
 		}
 
 		// concrete operations
@@ -512,8 +536,16 @@ class Interpreter {
 			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
+		if(isclass(lval, "PointerValue")){
+			lval = lval.value;
+		}
+
 		if(has(rval, "address")){
 			rval = this.memsim.readRecordValue(rval); // get the value
+		}
+
+		if(isclass(rval, "PointerValue")){
+			rval = rval.value;
 		}
 
 		// concrete operations
@@ -835,6 +867,7 @@ class Interpreter {
 		switch(initializer.kind){
 			case INITTYPE.EXPR:
 				val = this.evaluateExprArray(initializer.expr);
+				if(isclass(val, "PointerValue")) return val.value;
 				if(initializer.expr.cType == "CExpr" && initializer.expr.type == "s_literal") return val.address;
 				if(has(val, "address")) return this.memsim.readRecordValue(val);
 				return val;
@@ -919,6 +952,7 @@ class Interpreter {
 				val = this.evaluateExprArray(exprCopy.expr);
 			}else{  // last in the chain is identifier
 				val = this.evaluateExprArray(exprCopy);
+				if(isclass(val, "PointerValue")) record = val;
 				if(has(val, "address")) record = val;
 				break;
 			}
@@ -926,13 +960,18 @@ class Interpreter {
 			indices.push(val);
 			exprCopy = exprCopy.pointer;
 		};
-
+		
 		const flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
+
+		if(isclass(record, "PointerValue")){ // is this correct? I think it is... probably
+			return new PointerValue(record.value + MEMSIZES[record.memtype]*(flatIndex), record.memtype);
+		}
 
 		const dummyRecord = new MemoryRecord();
 		dummyRecord.dimension = 0;
 		dummyRecord.address = record.addresses[flatIndex];
 		dummyRecord.indirection = record.indirection;
+		dummyRecord.memtype = record.memtype;
 
 		return dummyRecord;
 	}
@@ -952,6 +991,10 @@ class Interpreter {
     visitUExpr(expr){
 		//TODO POSTFIX AND PREFIX DIFFERENTIATION
 		let value = this.evaluateExprArray(expr.expr);
+
+		if(isclass(value, "PointerValue")){
+			value = value.value;
+		}
 
 		switch(expr.op){
 			case '+':
@@ -993,13 +1036,12 @@ class Interpreter {
 				}else if(this.#callStack.findMemoryRecord(value)){
 					return this.#callStack.findMemoryRecord(value);
 				}else{
-					console.log(this.#callStack.findMemoryRecord(value));
-					throw new AppError(`Value ${value} is not a valid address`, expr.loc);
+					throw new RTError(`Value ${value} is not a valid address`, expr.loc);
 				}
 			}
 			case '&': {
 				if(has(value, "address")){
-					return value.address;
+					return new PointerValue(value.address, value.memtype);
 				}else if(this.#callStack.findMemoryRecord(value)){
 					return this.#callStack.findMemoryRecord(value);
 				}else{
@@ -1069,6 +1111,8 @@ class Interpreter {
 				return this.memsim.readRecordValue(arg);
 			}else if(has(arg, "address") && arg.size.length > 0){
 				return arg.address;
+			}else if(isclass(arg, "PointerValue")){
+				return arg.value;
 			}
 
 			return arg;
@@ -1262,5 +1306,12 @@ class ReturnVoid {
 class StopFlag {
 	constructor(){
 
+	}
+}
+
+class PointerValue {
+	constructor(value, memtype){
+		this.value = value;
+		this.memtype = memtype;
 	}
 }
