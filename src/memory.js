@@ -297,11 +297,11 @@ class Memsim {
 		const dimension = record.dimension;
 		const size = record.size;
 		const memsize = record.memsize;
-		const flatValue = value.flat(Infinity);
 
 		record.address = this.#allocRegion(region, memsize);
 
 		if(value){
+			const flatValue = value.flat(Infinity);
 			for(let i = 0; i < flatValue.length; i++){
 				const dummySym = { memtype: memtype, address: record.address + i*MEMSIZES[memtype], identifier: "array" };
 				const address = this.setPrimitiveValue(dummySym, flatValue[i], region);
