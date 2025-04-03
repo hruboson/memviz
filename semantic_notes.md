@@ -29,6 +29,13 @@ should clear them up.
 | [UExpr](./src/ast/expr.js) | The operand of `&` is function name, result of `[]`, `*` operator or an object | §6.5.3.2 | |
 | [UExpr](./src/ast/expr.js) | The operand of `*` is pointer type | §6.5.3.2 | |
 | [BArithExpr](./src/ast/expr.js)\* | If the operand of `*, %` is a 0, the behavior is undefined | §6.5.5 | Throw an RTError | 
-| [BArithExpr](./src/ast/expr.js)\* | When integers are divided the result is quotient, any fractional part is discarded | §6.5.6 | |
+| [BArithExpr](./src/ast/expr.js)\* | When integers are divided the result is quotient, any fractional part is discarded | §6.5.6 | Yes |
+
+## Pointer arithmetic
+- Pointer addition and subtraction:
+    - When you add or subtract an integer n to/from a pointer p (i.e., p + n or p - n), the result is computed by adding/subtracting n multiplied by the size of the object to which the pointer points (or the type size). (implemented)
+    - The pointer arithmetic must respect the type of the pointer. In the case of adding or subtracting from a pointer to an int, the result is adjusted by the size of an int (which is typically 4 bytes on many systems). (implemented)
+    - In other words, when you do something like p + 1 or p - 1 with p being a pointer to an integer (int\*), the resulting pointer will be adjusted by the size of an int, not 1 byte. This ensures that the pointer points to the next or previous int in memory. (implemented)
+    - Pointer division or multiplication *is not allowed*. (implemented)
 
 [^1]: https://en.cppreference.com/w/Cppreference:FAQ
