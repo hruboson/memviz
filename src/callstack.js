@@ -42,6 +42,7 @@ class CallStack{
 
 	/**
 	 * Finds memory record by its address
+	 * @returns {MemoryRecord|undefined}
 	 */
 	findMemoryRecord(address){
 		let record;
@@ -50,12 +51,31 @@ class CallStack{
 
 		}*/
 		for(record of this.dFrame){
-			if(record.address == address) return record;
+			if(record.address == address ) return record;
+			if(record.addresses.includes(address)){
+				const dummyRecord = new MemoryRecord();
+				dummyRecord.address = address;
+				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+				dummyRecord.indirection = record.indirection;
+				dummyRecord.memtype = record.memtype;
+				dummyRecord.memsize = MEMSIZES[record.memtype];
+				
+				return dummyRecord;
+			}
 		}
 		for(const frame of this.#sFrames){
 			for(record of frame.symtable.objects.values().filter(obj => obj.type == SYMTYPE.OBJ)){
-				console.log(address, record.address);
-				if(record.address == address) return record;
+				if(record.address == address || record.addresses.includes(address)) return record;
+				if(record.addresses.includes(address)){
+					const dummyRecord = new MemoryRecord();
+					dummyRecord.address = address;
+					dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+					dummyRecord.indirection = record.indirection;
+					dummyRecord.memtype = record.memtype;
+					dummyRecord.memsize = MEMSIZES[record.memtype];
+					
+					return dummyRecord;
+				}
 			}
 		}
 	}

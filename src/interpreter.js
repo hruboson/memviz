@@ -733,8 +733,9 @@ class Interpreter {
 		const fncPtr = this.#symtableGlobal.lookup(NAMESPACE.ORDS, callee.name);
 		let args = [];
 		for(let arg of callExpr.arguments){
-			if(has(arg, "address")){
-				args.push(this.memsim.readRecordValue(arg));
+			if(has(arg, "address") && arg.size.length == 0){
+				const value = this.memsim.readRecordValue(arg);
+				args.push(value);
 			}else{
 				args.push(this.evaluateExprArray(arg));
 			}
@@ -905,7 +906,7 @@ class Interpreter {
     visitSubscriptExpr(expr){
 		let indices = [this.evaluateExprArray(expr.expr)];
 		let exprCopy = expr.pointer;
-		let symbol;
+		let record;
 
 		while(exprCopy != null){
 			let val;
@@ -913,7 +914,7 @@ class Interpreter {
 				val = this.evaluateExprArray(exprCopy.expr);
 			}else{  // last in the chain is identifier
 				val = this.evaluateExprArray(exprCopy);
-				if(has(val, "address")) symbol = val;
+				if(has(val, "address")) record = val;
 				break;
 			}
 
@@ -923,12 +924,12 @@ class Interpreter {
 
 		const flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
 
-		const dummySym = new MemoryRecord();
-		dummySym.dimension = 0;
-		dummySym.address = symbol.addresses[flatIndex];
-		dummySym.indirection = symbol.indirection;
+		const dummyRecord = new MemoryRecord();
+		dummyRecord.dimension = 0;
+		dummyRecord.address = record.addresses[flatIndex];
+		dummyRecord.indirection = record.indirection;
 
-		return dummySym;
+		return dummyRecord;
 	}
 
 	visitSwitchStmt(stmt){
@@ -984,12 +985,21 @@ class Interpreter {
 						address: this.memsim.readRecordValue(value)
 					}
 					return this.memsim.readPrimitiveValue(dummySym);
+				}else if(this.#callStack.findMemoryRecord(value)){
+					return this.#callStack.findMemoryRecord(value);
+				}else{
+					console.log(this.#callStack.findMemoryRecord(value));
+					throw new AppError(`Value ${value} is not a valid address`, expr.loc);
 				}
-				throw new RTError(`Value ${value} does not have an address`, expr.loc);
 			}
 			case '&': {
-				if(has(value, "address")) return value.address;
-				throw new RTError(`Value ${value} does not have an address`, expr.loc);
+				if(has(value, "address")){
+					return value.address;
+				}else if(this.#callStack.findMemoryRecord(value)){
+					return this.#callStack.findMemoryRecord(value);
+				}else{
+					throw new RTError(`Value ${value} does not have an address`, expr.loc);
+				}
 			} 
 			default:
 				throw new AppError(`Unknown operator of UExpr: ${expr.op}`, expr.loc);
@@ -1049,7 +1059,16 @@ class Interpreter {
 		let formatString = this.memsim.readRecordValue(args[0]);
 		formatString = CArrayToJsString(formatString);
 		let otherArgs = args.slice(1);
-		otherArgs = otherArgs.map(arg => has(arg, "address") ? this.memsim.readRecordValue(arg) : arg);
+		otherArgs = otherArgs.map(arg => {
+			if(has(arg, "address") && arg.size.length == 0){
+				return this.memsim.readRecordValue(arg);
+			}else if(has(arg, "address") && arg.size.length > 0){
+				return arg.address;
+			}
+
+			return arg;
+		});
+
 
 		let i = 0;
 
@@ -1067,7 +1086,11 @@ class Interpreter {
 			}
 
 			if (match == "%s") {
-				const record = this.#callStack.findMemoryRecord(otherArgs[i++]);
+				let record = otherArgs[i++];
+				if(!has(record, "address")){
+					record = this.#callStack.findMemoryRecord(record);
+				}
+
 				return CArrayToJsString(this.memsim.readRecordValue(record));
 			}
 

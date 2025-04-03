@@ -225,7 +225,6 @@ class Memsim {
 			record.address = this.setPointerValue(record, value, region);
 		}else { 
 			record.address = this.setPrimitiveValue(record, value, region);
-			console.log(record);
 		}
 	}
 
@@ -300,12 +299,16 @@ class Memsim {
 
 		record.address = this.#allocRegion(region, memsize);
 
+		// calculate addresses
+		for(let i = 0; i < memsize; i += MEMSIZES[memtype]){
+			record.addresses.push(record.address + i);
+		}
+
 		if(value){
 			const flatValue = value.flat(Infinity);
 			for(let i = 0; i < flatValue.length; i++){
 				const dummySym = { memtype: memtype, address: record.address + i*MEMSIZES[memtype], identifier: "array" };
 				const address = this.setPrimitiveValue(dummySym, flatValue[i], region);
-				record.addresses.push(address);
 			}
 		}
 	}
@@ -349,7 +352,7 @@ class Memsim {
 	readPrimitiveValue(record){
 		switch(record.memtype){
 			case DATATYPE.bool:
-			break;
+				return this.readBoolValue(record.address);
 
 			case DATATYPE.char:
 				return this.readCharValue(record.address);
@@ -358,37 +361,37 @@ class Memsim {
 				return this.readUCharValue(record.address);
 
 			case DATATYPE.short:
-			break;
+				return this.readShortValue(record.address);
 
 			case DATATYPE.ushort:
-			break;
+				return this.readUShortValue(record.address);
 
 			case DATATYPE.int:
 				return this.readIntValue(record.address);
 
 			case DATATYPE.uint:
-			break;
+				return this.readUIntValue(record.address);
 
 			case DATATYPE.long:
-			break;
+				return this.readlongValue(record.address);
 
 			case DATATYPE.ulong:
-			break;
+				return this.readULongValue(record.address);
 
 			case DATATYPE.longlong:
-			break;
+				return this.readLongLongValue(record.address);
 
 			case DATATYPE.ulonglong:
-			break;
+				return this.readULongLongValue(record.address);
 
 			case DATATYPE.float:
-			break;
+				return this.readFloatValue(record.address);
 
 			case DATATYPE.double:
-			break;
+				return this.readDoubleValue(record.address);
 
 			case DATATYPE.longdouble:
-			break;
+				return this.readLongDoubleValue(record.address);
 		}
 
 	}
@@ -719,6 +722,49 @@ class Memsim {
 		}
 
 		return view.getInt32(0, true);
+	}
+
+	//////////
+	// UINT //
+	//////////
+	
+	setUIntValue(value, region, address){
+		value = this.checkValueOverflow(value, 0, UINT_MAX, 0xFFFFFFFF, "Integer");
+
+		const size = INTSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value == undefined || value == null){ 
+			view = undefined; // uninitialized object
+		}else{
+			view = new DataView(memorySpace);
+			view.setUint32(0, value, region, true);
+		}
+
+		this.#storeMemory(addr, size, region, view);
+
+		return addr;
+	}
+
+	readUIntValue(addr) {
+		const size = INTSIZE;
+		const buffer = new ArrayBuffer(size);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < size; i++){
+			if(!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
+			if(this.memory.get(addr + i).value == undefined) return undefined;
+			view.setUint8(i, this.memory.get(addr + i).value);
+		}
+
+		return view.getUint32(0, true);
 	}
 
 
