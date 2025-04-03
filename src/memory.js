@@ -810,7 +810,7 @@ class Memsim {
     const spaceForRegion = regionWidth - 10; // Space for region column
 
     // Header row
-    let dump = `Dec Addr${" ".repeat(Math.max(0, spaceForAddr))} | Hex Addr | Binary   | Hex  | Region\n`;
+    let dump = `Addr | Hex Addr | Binary   | Hex  | Region\n`;
     dump += "-".repeat(addrWidth + hexAddrWidth + valueWidth + hexValueWidth + regionWidth + 13) + "\n";
 
     this.memory.forEach((data, addr) => {
