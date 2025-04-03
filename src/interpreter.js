@@ -427,8 +427,12 @@ class Interpreter {
     visitBArithExpr(expr){
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
+		let coeVar = 1; // for pointer arithmetic
 
 		if(has(lval, "address")){
+			if(lval.indirection > 0){
+				coeVar = MEMSIZES[lval.memtype];
+			}
 			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
@@ -439,14 +443,14 @@ class Interpreter {
 		// concrete operations
 		switch(expr.op){
 			case '+':
-				return lval + rval;
+				return lval + rval*coeVar;
 			case '-':
-				return lval - rval;
+				return lval - rval*coeVar;
 			case '*':
-				return lval * rval;
+				return lval * rval*coeVar;
 			case '/':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				return Math.floor(lval / rval);
+				return Math.floor(lval / rval*coeVar);
 			case '%':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				return lval % rval;
