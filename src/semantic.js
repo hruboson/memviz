@@ -772,7 +772,7 @@ class Semantic {
 				//expr.expr.accept(this);
 				break;
 			case '&': {
-				const lvalue = expr.expr.accept(this);
+				const lvalue = this.evaluateExprArray(expr.expr);
 				//if(!isclass(expr.expr, "Identifier")) throw new SError("Lvalue (object, variable, ...) required for '&' operand", expr.loc);
 				break;
 			} 
@@ -820,6 +820,25 @@ class Semantic {
 	/**********************
 	 *  HELPER FUNCTIONS  *
 	 *********************/
+
+	/**
+	 * All expression could be returned as an array, that is by design of the C language.
+	 * This function exists to make it easier to evaluate any expression.
+	 * @param {Array.<Expr>} expr
+	 * @return {}
+	 */
+	evaluateExprArray(expr){
+		let ret;
+		if(Array.isArray(expr)){
+			for(const subexpr of expr){
+				ret = subexpr.accept(this);
+			}
+		}else{
+			ret = expr.accept(this);
+		}
+
+		return ret;
+	}
 
 	/**
 	 * Adds built-in (native) functions to the global symbol table.
