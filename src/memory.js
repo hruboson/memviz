@@ -137,6 +137,12 @@ class MemoryRecord{
 	 */
 	indirection = 0;
 
+	/**
+	 * Data type of value being pointed to
+	 * @type {DATATYPE}
+	 */
+	pointsToMemtype;
+
 	memsize; // size of memory object in bytes
 
 	/**

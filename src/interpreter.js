@@ -431,7 +431,7 @@ class Interpreter {
 
 		if(has(lval, "address")){
 			if(lval.indirection > 0){
-				coeVar = MEMSIZES[lval.memtype];
+				coeVar = MEMSIZES[lval.pointsToMemtype];
 			}
 			lval = this.memsim.readRecordValue(lval); // get the value
 		}
@@ -447,10 +447,10 @@ class Interpreter {
 			case '-':
 				return lval - rval*coeVar;
 			case '*':
-				return lval * rval*coeVar;
+				return lval * rval;
 			case '/':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				return Math.floor(lval / rval*coeVar);
+				return Math.floor(lval / rval);
 			case '%':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				return lval % rval;
