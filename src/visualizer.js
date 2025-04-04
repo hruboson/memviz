@@ -207,6 +207,46 @@ class Memviz {
 		return "white";
 	}
 
+	static get pointerStyle(){
+		return {
+			fillColor: "white",
+			strokeColor: "white",
+			fontSize: 14,
+			labelPosition: "center",
+			shape: "ellipse",
+		}
+	}
+
+	static get labelAboveStyle(){
+		return {
+			fillColor: "transparent",
+			strokeColor: "transparent",
+			labelPosition: "center",
+			verticalLabelPosition: "middle",
+			align: "left",
+
+			// font style
+			fontSize: 14,
+			fontColor: Memviz.fontColor,
+			fontFamily: Memviz.fontFamily,
+		}
+	}	
+
+	static get labelBelowStyle(){
+		return {
+			fillColor: "transparent",
+			strokeColor: "transparent",
+			labelPosition: "center",
+			verticalLabelPosition: "middle",
+			align: "right",
+
+			// font style
+			fontSize: 14,
+			fontColor: Memviz.fontColor,
+			fontFamily: Memviz.fontFamily,
+		}
+	}	
+
 	/**********************
 	 * CORE VIZ FUNCTIONS *
 	 **********************/
@@ -217,7 +257,6 @@ class Memviz {
 	 */
 	vizMemoryRecords(){
 		this.#init();
-		this.vizMemregions();
 
 		let nextY = 10;
 		const hf = this.callStack.hFrame;
@@ -370,7 +409,7 @@ class Memviz {
 		if(sym.size.length > 0){ // array
 			return this.vizArrayValue(sym, parent, style, y);
 		}else if(sym.indirection > 0){
-			return this.vizPointerValue(sym, parent, style, y);
+			return this.vizPointerRecord(sym, parent, style, y);
 		}else{
 			return this.vizPrimitiveValue(sym, parent, style, y);
 		}
@@ -449,84 +488,22 @@ class Memviz {
 	 * @param {Object} style
 	 * @param {Number} y
 	 */
-	vizPointerValue(sym, parent, style, y){
+	vizPointerRecord(sym, parent, style, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
+		const labelAbove = sym.name ? sym.name : "";
+		const labelBelow = '*'.repeat(sym.indirection) + sym.specifiers.join(' ');
 		let pointingTo;
 		if(sym.address){
 			pointingTo = this.memsim.readRecordValue(sym);
 		}
-
-		const valueBox = this.graph.insertVertex({
-			parent: parent,
-			position: [Memviz.squareX, y],
-			size: [Memviz.squareXYlen, Memviz.squareXYlen],
-			style: style,
-		});
-
-		let circle;
-		if(pointingTo){
-			circle = this.graph.insertVertex({
-				parent: valueBox, // The square is the parent
-				position: [(Memviz.squareXYlen/2)-(Memviz.circleXYlen/2), (Memviz.squareXYlen/2)-(Memviz.circleXYlen/2)], // Position relative to the square
-				size: [Memviz.circleXYlen, Memviz.circleXYlen], // Circle size (adjust for best fit)
-				style: {
-					fillColor: "white",
-					strokeColor: "white",
-					fontSize: 14,
-					labelPosition: "center",
-					shape: "ellipse", // Makes it a circle
-				},
-			});
-		}
-
-		const labelAbove = this.graph.insertVertex({
-			parent: parent, 
-			position: [Memviz.squareX, y - Memviz.labelHeight],
-			size: [Memviz.squareXYlen, Memviz.labelHeight],
-			value: sym.name ? sym.name : "",
-			style: {
-				fillColor: "transparent",
-				strokeColor: "transparent",
-				labelPosition: "center",
-				verticalLabelPosition: "middle",
-				align: "left",
-
-				// font style
-				fontSize: 14,
-				fontColor: Memviz.fontColor,
-				fontFamily: Memviz.fontFamily,
-			},
-		});
-
-		const labelBelow = this.graph.insertVertex({
-			parent: parent, 
-			position: [Memviz.squareX, y + Memviz.squareXYlen], // Position below the square
-			size: [Memviz.squareXYlen, Memviz.labelHeight],
-			value: '*'.repeat(sym.indirection) + sym.specifiers.join(' '),
-			style: {
-				fillColor: "transparent", // Transparent background
-				strokeColor: "transparent", // No border
-				labelPosition: "center",
-				verticalLabelPosition: "middle",
-				align: "right",
-
-				// font style
-				fontSize: 14,
-				fontColor: Memviz.fontColor,
-				fontFamily: Memviz.fontFamily,
-			},
-		});
-
-		if(pointingTo){
-			this.pointerPairs.push(
-				new VizPointerPair(
-					new VizCellPointer(sym.address, circle),
-					new VizCellValue(pointingTo, null) // will be determined at the end of call stack visualization
-				)
-			);
-		}
-
-		this.symbols.set(sym.address, new VizCellValue(sym.address, valueBox));
+		
+		this.vizPointerCell(
+			/* parent, x, y: */  parent, Memviz.squareX, y, 
+			/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen, 
+			/* above, below: */  labelAbove, labelBelow, 
+			/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(sym.address)), 
+			/* from, to: */      sym.address, pointingTo
+		);
 
 		return y + height;
 	}
@@ -569,82 +546,19 @@ class Memviz {
 				let valueBox;
 				if(sym.indirection > 0){
 					let pointingTo = arr[i];
-
-					const valueBox = this.graph.insertVertex({
-						parent: parent,
-						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y],
-						size: [Memviz.squareXYlen, Memviz.squareXYlen],
-						style: style,
-					});
-
-					let circle;
-					if(pointingTo){
-						circle = this.graph.insertVertex({
-							parent: valueBox, // The square is the parent
-							position: [(Memviz.squareXYlen/2)-(Memviz.circleXYlen/2), (Memviz.squareXYlen/2)-(Memviz.circleXYlen/2)], // Position relative to the square
-							size: [Memviz.circleXYlen, Memviz.circleXYlen], // Circle size (adjust for best fit)
-							style: {
-								fillColor: "white",
-								strokeColor: "white",
-								fontSize: 14,
-								labelPosition: "center",
-								shape: "ellipse", // Makes it a circle
-							},
-						});
-					}
-
+					const x = Memviz.squareX + ((Memviz.squareXYlen * n));
 					const indices = flatIndexToDimensionalIndices(n, sym.size);
 					const name = sym.name ? sym.name : ""
-					const labelText = name + indices.map(idx => `[${idx}]`).join('');
-					const labelAbove = this.graph.insertVertex({
-						parent: parent, 
-						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y - Memviz.labelHeight],
-						size: [Memviz.squareXYlen, Memviz.labelHeight],
-						value: labelText,
-						style: {
-							fillColor: "transparent",
-							strokeColor: "transparent",
-							labelPosition: "center",
-							verticalLabelPosition: "middle",
-							align: "left",
+					const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
+					const labelBelow = sym.specifiers ? '*'.repeat(sym.indirection) + sym.specifiers.join(' ') : '*'.repeat(sym.indirection) + sym.memtype;
 
-							// font style
-							fontSize: 14,
-							fontColor: Memviz.fontColor,
-							fontFamily: Memviz.fontFamily,
-						},
-					});
-
-					const belowValue = sym.specifiers ? '*'.repeat(sym.indirection) + sym.specifiers.join(' ') : '*'.repeat(sym.indirection) + sym.memtype;
-					const labelBelow = this.graph.insertVertex({
-						parent: parent, 
-						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y + Memviz.squareXYlen], // Position below the square
-						size: [Memviz.squareXYlen, Memviz.labelHeight],
-						value: belowValue,
-						style: {
-							fillColor: "transparent", // Transparent background
-							strokeColor: "transparent", // No border
-							labelPosition: "center",
-							verticalLabelPosition: "middle",
-							align: "right",
-
-							// font style
-							fontSize: 14,
-							fontColor: Memviz.fontColor,
-							fontFamily: Memviz.fontFamily,
-						},
-					});
-
-					if(pointingTo){
-						this.pointerPairs.push(
-							new VizPointerPair(
-								new VizCellPointer(sym.addresses[n], circle),
-								new VizCellValue(pointingTo, null) // will be determined at the end of call stack visualization
-							)
-						);
-					}
-
-					this.symbols.set(sym.addresses[n], new VizCellValue(sym.addresses[n], valueBox));
+					this.vizPointerCell(
+						/* parent, x, y: */  parent, x, y, 
+						/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen, 
+						/* above, below: */  labelAbove, labelBelow, 
+						/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(sym.address)), 
+						/* from, to: */      sym.address, pointingTo
+					);
 				}else{
 					valueBox = this.graph.insertVertex({
 						parent: parent,
@@ -706,12 +620,54 @@ class Memviz {
 		return n;
 	}
 
-	/**
-	 * Visualizes the hint at top of visualizer. This visualizes the memory regions and their colors
-	 * @todo implement
-	 */
-	vizMemregions(){
-		//TODO this will be on top of the whole visualization, it will show what color each region has
+	vizPointerCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, pointingFrom, pointingTo){
+		const valueBox = this.graph.insertVertex({
+			parent: parent,
+			position: [x, y],
+			size: [width, height],
+			style: cellStyle,
+		});
+
+		let circle;
+		if(pointingTo){
+			circle = this.graph.insertVertex({
+				parent: valueBox, // the square is the parent
+				position: [(width/2)-(Memviz.circleXYlen/2), (height/2)-(Memviz.circleXYlen/2)], // position relative to the square
+				size: [Memviz.circleXYlen, Memviz.circleXYlen], // circle size
+				style: Memviz.pointerStyle,
+			});
+		}
+
+		const labelAboveCell = this.graph.insertVertex({
+			parent: parent, 
+			position: [x, y - Memviz.labelHeight], // this might make some trouble later on
+			size: [width, Memviz.labelHeight],
+			value: labelAbove,
+			style: Memviz.labelAboveStyle,
+		});
+
+		const labelBelowCell = this.graph.insertVertex({
+			parent: parent, 
+			position: [x, y + height], // Position below the square
+			size: [width, Memviz.labelHeight],
+			value: labelBelow,
+			style: Memviz.labelBelowStyle,
+		});
+
+		if(pointingTo){
+			this.pointerPairs.push(
+				new VizPointerPair(
+					new VizCellPointer(pointingFrom, circle),
+					new VizCellValue(pointingTo, null) // will be determined at the end of call stack visualization
+				)
+			);
+		}
+
+		this.symbols.set(pointingFrom, new VizCellValue(pointingFrom, valueBox));
+	}
+
+	vizValueCell(parent, x, y, width, heigth, labelAbove, labelBelow, cellValue, cellStyle, /*isChar,*/ ){
+
 	}
 
 	/**
