@@ -976,7 +976,12 @@ class Interpreter {
 			exprCopy = exprCopy.pointer;
 		};
 		
-		const flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
+		let flatIndex = 1;
+		if(record.size){
+			flatIndex = this.getFlatIndex(indices, record.size);
+		}else{
+			flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
+		}
 
 		if(isclass(record, "PointerValue")){ // is this correct? I think it is... probably
 			return new PointerValue(record.value + MEMSIZES[record.memtype]*(flatIndex), record.memtype);
@@ -1211,6 +1216,18 @@ class Interpreter {
 	 */
 	sizeof(datatype){
 		return MEMSIZES[datatype];
+	}
+
+	getFlatIndex(indices, sizes){
+		let flatIndex = 0;
+		let stride = 1;
+
+		for(let i = 0; i < sizes.length; i++){
+			flatIndex += indices[i] * stride;
+			stride *= sizes[i];
+		}
+
+		return flatIndex;
 	}
 
 	/**
