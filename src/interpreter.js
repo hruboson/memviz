@@ -77,6 +77,20 @@ class Interpreter {
 	memsim;
 
 	/**
+	 * Memory dump before final free
+	 * @type {string}
+	 * @public
+	 */
+	memdump_pre;
+
+	/**
+	 * Memory dump at the end of program (after final free)
+	 * @type {string}
+	 * @public
+	 */
+	memdump_end;
+
+	/**
 	 * Memory visualizer
 	 * @type {Memviz}
 	 * @public
@@ -327,7 +341,7 @@ class Interpreter {
 
 		this.updateHTML(result);
 		this.memviz.updateHTML();
-		console.log(this.memsim.printMemory());
+		this.memdump_pre = this.memsim.printMemory();
 
 		/**
 		 * free all remaining automatic storage memory
@@ -351,6 +365,7 @@ class Interpreter {
 			this.memsim.free(record.address, record.memsize, record.region);
 		}
 
+		this.memdump_end = this.memsim.printMemory();
 		return result;
 	}
 
@@ -1220,6 +1235,8 @@ class Interpreter {
 		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
 		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
+		document.getElementById("memdump_pre").innerHTML = this.memdump_pre;
+		document.getElementById("memdump_end").innerHTML = this.memdump_end;
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
 		document.getElementById("console-output").innerHTML = this.output;
 

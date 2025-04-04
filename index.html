@@ -187,9 +187,10 @@
 			</div>
 			<div class="col-6 text-end">
 				<span id="debugInfo" style="visibility: visible"> <!-- on release change to hidden -->
-					<button class="btn btn-primary" onclick="execute(editor.getValue(), EXEOPT.PARSE)"><i class='bx bxs-parking'></i></button>
+					<button class="btn btn-primary" onclick="execute(editor.getValue(), EXEOPT.PARSE)">PARSE</button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#astOffcanvas" aria-controls="astOffcanvas">AST</button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#symtableOffcanvas" aria-controls="symtableOffcanvas">SYMTAB</button>
+					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#memdumpOffcanvas" aria-controls="memdumpOffcanvas">MEMDUMP</button>
 				</span>
 				<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#infoModal" type="button"><i class="bx bx-sm bx-info-circle"></i></button>
 				<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#settingsModal" type="button"><i class="bx bx-sm bx-cog"></i></button>
@@ -302,6 +303,24 @@
 			<div class="row">
 				<div class="col-6">
 					<pre id="symtable"></pre>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Memory dump offcanvas -->
+	<div class="offcanvas offcanvas-bottom h-75" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="memdumpOffcanvas" aria-labelledby="offcanvasScrollingLabel">
+		<div class="offcanvas-header">
+			<h3 class="offcanvas-title" id="memdumpOffcanvasLabel">Memory dump</h3>
+			<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		</div>
+		<div class="offcanvas-body">
+			<div class="row">
+				<div class="col-6">
+					<pre id="memdump_pre"></pre>
+				</div>
+				<div class="col-6">
+					<pre id="memdump_end"></pre>
 				</div>
 			</div>
 		</div>
