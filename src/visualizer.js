@@ -186,7 +186,7 @@ class Memviz {
 	 * @static
 	 */
 	static get labelHeight(){
-		return Memviz.squareXYlen/3;
+		return Memviz.squareXYlen/4;
 	}
 
 	/**
@@ -241,7 +241,7 @@ class Memviz {
 			align: "right",
 
 			// font style
-			fontSize: 14,
+			fontSize: 10,
 			fontColor: Memviz.fontColor,
 			fontFamily: Memviz.fontFamily,
 		}
@@ -317,7 +317,7 @@ class Memviz {
 		let nextY = 30; // first top padding
 
 		for(const dataObject of df.records){
-			nextY = this.vizSym(dataObject, dataFrameRectangle, nextY);
+			nextY = this.vizRecord(dataObject, dataFrameRectangle, nextY);
 		}
 
 		return sfY + height;
@@ -387,32 +387,30 @@ class Memviz {
 		});
 
 		let nextY = 30; // first top padding
-		for(const [name, sym] of filteredObjects){
-			nextY = this.vizSym(sym, stackFrameRectangle, nextY);
+		for(const [name, record] of filteredObjects){
+			nextY = this.vizRecord(record, stackFrameRectangle, nextY);
 		}
 
 		return sfY + height;
 	}
 
 	/**
-	 * Visualizes single symbol from stack frame.
-	 * @param {Symbol} sym
-	 * @param {Cell} parent This will be the symbols stack frame.
+	 * Visualizes single MemoryRecord from stack frame.
+	 * @param {MemoryRecord} record
+	 * @param {Cell} parent This will be the recordbols stack frame.
 	 * @param {Number} y
 	 */
-	vizSym(sym, parent, y){
-		//TODO only a demo, add switch for types of symbol (array, pointer, structure, primitive)
+	vizRecord(record, parent, y){
+		if(!record.address) console.warn(record);
+		const style = this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address));
 
-		if(!sym.address) console.warn(sym);
-		const style = this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(sym.address));
-
-		if(sym.size.length > 0){ // array
-			return this.vizArrayValue(sym, parent, style, y);
-		}else if(sym.indirection > 0){
-			return this.vizPointerRecord(sym, parent, style, y);
-		}else{
-			return this.vizPrimitiveRecord(sym, parent, style, y);
-		}
+		if(record.size.length > 0){ // array
+			return this.vizArrayValue(record, parent, style, y);
+		}else if(record.indirection > 0){ // pointer
+			return this.vizPointerRecord(record, parent, style, y);
+		}else{ // value
+			return this.vizPrimitiveRecord(record, parent, style, y);
+		} // todo struct
 	}
 
 	/**
@@ -492,88 +490,49 @@ class Memviz {
 
 	/**
 	 * Recursively visualizes each element of an array.
-	 * @param {Symbol} sym
+	 * @param {MemoryRecord} record
 	 * @param {Cell} parent
 	 * @param {Object} style
 	 * @param {Number} y
 	 * @param {integer} numberOfElements
 	 * @param {Array} arr
 	 */
-	vizArrayRecursive(sym, parent, style, y, numberOfElements, arr){
+	vizArrayRecursive(record, parent, style, y, numberOfElements, arr){
 		let n = numberOfElements;
 		for (var i = 0; i < arr.length; i++){
 			if (Array.isArray(arr[i])){
-				n = this.vizArrayRecursive(sym, parent, style, y, n, arr[i]);
+				n = this.vizArrayRecursive(record, parent, style, y, n, arr[i]);
 			}else{
-				let valueBox;
-				if(sym.indirection > 0){
+				if(record.indirection > 0){
 					let pointingTo = arr[i];
 					const x = Memviz.squareX + ((Memviz.squareXYlen * n));
-					const indices = flatIndexToDimensionalIndices(n, sym.size);
-					const name = sym.name ? sym.name : ""
+					const indices = flatIndexToDimensionalIndices(n, record.size);
+					const name = record.name ? record.name : ""
 					const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
-					const labelBelow = sym.specifiers ? '*'.repeat(sym.indirection) + sym.specifiers.join(' ') : '*'.repeat(sym.indirection) + sym.memtype;
+					const labelBelow = record.specifiers ? '*'.repeat(record.indirection) + record.specifiers.join(' ') : '*'.repeat(record.indirection) + record.memtype;
 
 					this.vizPointerCell(
 						/* parent, x, y: */  parent, x, y, 
 						/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen, 
 						/* above, below: */  labelAbove, labelBelow, 
-						/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(sym.address)), 
-						/* from, to: */      sym.address, pointingTo
+						/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address)), 
+						/* from, to: */      record.address, pointingTo
 					);
 				}else{
-					valueBox = this.graph.insertVertex({
-						parent: parent,
-						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y],
-						size: [Memviz.squareXYlen, Memviz.squareXYlen],
-						value: sym.memtype == DATATYPE.char || sym.memtype == DATATYPE.uchar ? CCharToJsString(arr[i]) : arr[i],
-						style: style,
-					});
+					const value = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? CCharToJsString(arr[i]) : arr[i];
+					const indices = flatIndexToDimensionalIndices(n, record.size);
+					const name = record.name ? record.name : ""
+					const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
+					const labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
+					const width = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? Memviz.squareXYlen/2 : Memviz.squareXYlen;
 
-					const indices = flatIndexToDimensionalIndices(n, sym.size);
-					const name = sym.name ? sym.name : ""
-					const labelText = name + indices.map(idx => `[${idx}]`).join('');
-
-					const labelAbove = this.graph.insertVertex({
-						parent: parent, 
-						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y - Memviz.labelHeight],
-						size: [Memviz.squareXYlen, Memviz.labelHeight],
-						value: labelText,
-						style: {
-							fillColor: "transparent",
-							strokeColor: "transparent",
-							labelPosition: "center",
-							verticalLabelPosition: "middle",
-							align: "left",
-
-							// font style
-							fontSize: 10,
-							fontColor: Memviz.fontColor,
-							fontFamily: Memviz.fontFamily,
-						},
-					});
-
-					const labelBelow = this.graph.insertVertex({
-						parent: parent, 
-						position: [Memviz.squareX + ((Memviz.squareXYlen * n)), y + Memviz.squareXYlen], // Position below the square
-						size: [Memviz.squareXYlen, Memviz.labelHeight],
-						value: sym.specifiers ? sym.specifiers.join(' ') : sym.memtype,
-						style: {
-							fillColor: "transparent", // Transparent background
-							strokeColor: "transparent", // No border
-							labelPosition: "center",
-							verticalLabelPosition: "middle",
-							align: "right",
-
-							// font style
-							fontSize: 14,
-							fontColor: Memviz.fontColor,
-							fontFamily: Memviz.fontFamily,
-						},
-					});
-
-					// don't forget to add the address to global array for visualization
-					this.symbols.set(sym.addresses[n], new VizCellValue(sym.addresses[n], valueBox));
+					this.vizValueCell(
+						/* parent, x, y: */  parent, Memviz.squareX + (width*n), y, 
+						/* width, height: */ width, Memviz.squareXYlen, 
+						/* above, below: */  labelAbove, labelBelow, 
+						/* style: */         style, 
+						/* address, value:*/ record.address, value 
+					);
 				}
 
 				n++;
@@ -597,18 +556,7 @@ class Memviz {
 			position: [x, y - Memviz.labelHeight],
 			size: [width, Memviz.labelHeight],
 			value: labelAbove,
-			style: {
-				fillColor: "transparent",
-				strokeColor: "transparent",
-				labelPosition: "center",
-				verticalLabelPosition: "middle",
-				align: "left",
-
-				// font style
-				fontSize: 14,
-				fontColor: Memviz.fontColor,
-				fontFamily: Memviz.fontFamily,
-			},
+			style: Memviz.labelAboveStyle,
 		});
 
 		const labelBelowCell = this.graph.insertVertex({
@@ -616,18 +564,7 @@ class Memviz {
 			position: [x, y + height], // Position below the square
 			size: [width, Memviz.labelHeight],
 			value: labelBelow,
-			style: {
-				fillColor: "transparent", // Transparent background
-				strokeColor: "transparent", // No border
-				labelPosition: "center",
-				verticalLabelPosition: "middle",
-				align: "right",
-
-				// font style
-				fontSize: 14,
-				fontColor: Memviz.fontColor,
-				fontFamily: Memviz.fontFamily,
-			},
+			style: Memviz.labelBelowStyle,
 		});
 
 		this.symbols.set(cellAddress, new VizCellValue(cellAddress, valueBox));
