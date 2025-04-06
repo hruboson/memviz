@@ -186,7 +186,7 @@ class Memviz {
 	 * @static
 	 */
 	static get labelHeight(){
-		return Memviz.squareXYlen/4;
+		return Memviz.squareXYlen/3;
 	}
 
 	/**
@@ -226,7 +226,7 @@ class Memviz {
 			align: "left",
 
 			// font style
-			fontSize: 14,
+			fontSize: 11,
 			fontColor: Memviz.fontColor,
 			fontFamily: Memviz.fontFamily,
 		}
@@ -241,7 +241,7 @@ class Memviz {
 			align: "right",
 
 			// font style
-			fontSize: 10,
+			fontSize: 14,
 			fontColor: Memviz.fontColor,
 			fontFamily: Memviz.fontFamily,
 		}
@@ -478,67 +478,58 @@ class Memviz {
 	vizArrayValue(record, parent, style, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight*2;
 
-		let value;
+		let arrayValue;
 		if(record.address){
-			value = this.memsim.readRecordValue(record);
+			arrayValue = this.memsim.readRecordValue(record);
 		}
 
-		this.vizArrayRecursive(record, parent, style, y, 0, value);
+		if(!Array.isArray(arrayValue) || !arrayValue){
+			return y + height;
+		}
+
+		arrayValue = arrayValue.flat(Infinity);
+		let n = 0;
+		for(let element of arrayValue){
+			console.log(n, arrayValue.length);
+			console.log(element);
+			if(record.indirection > 0){
+				let pointingTo = element;
+				const x = Memviz.squareX + ((Memviz.squareXYlen * n));
+				const indices = flatIndexToDimensionalIndices(n, record.size);
+				const name = record.name ? record.name : ""
+				const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
+				let labelBelow = record.specifiers ? '*'.repeat(record.indirection) + record.specifiers.join(' ') : '*'.repeat(record.indirection) + record.memtype;
+				labelBelow = n == arrayValue.length - 1 ? labelBelow : "";
+
+				this.vizPointerCell(
+					/* parent, x, y: */  parent, x, y, 
+					/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen, 
+					/* above, below: */  labelAbove, labelBelow, 
+					/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address)), 
+					/* from, to: */      record.addresses[n], pointingTo
+				);
+			}else{
+				const value = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? CCharToJsString(element) : element;
+				const indices = flatIndexToDimensionalIndices(n, record.size);
+				const name = record.name ? record.name : ""
+				const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
+				let labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
+				labelBelow = n == arrayValue.length - 1 ? labelBelow : "";
+				const width = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? Memviz.squareXYlen/2 : Memviz.squareXYlen;
+
+				this.vizValueCell(
+					/* parent, x, y: */  parent, Memviz.squareX + (width*n), y, 
+					/* width, height: */ width, Memviz.squareXYlen, 
+					/* above, below: */  labelAbove, labelBelow, 
+					/* style: */         style, 
+					/* address, value:*/ record.addresses[n], value 
+				);
+			}
+
+			n++;
+		}
 
 		return y + height;
-	}
-
-	/**
-	 * Recursively visualizes each element of an array.
-	 * @param {MemoryRecord} record
-	 * @param {Cell} parent
-	 * @param {Object} style
-	 * @param {Number} y
-	 * @param {integer} numberOfElements
-	 * @param {Array} arr
-	 */
-	vizArrayRecursive(record, parent, style, y, numberOfElements, arr){
-		let n = numberOfElements;
-		for (var i = 0; i < arr.length; i++){
-			if (Array.isArray(arr[i])){
-				n = this.vizArrayRecursive(record, parent, style, y, n, arr[i]);
-			}else{
-				if(record.indirection > 0){
-					let pointingTo = arr[i];
-					const x = Memviz.squareX + ((Memviz.squareXYlen * n));
-					const indices = flatIndexToDimensionalIndices(n, record.size);
-					const name = record.name ? record.name : ""
-					const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
-					const labelBelow = record.specifiers ? '*'.repeat(record.indirection) + record.specifiers.join(' ') : '*'.repeat(record.indirection) + record.memtype;
-
-					this.vizPointerCell(
-						/* parent, x, y: */  parent, x, y, 
-						/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen, 
-						/* above, below: */  labelAbove, labelBelow, 
-						/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address)), 
-						/* from, to: */      record.address, pointingTo
-					);
-				}else{
-					const value = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? CCharToJsString(arr[i]) : arr[i];
-					const indices = flatIndexToDimensionalIndices(n, record.size);
-					const name = record.name ? record.name : ""
-					const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
-					const labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
-					const width = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? Memviz.squareXYlen/2 : Memviz.squareXYlen;
-
-					this.vizValueCell(
-						/* parent, x, y: */  parent, Memviz.squareX + (width*n), y, 
-						/* width, height: */ width, Memviz.squareXYlen, 
-						/* above, below: */  labelAbove, labelBelow, 
-						/* style: */         style, 
-						/* address, value:*/ record.address, value 
-					);
-				}
-
-				n++;
-			}
-		}
-		return n;
 	}
 
 	vizValueCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, cellAddress, cellValue){
