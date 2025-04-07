@@ -582,7 +582,11 @@ class Memsim {
 	setVoidValue(record, value, region){
 		const bytes = [];
 		for (let i = 0; i < record.memsize; i++) {
-			bytes.push((value >> (i * 8)) & 0xFF);
+			if(value == undefined || value == null){
+				bytes.push(undefined);
+			}else{
+				bytes.push((value >> (i * 8)) & 0xFF);
+			}
 		}
 
 		let firstAddress;
@@ -597,6 +601,7 @@ class Memsim {
 		const bytes = [];
 		for(let i = 0; i < size; i++){
 			bytes.push(this.readUCharValue(address+i));
+			if(bytes[i] == undefined) return undefined;
 		}
 
 		let number = 0;

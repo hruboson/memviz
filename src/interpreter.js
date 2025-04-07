@@ -397,42 +397,44 @@ class Interpreter {
 			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
+		const newMemregion = symbol.memregion == MEMREGION.BSS ? MEMREGION.STACK : symbol.memregion;
+
 		// concrete operations
 		switch(expr.op){
 			case '=':
-				this.memsim.setRecordValue(symbol, rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, rval, newMemregion);
 				break;
 			case '+=':
-				this.memsim.setRecordValue(symbol, lval + rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval + rval, newMemregion);
 				break;
 			case '-=':
-				this.memsim.setRecordValue(symbol, lval - rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval - rval, newMemregion);
 				break;
 			case '*=':
-				this.memsim.setRecordValue(symbol, lval * rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval * rval, newMemregion);
 				break;
 			case '/=':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				this.memsim.setRecordValue(symbol, lval / rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval / rval, newMemregion);
 				break;
 			case '%=':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				this.memsim.setRecordValue(symbol, lval % rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval % rval, newMemregion);
 				break;
 			case '&=':
-				this.memsim.setRecordValue(symbol, lval & rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval & rval, newMemregion);
 				break;
 			case '|=':
-				this.memsim.setRecordValue(symbol, lval | rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval | rval, newMemregion);
 				break;
 			case '^=':
-				this.memsim.setRecordValue(symbol, lval ^ rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval ^ rval, newMemregion);
 				break;
 			case '<<=':
-				this.memsim.setRecordValue(symbol, lval << rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval << rval, newMemregion);
 				break;
 			case '>>=':
-				this.memsim.setRecordValue(symbol, lval >> rval, MEMREGION.STACK);
+				this.memsim.setRecordValue(symbol, lval >> rval, newMemregion);
 				break;
 
 			default:
@@ -1181,7 +1183,7 @@ class Interpreter {
 		record.memtype = DATATYPE.void;
 		record.region = MEMREGION.HEAP;
 
-		this.memsim.setRecordValue(record, 0, MEMREGION.HEAP);
+		this.memsim.setRecordValue(record, null, MEMREGION.HEAP);
 
 		this.#callStack.hFrame.add(record);
 		return new PointerValue(record.address, DATATYPE.void);
