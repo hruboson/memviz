@@ -352,3 +352,31 @@ const pointer_arithmetic_example = `int main(){
 	printf("s: %d\\n",    s);
 	printf("s using q pointer: %d\\n ", *(p-1));
 }`;
+
+const malloc_no_free_example = `int main() {
+    int* ptr = (int*) malloc(sizeof(int)); // allocate memory
+    if (ptr == NULL) {
+        return 1;
+    }
+
+    *ptr = 99;
+    printf("%d", *ptr);
+
+    // No call to free(ptr) — memory leak
+
+    return 0;
+}`;
+
+const malloc_free_example = `int main() {
+    int* ptr = (int*) malloc(sizeof(int)); // allocate memory for one int
+    if (ptr == NULL) {
+        return 1;
+    }
+
+    *ptr = 42; // assign value
+    printf("%d", *ptr);
+
+    free(ptr); // free allocated memory
+
+    return 0;
+}`;

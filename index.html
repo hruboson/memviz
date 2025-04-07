@@ -219,8 +219,8 @@
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(errors_example)">errors</button>
 						<div class="dropdown-divider"></div>
-						<button class="dropdown-item" type="button">malloc</button>
-						<button class="dropdown-item" type="button">free</button>
+						<button class="dropdown-item" type="button" onclick="setExample(malloc_no_free_example)">malloc</button>
+						<button class="dropdown-item" type="button" onclick="setExample(malloc_free_example)">free</button>
 						<div class="dropdown-divider"></div>
 						<button class="dropdown-item" type="button" onclick="setExample(while_loop_example)">while loop</button>
 						<button class="dropdown-item" type="button" onclick="setExample(for_loop_example)">for loop</button>
@@ -241,20 +241,17 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main() {
-	int x[][2][3] = {{{10, 20, 30}, {40, 50, 60}}, {{70, 80, 90}, {100, 110, 120}}};
-	int* p = &x[0][1][2]; // pointer into middle
-	int** pp = &p;
-	int* xx[] = {p, *pp};
-	char hello[] = "Hello world";
+    int* ptr = (int*) malloc(sizeof(int)); // allocate memory for one int
+    if (ptr == NULL) {
+        return 1;
+    }
 
-	char* fruit[3] = { 
-		"apples",
-		"bananas",
-		"cherries"
-	};
+    *ptr = 42; // assign value
+    printf("%d", *ptr);
 
-	printf("I have %d %s\n", *p, fruit[1]);
-	return 0;
+    free(ptr); // free allocated memory
+
+    return 0;
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
