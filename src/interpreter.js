@@ -939,6 +939,7 @@ class Interpreter {
 		if(expr == null) throw new ReturnThrow(new ReturnVoid(ret.loc)); // in case of empty return (void return)
 
 		expr = this.evaluateExprArray(expr); // resolve the expression (last is returned)
+		if(isclass(expr, "PointerValue")) expr = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(expr.value));
 		if(has(expr, "address")) expr = this.memsim.readRecordValue(expr);
 
 		// this breakstop is causing some weird behavior at the end of main, maybe remove it
