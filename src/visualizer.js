@@ -283,7 +283,51 @@ class Memviz {
 	}
 
 	vizHeapFrame(hf, y) {
-		return y;
+		const nHorizontal = hf.records.length;
+		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
+		let sfY = y + Memviz.labelHeight + 10;
+
+		let height = (Memviz.squareXYlen + Memviz.labelHeight);
+		if (hf.records.length > 0) {
+			height += 20; // inner padding for each row inside sf
+			height *= hf.records.length;
+		}
+		height += 20; // bottom padding
+
+		const root = this.root;
+		const heapFrameRectangle = this.graph.insertVertex({
+			root,
+			position: [Memviz.sfX, sfY],
+			height: height,
+			width: width,
+			style: {
+				// label style
+				labelPosition: "center",
+				verticalAlign: "bottom",
+				verticalLabelPosition: "top",
+				spacingBottom: 5,
+				align: "left",
+
+				strokeColor: "grey",
+				fillColor: "transparent",
+				shape: "rectangle",
+
+				// font style
+				fontSize: 14,
+				fontColor: Memviz.fontColor,
+
+				fontFamily: Memviz.fontFamily,
+			},
+		});
+
+		let nextY = 30; // first top padding
+
+		for (const heapObject of hf.records) {
+			nextY = this.vizRecord(heapObject, heapFrameRectangle, nextY);
+		}
+
+		return sfY + height;
+
 	}
 
 	vizDataFrame(df, y) {
