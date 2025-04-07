@@ -148,11 +148,11 @@ unary_expression
 	}
 	| SIZEOF unary_expression
 	{
-		$$ = new UExpr($2, $1, @$);
+		$$ = new SizeOfExpr($2, $1, @$);
 	}
 	| SIZEOF '(' type_name ')'
 	{
-		$$ = new UExpr($3, $1, @$);
+		$$ = new SizeOfExpr($3, $1, @$);
 	}
 	/*NOT SUPPORTED-------------------------------------------
 	//| ALIGNOF '(' type_name ')'

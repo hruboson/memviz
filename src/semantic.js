@@ -302,7 +302,7 @@ class Semantic {
 		}
 
 		// check lval type
-		if(symbol.isFunction){
+		if(symbol?.isFunction){
 			
 		}
 		
@@ -349,7 +349,7 @@ class Semantic {
 	}
 
     visitCastExpr(expr){
-
+		return expr.expr.accept(this);
 	}
 
 	visitCExpr(expr){
@@ -734,6 +734,11 @@ class Semantic {
 		}
 	}
 
+	visitSizeOfExpr(call){
+		const e = this.evaluateExprArray(call.expr);
+		if(!(e in MEMSIZES)) throw new SError(`Unknown type: ${e}`, call.loc);
+	}
+
     visitSStmt(stmt){
 
 	}
@@ -831,10 +836,18 @@ class Semantic {
 		let ret;
 		if(Array.isArray(expr)){
 			for(const subexpr of expr){
-				ret = subexpr.accept(this);
+				if(subexpr instanceof Construct){
+					ret = subexpr.accept(this);
+				}else{
+					ret = subexpr;
+				}
 			}
 		}else{
-			ret = expr.accept(this);
+			if(expr instanceof Construct){
+				ret = expr.accept(this);
+			}else{
+				ret = expr;
+			}
 		}
 
 		return ret;

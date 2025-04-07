@@ -580,7 +580,8 @@ class Interpreter {
 	}
 
     visitCastExpr(expr){
-
+		//TODO
+		return expr.expr.accept(this);
 	}
 
 	visitCExpr(expr){
@@ -591,6 +592,7 @@ class Interpreter {
 				const record = this.#callStack.dFrame.get(addr);
 				return record;
 			case "i_constant":
+				if(expr.value == "NULL") return 0;
 				return parseInt(expr.value);
 			case "f_constant":
 				return parseFloat(expr.value);
@@ -948,6 +950,11 @@ class Interpreter {
 		throw new ReturnThrow(expr);
 	}
 
+	visitSizeOfExpr(call){
+		const e = this.evaluateExprArray(call.expr);
+		return MEMSIZES[e];
+	}
+
     visitSStmt(stmt){
 
 	}
@@ -1200,10 +1207,18 @@ class Interpreter {
 		let ret;
 		if(Array.isArray(expr)){
 			for(const subexpr of expr){
-				ret = subexpr.accept(this);
+				if(subexpr instanceof Construct){
+					ret = subexpr.accept(this);
+				}else{
+					ret = subexpr;
+				}
 			}
 		}else{
-			ret = expr.accept(this);
+			if(expr instanceof Construct){
+				ret = expr.accept(this);
+			}else{
+				ret = expr;
+			}
 		}
 
 		return ret;

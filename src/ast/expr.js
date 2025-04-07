@@ -271,3 +271,15 @@ class CondExpr extends Expr {
 
 	//TODO
 }
+
+class SizeOfExpr extends Expr {
+	constructor(expr, type, loc){
+		super(loc);
+		this.expr = expr;
+		this.type = type;
+	}
+
+	accept(visitor){
+		return visitor.visitSizeOfExpr(this);
+	}
+}

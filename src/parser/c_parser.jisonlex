@@ -59,7 +59,7 @@ WS  [\s\t\v\n\f]
 "union"			{ return 'UNION'; }
 "unsigned"		{ return 'UNSIGNED'; }
 "void"			{ return 'VOID'; }
-"_Bool"         	{ return 'BOOL'; }
+"_Bool"         { return 'BOOL'; }
 "while"			{ return 'WHILE'; }
 
 /**
@@ -97,6 +97,7 @@ WS  [\s\t\v\n\f]
 {NZ}{D}*{IS}?					{ return 'I_CONSTANT'; }
 "0"{O}*{IS}?					{ return 'I_CONSTANT'; }
 {CP}?"'"([^'\\\n]|{ES})+"'"		{ return 'I_CONSTANT'; }
+"NULL"							{ return 'I_CONSTANT'; }
 
 ({SP}?\"([^"\\\n]|{ES})*\")+	{ return 'STRING_LITERAL'; }
 

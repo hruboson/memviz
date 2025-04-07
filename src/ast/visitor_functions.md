@@ -37,6 +37,7 @@ Alphabetically sorted:
 - visitPtrMemberAccessExpr
 - visitPointer
 - visitReturn
+- visitSizeOfExpr
 - visitSStmt
 - visitStruct
 - visitSubscriptExpr
@@ -68,6 +69,7 @@ Sorted by file name:
 - visitFncCallExpr
 - visitCastExpr
 - visitCondExpr
+- visitSizeOfExpr
 - visitFnc
 - visitIdentifier
 - visitLabelName

@@ -132,14 +132,19 @@ break;
 case 20: case 79: case 94: case 135: case 152:
  this.$ = [...$$[$0-2], $$[$0]]; 
 break;
-case 22: case 23: case 24: case 25:
+case 22: case 23: case 24:
 
 		this.$ = new UExpr($$[$0], $$[$0-1], this._$);
 	
 break;
+case 25:
+
+		this.$ = new SizeOfExpr($$[$0], $$[$0-1], this._$);
+	
+break;
 case 26:
 
-		this.$ = new UExpr($$[$0-1], $$[$0-3], this._$);
+		this.$ = new SizeOfExpr($$[$0-1], $$[$0-3], this._$);
 	
 break;
 case 34:
@@ -1003,9 +1008,11 @@ case 38: return 10;
 break;
 case 39: return 10; 
 break;
-case 40: return 14; 
+case 40: return 10; 
 break;
-case 41: 
+case 41: return 14; 
+break;
+case 42: 
 						if(parser.yy.symbols.types.includes(yy_.yytext)){
 							return 102;
 						}else if(parser.yy.symbols.enums.includes(yy_.yytext)){
@@ -1015,108 +1022,108 @@ case 41:
 						}
 					
 break;
-case 42: return 121; 
+case 43: return 121; 
 break;
-case 43: return 72; 
+case 44: return 72; 
 break;
-case 44: return 71; 
+case 45: return 71; 
 break;
-case 45: return 69; 
+case 46: return 69; 
 break;
-case 46: return 70; 
+case 47: return 70; 
 break;
-case 47: return 66; 
+case 48: return 66; 
 break;
-case 48: return 67; 
+case 49: return 67; 
 break;
-case 49: return 68; 
+case 50: return 68; 
 break;
-case 50: return 73; 
+case 51: return 73; 
 break;
-case 51: return 74; 
+case 52: return 74; 
 break;
-case 52: return 75; 
+case 53: return 75; 
 break;
-case 53: return 43; 
+case 54: return 43; 
 break;
-case 54: return 42; 
+case 55: return 42; 
 break;
-case 55: return 22; 
+case 56: return 22; 
 break;
-case 56: return 23; 
+case 57: return 23; 
 break;
-case 57: return 21; 
+case 58: return 21; 
 break;
-case 58: return 58; 
+case 59: return 58; 
 break;
-case 59: return 60; 
+case 60: return 60; 
 break;
-case 60: return 47; 
+case 61: return 47; 
 break;
-case 61: return 48; 
+case 62: return 48; 
 break;
-case 62: return 50; 
+case 63: return 50; 
 break;
-case 63: return 51; 
+case 64: return 51; 
 break;
-case 64: return 79; 
+case 65: return 79; 
 break;
-case 65: return 104; 
+case 66: return 104; 
 break;
-case 66: return 106; 
+case 67: return 106; 
 break;
-case 67: return 25; 
+case 68: return 25; 
 break;
-case 68: return 63; 
+case 69: return 63; 
 break;
-case 69: return 65; 
+case 70: return 65; 
 break;
-case 70: return 7; 
+case 71: return 7; 
 break;
-case 71: return 9; 
+case 72: return 9; 
 break;
-case 72: return 17; 
+case 73: return 17; 
 break;
-case 73: return 18; 
+case 74: return 18; 
 break;
-case 74: return 20; 
+case 75: return 20; 
 break;
-case 75: return 31; 
+case 76: return 31; 
 break;
-case 76: return 36; 
+case 77: return 36; 
 break;
-case 77: return 35; 
+case 78: return 35; 
 break;
-case 78: return 34; 
+case 79: return 34; 
 break;
-case 79: return 33; 
+case 80: return 33; 
 break;
-case 80: return 32; 
+case 81: return 32; 
 break;
-case 81: return 38; 
+case 82: return 38; 
 break;
-case 82: return 39; 
+case 83: return 39; 
 break;
-case 83: return 45; 
+case 84: return 45; 
 break;
-case 84: return 46; 
+case 85: return 46; 
 break;
-case 85: return 54; 
+case 86: return 54; 
 break;
-case 86: return 56; 
+case 87: return 56; 
 break;
-case 87: return 62; 
+case 88: return 62; 
 break;
-case 88: return 152; 
+case 89: return 152; 
 break;
-case 89: /* ignore whitespace */ 
+case 90: /* ignore whitespace */ 
 break;
-case 90: /* ignore bad characters */ 
+case 91: /* ignore bad characters */ 
 break;
 }
 },
-rules: [/^(?:\/\*)/,/^(?:\/\/[^\n]*)/,/^(?:break\b)/,/^(?:case\b)/,/^(?:char\b)/,/^(?:continue\b)/,/^(?:default\b)/,/^(?:do\b)/,/^(?:double\b)/,/^(?:else\b)/,/^(?:enum\b)/,/^(?:float\b)/,/^(?:for\b)/,/^(?:goto\b)/,/^(?:if\b)/,/^(?:int\b)/,/^(?:long\b)/,/^(?:return\b)/,/^(?:short\b)/,/^(?:signed\b)/,/^(?:sizeof\b)/,/^(?:struct\b)/,/^(?:switch\b)/,/^(?:typedef\b)/,/^(?:union\b)/,/^(?:unsigned\b)/,/^(?:void\b)/,/^(?:_Bool\b)/,/^(?:while\b)/,/^(?:([0-9])+(([Ee][+-]?([0-9])+))([fFlL])?)/,/^(?:([0-9])*\.([0-9])+(([Ee][+-]?([0-9])+))?([fFlL])?)/,/^(?:([0-9])+\.(([Ee][+-]?([0-9])+))?([fFlL])?)/,/^(?:((0[xX]))([a-fA-F0-9])+(([Pp][+-]?([0-9])+))([fFlL])?)/,/^(?:((0[xX]))([a-fA-F0-9])*\.([a-fA-F0-9])+(([Pp][+-]?([0-9])+))([fFlL])?)/,/^(?:((0[xX]))([a-fA-F0-9])+\.(([Pp][+-]?([0-9])+))([fFlL])?)/,/^(?:((0[bB]))[01]+)/,/^(?:((0[xX]))([a-fA-F0-9])+([uUlL]*)?)/,/^(?:([1-9])([0-9])*([uUlL]*)?)/,/^(?:0([0-7])*([uUlL]*)?)/,/^(?:([uUL])?'([^'\\\n]|((\\([\\'"?\abfnrtv]|[0-7]{1,3}|x[a-fA-F0-9]+))))+')/,/^(?:(((u8|[uUL]))?"([^"\\\n]|((\\([\\'"?\abfnrtv]|[0-7]{1,3}|x[a-fA-F0-9]+))))*")+)/,/^(?:([a-zA-Z_])(([a-zA-Z_])|([0-9]))*)/,/^(?:\.\.\.)/,/^(?:>>=)/,/^(?:<<=)/,/^(?:\+=)/,/^(?:-=)/,/^(?:\*=)/,/^(?:\/=)/,/^(?:%=)/,/^(?:&=)/,/^(?:\^=)/,/^(?:\|=)/,/^(?:>>)/,/^(?:<<)/,/^(?:\+\+)/,/^(?:--)/,/^(?:->)/,/^(?:&&)/,/^(?:\|\|)/,/^(?:<=)/,/^(?:>=)/,/^(?:==)/,/^(?:!=)/,/^(?:;)/,/^(?:(\{|<%))/,/^(?:(\}|%>))/,/^(?:,)/,/^(?::)/,/^(?:=)/,/^(?:\()/,/^(?:\))/,/^(?:(\[|<:))/,/^(?:(\]|:>))/,/^(?:\.)/,/^(?:&)/,/^(?:!)/,/^(?:~)/,/^(?:-)/,/^(?:\+)/,/^(?:\*)/,/^(?:\/)/,/^(?:%)/,/^(?:<)/,/^(?:>)/,/^(?:\^)/,/^(?:\|)/,/^(?:\?)/,/^(?:$)/,/^(?:[ \t\v\n\f])/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90],"inclusive":true}}
+rules: [/^(?:\/\*)/,/^(?:\/\/[^\n]*)/,/^(?:break\b)/,/^(?:case\b)/,/^(?:char\b)/,/^(?:continue\b)/,/^(?:default\b)/,/^(?:do\b)/,/^(?:double\b)/,/^(?:else\b)/,/^(?:enum\b)/,/^(?:float\b)/,/^(?:for\b)/,/^(?:goto\b)/,/^(?:if\b)/,/^(?:int\b)/,/^(?:long\b)/,/^(?:return\b)/,/^(?:short\b)/,/^(?:signed\b)/,/^(?:sizeof\b)/,/^(?:struct\b)/,/^(?:switch\b)/,/^(?:typedef\b)/,/^(?:union\b)/,/^(?:unsigned\b)/,/^(?:void\b)/,/^(?:_Bool\b)/,/^(?:while\b)/,/^(?:([0-9])+(([Ee][+-]?([0-9])+))([fFlL])?)/,/^(?:([0-9])*\.([0-9])+(([Ee][+-]?([0-9])+))?([fFlL])?)/,/^(?:([0-9])+\.(([Ee][+-]?([0-9])+))?([fFlL])?)/,/^(?:((0[xX]))([a-fA-F0-9])+(([Pp][+-]?([0-9])+))([fFlL])?)/,/^(?:((0[xX]))([a-fA-F0-9])*\.([a-fA-F0-9])+(([Pp][+-]?([0-9])+))([fFlL])?)/,/^(?:((0[xX]))([a-fA-F0-9])+\.(([Pp][+-]?([0-9])+))([fFlL])?)/,/^(?:((0[bB]))[01]+)/,/^(?:((0[xX]))([a-fA-F0-9])+([uUlL]*)?)/,/^(?:([1-9])([0-9])*([uUlL]*)?)/,/^(?:0([0-7])*([uUlL]*)?)/,/^(?:([uUL])?'([^'\\\n]|((\\([\\'"?\abfnrtv]|[0-7]{1,3}|x[a-fA-F0-9]+))))+')/,/^(?:NULL\b)/,/^(?:(((u8|[uUL]))?"([^"\\\n]|((\\([\\'"?\abfnrtv]|[0-7]{1,3}|x[a-fA-F0-9]+))))*")+)/,/^(?:([a-zA-Z_])(([a-zA-Z_])|([0-9]))*)/,/^(?:\.\.\.)/,/^(?:>>=)/,/^(?:<<=)/,/^(?:\+=)/,/^(?:-=)/,/^(?:\*=)/,/^(?:\/=)/,/^(?:%=)/,/^(?:&=)/,/^(?:\^=)/,/^(?:\|=)/,/^(?:>>)/,/^(?:<<)/,/^(?:\+\+)/,/^(?:--)/,/^(?:->)/,/^(?:&&)/,/^(?:\|\|)/,/^(?:<=)/,/^(?:>=)/,/^(?:==)/,/^(?:!=)/,/^(?:;)/,/^(?:(\{|<%))/,/^(?:(\}|%>))/,/^(?:,)/,/^(?::)/,/^(?:=)/,/^(?:\()/,/^(?:\))/,/^(?:(\[|<:))/,/^(?:(\]|:>))/,/^(?:\.)/,/^(?:&)/,/^(?:!)/,/^(?:~)/,/^(?:-)/,/^(?:\+)/,/^(?:\*)/,/^(?:\/)/,/^(?:%)/,/^(?:<)/,/^(?:>)/,/^(?:\^)/,/^(?:\|)/,/^(?:\?)/,/^(?:$)/,/^(?:[ \t\v\n\f])/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91],"inclusive":true}}
 });
 return lexer;
 })();
