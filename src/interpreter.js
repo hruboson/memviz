@@ -360,11 +360,6 @@ class Interpreter {
 			this.memsim.free(record.address, record.memsize, record.region);
 		}
 
-		// .heap
-		for(const record of this.#callStack.hFrame){
-			this.memsim.free(record.address, record.memsize, record.region);
-		}
-
 		this.memdump_end = this.memsim.printMemory();
 		return result;
 	}
@@ -385,17 +380,21 @@ class Interpreter {
 		rval = this.evaluateExprArray(expr.right);
 		lval = this.evaluateExprArray(expr.left);
 
+		if(isclass(lval, "PointerValue")){
+			lval = this.#callStack.findMemoryRecord(lval.value);
+		}
+
 		if(has(lval, "address")){
 			symbol = lval;
 			lval = this.memsim.readRecordValue(lval); // get the value
 		}
 
-		if(has(rval, "address")){
-			rval = this.memsim.readRecordValue(rval); // get the value
-		}
-
 		if(isclass(rval, "PointerValue")){
 			rval = rval.value;
+		}
+
+		if(has(rval, "address")){
+			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
 		// concrete operations
@@ -581,7 +580,7 @@ class Interpreter {
 
     visitCastExpr(expr){
 		//TODO
-		return expr.expr.accept(this);
+		return this.evaluateExprArray(expr.expr);
 	}
 
 	visitCExpr(expr){
@@ -797,7 +796,6 @@ class Interpreter {
 
 		const ret = fncPtr.astPtr.accept(this, args);
 		return ret;
-
 	}
 
 	visitForLoop(loop){
@@ -1052,14 +1050,8 @@ class Interpreter {
 				return ~value;
 			case '*': {
 				if(has(value, "address")){
-					/* Hmmm, this kind of works, but I think having
-					 * separate readValueAtAddress(memsize) function
-					 * would be nicer tbh */
-					const dummySym = {
-						memtype: value.memtype,
-						address: this.memsim.readRecordValue(value)
-					}
-					return this.memsim.readPrimitiveValue(dummySym);
+					const pointsTo = this.memsim.readPrimitiveValue(value);
+					return new PointerValue(pointsTo, value.pointsToMemtype);
 				}else if(this.#callStack.findMemoryRecord(value)){
 					return this.#callStack.findMemoryRecord(value);
 				}else{
@@ -1133,19 +1125,6 @@ class Interpreter {
 		let formatString = this.memsim.readRecordValue(args[0]);
 		formatString = CArrayToJsString(formatString);
 		let otherArgs = args.slice(1);
-		otherArgs = otherArgs.map(arg => {
-			if(has(arg, "address") && arg.size.length == 0){
-				return this.memsim.readRecordValue(arg);
-			}else if(has(arg, "address") && arg.size.length > 0){
-				return arg.address;
-			}else if(isclass(arg, "PointerValue")){
-				return arg.value;
-			}
-
-			return arg;
-		});
-
-
 		let i = 0;
 
 		let output = formatString.replace(/%[dfsp]/g, match => { // currently supported: %d, %s, %f, %p
@@ -1154,24 +1133,34 @@ class Interpreter {
 			}
 
 			if(match == "%d"){
-				return parseInt(otherArgs[i++]);
+				let value;
+				if(isclass(otherArgs[i], "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(otherArgs[i].value));
+				if(has(otherArgs[i], "address")) value = this.memsim.readRecordValue(otherArgs[i]);
+				i++;
+				return parseInt(value);
 			}
 
 			if(match == "%f"){
-				return parseFloat(otherArgs[i++]);
+				let value;
+				if(isclass(otherArgs[i], "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(otherArgs[i].value));
+				if(has(otherArgs[i], "address")) value = this.memsim.readRecordValue(otherArgs[i]);
+				i++;
+				return parseFloat(value);
 			}
 
 			if (match == "%s") {
-				let record = otherArgs[i++];
-				if(!has(record, "address")){
-					record = this.#callStack.findMemoryRecord(record);
-				}
-
-				return CArrayToJsString(this.memsim.readRecordValue(record));
+				let value;
+				if(isclass(otherArgs[i], "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(otherArgs[i].value));
+				if(has(otherArgs[i], "address")) value = this.memsim.readRecordValue(otherArgs[i]);
+				i++;
+				return CArrayToJsString(value);
 			}
 
 			if (match == "%p") {
-				return "0x" + otherArgs[i++].toString(16);
+				let value;
+				if(isclass(otherArgs[i], "PointerValue")) value = otherArgs[i].value;
+				if(has(otherArgs[i], "address")) value = otherArgs[i].address;
+				return "0x" + value.toString(16);
 			}
 
 			return match;
@@ -1185,12 +1174,19 @@ class Interpreter {
 	}
 
 	visitMalloc(malloc, arg){
-		console.log(arg);
-		return 69;
+		const s = this.evaluateExprArray(arg); // size to allocate
+		const record = new MemoryRecord();
+		record.memsize = s;
+		record.memtype = DATATYPE.void;
+		record.region = MEMREGION.HEAP;
+
+		this.memsim.setRecordValue(record, 0, MEMREGION.HEAP);
+
+		this.#callStack.hFrame.add(record);
+		return new PointerValue(record.address, DATATYPE.void);
 	}
 
 	visitFree(free, arg){
-		console.log(arg);
 	}
 
 	/************************************

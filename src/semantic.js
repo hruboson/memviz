@@ -883,7 +883,7 @@ class Semantic {
 			SYMTYPE.FNC,
 			true,                      // initialized
 			"malloc",                  // function name
-			["void*"],                   // return type (C's printf returns int)
+			["void*"],                   // return type
 			true,
 			0,                         // not an array
 			0,						   // not an array so 0 size
@@ -899,7 +899,7 @@ class Semantic {
 			SYMTYPE.FNC,
 			true,                      // initialized
 			"free",                  // function name
-			["void"],                   // return type (C's printf returns int)
+			["void"],                   // return type
 			false,
 			0,                         // not an array
 			0,						   // not an array so 0 size

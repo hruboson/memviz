@@ -90,6 +90,7 @@ const MEMSIZES = {
 	float: FLOATSIZE,
 	double: DOUBLESIZE,
 	longdouble: LONGDOUBLESIZE,
+	void: 1,
 }
 
 /**
@@ -190,7 +191,7 @@ class Memsim {
 	 */
 	#warningSystem;
 
-	constructor(warningSystem, heapSize = 1024, heapPointer = 1000, stackSize = 1024, stackPointer = 5000, dataSize = 512, dataPointer = 2000, bssSize = 512, bssPointer = 3000){
+	constructor(warningSystem, heapSize = 3000, heapPointer = 2000, stackSize = 3000, stackPointer = 5000, dataSize = 500, dataPointer = 500, bssSize = 500, bssPointer = 1000){
 		this.#warningSystem = warningSystem;
 		this.memory = new Map(); // Simulated memory
 		this.references = new Map(); // Reference counter
@@ -229,7 +230,7 @@ class Memsim {
 			this.setArrayValue(record, value, region);
 		}else if(record.indirection > 0){
 			record.address = this.setPointerValue(record, value, region);
-		}else { 
+		}else{ 
 			record.address = this.setPrimitiveValue(record, value, region);
 		}
 	}
@@ -285,8 +286,12 @@ class Memsim {
 			case DATATYPE.longdouble:
 				return this.setLongDoubleValue(value, region, record.address);
 
+			case DATATYPE.void:{
+				return this.setVoidValue(record, value, region);
+			}
+
 			default:
-				throw new AppError(`Invalid DATATYPE while setting value of primitive object: ${record.type}!`);
+				throw new AppError(`Invalid DATATYPE while setting value of primitive object: ${record.memtype}!`);
 		}
 	}
 
@@ -299,8 +304,6 @@ class Memsim {
 	setArrayValue(record, value, region){
 		// determine derived type of array
 		const memtype = record.memtype;
-		const dimension = record.dimension;
-		const size = record.size;
 		const memsize = record.memsize;
 
 		record.address = this.#allocRegion(region, memsize);
@@ -398,6 +401,9 @@ class Memsim {
 
 			case DATATYPE.longdouble:
 				return this.readLongDoubleValue(record.address);
+
+			case DATATYPE.void:
+				return this.readVoidValue(record.memsize, record.address);
 		}
 
 	}
@@ -568,6 +574,37 @@ class Memsim {
 	 *****************************
 	 * - all values are stored as little endian using the ArrayBuffer and DataView classes of JS
 	 */
+
+	//////////
+	// VOID // (for void pointers)
+	//////////
+
+	setVoidValue(record, value, region){
+		const bytes = [];
+		for (let i = 0; i < record.memsize; i++) {
+			bytes.push((value >> (i * 8)) & 0xFF);
+		}
+
+		let firstAddress;
+		for(let i = 0; i < record.memsize; i++){
+			const newAddress = this.setUCharValue(bytes[i], region, record.address+i);
+			firstAddress = firstAddress ? firstAddress : newAddress;
+		}
+		return firstAddress;
+	}
+
+	readVoidValue(size, address){
+		const bytes = [];
+		for(let i = 0; i < size; i++){
+			bytes.push(this.readUCharValue(address+i));
+		}
+
+		let number = 0;
+		for(let i = 0; i < size; i++){
+			number |= bytes[i] << (i*8);
+		}
+		return number;
+	}
 
 	//////////
 	// BOOL //

@@ -9,7 +9,7 @@
  */
 class NATIVE_printf{
 	accept(visitor, args){ // will only be called in interpreter
-		visitor.visitPrintF(this, args);
+		return visitor.visitPrintF(this, args);
 	}
 }
 
@@ -19,7 +19,7 @@ class NATIVE_printf{
  */
 class NATIVE_malloc{
 	accept(visitor, arg){
-		visitor.visitMalloc(this, arg);
+		return visitor.visitMalloc(this, arg);
 	}
 }
 
@@ -29,6 +29,6 @@ class NATIVE_malloc{
  */
 class NATIVE_free{
 	accept(visitor, arg){
-		visitor.visitFree(this, arg);
+		return visitor.visitFree(this, arg);
 	}
 }

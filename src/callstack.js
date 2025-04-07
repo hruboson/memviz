@@ -46,10 +46,19 @@ class CallStack{
 	 */
 	findMemoryRecord(address){
 		let record;
-		/*TODO
 		for(record of this.hFrame){
-
-		}*/
+			if(record.address == address ) return record;
+			if(record.addresses.includes(address)){
+				const dummyRecord = new MemoryRecord();
+				dummyRecord.address = address;
+				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+				dummyRecord.indirection = record.indirection;
+				dummyRecord.memtype = record.memtype;
+				dummyRecord.memsize = MEMSIZES[record.memtype];
+				
+				return dummyRecord;
+			}
+		}
 		for(record of this.dFrame){
 			if(record.address == address ) return record;
 			if(record.addresses.includes(address)){

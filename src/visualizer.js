@@ -100,7 +100,7 @@ class Memviz {
 	 * @public
 	 */
 	updateHTML() {
-		console.log(this.memVizStyle);
+		//console.log(this.memVizStyle);
 		this.vizMemoryRecords();
 	}
 

@@ -74,7 +74,8 @@ const DATATYPE = {
 	ulonglong: "ulonglong",
 	float: "float",
 	double: "double",
-	longdouble: "longdouble"
+	longdouble: "longdouble",
+	void: "void",
 };
 
 /**
