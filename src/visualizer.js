@@ -385,7 +385,6 @@ class Memviz {
 	 * @returns {Number} newY Used to calculate the position of next stack frame.
 	 */
 	vizStackFrame(sf, y) {
-		console.log(sf);
 		if (sf.emptyObjects() || sf.empty()) { // in case of no names in symtable
 			return y;
 		}

@@ -262,7 +262,6 @@ class StackFrame {
 	 */
 	emptyObjects(){
 		const filteredObjects = Array.from(this.symtable.objects.entries()).filter(([name, sym]) => !sym.isFunction && !sym.isNative);
-		console.log(filteredObjects);
 		return filteredObjects.length == 0 ? true : false;
 	}
 }
