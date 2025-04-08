@@ -254,6 +254,17 @@ class StackFrame {
 	empty(){
 		return (this.symtable.objects.size == 0 && this.symtable.tags.size == 0 && this.symtable.labels.size == 0) ? true : false;
 	}
+
+	/**
+	 * Checks whether symbol table contains no objects (meaning objects that can be visualized)
+	 * @note Returns empty even if functions, typedefs and other non-object types are in the symtable
+	 * @return {bool}
+	 */
+	emptyObjects(){
+		const filteredObjects = Array.from(this.symtable.objects.entries()).filter(([name, sym]) => !sym.isFunction && !sym.isNative);
+		console.log(filteredObjects);
+		return filteredObjects.length == 0 ? true : false;
+	}
 }
 
 class HeapFrame{
