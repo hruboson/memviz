@@ -263,6 +263,13 @@ class HeapFrame{
 		this.records.push(record);
 	}
 
+	remove(record){
+		const index = this.records.indexOf(record);
+		if(index != -1){
+			this.records.splice(index, 1);
+		}
+	}
+
 	get(address){
 		for(const r of this.records){
 			if(r.address == address) return r;
@@ -285,11 +292,17 @@ class HeapFrame{
 }
 
 class DataFrame{
-
 	records = [];
 
 	add(record){
 		this.records.push(record);
+	}
+
+	remove(record){
+		const index = this.records.indexOf(record);
+		if(index != -1){
+			this.records.splice(index, 1);
+		}
 	}
 
 	get(address){

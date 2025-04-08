@@ -334,33 +334,32 @@ class Interpreter {
 			try{
 				this.pc = mainFnc.astPtr;
 				result = mainFnc.astPtr.accept(this, [1, 1]); //TODO args from UI
+
+				/**
+				 * free all remaining automatic storage memory
+				 */
+
+				// globals
+				for(const [key, record] of this.#callStack.bottomSFrame().symtable.objects){ // bottom sFrame is basically global scope (globals)
+					if(record.isFunction) continue; // skip functions
+					if(record.isNative) continue; // skip built-in functions
+					if(record.type == "TYPEDEF") continue; // skip typedefs
+					this.memsim.free(record.address, record.memsize, record.region);
+				}
+
+				// .data
+				for(const record of this.#callStack.dFrame){
+					this.memsim.free(record.address, record.memsize, record.region);
+					this.#callStack.dFrame.remove(record);
+				}
 			}catch(ret){ // catch return value of main
 				result = ret;
 			}
 		}
 
+		this.memdump = this.memsim.printMemory();
 		this.updateHTML(result);
 		this.memviz.updateHTML();
-		this.memdump_pre = this.memsim.printMemory();
-
-		/**
-		 * free all remaining automatic storage memory
-		 */
-
-		// globals
-		for(const [key, record] of this.#callStack.bottomSFrame().symtable.objects){ // bottom sFrame is basically global scope (globals)
-			if(record.isFunction) continue; // skip functions
-			if(record.isNative) continue; // skip built-in functions
-			if(record.type == "TYPEDEF") continue; // skip typedefs
-			this.memsim.free(record.address, record.memsize, record.region);
-		}
-		
-		// .data
-		for(const record of this.#callStack.dFrame){
-			this.memsim.free(record.address, record.memsize, record.region);
-		}
-
-		this.memdump_end = this.memsim.printMemory();
 		return result;
 	}
 
@@ -1190,6 +1189,14 @@ class Interpreter {
 	}
 
 	visitFree(free, arg){
+		let addressToFree;
+		const expr = this.evaluateExprArray(arg);
+		
+		if(has(expr, "address")) addressToFree = this.memsim.readRecordValue(expr);
+
+		const memoryToFree = this.#callStack.findMemoryRecord(addressToFree);
+		this.memsim.free(addressToFree, memoryToFree.memsize);
+		this.#callStack.hFrame.remove(memoryToFree);
 	}
 
 	/************************************
@@ -1266,8 +1273,7 @@ class Interpreter {
 		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
 		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
 		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
-		document.getElementById("memdump_pre").innerHTML = this.memdump_pre;
-		document.getElementById("memdump_end").innerHTML = this.memdump_end;
+		document.getElementById("memdump").innerHTML = this.memdump;
 		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
 		document.getElementById("console-output").innerHTML = this.output;
 
