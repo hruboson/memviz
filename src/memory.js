@@ -326,8 +326,11 @@ class Memsim {
 			case DATATYPE.longdouble:
 				return this.readLongDoubleValue(record.address);
 
-			case DATATYPE.void:
-				return this.readVoidValue(record.memsize, record.address);
+			case DATATYPE.void:{
+				let size = record.memsize;
+				if(record.beingPointedToBy) size = MEMSIZES[record.beingPointedToBy];
+				return this.readVoidValue(size, record.address);
+			}
 		}
 
 	}

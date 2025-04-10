@@ -54,7 +54,17 @@ class MemoryRecord{
 	 */
 	pointsToMemtype;
 
-	memsize; // size of memory object in bytes
+	/**
+	 * Being pointed to by memptype (type casting - type punning). This should be set in case of void memtype
+	 * @type {DATATYPE}
+	 */
+	beingPointedToBy;
+
+	/**
+	 * Size of memory object in BYTES (the whole size allocated)
+	 * @type {integer}
+	 */
+	memsize;
 
 	/**
 	 * Data type

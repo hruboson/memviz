@@ -580,7 +580,11 @@ class Interpreter {
 	}
 
     visitCastExpr(expr){
-		return this.evaluateExprArray(expr.expr);
+		const value = this.evaluateExprArray(expr.expr);
+		const type = this.evaluateExprArray(expr.type);
+		if(isclass(value, "PointerValue")) this.#callStack.findMemoryRecord(value.value).beingPointedToBy = DATATYPE[type];
+		if(has(value, "address")) value.memtype = type;
+		return value;
 	}
 
 	visitCExpr(expr){
