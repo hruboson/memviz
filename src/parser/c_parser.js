@@ -349,10 +349,10 @@ case 188:
  this.$ = new LStmt($$[$0-2], $$[$0]); 
 break;
 case 189:
- this.$ = new CaseStmt($$[$0-2], $$[$0]); 
+ this.$ = new CaseStmt($$[$0-2], $$[$0], this._$); 
 break;
 case 190:
- this.$ = new CaseStmt(null, $$[$0]); 
+ this.$ = new CaseStmt(null, $$[$0], this._$); 
 break;
 case 191:
  this.$ = new CStmt([], this._$); 

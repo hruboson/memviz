@@ -586,8 +586,8 @@ statement
 
 labeled_statement
 	: IDENTIFIER ':' statement { $$ = new LStmt($1, $3); }
-	| CASE constant_expression ':' statement  { $$ = new CaseStmt($2, $4); }
-	| DEFAULT ':' statement { $$ = new CaseStmt(null, $3); }
+	| CASE constant_expression ':' statement  { $$ = new CaseStmt($2, $4, @$); }
+	| DEFAULT ':' statement { $$ = new CaseStmt(null, $3, @$); }
 	;
 
 compound_statement
