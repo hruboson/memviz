@@ -66,7 +66,7 @@ class StringTable{
     /**
      * Filters string records based on a predicate function (same as Array filter)
      * @param {function(StringRecord): boolean} predicate 
-     * @returns {Iterable<[string, StringRecord]>}
+     * @returns {Iterable.<string, StringRecord>}
      */
     *filter(predicate) {
         for (const [key, stringRecord] of this.strings) {
