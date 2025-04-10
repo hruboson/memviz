@@ -167,7 +167,7 @@ case 66:
 break;
 case 81:
 
-		this.$ = [new Type($$[$0-1], this._$)];
+		this.$ = isclass($$[$0-1][0], "Enum") ? $$[$0-1][0] : new Type($$[$0-1], this._$);
 	
 break;
 case 82:

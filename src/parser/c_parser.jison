@@ -267,7 +267,7 @@ constant_expression
 declaration
 	: declaration_specifiers ';'
 	{
-		$$ = [new Type($1, @$)];
+		$$ = isclass($1[0], "Enum") ? $1[0] : new Type($1, @$);
 	}
 	| declaration_specifiers init_declarator_list ';' 
 	{
