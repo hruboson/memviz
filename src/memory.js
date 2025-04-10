@@ -94,82 +94,6 @@ const MEMSIZES = {
 }
 
 /**
- * @class MemoryRecord
- */
-class MemoryRecord{
-
-	/**
-	 * Hexadecimal number specifying where in memory the symbol is stored
-	 * @type {integer}
-	 */
-	address;
-
-	/**
-	 * Array of hexadecimal numbers. This field is set in case of array.
-	 * @type {integer}
-	 * @example
-	 * 	int x[][][] = {{{10, 20, 30}, {10, 20, 30}}, {{10, 20, 30}, {10, 20, 30}}}; -> addresses == [4996,4992,4988,4984,4980,4976,4972,4968,4964,4960,4956,4952] (array on stack)
-	 */
-	addresses = [];
-
-	/**
-	 * Dimension of an array
-	 * @type {integer}
-	 */
-	dimension;
-
-	/**
-	 * Array sizes in case of array symbol
-	 * @type {Array.<integer>|Array.<char>}
-	 * @example
-	 * 	int a = 1; // size = []
-	 * 	int[] = {1, 2, 3}; // size = [3]
-	 * 	int[][] = { {1, 2, 3}, {3, 4, 5} }; // size = [2, 3]
-	 */
-	size = [];
-
-	/**
-	 * Pointer indirection level
-	 * @type {integer}
-	 * @example
-	 * 	int x = 10; // indirection = 0
-	 * 	int *p = &x; // indirection = 1
-	 * 	int **p = &p; // indirection = 2
-	 */
-	indirection = 0;
-
-	/**
-	 * Data type of value being pointed to
-	 * @type {DATATYPE}
-	 */
-	pointsToMemtype;
-
-	memsize; // size of memory object in bytes
-
-	/**
-	 * Data type
-	 * @type {DATATYPE}
-	 * @description Derived from specifiers
-	 */
-	memtype;
-
-	/**
-	 * Region in which the record is allocated
-	 * Can be acquired with address through getMemoryRegion
-	 * @type {MEMREGION}
-	 */
-	memregion;
-
-	constructor(){
-		
-	}
-
-	determineSize(){
-		this.memsize = this.size.length > 0 ? this.size.reduce((res, item) => res *= item) * MEMSIZES[this.memtype] : MEMSIZES[this.memtype];
-	}
-}
-
-/**
  * @class Memsim
  * @description Memory simulation class, handles calls from interpreter
  * @param {WarningSystem} warningSystem
@@ -601,7 +525,6 @@ class Memsim {
 		}
 
 		let firstAddress;
-		console.log(bytes);
 		for(let i = 0; i < record.memsize; i++){
 			const newAddress = this.setUCharValue(bytes[i], region, record.address+i);
 			firstAddress = firstAddress ? firstAddress : newAddress;
@@ -615,7 +538,6 @@ class Memsim {
 			bytes.push(this.readUCharValue(address+i));
 			if(bytes[i] == undefined) return undefined;
 		}
-		console.log(bytes);
 
 		let number = 0;
 		for(let i = 0; i < size; i++){
