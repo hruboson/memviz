@@ -339,38 +339,33 @@ class Symtable {
 	 * @param {Construct} astPtr
 	 * @param {bool} isNative
 	 */
-	insert(namespace, type, initialized, name, specifiers, pointer, dimension=0, size=0, indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
-		switch(namespace){
-			case NAMESPACE.ORDS:
-				const sym = this.lookup(namespace, name);
-				if(sym){
-					if(sym.initialized){
-						throw new SError(`redefinition of ${name}`, astPtr.loc);
-					}else{
-						// allow function declaration - definition
-						if(type == SYMTYPE.FNC){
-							sym.initialize();
-							sym.astPtr = astPtr;
-							sym.type = SYMTYPE.FNC;
-							sym.isNative = isNative;
-							return;
-						}
-
-						throw new SError(`redefinition of ${name}`, astPtr.loc);
-					}
+	insertORD(namespace, type, initialized, name, specifiers, pointer, dimension=0, size=0, indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
+		console.log(namespace);
+		const sym = this.lookup(namespace, name);
+		if(sym){
+			if(sym.initialized){
+				throw new SError(`redefinition of ${name}`, astPtr.loc);
+			}else{
+				// allow function declaration - definition
+				if(type == SYMTYPE.FNC){
+					sym.initialize();
+					sym.astPtr = astPtr;
+					sym.type = SYMTYPE.FNC;
+					sym.isNative = isNative;
+					return;
 				}
 
-				this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, size, indirection, parameters, isFunction, astPtr, isNative));
-				break;
-			case NAMESPACE.TAGS:
-				break;
-			case NAMESPACE.MEMBERS:
-				break;
-			case NAMESPACE.LABELS:
-				break;
-			default:
-				throw new AppError("Wrong namespace type while inserting symbol!", astPtr.loc);
+				throw new SError(`redefinition of ${name}`, astPtr.loc);
+			}
 		}
+
+		this.objects.set(name, new Sym(name, type, initialized, specifiers, pointer, dimension, size, indirection, parameters, isFunction, astPtr, isNative));
+	}
+
+	insertTAG(namespace, tagname, values){
+		const tag = this.lookup(namespace, tagname);
+		if(tag) throw new SError(`redefinition of ${tagname}`, astPtr.loc);
+		this.tags.set(tagname, new Sym());
 	}
 
 	/**

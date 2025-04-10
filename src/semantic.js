@@ -191,7 +191,7 @@ class Semantic {
 					}
 
 					const currSymtable = this.symtableStack.peek();
-					currSymtable.insert(namespace, declMainType, initialized, declChild.identifier.name, specifiers, declPtr, dimension, size, indirection, parameters, isFunction, astPtr);
+					currSymtable.insertORD(namespace, declMainType, initialized, declChild.identifier.name, specifiers, declPtr, dimension, size, indirection, parameters, isFunction, astPtr);
 					symbolName = declChild.identifier.name;
 				}
 				if(declChild.kind == DECLTYPE.FNC){
@@ -245,6 +245,11 @@ class Semantic {
 		}while(declChild != null);
 
 		return symbolName;
+	}
+
+	addEnum(name, values){
+		const currSymtable = this.symtableStack.peek();
+		currSymtable.insertTAG(NAMESPACE.TAGS, name, values);
 	}
 
 	/**
@@ -455,8 +460,17 @@ class Semantic {
 		this.closeScope();
 	}
 
-    visitEnum(enumerator){
-
+    visitEnum(enm){
+		const name = enm.tagname;
+		let list = [];
+		let i = 0;
+		for(const element of enm.enumerator_list){
+			const value = element.constantExpression?.accept(this) ? element.constantExpression.accept(this) : i;
+			let p = new Pair(element.identifier.name, value)
+			list.push(p);
+			i = value + 1;
+		}
+		this.addEnum(name, list);
 	}
 
 	visitFnc(fnc){
@@ -862,7 +876,7 @@ class Semantic {
 	 * @param {Symtable} symtableGlobal - The global symbol table where native functions are registered.
 	 */
 	addNativeFunctions(symtableGlobal){
-		symtableGlobal.insert(
+		symtableGlobal.insertORD(
 			NAMESPACE.ORDS,
 			SYMTYPE.FNC,
 			true,                      // initialized
@@ -878,7 +892,7 @@ class Semantic {
 			true                       // isNative
 		);
 
-		symtableGlobal.insert(
+		symtableGlobal.insertORD(
 			NAMESPACE.ORDS,
 			SYMTYPE.FNC,
 			true,                      // initialized
@@ -894,7 +908,7 @@ class Semantic {
 			true                       // isNative
 		);
 
-		symtableGlobal.insert(
+		symtableGlobal.insertORD(
 			NAMESPACE.ORDS,
 			SYMTYPE.FNC,
 			true,                      // initialized

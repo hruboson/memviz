@@ -276,28 +276,29 @@ const if_example = `int main(){
 }`;
 
 const switch_example = `int main(){
-    int day = 6;
+	enum DAYS { monday, tuesday, wednesday, thursday, friday, saturday, sunday };
+    enum DAYS day = friday;
 
     switch (day) {
-        case 1:
+        case monday:
             printf("Monday\\n");
             break;
-        case 2:
+        case tuesday:
             printf("Tuesday\\n");
             break;
-        case 3:
+        case wednesday:
             printf("Wednesday\\n");
             break;
-        case 4:
+        case thursday:
             printf("Thursday\\n");
             break;
-        case 5:
+        case friday:
             printf("Friday\\n");
             break;
-        case 6:
+        case saturday:
             printf("Saturday\\n");
             break;
-        case 7:
+        case sunday:
             printf("Sunday\\n");
             break;
         default:

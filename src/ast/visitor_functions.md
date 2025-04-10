@@ -21,6 +21,7 @@ Alphabetically sorted:
 - visitDesignator
 - visitDoWhileLoop
 - visitEnum
+- visitEnumerator
 - visitFnc
 - visitFncCallExpr
 - visitForLoop

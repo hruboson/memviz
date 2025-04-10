@@ -735,7 +735,6 @@ class Interpreter {
 	}
 
     visitEnum(enumerator){
-
 	}
 
 	//TODO FNC is not popping sfParams properly in some cases, no clue why (see the quadratic equation example)
@@ -1007,7 +1006,7 @@ class Interpreter {
 	}
 
 	visitSwitchStmt(stmt){
-
+		console.log(stmt);
 	}
 
     visitTagname(tagname){
