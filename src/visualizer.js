@@ -608,6 +608,7 @@ class Memviz {
 	 * @param {integer|string} cellValue
 	 */
 	vizValueCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, cellAddress, cellValue) {
+		if(cellValue == '\\0') cellStyle.fontSize = cellStyle.fontSize/1.5; // make strign terminator smaller
 		const valueBox = this.graph.insertVertex({
 			parent: parent,
 			position: [x, y],
