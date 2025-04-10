@@ -340,7 +340,6 @@ class Symtable {
 	 * @param {bool} isNative
 	 */
 	insertORD(namespace, type, initialized, name, specifiers, pointer, dimension=0, size=0, indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
-		console.log(namespace);
 		const sym = this.lookup(namespace, name);
 		if(sym){
 			if(sym.initialized){
