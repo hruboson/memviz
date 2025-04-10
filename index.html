@@ -52,9 +52,9 @@
 	<script src="src/error.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/warning.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/parser/c_parser.js" type="text/javascript" charset="utf-8"></script>
+	<script src="src/callstack.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/symtable.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/semantic.js" type="text/javascript" charset="utf-8"></script>
-	<script src="src/callstack.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/interpreter.js" type="text/javascript" charset="utf-8"></script>
 	<script src="src/nativefuncs.js" type="text/javascript" charset="utf-8"></script>
 
@@ -241,13 +241,17 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main() {
-    int* ptr = (int*) malloc(sizeof(int)); // allocate memory for one int
+    char* ptr = (char*) malloc(sizeof(char)*2); // allocate memory for two chars
     if (ptr == NULL) {
         return 1;
     }
 
-    *ptr = 42; // assign value
+    // assign value
+    *ptr = 10;
+    *(ptr+1) = 20;
+    
     printf("%d", *ptr);
+    printf("%d", *(ptr+1));
 
     free(ptr); // free allocated memory
 

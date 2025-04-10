@@ -4,6 +4,82 @@
  */
 
 /**
+ * @class MemoryRecord
+ */
+class MemoryRecord{
+
+	/**
+	 * Hexadecimal number specifying where in memory the symbol is stored
+	 * @type {integer}
+	 */
+	address;
+
+	/**
+	 * Array of hexadecimal numbers. This field is set in case of array.
+	 * @type {integer}
+	 * @example
+	 * 	int x[][][] = {{{10, 20, 30}, {10, 20, 30}}, {{10, 20, 30}, {10, 20, 30}}}; -> addresses == [4996,4992,4988,4984,4980,4976,4972,4968,4964,4960,4956,4952] (array on stack)
+	 */
+	addresses = [];
+
+	/**
+	 * Dimension of an array
+	 * @type {integer}
+	 */
+	dimension;
+
+	/**
+	 * Array sizes in case of array symbol
+	 * @type {Array.<integer>|Array.<char>}
+	 * @example
+	 * 	int a = 1; // size = []
+	 * 	int[] = {1, 2, 3}; // size = [3]
+	 * 	int[][] = { {1, 2, 3}, {3, 4, 5} }; // size = [2, 3]
+	 */
+	size = [];
+
+	/**
+	 * Pointer indirection level
+	 * @type {integer}
+	 * @example
+	 * 	int x = 10; // indirection = 0
+	 * 	int *p = &x; // indirection = 1
+	 * 	int **p = &p; // indirection = 2
+	 */
+	indirection = 0;
+
+	/**
+	 * Data type of value being pointed to
+	 * @type {DATATYPE}
+	 */
+	pointsToMemtype;
+
+	memsize; // size of memory object in bytes
+
+	/**
+	 * Data type
+	 * @type {DATATYPE}
+	 * @description Derived from specifiers
+	 */
+	memtype;
+
+	/**
+	 * Region in which the record is allocated
+	 * Can be acquired with address through getMemoryRegion
+	 * @type {MEMREGION}
+	 */
+	memregion;
+
+	constructor(){
+		
+	}
+
+	determineSize(){
+		this.memsize = this.size.length > 0 ? this.size.reduce((res, item) => res *= item) * MEMSIZES[this.memtype] : MEMSIZES[this.memtype];
+	}
+}
+
+/**
  * @class CallStack
  * @param {Memsim} memsim Memory manager to deallocate stack symbols
  * @todo rename this class
@@ -55,6 +131,19 @@ class CallStack{
 				dummyRecord.indirection = record.indirection;
 				dummyRecord.memtype = record.memtype;
 				dummyRecord.memsize = MEMSIZES[record.memtype];
+				dummyRecord.memregion = record.memregion;
+				
+				return dummyRecord;
+			}
+			const possibleAddresses = Array.from({ length: record.memsize }, (_, i) => record.address + i);
+			if(possibleAddresses.includes(address)){
+				const dummyRecord = new MemoryRecord();
+				dummyRecord.address = address;
+				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+				dummyRecord.indirection = record.indirection;
+				dummyRecord.memtype = record.memtype;
+				dummyRecord.memsize = MEMSIZES[record.memtype]; // this could be substracted from the address
+				dummyRecord.memregion = record.memregion;
 				
 				return dummyRecord;
 			}
@@ -68,6 +157,7 @@ class CallStack{
 				dummyRecord.indirection = record.indirection;
 				dummyRecord.memtype = record.memtype;
 				dummyRecord.memsize = MEMSIZES[record.memtype];
+				dummyRecord.memregion = record.memregion;
 				
 				return dummyRecord;
 			}
@@ -82,6 +172,7 @@ class CallStack{
 					dummyRecord.indirection = record.indirection;
 					dummyRecord.memtype = record.memtype;
 					dummyRecord.memsize = MEMSIZES[record.memtype];
+					dummyRecord.memregion = record.memregion;
 					
 					return dummyRecord;
 				}
