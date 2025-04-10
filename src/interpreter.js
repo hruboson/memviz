@@ -580,7 +580,6 @@ class Interpreter {
 	}
 
     visitCastExpr(expr){
-		//TODO
 		return this.evaluateExprArray(expr.expr);
 	}
 
@@ -1136,32 +1135,37 @@ class Interpreter {
 
 			if(match == "%d"){
 				let value;
-				if(isclass(otherArgs[i], "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(otherArgs[i].value));
-				if(has(otherArgs[i], "address")) value = this.memsim.readRecordValue(otherArgs[i]);
+				value = otherArgs[i];
+				if(isclass(value, "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
+				if(has(value, "address")) value = this.memsim.readRecordValue(value);
 				i++;
 				return parseInt(value);
 			}
 
 			if(match == "%f"){
 				let value;
-				if(isclass(otherArgs[i], "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(otherArgs[i].value));
-				if(has(otherArgs[i], "address")) value = this.memsim.readRecordValue(otherArgs[i]);
+				value = otherArgs[i];
+				if(isclass(value, "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
+				if(has(value, "address")) value = this.memsim.readRecordValue(value);
 				i++;
 				return parseFloat(value);
 			}
 
-			if (match == "%s") {
+			if(match == "%s"){
 				let value;
-				if(isclass(otherArgs[i], "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(otherArgs[i].value));
-				if(has(otherArgs[i], "address")) value = this.memsim.readRecordValue(otherArgs[i]);
+				value = otherArgs[i];
+				if(isclass(value, "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
+				if(has(value, "address")) value = this.memsim.readRecordValue(value);
 				i++;
 				return CArrayToJsString(value);
 			}
 
-			if (match == "%p") {
+			if(match == "%p"){
 				let value;
+				value = otherArgs[i];
 				if(isclass(otherArgs[i], "PointerValue")) value = otherArgs[i].value;
 				if(has(otherArgs[i], "address")) value = otherArgs[i].address;
+				i++;
 				return "0x" + value.toString(16);
 			}
 
