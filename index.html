@@ -574,6 +574,10 @@ Split(["#split-ve", "#split-console"], {
 	 */
 	var breaklineEditor = 0;
 
+	/**
+	 * @description Removes editor highlights
+	 * @global
+	 */
 	function unhighlight(){
 		// src: https://stackoverflow.com/questions/65677814/how-to-remove-all-the-existing-highlight-markers-in-ace-editor-using-react
 		// clears any existing markers
@@ -652,6 +656,10 @@ Split(["#split-ve", "#split-console"], {
 	 */
 	var interpreter;
 
+	/**
+	 * @description Function to force visualization update if interpretation has started
+	 * @global
+	 */
 	function updateVisualization(){
 		if(interpreter){
 			const memVizStyle = document.getElementById("visualizationStyle").value;
