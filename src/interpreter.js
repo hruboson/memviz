@@ -8,11 +8,10 @@
  * @description We are pretending to be "compiling" to target machine code. The interpreter first analyses the code using the Semantic analyzer and either throws
  * 				an error or allows for further interpretation of AST.
  * @class Interpreter
- * @param {String} memVizStyle Option for Memviz
  */
 class Interpreter {
 
-	constructor(memVizStyle){
+	constructor(memVizStyle, trueSizes){ // todo move memviz to updateHTML only, I dont want any parameters here
 		this.#symtableGlobal = new Symtable("global", "global");
 		this.#symtableStack = new Stack(); // only for semantic analyzer
 		this.#symtableStack.push(this.#symtableGlobal);
@@ -21,7 +20,7 @@ class Interpreter {
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.memsim = new Memsim(this.#warningSystem);
 		this.#callStack = new CallStack(this.memsim);
-		this.memviz = new Memviz(memVizStyle, this.memsim, this.#callStack, document.getElementById("output")); // TODO pass the element id as string parameter for interpreter
+		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output"), new MemvizOptions(memVizStyle, trueSizes)); // TODO pass the element id as string parameter for interpreter
 	}
 
 	/* ATTRIBUTES */

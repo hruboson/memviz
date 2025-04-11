@@ -54,21 +54,58 @@ class VizPointerPair extends Pair {
 }
 
 /**
+ * Memviz styles
+ * @description Possible visualization styles and other options
+ * @typedef MEMVIZSTYLES
+ * @global
+ * @const
+ */
+const MEMVIZSTYLES = {
+	STYLE: {
+		MEMROW: "MEMROW",
+		SEMANTIC: "SEMANTIC",
+	},
+	TRUESIZES: {
+		TRUE: true,
+		FALSE: false,
+	},
+}
+
+/**
+ * Helper options class, inspired by Vulkan xyCreateInfo
+ */
+class MemvizOptions {
+	static get defaultStyle(){
+		return MEMVIZSTYLES.STYLE.MEMROW;
+	}
+
+	static get defaultTrueSize(){
+		return MEMVIZSTYLES.TRUESIZES.FALSE;
+	}
+
+	constructor(style, trueSizes){
+		this.style = style ? style : MemvizOptions.defaultStyle;
+		this.trueSizes = trueSizes ? trueSizes : MemvizOptions.defaultTrueSize;
+	}
+}
+
+/**
  * @class Memviz
  * @description Main visualization class, handles memory visualization. Basically visualizing the call stack and each of its stack frames (symbol tables).
  * @param {Memsim} memsim
  * @param {CallStack} callStack
  * @param {Element} container HTML element to print to - get it by doing document.getElementById
+ * @param {MemvizOptions} options
  */
 class Memviz {
 
-	constructor(memVizStyle, memsim, callStack, container) {
+	constructor(memsim, callStack, container, options) {
 		if (!(container instanceof Element)) throw new AppError(`Container must be a HTML element!`);
 
 		this.memsim = memsim;
 		this.callStack = callStack;
 		this.container = container;
-		this.memVizStyle = memVizStyle;
+		this.options = options;
 
 		this.#init();
 	}
@@ -150,7 +187,7 @@ class Memviz {
 	 * @static
 	 */
 	static get squareX() {
-		return 30;
+		return 100;
 	}
 
 	/**
@@ -478,7 +515,8 @@ class Memviz {
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 		const labelAbove = record.name ? record.name : "";
 		const labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
-		const width = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? Memviz.squareXYlen / 2 : Memviz.squareXYlen;
+		const ratioToInt = this.options.trueSizes ? MEMSIZES[DATATYPE.int]/MEMSIZES[record.memtype] : 1;
+		const width = Memviz.squareXYlen/ratioToInt;
 		let value;
 		if (record.address) {
 			value = this.memsim.readRecordValue(record);
