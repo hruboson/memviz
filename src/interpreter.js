@@ -1027,16 +1027,21 @@ class Interpreter {
 
 		for(const construct of stmt.body.sequence){
 			// find switch with the value
+			console.log(construct);
 			if(!foundCase && isclass(construct, "CaseStmt")){
 				const caseValue = this.evaluateExprArray(construct.expr);
 				if(switchValue == caseValue){
 					foundCase = true;
 				}else{
-					continue;
+					if(caseValue == null){
+						foundCase = true;
+					}else{
+						continue;
+					}
 				}
 			}
 
-			// after finding case execute until break is encountered
+			// after finding case execute until break is encountered (or match default - construct.expr == null)
 			if(foundCase || (construct.expr == null && isclass(construct, "CaseStmt"))){
 				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 				this.pc = construct;
