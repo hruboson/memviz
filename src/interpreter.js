@@ -607,7 +607,12 @@ class Interpreter {
 	}
 
     visitCondExpr(expr){
-
+		const condition = this.evaluateExprArray(expr.condition);
+		if(condition){
+			return this.evaluateExprArray(expr.texpr);
+		}else{
+			return this.evaluateExprArray(expr.fexpr);
+		}
 	}
 
 	visitContinue(cont){

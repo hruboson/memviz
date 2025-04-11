@@ -241,21 +241,8 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main() {
-    char* ptr = (char*) malloc(sizeof(char)*2); // allocate memory for two chars
-    if (ptr == NULL) {
-        return 1;
-    }
-
-    // assign value
-    *ptr = 10;
-    *(ptr+1) = 20;
-    
-    printf("%d", *ptr);
-    printf("%d", *(ptr+1));
-
-    free(ptr); // free allocated memory
-
-    return 0;
+	int a = 1;
+	int b = a == 1 ? a : a*3;
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">

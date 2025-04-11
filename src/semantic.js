@@ -373,7 +373,9 @@ class Semantic {
 	}
 
     visitCondExpr(expr){
-
+		this.evaluateExprArray(expr.condition);
+		this.evaluateExprArray(expr.texpr);
+		this.evaluateExprArray(expr.fexpr);
 	}
 
 	visitContinue(cont){

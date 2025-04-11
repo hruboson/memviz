@@ -265,11 +265,16 @@ class CastExpr extends Expr {
 }
 
 class CondExpr extends Expr {
-	constructor(){
+	constructor(condition, texpr, fexpr){
 		super();
+		this.condition = condition;
+		this.texpr = texpr;
+		this.fexpr = fexpr;
 	}
 
-	//TODO
+	accept(visitor){
+		return visitor.visitCondExpr(this);
+	}
 }
 
 class SizeOfExpr extends Expr {
