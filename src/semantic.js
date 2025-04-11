@@ -393,7 +393,10 @@ class Semantic {
 
 	visitCaseStmt(stmt){
 		stmt.attachSymtable(this.symtableStack.peek());
-		this.evaluateExprArray(stmt.expr);
+		const caseValue = this.evaluateExprArray(stmt.expr);
+
+		// TODO add enum check
+		if(!Number.isInteger(caseValue)) throw new SError(`Case label does not reduce to an integer constant`, stmt.loc);
 
 		for(const construct of stmt.stmt){
 			construct.accept(this);

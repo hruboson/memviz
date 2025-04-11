@@ -1025,8 +1025,6 @@ class Interpreter {
 		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.getParentSF(stmt.symtbptr)); // StackFrame creates deep copy of symbol table
 		this.#callStack.pushSFrame(sf);
 
-		console.log(stmt);
-
 		for(const construct of stmt.body.sequence){
 			// find switch with the value
 			if(!foundCase && isclass(construct, "CaseStmt")){
