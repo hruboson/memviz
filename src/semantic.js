@@ -623,11 +623,13 @@ class Semantic {
 	}
 
 	visitIdentifier(identifier){
+		let symbol;
 		try{
-			const name = this.symtableStack.peek().resolve(identifier.name);
+			symbol = this.symtableStack.peek().resolve(identifier.name);
 		}catch(e){
 			throw new SError(e.details, identifier.loc);
 		}
+		return symbol;
 	}
 
 	// TODO ELSE IF
@@ -814,6 +816,7 @@ class Semantic {
 				break;
 			case '&': {
 				const lvalue = this.evaluateExprArray(expr.expr);
+				if(isclass(lvalue, "Sym") && lvalue.isFunction) throw new NSError(`function pointers`, expr.loc);
 				//if(!isclass(expr.expr, "Identifier")) throw new SError("Lvalue (object, variable, ...) required for '&' operand", expr.loc);
 				break;
 			} 

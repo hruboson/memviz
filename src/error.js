@@ -58,3 +58,22 @@ class AppError extends Error {
 		this.name = "Application error";
 	}
 }
+
+/**
+ * Not supported feature error - for things I don't support yet (or never will)
+ * @class NSError
+ * @param {string} what Which feature is not supported
+ * @param {Object} loc
+ */
+class NSError extends Error {
+	constructor(what, loc=null){
+		if(!loc){
+			super(`Sorry, we currently do not support ${what}`);
+		}else{
+			const line = loc.first_line;
+			super(`Sorry, we currently do not support ${what} (on line ${loc.first_line})`);
+		}
+		console.error(`NS:${what}`);
+		this.name = "Not supported error";
+	}
+}

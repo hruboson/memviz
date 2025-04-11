@@ -1385,6 +1385,14 @@ class Interpreter {
 				});
 				resultDiv.innerHTML += formattedText;
 				resultDiv.classList.add("bg-danger");
+			}else if(isclass(result, "NSError")){
+				const regex = /\(on line \d+\)/g;
+				const formattedText = result.message.replace(regex, (match) => {
+					return `<kbd class="fw-bolder">${match}</kbd>`;
+				});
+				resultDiv.classList.add("bg-secondary");
+				resultDiv.innerHTML = formattedText;
+
 			}else if(isclass(result, "AppError") || result instanceof Error){
 				resultDiv.classList.add("bg-secondary");
 				resultDiv.innerHTML += "App Error. Who shot himself in the foot? The developer.\nTry sending him this message: \n<kbd>" + result + "</kbd>";
