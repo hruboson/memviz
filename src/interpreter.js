@@ -1376,9 +1376,9 @@ class Interpreter {
 			resultDiv.innerHTML = "Result: \n";
 			// make text "on line x" bold
 			const regex = /on line \d+/g;
-			const formattedText = result.message.replace(regex, (match) => {
+			const formattedText = result.message ? result.message.replace(regex, (match) => {
 				return `<kbd class="fw-bolder">${match}</kbd>`;
-			});
+			}) : "";
 			if(isclass(result, "ReturnVoid")){
 				resultDiv.innerHTML += "void";
 				resultDiv.classList.add("bg-success");
