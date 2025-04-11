@@ -1374,22 +1374,19 @@ class Interpreter {
 		// add result/error depending on type returned from main (result arg)
 		if(result != undefined && result != null && !isclass(result, "StopFlag")){;
 			resultDiv.innerHTML = "Result: \n";
+			// make text "on line x" bold
+			const regex = /on line \d+/g;
+			const formattedText = result.message.replace(regex, (match) => {
+				return `<kbd class="fw-bolder">${match}</kbd>`;
+			});
 			if(isclass(result, "ReturnVoid")){
 				resultDiv.innerHTML += "void";
 				resultDiv.classList.add("bg-success");
 			}else if(isclass(result, "SError") || isclass(result, "RTError")){
-				// make text "on line x" bold
-				const regex = /on line \d+/g;
-				const formattedText = result.message.replace(regex, (match) => {
-					return `<kbd class="fw-bolder">${match}</kbd>`;
-				});
+
 				resultDiv.innerHTML += formattedText;
 				resultDiv.classList.add("bg-danger");
 			}else if(isclass(result, "NSError")){
-				const regex = /\(on line \d+\)/g;
-				const formattedText = result.message.replace(regex, (match) => {
-					return `<kbd class="fw-bolder">${match}</kbd>`;
-				});
 				resultDiv.classList.add("bg-secondary");
 				resultDiv.innerHTML = formattedText;
 
