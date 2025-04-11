@@ -1026,32 +1026,37 @@ class Interpreter {
 		this.#callStack.pushSFrame(sf);
 
 		for(const construct of stmt.body.sequence){
-			// find switch with the value
-			if(!foundCase && isclass(construct, "CaseStmt")){
-				const caseValue = this.evaluateExprArray(construct.expr);
-				if(switchValue == caseValue){
-					foundCase = true;
-				}else{
-					if(caseValue == null){
+			if(!foundCase){
+				// check for matching case or default
+				if(isclass(construct, "CaseStmt")){
+					let caseExpr = construct.expr;
+
+					if(caseExpr == null){
+						// default:
 						foundCase = true;
 					}else{
-						continue;
+						const caseValue = this.evaluateExprArray(caseExpr);
+						if(switchValue == caseValue){
+							foundCase = true;
+						}else{
+							continue; // not matched yet, skip this CaseStmt
+						}
 					}
+				}else if(!isclass(construct, "Declaration")){
+					continue;
 				}
 			}
 
-			// after finding case execute until break is encountered (or match default - construct.expr == null)
-			if(foundCase || (construct.expr == null && isclass(construct, "CaseStmt"))){
-				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-				this.pc = construct;
-				try{
-					construct.accept(this);
-				}catch(t){ // construct can return prematurely
-					if(isclass(t, "StopFlag")) throw t; // if it is just stop flag, throw it immediately, otherwise pop frame and throw result
-					if(isclass(t, "BreakThrow")) break;
-					this.#callStack.popSFrame();
-					throw t;
-				}
+			// After matching: execute all statements/declarations until break
+			if (this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.pc = construct;
+			try {
+				construct.accept(this);
+			} catch (t) {
+				if (isclass(t, "StopFlag")) throw t;
+				if (isclass(t, "BreakThrow")) break;
+				this.#callStack.popSFrame();
+				throw t;
 			}
 		}
 

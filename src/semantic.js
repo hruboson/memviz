@@ -782,7 +782,9 @@ class Semantic {
 		this.newScope(symtable, stmt);
 
 		this.evaluateExprArray(stmt.expr);
-		stmt.body.accept(this);
+		for(const construct of stmt.body.sequence){
+			construct.accept(this);
+		}
 
 		this.closeScope();
 	}
