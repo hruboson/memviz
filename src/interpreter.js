@@ -1027,7 +1027,6 @@ class Interpreter {
 
 		for(const construct of stmt.body.sequence){
 			// find switch with the value
-			console.log(construct);
 			if(!foundCase && isclass(construct, "CaseStmt")){
 				const caseValue = this.evaluateExprArray(construct.expr);
 				if(switchValue == caseValue){
