@@ -52,8 +52,8 @@ const DOUBLESIZE = 8;
 const DOUBLE_MIN = 2.2250738585072014e-308; // Smallest positive normalized double
 const DOUBLE_MAX = 1.7976931348623157e+308; // Largest finite double
 
-// Long double (128-bit)
-const LONGDOUBLESIZE = 16;
+// Long Double - on my architecture will be 64-bit ('cuz it's easier implementation... no time for big numbers :-( )
+const LONGDOUBLESIZE = 8;
 
 /**
  * Memory regions
