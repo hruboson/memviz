@@ -396,7 +396,7 @@ class Semantic {
 		const caseValue = this.evaluateExprArray(stmt.expr);
 
 		// TODO add enum check
-		if(!Number.isInteger(caseValue)) throw new SError(`Case label does not reduce to an integer constant`, stmt.loc);
+		if(caseValue && !Number.isInteger(caseValue)) throw new SError(`Case label does not reduce to an integer constant`, stmt.loc);
 
 		for(const construct of stmt.stmt){
 			construct.accept(this);
