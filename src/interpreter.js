@@ -576,7 +576,9 @@ class Interpreter {
 	}
 
 	visitBreak(br){
-
+		/*if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+		this.pc = br; <-- this doesn't look too great on the visualization */
+		throw new BreakThrow(br);
 	}
 
     visitCastExpr(expr){
@@ -630,6 +632,14 @@ class Interpreter {
 
 		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 		this.#callStack.popSFrame();
+	}
+
+	visitCaseStmt(stmt){
+		for(const construct of stmt.stmt){
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.pc = construct;
+			construct.accept(this);
+		}
 	}
 
 	visitDeclaration(declaration){
@@ -1006,7 +1016,45 @@ class Interpreter {
 	}
 
 	visitSwitchStmt(stmt){
+		let switchValue = this.evaluateExprArray(stmt.expr);
+		if(isclass(switchValue, "PointerValue")) switchValue = switchValue.value;
+		if(has(switchValue, "address")) switchValue = this.memsim.readRecordValue(switchValue);
+
+		let foundCase = false;
+
+		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.getParentSF(stmt.symtbptr)); // StackFrame creates deep copy of symbol table
+		this.#callStack.pushSFrame(sf);
+
 		console.log(stmt);
+
+		for(const construct of stmt.body.sequence){
+			// find switch with the value
+			if(!foundCase && isclass(construct, "CaseStmt")){
+				const caseValue = this.evaluateExprArray(construct.expr);
+				if(switchValue == caseValue){
+					foundCase = true;
+				}else{
+					continue;
+				}
+			}
+
+			// after finding case execute until break is encountered
+			if(foundCase || (construct.expr == null && isclass(construct, "CaseStmt"))){
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+				this.pc = construct;
+				try{
+					construct.accept(this);
+				}catch(t){ // construct can return prematurely
+					if(isclass(t, "StopFlag")) throw t; // if it is just stop flag, throw it immediately, otherwise pop frame and throw result
+					if(isclass(t, "BreakThrow")) break;
+					this.#callStack.popSFrame();
+					throw t;
+				}
+			}
+		}
+
+		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+		this.#callStack.popSFrame();
 	}
 
     visitTagname(tagname){
@@ -1342,6 +1390,30 @@ class Interpreter {
  * @param {Construct} construct
  */
 class ReturnThrow {
+	constructor(construct){
+		this.loc = construct.loc;
+		this.value = construct;
+	}
+}
+
+/**
+ * @class BreakThrow
+ * @description Class which can be thrown to break statement (loop, switch, ...)
+ * @param {Construct} construct
+ */
+class BreakThrow {
+	constructor(construct){
+		this.loc = construct.loc;
+		this.value = construct;
+	}
+}
+
+/**
+ * @class ContinueThrow
+ * @description Class which can be thrown to continue a loop
+ * @param {Construct} construct
+ */
+class ContinueThrow {
 	constructor(construct){
 		this.loc = construct.loc;
 		this.value = construct;

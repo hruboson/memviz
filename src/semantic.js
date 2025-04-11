@@ -391,6 +391,15 @@ class Semantic {
 		this.closeScope();
 	}
 
+	visitCaseStmt(stmt){
+		stmt.attachSymtable(this.symtableStack.peek());
+		this.evaluateExprArray(stmt.expr);
+
+		for(const construct of stmt.stmt){
+			construct.accept(this);
+		}
+	}
+
 	visitDeclaration(declaration){
 		const declKind = declaration.declarator.accept(this);
 
@@ -766,7 +775,13 @@ class Semantic {
 	}
 
 	visitSwitchStmt(stmt){
+		let symtable = new Symtable("switch statement", "stmt", this.symtableStack.peek());
+		this.newScope(symtable, stmt);
 
+		this.evaluateExprArray(stmt.expr);
+		stmt.body.accept(this);
+
+		this.closeScope();
 	}
 
     visitTagname(tagname){
