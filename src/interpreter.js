@@ -20,7 +20,6 @@ class Interpreter {
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
 		this.memsim = new Memsim(this.#warningSystem);
 		this.#callStack = new CallStack(this.memsim);
-		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output"), new MemvizOptions(memVizStyle, trueSizes)); // TODO pass the element id as string parameter for interpreter
 	}
 
 	/* ATTRIBUTES */
@@ -357,8 +356,6 @@ class Interpreter {
 		}
 
 		this.memdump = this.memsim.printMemory();
-		this.updateHTML(result);
-		this.memviz.updateHTML();
 		return result;
 	}
 
@@ -1348,7 +1345,12 @@ class Interpreter {
 	 * @param {Object|integer|string} result Result of main
 	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
-	updateHTML(result){
+	updateHTML(result, vizOptions){
+		// memory visualization
+		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output"), vizOptions); // TODO pass the element id as string parameter for interpreter
+		this.memviz.updateHTML();
+
+		// other elements
 		if(JSONEDITeditorAST && JSONEDITeditorTYPEDEFS){
 			JSONEDITeditorAST.set(JSON.parse(JSON.stringify(this.#ast))); // due to symtable now being attached to nodes, I cannot print it because of recursive references
 			JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));

@@ -241,8 +241,27 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main() {
-	int a = 1;
-	int b = a == 1 ? a : a*3;
+    /*_Bool b = 1; 				// size 1 byte
+
+	char c = 2; 				// size 1 byte
+	unsigned char uc = 3; 		// size 1 byte
+
+	short s = 4; 				// size 2 bytes
+	unsigned short us = 5;		// size 2 bytes
+
+	int i = 6;					// size 4 bytes
+	unsigned int ui = 7;		// size 4 bytes
+
+	long l = 8;					// size 4 bytes
+	unsigned long ul = 9;		// size 4 bytes
+	long long ll = 10;			// size 8 bytes
+	unsigned long long ull = 11;// size 8 bytes*/
+
+	float f = 3.14;				// size 4 bytes
+	double d = 1.414;			// size 8 bytes
+	long double ld = 6.28318;	// size 8 bytes
+
+    return 0;
 }</div>
 					</div>
 					<div id="split-output" style="overflow: scroll;">
@@ -379,9 +398,14 @@
 							<div class="col-7">
 								<div class="mb-3">
 									<label for="visualizationStyle" class="form-label">Visualization Style</label>
-									<select class="form-select" id="visualizationStyle">
+									<select class="form-select" id="visualizationStyle" onchange="updateVisualization()">
 										<option value="memVizStyleMemoryRow">Memory row</option>
 										<option value="memVizStyleSemantic" selected>Semantic</option>
+									</select>
+									<label for="visualizationTrueSizes" class="form-label">Show true sizes of types?</label>
+									<select class="form-select" id="visualizationTrueSizes" onchange="updateVisualization()">
+										<option value="true">Yes</option>
+										<option value="false" selected>No</option>
 									</select>
 								</div>
 								<!--div class="mb-3"> For now dont let user choose the sizes
@@ -623,6 +647,22 @@ Split(["#split-ve", "#split-console"], {
 	}
 
 	/**
+	 * Instance of interpreter - refreshed on every call of execute()
+	 * @global
+	 */
+	var interpreter;
+
+	function updateVisualization(){
+		if(interpreter){
+			const memVizStyle = document.getElementById("visualizationStyle").value;
+			const memVizShowTrueSizes = document.getElementById("visualizationTrueSizes").value == "true" ? true : false;
+
+			const memVizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
+			interpreter.updateHTML(null, memVizOptions);
+		}
+	}
+
+	/**
 	 * @description Interpreter runner helper function. Should be only ever called from HTML (e.g. button)
 	 * @global
 	 * @param {string} input
@@ -631,7 +671,8 @@ Split(["#split-ve", "#split-console"], {
 	 */
 	function execute(input, flag){
 		const memVizStyle = document.getElementById("visualizationStyle").value;
-		var interpreter = new Interpreter(memVizStyle);
+		const memVizShowTrueSizes = document.getElementById("visualizationTrueSizes").value == "true" ? true : false;
+		interpreter = new Interpreter();
 		unhighlight();
 		try{
 			switch(flag){
@@ -676,7 +717,8 @@ Split(["#split-ve", "#split-console"], {
 			const result = interpreter.interpret(breakEditor);
 			console.info("Main result: ", result);
 
-			interpreter.updateHTML(result);
+			const vizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
+			interpreter.updateHTML(result, vizOptions);
 		}catch(e){
 			console.error(e);
 		}
