@@ -611,7 +611,7 @@ class Interpreter {
 	}
 
 	visitContinue(cont){
-
+		throw new ContinueThrow(cont);
 	}
 
 	visitCStmt(stmt){
@@ -712,16 +712,22 @@ class Interpreter {
 		loop: for(;;){ // the for loop is there only as a label
 			if(condition){
 				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-				if(isclass(loop.body, "CStmt")){
-					for(const construct of loop.body.sequence){
+				try{
+					if(isclass(loop.body, "CStmt")){
+						for(const construct of loop.body.sequence){
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}else{
 						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-						this.pc = construct;
-						construct.accept(this);
+						this.pc = loop.body;
+						loop.body.accept(this);
 					}
-				}else{
-					if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-					this.pc = loop.body;
-					loop.body.accept(this);
+				}catch(t){
+					if(isclass(t, "StopFlag")) throw t;
+					if(isclass(t, "BreakThrow")) break;
+					if(isclass(t, "ContinueThrow")) continue;
 				}
 
 				// check if iteration expression should be interpreted
@@ -827,16 +833,22 @@ class Interpreter {
 
 			if(condition){
 				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-				if(isclass(loop.body, "CStmt")){
-					for(const construct of loop.body.sequence){
+				try{
+					if(isclass(loop.body, "CStmt")){
+						for(const construct of loop.body.sequence){
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}else{
 						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-						this.pc = construct;
-						construct.accept(this);
+						this.pc = loop.body;
+						loop.body.accept(this);
 					}
-				}else{
-					if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-					this.pc = loop.body;
-					loop.body.accept(this);
+				}catch(t){
+					if(isclass(t, "StopFlag")) throw t;
+					if(isclass(t, "BreakThrow")) break;
+					if(isclass(t, "ContinueThrow")) continue;
 				}
 
 				// check if iteration expression should be interpreted
@@ -1148,16 +1160,22 @@ class Interpreter {
 
 			if(condition){
 				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-				if(isclass(loop.body, "CStmt")){
-					for(const construct of loop.body.sequence){
+				try{
+					if(isclass(loop.body, "CStmt")){
+						for(const construct of loop.body.sequence){
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}else{
 						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-						this.pc = construct;
-						construct.accept(this);
+						this.pc = loop.body;
+						loop.body.accept(this);
 					}
-				}else{
-					if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-					this.pc = loop.body;
-					loop.body.accept(this);
+				}catch(t){
+					if(isclass(t, "StopFlag")) throw t;
+					if(isclass(t, "BreakThrow")) break;
+					if(isclass(t, "ContinueThrow")) continue;
 				}
 
 				// check if iteration expression should be interpreted
