@@ -231,6 +231,7 @@
 						<button class="dropdown-item" type="button" onclick="setExample(tree_example)">tree</button>
 						<button class="dropdown-item" type="button" onclick="setExample(infinite_recursion_example)">infinite recursion</button>
 						<button class="dropdown-item" type="button" onclick="setExample(different_memory_regions_example)">memory regions</button>
+						<button class="dropdown-item" type="button" onclick="setExample(different_memory_sizes_example)">memory sizes</button>
 						<button class="dropdown-item" type="button" onclick="setExample(pointer_arithmetic_example)">pointer arithmetic</button>
 					</ul>
 				</div>
@@ -241,25 +242,19 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main() {
-    /*_Bool b = 1; 				// size 1 byte
+    char* ptr = (char*) malloc(sizeof(char)*2); // allocate memory for two chars
+    if (ptr == NULL) {
+        return 1;
+    }
 
-	char c = 2; 				// size 1 byte
-	unsigned char uc = 3; 		// size 1 byte
+    // assign value
+    *ptr = 10;
+    *(ptr+1) = 20;
+    
+    printf("%d", *ptr);
+    printf("%d", *(ptr+1));
 
-	short s = 4; 				// size 2 bytes
-	unsigned short us = 5;		// size 2 bytes
-
-	int i = 6;					// size 4 bytes
-	unsigned int ui = 7;		// size 4 bytes
-
-	long l = 8;					// size 4 bytes
-	unsigned long ul = 9;		// size 4 bytes
-	long long ll = 10;			// size 8 bytes
-	unsigned long long ull = 11;// size 8 bytes*/
-
-	float f = 3.14;				// size 4 bytes
-	double d = 1.414;			// size 8 bytes
-	long double ld = 6.28318;	// size 8 bytes
+    free(ptr); // free allocated memory
 
     return 0;
 }</div>

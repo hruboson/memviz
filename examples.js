@@ -261,6 +261,30 @@ int main(){
 	int x = 42;
 }`;
 
+const different_memory_sizes_example = `int main() {
+    _Bool b = 1; 				// size 1 byte
+
+	char c = 2; 				// size 1 byte
+	unsigned char uc = 3; 		// size 1 byte
+
+	short s = 4; 				// size 2 bytes
+	unsigned short us = 5;		// size 2 bytes
+
+	int i = 6;					// size 4 bytes
+	unsigned int ui = 7;		// size 4 bytes
+
+	long l = 8;					// size 4 bytes
+	unsigned long ul = 9;		// size 4 bytes
+	long long ll = 10;			// size 8 bytes
+	unsigned long long ull = 11;// size 8 bytes
+
+	float f = 3.14;				// size 4 bytes
+	double d = 1.414;			// size 8 bytes
+	long double ld = 6.28318;	// size 8 bytes
+
+    return 0;
+}`;
+
 const if_example = `int main(){
 	if(1){
 		printf("Yay");
