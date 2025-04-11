@@ -53,7 +53,7 @@ const DOUBLE_MIN = 2.2250738585072014e-308; // Smallest positive normalized doub
 const DOUBLE_MAX = 1.7976931348623157e+308; // Largest finite double
 
 // Long double (128-bit)
-const LONGDOUBLESIZE = 128;
+const LONGDOUBLESIZE = 16;
 
 /**
  * Memory regions
@@ -306,7 +306,7 @@ class Memsim {
 				return this.readUIntValue(record.address);
 
 			case DATATYPE.long:
-				return this.readlongValue(record.address);
+				return this.readLongValue(record.address);
 
 			case DATATYPE.ulong:
 				return this.readULongValue(record.address);
@@ -337,7 +337,7 @@ class Memsim {
 
 	readArrayValue(record){
 		let arr = [];
-		
+
 		const noElements = record.size.reduce((res, item) => res *= item);
 
 		// here the record.addresses could be used
@@ -420,8 +420,8 @@ class Memsim {
 				this.#storeMemory(this.dataSegment, size, MEMREGION.DATA);
 				this.dataSegment += size;
 				break;
-	        default:
-    	        throw new AppError(`Invalid memory region: ${region}`);
+			default:
+				throw new AppError(`Invalid memory region: ${region}`);
 		}
 
 		return addr;
@@ -474,7 +474,7 @@ class Memsim {
 	/**
 	 * Increase reference count when a pointer points to an address
 	 * @param {integer} address
-	*/
+	 */
 	addReference(address) {
 		if(this.references.has(address)){
 			this.references.set(address, this.references.get(address) + 1);
@@ -552,30 +552,14 @@ class Memsim {
 	//////////
 	// BOOL //
 	//////////
+	// _Bool has size of char
 
 	setBoolValue(value, region, address){
-		value = this.checkValueOverflow(value, 0, 1, 1, "Boolean");
+		return this.setCharValue(value, region, address);
+	}
 
-		const size = CHARSIZE;
-
-		let addr = address;
-		if(!addr){
-			addr = this.#allocRegion(region, size);
-		}
-
-		const memorySpace = new ArrayBuffer(size);
-		let view;
-
-		if(value == undefined || value == null){ 
-			view = undefined; // uninitialized object
-		}else{
-			view = new DataView(memorySpace);
-			view.setUint8(0, value, region, true);
-		}
-
-		this.#storeMemory(addr, size, region, view);
-
-		return addr;
+	readBoolValue(address){
+		return this.readCharValue(address);
 	}
 
 	//////////
@@ -607,15 +591,15 @@ class Memsim {
 		return addr;
 	}
 
-	readCharValue(addr){
+	readCharValue(address){
 		const s = CHARSIZE;
 		const buffer = new ArrayBuffer(s);
 		const view = new DataView(buffer);
 
 		for(let i = 0; i < s; i++){
-			if (!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
-			if (this.memory.get(addr + i).value == undefined) return undefined; // handle uninitialized memory
-			view.setUint8(i, this.memory.get(addr + i).value);
+			if (!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if (this.memory.get(address + i).value == undefined) return undefined; // handle uninitialized memory
+			view.setUint8(i, this.memory.get(address + i).value);
 		}
 
 		return view.getInt8(0); // read the char value (signed 8-bit integer)
@@ -649,23 +633,107 @@ class Memsim {
 
 		return addr;
 	}
-	
 
-	readUCharValue(addr){
+	readUCharValue(address){
 		const s = CHARSIZE;
 		const buffer = new ArrayBuffer(s);
 		const view = new DataView(buffer);
 
 		for(let i = 0; i < s; i++){
-			if (!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
-			if (this.memory.get(addr + i).value == undefined) return undefined; // handle uninitialized memory
-			view.setUint8(i, this.memory.get(addr + i).value);
+			if (!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if (this.memory.get(address + i).value == undefined) return undefined; // handle uninitialized memory
+			view.setUint8(i, this.memory.get(address + i).value);
 		}
 
 		return view.getUint8(0); // read the char value (unsigned 8-bit integer)
 	}
 
+	///////////
+	// SHORT //
+	///////////
 
+	setShortValue(value, region, address){
+		value = this.checkValueOverflow(value, SHORT_MIN, SHORT_MAX, 0xFFFF, "Integer");
+
+		const size = SHORTSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value === undefined || value === null){
+			view = undefined;
+		}else{
+			view = new DataView(memorySpace);
+			view.setInt16(0, value, true); // little endian
+		}
+
+		this.#storeMemory(addr, size, region, view);
+
+		return addr;
+	}
+
+	readShortValue(address){
+		const size = SHORTSIZE;
+		const buffer = new ArrayBuffer(size);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < size; i++){
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value === undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
+		}
+
+		return view.getInt16(0, true);
+	}
+
+
+	////////////
+	// USHORT //
+	////////////
+
+	setUShortValue(value, region, address){
+		value = this.checkValueOverflow(value, 0, USHORT_MAX, 0xFFFF, "Integer");
+
+		const size = SHORTSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value === undefined || value === null){
+			view = undefined;
+		}else{
+			view = new DataView(memorySpace);
+			view.setUint16(0, value, true); // little endian
+		}
+
+		this.#storeMemory(addr, size, region, view);
+
+		return addr;
+	}
+
+	readUShortValue(address){
+		const size = SHORTSIZE;
+		const buffer = new ArrayBuffer(size);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < size; i++){
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value === undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
+		}
+
+		return view.getUint16(0, true);
+	}
 
 	/////////
 	// INT //
@@ -696,15 +764,15 @@ class Memsim {
 		return addr;
 	}
 
-	readIntValue(addr) {
+	readIntValue(address) {
 		const size = INTSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
 
 		for(let i = 0; i < size; i++){
-			if(!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
-			if(this.memory.get(addr + i).value == undefined) return undefined;
-			view.setUint8(i, this.memory.get(addr + i).value);
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value == undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
 		}
 
 		return view.getInt32(0, true);
@@ -713,7 +781,7 @@ class Memsim {
 	//////////
 	// UINT //
 	//////////
-	
+
 	setUIntValue(value, region, address){
 		value = this.checkValueOverflow(value, 0, UINT_MAX, 0xFFFFFFFF, "Integer");
 
@@ -739,20 +807,225 @@ class Memsim {
 		return addr;
 	}
 
-	readUIntValue(addr) {
+	readUIntValue(address) {
 		const size = INTSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
 
 		for(let i = 0; i < size; i++){
-			if(!this.memory.has(addr + i)) throw new RTError(`Invalid memory access at ${addr + i}`);
-			if(this.memory.get(addr + i).value == undefined) return undefined;
-			view.setUint8(i, this.memory.get(addr + i).value);
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value == undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
 		}
 
 		return view.getUint32(0, true);
 	}
 
+	//////////
+	// LONG //
+	//////////
+
+	setLongValue(value, region, address){
+		return this.setIntValue(value, region, address);
+	}
+
+	readLongValue(address){
+		return this.readIntValue(address);
+	}
+
+	///////////
+	// ULONG //
+	///////////
+
+	setULongValue(value, region, address){
+		return this.setUIntValue(value, region, address);
+	}
+
+	readULongValue(address){
+		return this.readUIntValue(address);
+	}
+
+	///////////////
+	// LONG LONG //
+	///////////////
+
+	setLongLongValue(value, region, address){
+		value = this.checkValueOverflow(value, LLONG_MIN, LLONG_MAX, 0xFFFFFFFFFFFFFFFFn, "Integer");
+
+		const size = LONGLONGSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value == undefined || value == null){
+			view = undefined;
+		}else{
+			view = new DataView(memorySpace);
+			view.setBigInt64(0, BigInt(value), true);
+		}
+
+		this.#storeMemory(addr, size, region, view);
+
+		return addr;
+	}
+
+	readLongLongValue(address){
+		const size = LONGLONGSIZE;
+		const buffer = new ArrayBuffer(size);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < size; i++){
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value == undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
+		}
+
+		return view.getBigInt64(0, true);
+	}
+
+	/////////////////
+	// U LONG LONG //
+	/////////////////
+
+	setULongLongValue(value, region, address){
+		value = this.checkValueOverflow(value, 0n, ULLONG_MAX, 0xFFFFFFFFFFFFFFFFn, "Integer");
+
+		const size = LONGLONGSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value == undefined || value == null){
+			view = undefined;
+		}else{
+			view = new DataView(memorySpace);
+			view.setBigUint64(0, BigInt(value), true);
+		}
+
+		this.#storeMemory(addr, size, region, view);
+
+		return addr;
+	}
+
+	readULongLongValue(address){
+		const size = LONGLONGSIZE;
+		const buffer = new ArrayBuffer(size);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < size; i++){
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value == undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
+		}
+
+		return view.getBigUint64(0, true);
+	}
+
+	///////////
+	// FLOAT //
+	///////////
+
+	setFloatValue(value, region, address){
+		const size = FLOATSIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value === undefined || value === null){
+			view = undefined;
+		}else{
+			view = new DataView(memorySpace);
+			view.setFloat32(0, value, true); // little endian
+		}
+
+		this.#storeMemory(addr, size, region, view);
+
+		return addr;
+	}
+
+	readFloatValue(address){
+		const size = FLOATSIZE;
+		const buffer = new ArrayBuffer(size);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < size; i++){
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value === undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
+		}
+
+		return view.getFloat32(0, true);
+	}
+
+	////////////
+	// DOUBLE //
+	////////////
+
+	setDoubleValue(value, region, address){
+		const size = DOUBLESIZE;
+
+		let addr = address;
+		if(!addr){
+			addr = this.#allocRegion(region, size);
+		}
+
+		const memorySpace = new ArrayBuffer(size);
+		let view;
+
+		if(value === undefined || value === null){
+			view = undefined;
+		}else{
+			view = new DataView(memorySpace);
+			view.setFloat64(0, value, true); // little endian
+		}
+
+		this.#storeMemory(addr, size, region, view);
+
+		return addr;
+	}
+
+	readDoubleValue(address){
+		const size = DOUBLESIZE;
+		const buffer = new ArrayBuffer(size);
+		const view = new DataView(buffer);
+
+		for(let i = 0; i < size; i++){
+			if(!this.memory.has(address + i)) throw new RTError(`Invalid memory access at ${address + i}`);
+			if(this.memory.get(address + i).value === undefined) return undefined;
+			view.setUint8(i, this.memory.get(address + i).value);
+		}
+
+		return view.getFloat64(0, true);
+	}
+
+	/////////////////
+	// LONG DOUBLE //
+	/////////////////
+
+	setLongDoubleValue(value, region, address){
+		// according to standard, the long double has to be AT LEAST as precise as double
+		// (ISO/IEC 9899:1999), Section 6.2.5 — Types
+		return this.setDoubleValue(value, region, address);
+	}
+
+	readLongDoubleValue(address){
+		return this.readDoubleValue(address);
+	}
 
 	/************************************
 	 *          Helper functions        *

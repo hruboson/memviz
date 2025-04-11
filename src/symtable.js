@@ -210,8 +210,15 @@ class Sym extends MemoryRecord{
 
 		// Handling 'long', 'long long', and unsigned variations
 		if(specSet.has("long")){
-			if(specSet.has("long")) return specSet.has("unsigned") ? DATATYPE.ulonglong : DATATYPE.longlong;
-			return specSet.has("unsigned") ? DATATYPE.ulong : DATATYPE.long;
+			let longCount = 0;
+			if(specSet.has("long")) longCount = specArr.filter(x => x === "long").length;
+
+			if(longCount == 2){
+				return specSet.has("unsigned") ? DATATYPE.ulonglong : DATATYPE.longlong;
+			}
+			if(longCount == 1){
+				return specSet.has("unsigned") ? DATATYPE.ulong : DATATYPE.long;
+			}
 		}
 
 		// Default to int
