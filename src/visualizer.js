@@ -515,7 +515,7 @@ class Memviz {
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 		const labelAbove = record.name ? record.name : "";
 		const labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
-		const ratioToInt = this.options.trueSizes ? MEMSIZES[DATATYPE.int]/MEMSIZES[record.memtype] : 1;
+		const ratioToInt = this.options.trueSizes ? MEMSIZES[DATATYPE.int]/record.memsize : 1;
 		const width = Memviz.squareXYlen/ratioToInt;
 		let value;
 		if (record.address) {
