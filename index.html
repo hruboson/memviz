@@ -242,7 +242,7 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int main() {
-    char* ptr = (char*) malloc(sizeof(char)*2); // allocate memory for two chars
+    char* ptr = (char*) malloc(sizeof(char)*4); // allocate memory for two chars
     if (ptr == NULL) {
         return 1;
     }
@@ -250,9 +250,13 @@
     // assign value
     *ptr = 10;
     *(ptr+1) = 20;
+	*(ptr+2) = 30;
+	*(ptr+3) = 40;
+	int* p = (int*) ptr;
     
     printf("%d", *ptr);
     printf("%d", *(ptr+1));
+	printf("%d", *p);
 
     free(ptr); // free allocated memory
 

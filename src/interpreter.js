@@ -584,7 +584,11 @@ class Interpreter {
 		const value = this.evaluateExprArray(expr.expr);
 		const type = this.evaluateExprArray(expr.type);
 		if(isclass(value, "PointerValue")) this.#callStack.findMemoryRecord(value.value).beingPointedToBy = DATATYPE[type];
-		if(has(value, "address")) value.memtype = type;
+		if(has(value, "address")){
+			const record = this.#callStack.findMemoryRecord(this.memsim.readRecordValue(value));
+			if(record) record.beingPointedToBy = DATATYPE[type]; // switch view (type punning)
+			value.memtype = type; 
+		}
 		return value;
 	}
 
@@ -1127,10 +1131,12 @@ class Interpreter {
 				return ~value;
 			case '*': {
 				if(has(value, "address")){
-					const pointsTo = this.memsim.readPrimitiveValue(value);
+					const pointsTo = this.memsim.readRecordValue(value);
+					this.#callStack.findMemoryRecord(pointsTo).beingPointedToBy = value.pointsToMemtype;
 					return new PointerValue(pointsTo, value.pointsToMemtype);
 				}else if(this.#callStack.findMemoryRecord(value)){
-					return this.#callStack.findMemoryRecord(value);
+					let record = this.#callStack.findMemoryRecord(value);
+					return record;
 				}else{
 					throw new RTError(`Value ${value} is not a valid address`, expr.loc);
 				}
@@ -1218,7 +1224,16 @@ class Interpreter {
 			if(match == "%d"){
 				let value;
 				value = otherArgs[i];
-				if(isclass(value, "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
+				if(isclass(value, "PointerValue")){ // TODO type punning by this, but fix this
+					const record = this.#callStack.findMemoryRecord(value.value);
+					let dummyRecord = new MemoryRecord();
+					dummyRecord.memtype = value.memtype;
+					dummyRecord.size = record.size;
+					dummyRecord.memsize = record.memsize;
+					dummyRecord.address = record.address;
+					dummyRecord.addresses = record.addresses;
+					value = this.memsim.readRecordValue(dummyRecord);
+				}
 				if(has(value, "address")) value = this.memsim.readRecordValue(value);
 				i++;
 				return parseInt(value);
