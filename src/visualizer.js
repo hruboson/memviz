@@ -134,6 +134,7 @@ class Memviz {
 	 */
 	#setGraphOptions() {
 		this.graph.setEnabled(false);
+		this.graph.setHtmlLabels(true);
 		mxg.InternalEvent.disableContextMenu(this.container);
 	}
 
@@ -405,7 +406,7 @@ class Memviz {
 			/* address, value:*/ record.address, value
 		);
 
-		return y + height;
+		return {x: x, y: y + height};
 	}
 
 	/**
@@ -433,7 +434,7 @@ class Memviz {
 			/* from, to: */      record.address, pointingTo
 		);
 
-		return y + height;
+		return {x: x, y: y + height};
 	}
 
 	/**
@@ -453,7 +454,7 @@ class Memviz {
 		}
 
 		if (!Array.isArray(arrayValue) || !arrayValue) {
-			return y + height;
+			return {x: x, y: y + height};
 		}
 
 		arrayValue = arrayValue.flat(Infinity);
@@ -506,7 +507,7 @@ class Memviz {
 			n++;
 		}
 
-		return y + height;
+		return {x: x, y: y + height};
 	}
 
 	/**
@@ -809,11 +810,11 @@ class MemVisualizerSemantic extends MemVisualizer {
 		let nextY = 30; // first top padding
 
 		for (const heapObject of hf.records) {
-			nextY = this.memviz.vizRecord(heapObject, heapFrameRectangle, Memviz.sfX, nextY);
+			const xy = this.memviz.vizRecord(heapObject, heapFrameRectangle, Memviz.sfX, nextY);
+			nextY = xy.y;
 		}
 
 		return sfY + height;
-
 	}
 
 	/**
@@ -861,7 +862,8 @@ class MemVisualizerSemantic extends MemVisualizer {
 		let nextY = 30; // first top padding
 
 		for (const dataObject of df.records) {
-			nextY = this.memviz.vizRecord(dataObject, dataFrameRectangle, Memviz.sfX, nextY);
+			const xy = this.memviz.vizRecord(dataObject, dataFrameRectangle, Memviz.sfX, nextY);
+			nextY = xy.y;
 		}
 
 		return sfY + height;
@@ -933,7 +935,8 @@ class MemVisualizerSemantic extends MemVisualizer {
 
 		let nextY = 30; // first top padding
 		for (const [_, record] of filteredObjects) {
-			nextY = this.memviz.vizRecord(record, stackFrameRectangle, Memviz.sfX, nextY);
+			const xy = this.memviz.vizRecord(record, stackFrameRectangle, Memviz.sfX, nextY);
+			nextY = xy.y;
 		}
 
 		return sfY + height;
@@ -951,15 +954,53 @@ class MemVisualizerRow extends MemVisualizer {
 		super(memviz);
 	}
 
+	static get memoryRowHeight(){
+		return 300;
+	}
+
 	/**
 	 * Visualizes the whole call stack.
 	 * @function
 	 */
 	vizMemoryRecords() {
+		const rectHeight = MemVisualizerRow.memoryRowHeight;
+
 		const hf = this.memviz.callStack.hFrame;
 		const df = this.memviz.callStack.dFrame;
 
-		if(!hf.empty()){
+		// calculate center y from container height
+		const graphContainer = this.memviz.graph.container;
+		const containerHeight = graphContainer.clientHeight;
+		const y = (containerHeight - rectHeight) / 2;
+
+		const root = this.memviz.root;
+		const scrollableRectangle = this.memviz.graph.insertVertex({
+			root,
+			position: [Memviz.sfX, y],
+			value: `<div style="transform: rotate(45deg); transform-origin: center; white-space: nowrap;">main</div>`,
+			height: rectHeight,
+			width: 100,
+			style: {
+				// label style
+				labelPosition: "left",
+				verticalAlign: "bottom",
+				verticalLabelPosition: "top",
+				spacingBottom: 5,
+				align: "right",
+
+				strokeColor: "grey",
+				fillColor: "transparent",
+				shape: "rectangle",
+
+				// font style
+				fontSize: 14,
+				fontColor: Memviz.fontColor,
+
+				fontFamily: Memviz.fontFamily,
+			},
+		});
+
+		/*if(!hf.empty()){
 			this.vizHeapFrame(hf);
 		}
 
@@ -969,7 +1010,7 @@ class MemVisualizerRow extends MemVisualizer {
 
 		for (const sf of this.memviz.callStack) {
 			this.vizStackFrame(sf);
-		}
+		}*/
 
 		this.memviz.vizPointers();
 	}
