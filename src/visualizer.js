@@ -64,6 +64,7 @@ const MEMVIZSTYLES = {
 	STYLE: {
 		MEMROW: "MEMROW",
 		SEMANTIC: "SEMANTIC",
+		NONE: "NONE",
 	},
 	TRUESIZES: {
 		TRUE: true,
@@ -145,7 +146,7 @@ class Memviz {
 				this.#visualizer = new MemVisualizerSemantic(this);
 				break;
 			default:
-				this.#visualizer = new MemVisualizerSemantic(this);
+				this.#visualizer = undefined;
 				break;
 		}
 	}
@@ -155,9 +156,10 @@ class Memviz {
 	 * @public
 	 */
 	updateHTML() {
-		console.log(this.options);
 		this.#setVisualizer(this.options);
-		this.#visualizer.vizMemoryRecords();
+		if(this.#visualizer){
+			this.#visualizer.vizMemoryRecords();
+		}
 	}
 
 	/**
