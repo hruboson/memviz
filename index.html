@@ -684,6 +684,7 @@ Split(["#split-ve", "#split-console"], {
 			switch(flag){
 				case EXEOPT.COMPILE:
 					result = interpreter.compile(input);
+					console.log(typeof result);
 					if(typeof result != "object"){
 						toggleButtons(false);
 					}
@@ -721,8 +722,12 @@ Split(["#split-ve", "#split-console"], {
 			}
 
 			if(!isclass(result, "PError") && flag != EXEOPT.PARSE){
-				result = interpreter.compile(input);
-				result = interpreter.interpret(breakEditor);
+				if(flag != EXEOPT.COMPILE){
+					result = interpreter.compile(input);
+				}
+				if(!isclass(result, "SError")){
+					result = interpreter.interpret(breakEditor);
+				}
 			}
 			console.info("Main result: ", result);
 
