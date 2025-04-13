@@ -527,6 +527,7 @@ class Memsim {
 			}
 		}else{
 			let i = 0;
+			// TODO FIX THIS FOR ALL POSSIBLE NUMBERS, DETERMINE TYPE FROM RECORD.beingPointedToBy
 			while(value > 0 && i < record.memsize){
 				bytes.push(value & 0xFF);
 				value >>= 8;

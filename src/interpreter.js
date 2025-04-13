@@ -1030,7 +1030,7 @@ class Interpreter {
 
 		const dummyRecord = new MemoryRecord();
 		dummyRecord.dimension = 0;
-		dummyRecord.address = record.addresses[flatIndex];
+		dummyRecord.address = record.address + MEMSIZES[record.memtype]*(flatIndex);
 		dummyRecord.indirection = record.indirection;
 		dummyRecord.memtype = record.memtype;
 
