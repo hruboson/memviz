@@ -274,7 +274,6 @@ class Interpreter {
 				throw new SError("undefined reference to main()")
 			}
 		}catch(err){
-			this.updateHTML(err);
 			throw err;
 		}
 
@@ -318,6 +317,7 @@ class Interpreter {
 			record.size = [stringRecord.toCArray().length];
 			record.memtype = DATATYPE.uchar;
 			record.determineSize();
+			record.specifiers = ["unsigned", "char"];
 
 			this.memsim.setRecordValue(record, stringRecord.toCArray(), MEMREGION.DATA);
 
