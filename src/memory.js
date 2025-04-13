@@ -273,7 +273,7 @@ class Memsim {
 		}
 
 		//TODO struct
-		if(record.size.length > 0){ // array
+		if(record.size.length > 0 && record.memtype != DATATYPE.void){ // array
 			return this.readArrayValue(record);
 		}else if(record.indirection > 0){
 			return this.readPointerValue(record);
@@ -328,7 +328,20 @@ class Memsim {
 
 			case DATATYPE.void:{
 				let size = record.memsize;
-				if(record.beingPointedToBy) size = MEMSIZES[record.beingPointedToBy];
+				if(record.beingPointedToBy){ 
+					size = MEMSIZES[record.beingPointedToBy];
+					const len = Math.floor(record.memsize/size);
+					if(len > 1){ // array or struct
+						const dummyRecord = new MemoryRecord();
+						dummyRecord.size = [len]; // rest is discarded -> maybe put warning or something like that
+						dummyRecord.address = record.address;
+						dummyRecord.addresses = Array.from({length: len}, (_, i) => record.address + i*size);
+						dummyRecord.memtype = record.beingPointedToBy;
+						dummyRecord.dimesion = 1;
+
+						return this.readArrayValue(dummyRecord);
+					}
+				}
 				return this.readVoidValue(size, record.address);
 			}
 		}
@@ -522,7 +535,7 @@ class Memsim {
 
 			// padding (remanining zeroes)
 			while(i < record.memsize){
-				bytes.push(0);
+				bytes.push(undefined);
 				i++;
 			}
 		}

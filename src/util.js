@@ -244,6 +244,7 @@ function CArrayToJsString(arr){
  * @returns String
  */
 function CCharToJsString(c){
+	if(c == undefined || c == null) return undefined;
 	if(c == 0) return "\\0";
 	return String.fromCharCode(c);
 }

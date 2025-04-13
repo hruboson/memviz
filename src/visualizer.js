@@ -500,6 +500,17 @@ class Memviz {
 		} else if (record.indirection > 0) { // pointer
 			return this.vizPointerRecord(record, parent, style, y);
 		} else { // value
+			if(record.memtype == DATATYPE.void){
+				const size = MEMSIZES[record.beingPointedToBy];
+				const len = record.memsize/size;
+				if(len > 1){
+					record.specifiers = [record.beingPointedToBy];
+					record.addresses = Array.from({length: len}, (_, i) => record.address + i*size);
+					record.dimension = 1;
+					record.size = [len];
+					return this.vizArrayValue(record, parent, style, y);
+				}
+			}
 			return this.vizPrimitiveRecord(record, parent, style, y);
 		} // todo struct
 	}
