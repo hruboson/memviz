@@ -888,7 +888,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 			sf.symtable.scopeInfo.name = sf.symtable.scopeInfo.name + " > parameters";
 		}
 
-		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([name, sym]) => sym.type !== "FNC" && sym.interpreted);
+		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted);
 
 		//TODO determine nVertical from largest array size
 		const nHorizontal = 3;
@@ -932,7 +932,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 		});
 
 		let nextY = 30; // first top padding
-		for (const [name, record] of filteredObjects) {
+		for (const [_, record] of filteredObjects) {
 			nextY = this.memviz.vizRecord(record, stackFrameRectangle, Memviz.sfX, nextY);
 		}
 
@@ -980,7 +980,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 */
 	vizHeapFrame(hf) {
 		for (const dataObject of hf.records) {
-			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfY);
+			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfX, Memviz.sfY);
 		}
 	}
 
@@ -990,7 +990,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 */
 	vizDataFrame(df) {
 		for (const dataObject of df.records) {
-			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfY);
+			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfX, Memviz.sfY);
 		}
 	}
 
@@ -1003,6 +1003,9 @@ class MemVisualizerRow extends MemVisualizer {
 	 * @returns {Number} newY Used to calculate the position of next stack frame.
 	 */
 	vizStackFrame(sf) {
-
+		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted);
+		for (const [_, record] of filteredObjects) {
+			this.memviz.vizRecord(record, this.memviz.root, Memviz.sfX, Memviz.sfY);
+		}
 	}
 }
