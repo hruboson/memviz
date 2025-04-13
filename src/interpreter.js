@@ -11,7 +11,7 @@
  */
 class Interpreter {
 
-	constructor(memVizStyle, trueSizes){ // todo move memviz to updateHTML only, I dont want any parameters here
+	constructor(){ // todo move memviz to updateHTML only, I dont want any parameters here
 		this.#symtableGlobal = new Symtable("global", "global");
 		this.#symtableStack = new Stack(); // only for semantic analyzer
 		this.#symtableStack.push(this.#symtableGlobal);
@@ -305,7 +305,7 @@ class Interpreter {
 		let result;
 
 		// initialize global variables
-		for(const [name, record] of this.#symtableGlobal.objects){
+		for(const [_, record] of this.#symtableGlobal.objects){
 			if(record.isFunction) continue; // skip functions
 			if(record.isNative) continue; // skip built-in functions
 			if(record.type == "TYPEDEF") continue; // skip typedefs
@@ -313,7 +313,7 @@ class Interpreter {
 		}
 
 		// initialize strings
-		for(const [key, stringRecord] of this.#semanticAnalyzer.stringTable){
+		for(const [_, stringRecord] of this.#semanticAnalyzer.stringTable){
 			const record = new MemoryRecord();
 			record.size = [stringRecord.toCArray().length];
 			record.memtype = DATATYPE.uchar;
@@ -338,12 +338,7 @@ class Interpreter {
 				 */
 
 				// globals
-				for(const [key, record] of this.#callStack.bottomSFrame().symtable.objects){ // bottom sFrame is basically global scope (globals)
-					if(record.isFunction) continue; // skip functions
-					if(record.isNative) continue; // skip built-in functions
-					if(record.type == "TYPEDEF") continue; // skip typedefs
-					this.memsim.free(record.address, record.memsize, record.region);
-				}
+				this.#callStack.popSFrame();
 
 				// .data
 				for(const record of this.#callStack.dFrame){
@@ -622,6 +617,7 @@ class Interpreter {
 		for(const construct of stmt.sequence){
 			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.pc = construct;
+
 			try{
 				construct.accept(this);
 			}catch(t){ // construct can return prematurely
@@ -774,6 +770,7 @@ class Interpreter {
 			fnc.body.accept(this); // run body
 			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.#callStack.popSFrame(); // pop param symtable
+			return null;
 		}catch(ret){ // catch return
 			if(ret instanceof Error){ // in case of too much recursion, run-time errors, ...
 				throw ret;
