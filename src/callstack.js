@@ -388,6 +388,10 @@ class HeapFrame{
 		return false;
 	}
 
+	empty(){
+		return this.records.length > 0 ? false : true;
+	}
+
 	[Symbol.iterator](){
 		let index = 0; // start from bottom
 		return {
@@ -421,6 +425,10 @@ class DataFrame{
 			if(r.address == address) return r;
 		}
 		return false;
+	}
+
+	empty(){
+		return this.records.length > 0 ? false : true;
 	}
 
 	[Symbol.iterator](){

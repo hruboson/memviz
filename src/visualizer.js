@@ -309,8 +309,13 @@ class Memviz {
 		const hf = this.callStack.hFrame;
 		const df = this.callStack.dFrame;
 
-		nextY = this.vizHeapFrame(hf, nextY);
-		nextY = this.vizDataFrame(df, nextY);
+		if(!hf.empty()){
+			nextY = this.vizHeapFrame(hf, nextY);
+		}
+
+		if(!df.empty()){
+			nextY = this.vizDataFrame(df, nextY);
+		}
 
 		for (const sf of this.callStack) {
 			nextY = this.vizStackFrame(sf, nextY);
