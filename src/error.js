@@ -4,6 +4,18 @@
  */
 
 /**
+ * Parser/syntax Error
+ * @class PError
+ * @param {string} message Error message
+ */
+class PError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "Syntax error";
+	}
+}
+
+/**
  * Semantic Error
  * @class SError
  * @param {string} details Error message

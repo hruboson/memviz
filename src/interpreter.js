@@ -244,8 +244,12 @@ class Interpreter {
 	* @return {Interpreter} Interpreter
 	*/
 	parse(text){
-		this.#refreshSymbols();
-		this.#ast = this.#parser.parse(text);
+		try{
+			this.#refreshSymbols();
+			this.#ast = this.#parser.parse(text);
+		}catch(e){
+			throw new PError(e.message);
+		}
 		return this;
 	}
 
@@ -286,7 +290,11 @@ class Interpreter {
 	 * @throws {AppError|RTError}
 	 */
 	compile(code){
-		this.parse(code).semantic(this.#ast);
+		try{
+			this.parse(code).semantic(this.#ast);
+		}catch(e){
+			return e;
+		}
 	}
 
 	/**
@@ -1343,23 +1351,6 @@ class Interpreter {
 	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
 	updateHTML(result, vizOptions){
-		// memory visualization
-		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output"), vizOptions); // TODO pass the element id as string parameter for interpreter
-		this.memviz.updateHTML();
-
-		// other elements
-		if(JSONEDITeditorAST && JSONEDITeditorTYPEDEFS){
-			JSONEDITeditorAST.set(JSON.parse(JSON.stringify(this.#ast))); // due to symtable now being attached to nodes, I cannot print it because of recursive references
-			JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
-		}
-		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2); // old way of printing AST
-		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
-		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
-		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
-		document.getElementById("memdump").innerHTML = this.memdump;
-		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
-		document.getElementById("console-output").innerHTML = this.output;
-
 		const resultDiv = document.getElementById("result");
 
 		// reset result element
@@ -1367,7 +1358,7 @@ class Interpreter {
 		const classes = resultDiv.classList;
 		const classesToRemove = Array.from(classes).filter(className => className.startsWith("bg-"));
 		classesToRemove.forEach(className => resultDiv.classList.remove(className))
-		
+
 		// add result/error depending on type returned from main (result arg)
 		if(result != undefined && result != null && !isclass(result, "StopFlag")){;
 			resultDiv.innerHTML = "Result: \n";
@@ -1379,8 +1370,7 @@ class Interpreter {
 			if(isclass(result, "ReturnVoid")){
 				resultDiv.innerHTML += "void";
 				resultDiv.classList.add("bg-success");
-			}else if(isclass(result, "SError") || isclass(result, "RTError")){
-
+			}else if(isclass(result, "SError") || isclass(result, "RTError") || isclass(result, "PError")){
 				resultDiv.innerHTML += formattedText;
 				resultDiv.classList.add("bg-danger");
 			}else if(isclass(result, "NSError")){
@@ -1395,6 +1385,25 @@ class Interpreter {
 				resultDiv.classList.add("bg-success");
 			}
 		}
+
+		// memory visualization
+		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output"), vizOptions); // TODO pass the element id as string parameter for interpreter
+		this.memviz.updateHTML();
+
+		// other elements
+		if(this.#ast && this.userEnums){
+			if(JSONEDITeditorAST && JSONEDITeditorTYPEDEFS){
+				JSONEDITeditorAST.set(JSON.parse(JSON.stringify(this.#ast))); // due to symtable now being attached to nodes, I cannot print it because of recursive references
+				JSONEDITeditorTYPEDEFS.set(this.userTypes.concat(this.userEnums));
+			}
+		}
+		//document.getElementById("ast").innerHTML = JSON.stringify(this.#ast, null, 2); // old way of printing AST
+		//document.getElementById("typedefs").innerHTML = JSON.stringify(this.userTypes.concat(this.userEnums), null, 2); // old way of printing typedefs
+		document.getElementById("programCounter").innerHTML = "Step: " + (this.#breakstop == Infinity ? "end" : this.#breakstop);
+		document.getElementById("symtable").innerHTML = this.#symtableGlobal.print();
+		document.getElementById("memdump").innerHTML = this.memdump;
+		document.getElementById("warnings").innerHTML = this.#warningSystem.print();
+		document.getElementById("console-output").innerHTML = this.output;
 
 		// create new marker
 		/*if(this.pcloclast > 0){

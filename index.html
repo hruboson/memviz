@@ -678,17 +678,19 @@ Split(["#split-ve", "#split-console"], {
 		const memVizStyle = document.getElementById("visualizationStyle").value;
 		const memVizShowTrueSizes = document.getElementById("visualizationTrueSizes").value == "true" ? true : false;
 		interpreter = new Interpreter();
+		let result;
 		unhighlight();
 		try{
 			switch(flag){
 				case EXEOPT.COMPILE:
-					interpreter.compile(input);
-					toggleButtons(false);
+					result = interpreter.compile(input);
+					if(typeof result != "object"){
+						toggleButtons(false);
+					}
 					breakEditor = 0;
 					break;
 
 				case EXEOPT.PARSE:
-					interpreter.parse(input);
 					toggleButtons(false);
 					breakEditor = 0;
 					break;
@@ -718,8 +720,10 @@ Split(["#split-ve", "#split-console"], {
 					break;
 			}
 
-			if(flag != EXEOPT.COMPILE) interpreter.compile(input); // this is all so ugly, I hate it
-			const result = interpreter.interpret(breakEditor);
+			if(!isclass(result, "PError") && flag != EXEOPT.PARSE){
+				result = interpreter.compile(input);
+				result = interpreter.interpret(breakEditor);
+			}
 			console.info("Main result: ", result);
 
 			const vizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
