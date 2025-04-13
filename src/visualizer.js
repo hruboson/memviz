@@ -39,6 +39,7 @@ class VizCellPointer {
 
 /**
  * @class VizPointerPair
+ * @extends Pair
  * @description Adds convenient aliases to the Pair class.
  * @param {VizCellPointer} pointedFrom
  * @param {VizCellValue} pointedTo
@@ -74,6 +75,9 @@ const MEMVIZSTYLES = {
 
 /**
  * Helper options class, inspired by Vulkan xyCreateInfo
+ * @class MemvizOptions
+ * @param {string} style
+ * @param {boolean} trueSizes
  */
 class MemvizOptions {
 	static get defaultStyle(){
@@ -92,7 +96,7 @@ class MemvizOptions {
 
 /**
  * @class Memviz
- * @description Main visualization class, handles memory visualization. Basically visualizing the call stack and each of its stack frames (symbol tables).
+ * @description Main visualization class, handles memory visualization by choosing appropriate strategy (visualizer) and delegating the main style rendering. This class can render primitive Cells - value, pointer, array, ...
  * @param {Memsim} memsim
  * @param {CallStack} callStack
  * @param {Element} container HTML element to print to - get it by doing document.getElementById
@@ -272,6 +276,11 @@ class Memviz {
 		return "white";
 	}
 
+	/**
+	 * Pointer style
+	 * @returns {Object}
+	 * @static
+	 */
 	static get pointerStyle() {
 		return {
 			fillColor: "white",
@@ -282,6 +291,11 @@ class Memviz {
 		}
 	}
 
+	/**
+	 * Upper label style
+	 * @returns {Object}
+	 * @static
+	 */
 	static get labelAboveStyle() {
 		return {
 			fillColor: "transparent",
@@ -302,6 +316,11 @@ class Memviz {
 		}
 	}
 
+	/**
+	 * Lower label style
+	 * @returns {Object}
+	 * @static
+	 */
 	static get labelBelowStyle() {
 		return {
 			fillColor: "transparent",
@@ -328,18 +347,20 @@ class Memviz {
 
 	/**
 	 * Visualizes single MemoryRecord from frame.
+	 * @public
 	 * @param {MemoryRecord} record
 	 * @param {Cell} parent This will be the records frame.
+	 * @param {Number} x
 	 * @param {Number} y
 	 */
-	vizRecord(record, parent, y) {
+	vizRecord(record, parent, x, y) {
 		if (!record.address) console.warn(record);
 		const style = this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address));
 
 		if (record.size.length > 0) { // array
-			return this.vizArrayValue(record, parent, style, y);
+			return this.vizArrayValue(record, parent, style, x, y);
 		} else if (record.indirection > 0) { // pointer
-			return this.vizPointerRecord(record, parent, style, y);
+			return this.vizPointerRecord(record, parent, style, x, y);
 		} else { // value
 			if(record.memtype == DATATYPE.void){
 				const size = MEMSIZES[record.beingPointedToBy];
@@ -349,21 +370,23 @@ class Memviz {
 					record.addresses = Array.from({length: len}, (_, i) => record.address + i*size);
 					record.dimension = 1;
 					record.size = [len];
-					return this.vizArrayValue(record, parent, style, y);
+					return this.vizArrayValue(record, parent, style, x, y);
 				}
 			}
-			return this.vizPrimitiveRecord(record, parent, style, y);
+			return this.vizPrimitiveRecord(record, parent, style, x, y);
 		} // todo struct
 	}
 
 	/**
 	 * Visualizes primitive value.
+	 * @public
 	 * @param {MemoryRecord} record
 	 * @param {Cell} parent
 	 * @param {Object} style
+	 * @param {Number} x
 	 * @param {Number} y
 	 */
-	vizPrimitiveRecord(record, parent, style, y) {
+	vizPrimitiveRecord(record, parent, style, x, y) {
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 		const labelAbove = record.name ? record.name : "";
 		const labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
@@ -375,7 +398,7 @@ class Memviz {
 		}
 
 		this.vizValueCell(
-			/* parent, x, y: */  parent, Memviz.squareX, y,
+			/* parent, x, y: */  parent, x, y,
 			/* width, height: */ width, Memviz.squareXYlen,
 			/* above, below: */  labelAbove, labelBelow,
 			/* style: */         style,
@@ -387,12 +410,13 @@ class Memviz {
 
 	/**
 	 * Visualizes pointer value.
+	 * @public
 	 * @param {MemoryRecord} record
 	 * @param {Cell} parent
 	 * @param {Object} style
 	 * @param {Number} y
 	 */
-	vizPointerRecord(record, parent, style, y) {
+	vizPointerRecord(record, parent, style, x, y) {
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 		const labelAbove = record.name ? record.name : "";
 		const labelBelow = '*'.repeat(record.indirection) + record.specifiers.join(' ');
@@ -402,7 +426,7 @@ class Memviz {
 		}
 
 		this.vizPointerCell(
-			/* parent, x, y: */  parent, Memviz.squareX, y,
+			/* parent, x, y: */  parent, x, y,
 			/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen,
 			/* above, below: */  labelAbove, labelBelow,
 			/* style: */         style,
@@ -414,12 +438,13 @@ class Memviz {
 
 	/**
 	 * Visualizes array.
+	 * @public
 	 * @param {MemoryRecord} record
 	 * @param {Cell} parent
 	 * @param {Object} style
 	 * @param {Number} y
 	 */
-	vizArrayValue(record, parent, style, y) {
+	vizArrayValue(record, parent, style, x, y) {
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 
 		let arrayValue;
@@ -437,7 +462,7 @@ class Memviz {
 			const last =  n == arrayValue.length - 1;
 			if (record.indirection > 0) {
 				let pointingTo = element;
-				const x = Memviz.squareX + ((Memviz.squareXYlen * n));
+				const newX = x + ((Memviz.squareXYlen * n));
 				const indices = flatIndexToDimensionalIndices(n, record.size);
 				const name = record.name ? record.name : ""
 				const labelAbove = name + indices.map(idx => `[${idx}]`).join('');
@@ -445,7 +470,7 @@ class Memviz {
 				labelBelow = n == arrayValue.length - 1 ? labelBelow : "";
 
 				this.vizPointerCell(
-					/* parent, x, y: */  parent, x, y,
+					/* parent, x, y: */  parent, newX, y,
 					/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen,
 					/* above, below: */  labelAbove, labelBelow,
 					/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address)),
@@ -470,7 +495,7 @@ class Memviz {
 				}
 
 				this.vizValueCell(
-					/* parent, x, y: */  parent, Memviz.squareX + (width * n), y,
+					/* parent, x, y: */  parent, x + (width * n), y,
 					/* width, height: */ width, Memviz.squareXYlen,
 					/* above, below: */  labelAbove, labelBelow,
 					/* style: */         style,
@@ -486,6 +511,7 @@ class Memviz {
 
 	/**
 	 * Vizualizes single value cell
+	 * @public
 	 * @param {Cell} parent
 	 * @param {number} x
 	 * @param {number} y
@@ -528,6 +554,7 @@ class Memviz {
 
 	/**
 	 * Vizualizes single pointer cell
+	 * @public
 	 * @param {Cell} parent
 	 * @param {number} x
 	 * @param {number} y
@@ -588,6 +615,7 @@ class Memviz {
 	/**
 	 * Creates edges of pointers pointing to values.
 	 * @function
+	 * @public
 	 */
 	vizPointers() {
 		const root = this.root;
@@ -688,6 +716,7 @@ class Memviz {
 /**
  * @class MemVisualizer
  * @description Abstract class for different visualizers (strategy pattern). It's basically just interface.
+ * @param {Memviz} memviz
  */
 class MemVisualizer {
 	constructor(memviz){
@@ -702,7 +731,9 @@ class MemVisualizer {
 
 /**
  * @class MemVisualizerSemantic
+ * @extends MemVisualizer
  * @description One of visualization strategies
+ * @param {Memviz} memviz
  */
 class MemVisualizerSemantic extends MemVisualizer {
 	constructor(memviz){
@@ -778,7 +809,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 		let nextY = 30; // first top padding
 
 		for (const heapObject of hf.records) {
-			nextY = this.memviz.vizRecord(heapObject, heapFrameRectangle, nextY);
+			nextY = this.memviz.vizRecord(heapObject, heapFrameRectangle, Memviz.sfX, nextY);
 		}
 
 		return sfY + height;
@@ -830,7 +861,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 		let nextY = 30; // first top padding
 
 		for (const dataObject of df.records) {
-			nextY = this.memviz.vizRecord(dataObject, dataFrameRectangle, nextY);
+			nextY = this.memviz.vizRecord(dataObject, dataFrameRectangle, Memviz.sfX, nextY);
 		}
 
 		return sfY + height;
@@ -902,7 +933,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 
 		let nextY = 30; // first top padding
 		for (const [name, record] of filteredObjects) {
-			nextY = this.memviz.vizRecord(record, stackFrameRectangle, nextY);
+			nextY = this.memviz.vizRecord(record, stackFrameRectangle, Memviz.sfX, nextY);
 		}
 
 		return sfY + height;
@@ -911,7 +942,9 @@ class MemVisualizerSemantic extends MemVisualizer {
 
 /**
  * @class MemVisualizerSemantic
- * @description One of visualization strategies
+ * @extends MemVisualizer
+ * @description One of visualization strategie
+ * @param {Memviz} memviz
  */
 class MemVisualizerRow extends MemVisualizer {
 	constructor(memviz){
@@ -923,6 +956,21 @@ class MemVisualizerRow extends MemVisualizer {
 	 * @function
 	 */
 	vizMemoryRecords() {
+		const hf = this.memviz.callStack.hFrame;
+		const df = this.memviz.callStack.dFrame;
+
+		if(!hf.empty()){
+			this.vizHeapFrame(hf);
+		}
+
+		if(!df.empty()){
+			this.vizDataFrame(df);
+		}
+
+		for (const sf of this.memviz.callStack) {
+			this.vizStackFrame(sf);
+		}
+
 		this.memviz.vizPointers();
 	}
 
@@ -931,7 +979,9 @@ class MemVisualizerRow extends MemVisualizer {
 	 * @function
 	 */
 	vizHeapFrame(hf) {
-	
+		for (const dataObject of hf.records) {
+			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfY);
+		}
 	}
 
 	/**
@@ -939,7 +989,9 @@ class MemVisualizerRow extends MemVisualizer {
 	 * @function
 	 */
 	vizDataFrame(df) {
-
+		for (const dataObject of df.records) {
+			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfY);
+		}
 	}
 
 
