@@ -133,13 +133,39 @@ class Memviz {
 	}
 
 	/**
+	 * @param {MemvizOptions} options
+	 * @private
+	 */
+	#setVisualizer(options){
+		switch(options.style){
+			case MEMVIZSTYLES.STYLE.MEMROW:
+				this.#visualizer = new MemVisualizerRow(this);
+				break;
+			case MEMVIZSTYLES.STYLE.SEMANTIC:
+				this.#visualizer = new MemVisualizerSemantic(this);
+				break;
+			default:
+				this.#visualizer = new MemVisualizerSemantic(this);
+				break;
+		}
+	}
+
+	/**
 	 * Starts visualization. Outputs to container.
 	 * @public
 	 */
 	updateHTML() {
-		//console.log(this.memVizStyle);
-		this.vizMemoryRecords();
+		console.log(this.options);
+		this.#setVisualizer(this.options);
+		this.#visualizer.vizMemoryRecords();
 	}
+
+	/**
+	 * Visualizer strategy
+	 * @type{MemVisualizer}
+	 * @private
+	 */
+	#visualizer;
 
 	/**
 	 * Call stack acquired from interpreter.
@@ -299,201 +325,9 @@ class Memviz {
 	 **********************/
 
 	/**
-	 * Visualizes the whole call stack.
-	 * @function
-	 */
-	vizMemoryRecords() {
-		this.#init();
-
-		let nextY = 10;
-		const hf = this.callStack.hFrame;
-		const df = this.callStack.dFrame;
-
-		if(!hf.empty()){
-			nextY = this.vizHeapFrame(hf, nextY);
-		}
-
-		if(!df.empty()){
-			nextY = this.vizDataFrame(df, nextY);
-		}
-
-		for (const sf of this.callStack) {
-			nextY = this.vizStackFrame(sf, nextY);
-		}
-
-		this.vizPointers();
-	}
-
-	vizHeapFrame(hf, y) {
-		const nHorizontal = hf.records.length;
-		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
-		let sfY = y + Memviz.labelHeight + 10;
-
-		let height = (Memviz.squareXYlen + Memviz.labelHeight);
-		if (hf.records.length > 0) {
-			height += 20; // inner padding for each row inside sf
-			height *= hf.records.length;
-		}
-		height += 20; // bottom padding
-
-		const root = this.root;
-		const heapFrameRectangle = this.graph.insertVertex({
-			root,
-			position: [Memviz.sfX, sfY],
-			height: height,
-			width: width,
-			style: {
-				// label style
-				labelPosition: "center",
-				verticalAlign: "bottom",
-				verticalLabelPosition: "top",
-				spacingBottom: 5,
-				align: "left",
-
-				strokeColor: "grey",
-				fillColor: "transparent",
-				shape: "rectangle",
-
-				// font style
-				fontSize: 14,
-				fontColor: Memviz.fontColor,
-
-				fontFamily: Memviz.fontFamily,
-			},
-		});
-
-		let nextY = 30; // first top padding
-
-		for (const heapObject of hf.records) {
-			nextY = this.vizRecord(heapObject, heapFrameRectangle, nextY);
-		}
-
-		return sfY + height;
-
-	}
-
-	vizDataFrame(df, y) {
-		const nHorizontal = df.records.length;
-		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
-		let sfY = y + Memviz.labelHeight + 10;
-
-		let height = (Memviz.squareXYlen + Memviz.labelHeight);
-		if (df.records.length > 0) {
-			height += 20; // inner padding for each row inside sf
-			height *= df.records.length;
-		}
-		height += 20; // bottom padding
-
-		const root = this.root;
-		const dataFrameRectangle = this.graph.insertVertex({
-			root,
-			position: [Memviz.sfX, sfY],
-			height: height,
-			width: width,
-			style: {
-				// label style
-				labelPosition: "center",
-				verticalAlign: "bottom",
-				verticalLabelPosition: "top",
-				spacingBottom: 5,
-				align: "left",
-
-				strokeColor: "grey",
-				fillColor: "transparent",
-				shape: "rectangle",
-
-				// font style
-				fontSize: 14,
-				fontColor: Memviz.fontColor,
-
-				fontFamily: Memviz.fontFamily,
-			},
-		});
-
-		let nextY = 30; // first top padding
-
-		for (const dataObject of df.records) {
-			nextY = this.vizRecord(dataObject, dataFrameRectangle, nextY);
-		}
-
-		return sfY + height;
-	}
-
-	/**
-	 * Visualizes one stack frame.
-	 * @function
-	 * @param {StackFrame} sf
-	 * @param {Number} y Y coordinate to visualize the stack frame.
-	 * @returns {Number} newY Used to calculate the position of next stack frame.
-	 */
-	vizStackFrame(sf, y) {
-		if (sf.emptyObjects() || sf.empty()) { // in case of no names in symtable
-			return y;
-		}
-
-		if (sf.symtable.scopeInfo.type == "stmt") { // in case of compound statement (... {...} ...) keep the function name
-			sf.symtable.scopeInfo.name = sf.parent.symtable.scopeInfo.name + " > " + sf.symtable.scopeInfo.name;
-		}
-
-		if (sf.symtable.scopeInfo.type == "function params") {
-			sf.symtable.scopeInfo.name = sf.symtable.scopeInfo.name + " > parameters";
-		}
-
-		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([name, sym]) => sym.type !== "FNC" && sym.interpreted);
-
-		//TODO determine nVertical from largest array size
-		const nHorizontal = 3;
-
-		let height = (Memviz.squareXYlen + Memviz.labelHeight);
-		if (filteredObjects.length > 0) {
-			height += 20; // inner padding for each row inside sf
-			height *= filteredObjects.length;
-		}
-		height += 20; // bottom padding
-
-		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
-
-		let sfY = y + Memviz.labelHeight + 10;
-
-		const root = this.root;
-		const stackFrameRectangle = this.graph.insertVertex({
-			root,
-			position: [Memviz.sfX, sfY],
-			value: sf.symtable.scopeInfo.name,
-			height: height,
-			width: width,
-			style: {
-				// label style
-				labelPosition: "center",
-				verticalAlign: "bottom",
-				verticalLabelPosition: "top",
-				spacingBottom: 5,
-				align: "left",
-
-				strokeColor: "grey",
-				fillColor: "transparent",
-				shape: "rectangle",
-
-				// font style
-				fontSize: 14,
-				fontColor: Memviz.fontColor,
-
-				fontFamily: Memviz.fontFamily,
-			},
-		});
-
-		let nextY = 30; // first top padding
-		for (const [name, record] of filteredObjects) {
-			nextY = this.vizRecord(record, stackFrameRectangle, nextY);
-		}
-
-		return sfY + height;
-	}
-
-	/**
-	 * Visualizes single MemoryRecord from stack frame.
+	 * Visualizes single MemoryRecord from frame.
 	 * @param {MemoryRecord} record
-	 * @param {Cell} parent This will be the recordbols stack frame.
+	 * @param {Cell} parent This will be the records frame.
 	 * @param {Number} y
 	 */
 	vizRecord(record, parent, y) {
@@ -846,5 +680,275 @@ class Memviz {
 			default:
 				throw new AppError(`Unknown memory region: ${memregion}, cannot deduce vertex style`);
 		}
+	}
+}
+
+/**
+ * @class MemVisualizer
+ * @description Abstract class for different visualizers (strategy pattern). It's basically just interface.
+ */
+class MemVisualizer {
+	constructor(memviz){
+		abstract(this, "MemVisualizer");
+		intfc(this, "vizMemoryRecords");
+		intfc(this, "vizStackFrame");
+		intfc(this, "vizHeapFrame");
+		intfc(this, "vizDataFrame");
+		this.memviz = memviz;
+	}
+}
+
+/**
+ * @class MemVisualizerSemantic
+ * @description One of visualization strategies
+ */
+class MemVisualizerSemantic extends MemVisualizer {
+	constructor(memviz){
+		super(memviz);
+	}
+
+	/**
+	 * Visualizes the whole call stack.
+	 * @function
+	 */
+	vizMemoryRecords() {
+		let nextY = 10;
+		const hf = this.memviz.callStack.hFrame;
+		const df = this.memviz.callStack.dFrame;
+
+		if(!hf.empty()){
+			nextY = this.vizHeapFrame(hf, nextY);
+		}
+
+		if(!df.empty()){
+			nextY = this.vizDataFrame(df, nextY);
+		}
+
+		for (const sf of this.memviz.callStack) {
+			nextY = this.vizStackFrame(sf, nextY);
+		}
+
+		this.memviz.vizPointers();
+	}
+
+	/**
+	 * Visualizes heap part of callstack
+	 * @function
+	 */
+	vizHeapFrame(hf, y) {
+		const nHorizontal = hf.records.length;
+		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
+		let sfY = y + Memviz.labelHeight + 10;
+
+		let height = (Memviz.squareXYlen + Memviz.labelHeight);
+		if (hf.records.length > 0) {
+			height += 20; // inner padding for each row inside sf
+			height *= hf.records.length;
+		}
+		height += 20; // bottom padding
+
+		const root = this.memviz.root;
+		const heapFrameRectangle = this.memviz.graph.insertVertex({
+			root,
+			position: [Memviz.sfX, sfY],
+			height: height,
+			width: width,
+			style: {
+				// label style
+				labelPosition: "center",
+				verticalAlign: "bottom",
+				verticalLabelPosition: "top",
+				spacingBottom: 5,
+				align: "left",
+
+				strokeColor: "grey",
+				fillColor: "transparent",
+				shape: "rectangle",
+
+				// font style
+				fontSize: 14,
+				fontColor: Memviz.fontColor,
+
+				fontFamily: Memviz.fontFamily,
+			},
+		});
+
+		let nextY = 30; // first top padding
+
+		for (const heapObject of hf.records) {
+			nextY = this.memviz.vizRecord(heapObject, heapFrameRectangle, nextY);
+		}
+
+		return sfY + height;
+
+	}
+
+	/**
+	 * Visualizes data part (mostly strings) of callstack
+	 * @function
+	 */
+	vizDataFrame(df, y) {
+		const nHorizontal = df.records.length;
+		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
+		let sfY = y + Memviz.labelHeight + 10;
+
+		let height = (Memviz.squareXYlen + Memviz.labelHeight);
+		if (df.records.length > 0) {
+			height += 20; // inner padding for each row inside sf
+			height *= df.records.length;
+		}
+		height += 20; // bottom padding
+
+		const root = this.memviz.root;
+		const dataFrameRectangle = this.memviz.graph.insertVertex({
+			root,
+			position: [Memviz.sfX, sfY],
+			height: height,
+			width: width,
+			style: {
+				// label style
+				labelPosition: "center",
+				verticalAlign: "bottom",
+				verticalLabelPosition: "top",
+				spacingBottom: 5,
+				align: "left",
+
+				strokeColor: "grey",
+				fillColor: "transparent",
+				shape: "rectangle",
+
+				// font style
+				fontSize: 14,
+				fontColor: Memviz.fontColor,
+
+				fontFamily: Memviz.fontFamily,
+			},
+		});
+
+		let nextY = 30; // first top padding
+
+		for (const dataObject of df.records) {
+			nextY = this.memviz.vizRecord(dataObject, dataFrameRectangle, nextY);
+		}
+
+		return sfY + height;
+	}
+
+
+	/**
+	 * Visualizes one stack frame.
+	 * @function
+	 * @param {StackFrame} sf
+	 * @param {Number} y Y coordinate to visualize the stack frame.
+	 * @returns {Number} newY Used to calculate the position of next stack frame.
+	 */
+	vizStackFrame(sf, y) {
+		if (sf.emptyObjects() || sf.empty()) { // in case of no names in symtable
+			return y;
+		}
+
+		if (sf.symtable.scopeInfo.type == "stmt") { // in case of compound statement (... {...} ...) keep the function name
+			sf.symtable.scopeInfo.name = sf.parent.symtable.scopeInfo.name + " > " + sf.symtable.scopeInfo.name;
+		}
+
+		if (sf.symtable.scopeInfo.type == "function params") {
+			sf.symtable.scopeInfo.name = sf.symtable.scopeInfo.name + " > parameters";
+		}
+
+		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([name, sym]) => sym.type !== "FNC" && sym.interpreted);
+
+		//TODO determine nVertical from largest array size
+		const nHorizontal = 3;
+
+		let height = (Memviz.squareXYlen + Memviz.labelHeight);
+		if (filteredObjects.length > 0) {
+			height += 20; // inner padding for each row inside sf
+			height *= filteredObjects.length;
+		}
+		height += 20; // bottom padding
+
+		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
+
+		let sfY = y + Memviz.labelHeight + 10;
+
+		const root = this.memviz.root;
+		const stackFrameRectangle = this.memviz.graph.insertVertex({
+			root,
+			position: [Memviz.sfX, sfY],
+			value: sf.symtable.scopeInfo.name,
+			height: height,
+			width: width,
+			style: {
+				// label style
+				labelPosition: "center",
+				verticalAlign: "bottom",
+				verticalLabelPosition: "top",
+				spacingBottom: 5,
+				align: "left",
+
+				strokeColor: "grey",
+				fillColor: "transparent",
+				shape: "rectangle",
+
+				// font style
+				fontSize: 14,
+				fontColor: Memviz.fontColor,
+
+				fontFamily: Memviz.fontFamily,
+			},
+		});
+
+		let nextY = 30; // first top padding
+		for (const [name, record] of filteredObjects) {
+			nextY = this.memviz.vizRecord(record, stackFrameRectangle, nextY);
+		}
+
+		return sfY + height;
+	}
+}
+
+/**
+ * @class MemVisualizerSemantic
+ * @description One of visualization strategies
+ */
+class MemVisualizerRow extends MemVisualizer {
+	constructor(memviz){
+		super(memviz);
+	}
+
+	/**
+	 * Visualizes the whole call stack.
+	 * @function
+	 */
+	vizMemoryRecords() {
+		this.memviz.vizPointers();
+	}
+
+	/**
+	 * Visualizes heap part of callstack
+	 * @function
+	 */
+	vizHeapFrame(hf) {
+	
+	}
+
+	/**
+	 * Visualizes data part (mostly strings) of callstack
+	 * @function
+	 */
+	vizDataFrame(df) {
+
+	}
+
+
+	/**
+	 * Visualizes one stack frame.
+	 * @function
+	 * @param {StackFrame} sf
+	 * @param {Number} y Y coordinate to visualize the stack frame.
+	 * @returns {Number} newY Used to calculate the position of next stack frame.
+	 */
+	vizStackFrame(sf) {
+
 	}
 }

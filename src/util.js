@@ -19,6 +19,12 @@ function abstract(obj, name){ // passing name makes the children not abstract
  * @param {Object} obj Instance of class (it will always be `this`)
  * @param {string} function_name Name of the function the class will have to implement
  * @param {array} [parameters=[]] Optional parameters for function
+ * @example
+ *  constructor(){
+ *		intfc(this, "accept", ["visitor", "args"]);
+ *		intfc(this, "get");
+ *		intfc(this, "set");
+ *	}
  */
 function intfc(obj, function_name, parameters = []){
 	if(typeof obj[function_name] != "function"){
