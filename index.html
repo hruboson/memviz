@@ -394,8 +394,9 @@
 								<div class="mb-3">
 									<label for="visualizationStyle" class="form-label">Visualization Style</label>
 									<select class="form-select" id="visualizationStyle" onchange="updateVisualization()">
-										<option value="memVizStyleMemoryRow">Memory row</option>
-										<option value="memVizStyleSemantic" selected>Semantic</option>
+										<!-- see src/visualizer.js for possible values -->
+										<option value="MEMROW">Memory row</option>
+										<option value="SEMANTIC" selected>Semantic</option>
 									</select>
 									<label for="visualizationTrueSizes" class="form-label">Show true sizes of types?</label>
 									<select class="form-select" id="visualizationTrueSizes" onchange="updateVisualization()">
