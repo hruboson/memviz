@@ -13,4 +13,7 @@ describe('printf/console output', () => {
 	it('prints correct result of expressions', () => {
 		chai.assert.equal(interpretAll(expressions_shenanigans), "-82785");
 	});
+	it('prints correct value of allocated memory', () => {
+		chai.assert.equal(interpretAll(malloc_pointer_arithmetic), "10201346780210");
+	});
 });

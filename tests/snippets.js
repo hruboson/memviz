@@ -519,3 +519,25 @@ const expressions_shenanigans = `int main(){
 	printf("%d", guess);
 	return i;
 }`;
+
+const malloc_pointer_arithmetic = `int main() {
+    char* ptr = (char*) malloc(sizeof(char)*8); // allocate memory for eight chars
+    if (ptr == 0) {
+        return 1;
+    }
+
+    // assign values to each address allocated
+    for(int i = 0; i < 8; i++){
+        *(ptr+i) = (i+1)*10;
+    }
+
+    int* p = (int*) ptr+1;
+    
+    printf("%d", *ptr);
+    printf("%d", *(ptr+1));
+    printf("%d", *p);
+
+    free(ptr); // free allocated memory
+
+    return 0;
+}`;

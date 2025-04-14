@@ -448,6 +448,7 @@ class Interpreter {
 		let coeVar = 1; // for pointer arithmetic
 
 		// special case for pointer arithmetic
+		// ! known bug with pointer arithmetic: after casting to different sized type, the new address is not calculated correctly
 		if(isclass(lval, "PointerValue")){
 			switch(expr.op){
 				case '+':
@@ -583,7 +584,14 @@ class Interpreter {
     visitCastExpr(expr){
 		const value = this.evaluateExprArray(expr.expr);
 		const type = this.evaluateExprArray(expr.type);
-		if(isclass(value, "PointerValue")) this.#callStack.findMemoryRecord(value.value).beingPointedToBy = DATATYPE[type];
+		if(isclass(value, "PointerValue")){
+			const record = this.#callStack.findMemoryRecord(value.value);
+			if(record){
+				record.beingPointedToBy = DATATYPE[type];
+			}else{
+				throw new RTError(`Trying to get a value of uninitialized memory`, expr.loc);
+			}
+		}
 		if(has(value, "address")){
 			const record = this.#callStack.findMemoryRecord(this.memsim.readRecordValue(value));
 			if(record) record.beingPointedToBy = DATATYPE[type]; // switch view (type punning)
@@ -1009,7 +1017,12 @@ class Interpreter {
 			}else{  // last in the chain is identifier
 				val = this.evaluateExprArray(exprCopy);
 				if(isclass(val, "PointerValue")) record = val;
-				if(has(val, "address")) record = val;
+				if(has(val, "address")){ 
+					record = val;
+					if(record.indirection > 0){
+						record = new PointerValue(this.memsim.readRecordValue(record), record.memtype); // the second parameter is correct?
+					}
+				}
 				break;
 			}
 
@@ -1018,7 +1031,7 @@ class Interpreter {
 		};
 		
 		let flatIndex = 1;
-		if(record.size){
+		if(record.size?.length > 0){
 			flatIndex = this.getFlatIndex(indices, record.size);
 		}else{
 			flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
