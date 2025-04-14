@@ -689,7 +689,6 @@ Split(["#split-ve", "#split-console"], {
 			switch(flag){
 				case EXEOPT.COMPILE:
 					result = interpreter.compile(input);
-					console.log(typeof result);
 					if(typeof result != "object"){
 						toggleButtons(false);
 					}
