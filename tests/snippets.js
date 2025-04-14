@@ -504,7 +504,7 @@ const wrong_array_initializer_size = `int main(){
     };
 }`;
 
-const expressions_shenanigans = `int main(){
+const expressions_shenanigans_test = `int main(){
 	int i;
 	i = +10;
 	i += 10;
@@ -520,7 +520,7 @@ const expressions_shenanigans = `int main(){
 	return i;
 }`;
 
-const malloc_pointer_arithmetic = `int main() {
+const malloc_pointer_arithmetic_test = `int main() {
     char* ptr = (char*) malloc(sizeof(char)*8); // allocate memory for eight chars
     if (ptr == 0) {
         return 1;
@@ -540,4 +540,23 @@ const malloc_pointer_arithmetic = `int main() {
     free(ptr); // free allocated memory
 
     return 0;
+}`;
+
+const arrays_strings_pointers_test = `int main() {
+	int x[][2][3] = {{{100, 200, 300}, {400, 500, 600}}, {{700, 800, 9000}, {1000, 1100, 1200}}};
+	int* p = &x[0][1][1]; // pointer into array x
+
+	int** pp = &p; // pointer to pointer
+	int* arr_p[] = {p, *pp}; // array of pointers
+
+	char hello[] = "Hello world"; // string allocated on stack
+ 
+	char* animals[3] = { // strings allocated in data segment
+		"cats",
+		"dogs",
+		"lizards"
+	};
+ 
+	printf("I'm gonna buy %d %s\\n", *p, animals[2]);
+	return 0;
 }`;
