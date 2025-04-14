@@ -325,7 +325,7 @@ class Interpreter {
 			record.size = [stringRecord.toCArray().length];
 			record.memtype = DATATYPE.uchar;
 			record.determineSize();
-			record.specifiers = ["unsigned", "char"];
+			record.specifiers = ["char"];
 
 			this.memsim.setRecordValue(record, stringRecord.toCArray(), MEMREGION.DATA);
 
