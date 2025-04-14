@@ -1019,7 +1019,7 @@ class Interpreter {
 				if(isclass(val, "PointerValue")) record = val;
 				if(has(val, "address")){ 
 					record = val;
-					if(record.indirection > 0){
+					if(record.indirection > 0 && record.size.length < 1){
 						record = new PointerValue(this.memsim.readRecordValue(record), record.memtype); // the second parameter is correct?
 					}
 				}
@@ -1029,7 +1029,7 @@ class Interpreter {
 			indices.push(val);
 			exprCopy = exprCopy.pointer;
 		};
-		
+
 		let flatIndex = 1;
 		if(record.size?.length > 0){
 			flatIndex = this.getFlatIndex(indices, record.size);
@@ -1046,6 +1046,7 @@ class Interpreter {
 		dummyRecord.address = record.address + MEMSIZES[record.memtype]*(flatIndex);
 		dummyRecord.indirection = record.indirection;
 		dummyRecord.memtype = record.memtype;
+		dummyRecord.size = [];
 
 		return dummyRecord;
 	}
@@ -1111,6 +1112,8 @@ class Interpreter {
 		//TODO POSTFIX AND PREFIX DIFFERENTIATION
 		let value = this.evaluateExprArray(expr.expr);
 
+		// TODO add pointer coeff just like in BArithExpr
+
 		if(isclass(value, "PointerValue")){
 			value = value.value;
 		}
@@ -1144,9 +1147,10 @@ class Interpreter {
 				return ~value;
 			case '*': {
 				if(has(value, "address")){
-					const pointsTo = this.memsim.readRecordValue(value);
-					this.#callStack.findMemoryRecord(pointsTo).beingPointedToBy = value.pointsToMemtype;
-					return new PointerValue(pointsTo, value.pointsToMemtype);
+					const pointsToAddress = this.memsim.readRecordValue(value);
+					const record = this.#callStack.findMemoryRecord(pointsToAddress);
+					record.beingPointedToBy = value.pointsToMemtype;
+					return this.memsim.readRecordValue(record);
 				}else if(this.#callStack.findMemoryRecord(value)){
 					let record = this.#callStack.findMemoryRecord(value);
 					return record;
@@ -1237,18 +1241,13 @@ class Interpreter {
 			if(match == "%d"){
 				let value;
 				value = otherArgs[i];
-				if(isclass(value, "PointerValue")){ // TODO type punning by this, but fix this
+				if(isclass(value, "PointerValue")){
 					const record = this.#callStack.findMemoryRecord(value.value);
-					let dummyRecord = new MemoryRecord();
-					dummyRecord.memtype = value.memtype;
-					dummyRecord.size = record.size;
-					dummyRecord.memsize = record.memsize;
-					dummyRecord.address = record.address;
-					dummyRecord.addresses = record.addresses;
-					value = this.memsim.readRecordValue(dummyRecord);
+					value = record;
 				}
 				if(has(value, "address")) value = this.memsim.readRecordValue(value);
 				i++;
+
 				return parseInt(value);
 			}
 
@@ -1265,7 +1264,7 @@ class Interpreter {
 				let value;
 				value = otherArgs[i];
 				if(isclass(value, "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
-				if(has(value, "address")) value = this.memsim.readRecordValue(value);
+				if(has(value, "address")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(this.memsim.readRecordValue(value)));
 				i++;
 				return CArrayToJsString(value);
 			}

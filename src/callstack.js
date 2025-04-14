@@ -174,7 +174,7 @@ class CallStack{
 		}
 		for(const frame of this.#sFrames){
 			for(record of frame.symtable.objects.values().filter(obj => obj.type == SYMTYPE.OBJ)){
-				if(record.address == address || record.addresses.includes(address)) return record;
+				if(record.address == address) return record;
 				if(record.addresses.includes(address)){
 					const dummyRecord = new MemoryRecord();
 					dummyRecord.address = address;

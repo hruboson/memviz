@@ -213,7 +213,6 @@ class Initializer extends Construct {
 		switch (this.kind){
 			case INITTYPE.EXPR:
 				let val = this.expr.accept(visitor);
-				if(has(val, "address")) val = visitor.memsim.readSymValue(val); //! this is really wrong, but it works for now
 				return val;
 			case INITTYPE.ARR:
 				return this.arr.map(el => el.toJSArray(visitor)); // recursion -> maybe change to iterative for better performance
