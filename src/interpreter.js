@@ -350,7 +350,6 @@ class Interpreter {
 
 				// .data
 				for(const record of [...this.#callStack.dFrame]){
-					console.log(record.address, record.memsize, record.region);
 					this.memsim.free(record.address, record.memsize, record.region);
 					this.#callStack.dFrame.remove(record);
 				}
