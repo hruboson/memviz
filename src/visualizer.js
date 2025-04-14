@@ -627,20 +627,37 @@ class Memviz {
 			if (!targetCellValue) { console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); return; };
 			pair.to.cell = targetCellValue.cell;
 
-			const edge = this.graph.insertEdge({
-				parent: root,
-				source: pair.from.cell,
-				target: pair.to.cell,
-				style: {
-					edgeStyle: "smoothCurveEdge",
-					strokeColor: "white",
-					rounded: true,
-					entryX: 0, // Left side of value vertex
-					entryY: 0, // Top side of value vertex
-					exitX: 0.5,  // Middle of the source cell
-					exitY: 0.5,    // Top of the source cell
-				},
-			});
+			if(mxg.StyleRegistry.getValue("visualizerEdgeStyle")){ // custom edge found
+				const edge = this.graph.insertEdge({
+					parent: root,
+					source: pair.from.cell,
+					target: pair.to.cell,
+					style: {
+						edgeStyle: "visualizerEdgeStyle",
+						strokeColor: "white",
+						rounded: false,
+						entryX: 0, // Left side of value vertex
+						entryY: 0, // Top side of value vertex
+						exitX: 0.5,  // Middle of the source cell
+						exitY: 0.5,    // Top of the source cell
+					},
+				});
+			}else{ // default to straight edge
+				const edge = this.graph.insertEdge({
+					parent: root,
+					source: pair.from.cell,
+					target: pair.to.cell,
+					style: {
+						edgeStyle: "smoothCurveEdge",
+						strokeColor: "white",
+						rounded: true,
+						entryX: 0, // Left side of value vertex
+						entryY: 0, // Top side of value vertex
+						exitX: 0.5,  // Middle of the source cell
+						exitY: 0.5,    // Top of the source cell
+					},
+				});
+			}
 
 			this.graph.refresh();
 		}
@@ -728,6 +745,10 @@ class MemVisualizer {
 		intfc(this, "vizHeapFrame");
 		intfc(this, "vizDataFrame");
 		this.memviz = memviz;
+
+		/**
+		 * MemVisualizer can also implement custom edge style, if it is defined, it will be used
+		 */
 	}
 }
 
@@ -740,6 +761,23 @@ class MemVisualizer {
 class MemVisualizerSemantic extends MemVisualizer {
 	constructor(memviz){
 		super(memviz);
+
+		/**
+		 * Function defining new edge style for the mxg library
+		 */
+		const VisualizerEdgeStyle = (state, source, target, points, result) => {
+			if (source && target) {
+				const pt = new mxg.Point(target.getCenterX(), source.getCenterY());
+
+				if (mxg.mathUtils.contains(source, pt.x, pt.y)) {
+					pt.y = source.y + source.height;
+				}
+
+				result.push(pt);
+			}
+		};
+
+		mxg.StyleRegistry.putValue("visualizerEdgeStyle", VisualizerEdgeStyle); // register style with library
 	}
 
 	/**
@@ -956,6 +994,28 @@ class MemVisualizerSemantic extends MemVisualizer {
 class MemVisualizerRow extends MemVisualizer {
 	constructor(memviz){
 		super(memviz);
+
+		/**
+		 * Function defining new edge style for the mxg library
+		 */
+		const VisualizerEdgeStyle = (state, source, target, points, result) => {
+			// creates two points - one above source and one above target, these act as anchors, so the edge must go through them - todo: calculate height based on how many pointers there are
+			if (source && target) {
+				const ptSource = new mxg.Point();
+				const ptTarget = new mxg.Point();
+
+				ptSource.x = source.x + 10;
+				ptSource.y = source.y - 50;
+
+				ptTarget.x = target.x;
+				ptTarget.y = target.y - 25;
+
+				result.push(ptSource);
+				result.push(ptTarget);
+			}
+		};
+
+		mxg.StyleRegistry.putValue("visualizerEdgeStyle", VisualizerEdgeStyle); // register style with library
 	}
 
 	static get memoryRowHeight(){
