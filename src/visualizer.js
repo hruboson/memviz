@@ -406,7 +406,7 @@ class Memviz {
 			/* address, value:*/ record.address, value
 		);
 
-		return {x: x, y: y + height};
+		return {x: x + width, y: y + height};
 	}
 
 	/**
@@ -421,6 +421,7 @@ class Memviz {
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 		const labelAbove = record.name ? record.name : "";
 		const labelBelow = '*'.repeat(record.indirection) + record.specifiers.join(' ');
+		const width = Memviz.squareXYlen;
 		let pointingTo;
 		if (record.address) {
 			pointingTo = this.memsim.readRecordValue(record);
@@ -428,13 +429,13 @@ class Memviz {
 
 		this.vizPointerCell(
 			/* parent, x, y: */  parent, x, y,
-			/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen,
+			/* width, height: */ width, Memviz.squareXYlen,
 			/* above, below: */  labelAbove, labelBelow,
 			/* style: */         style,
 			/* from, to: */      record.address, pointingTo
 		);
 
-		return {x: x, y: y + height};
+		return {x: x + width, y: y + height};
 	}
 
 	/**
@@ -457,12 +458,14 @@ class Memviz {
 			return {x: x, y: y + height};
 		}
 
+		let totalWidth = 0;
 		arrayValue = arrayValue.flat(Infinity);
 		let n = 0;
 		for (let element of arrayValue) {
 			const last =  n == arrayValue.length - 1;
 			if (record.indirection > 0) {
 				let pointingTo = element;
+				const width = Memviz.squareXYlen;
 				const newX = x + ((Memviz.squareXYlen * n));
 				const indices = flatIndexToDimensionalIndices(n, record.size);
 				const name = record.name ? record.name : ""
@@ -472,11 +475,12 @@ class Memviz {
 
 				this.vizPointerCell(
 					/* parent, x, y: */  parent, newX, y,
-					/* width, height: */ Memviz.squareXYlen, Memviz.squareXYlen,
+					/* width, height: */ width, Memviz.squareXYlen,
 					/* above, below: */  labelAbove, labelBelow,
 					/* style: */         this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address)),
 					/* from, to: */      record.addresses[n], pointingTo
 				);
+				totalWidth += width;
 			} else {
 				const isChar = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar;
 				const value = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? CCharToJsString(element) : element;
@@ -502,12 +506,13 @@ class Memviz {
 					/* style: */         style,
 					/* address, value:*/ record.addresses[n], value
 				);
+				totalWidth += width;
 			}
 
 			n++;
 		}
 
-		return {x: x, y: y + height};
+		return {x: x + totalWidth, y: y + height};
 	}
 
 	/**
@@ -1064,16 +1069,17 @@ class MemVisualizerRow extends MemVisualizer {
 			},
 		});
 
-		if(!hf.empty()){
-			this.vizHeapFrame(hf, scrollableRectangle);
-		}
-
+		let nextX = Memviz.sfX;
 		if(!df.empty()){
-			this.vizDataFrame(df, scrollableRectangle);
+			nextX = this.vizDataFrame(df, scrollableRectangle, nextX);
 		}
 
-		for (const sf of this.memviz.callStack) {
-			this.vizStackFrame(sf, scrollableRectangle);
+		if(!hf.empty()){
+			nextX = this.vizHeapFrame(hf, scrollableRectangle, nextX);
+		}
+
+		for(const sf of this.memviz.callStack){
+			nextX = this.vizStackFrame(sf, scrollableRectangle, nextX);
 		}
 
 		this.memviz.vizPointers();
@@ -1083,20 +1089,26 @@ class MemVisualizerRow extends MemVisualizer {
 	 * Visualizes heap part of callstack
 	 * @function
 	 */
-	vizHeapFrame(hf, parent) {
-		for (const dataObject of hf.records) {
-			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfX, Memviz.sfY);
+	vizHeapFrame(hf, parent, x) {
+		let nextX = x;
+		for(const dataObject of hf.records){
+			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
+			nextX = xy.x;
 		}
+		return nextX;
 	}
 
 	/**
 	 * Visualizes data part (mostly strings) of callstack
 	 * @function
 	 */
-	vizDataFrame(df, parent) {
-		for (const dataObject of df.records) {
-			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfX, Memviz.sfY);
+	vizDataFrame(df, parent, x) {
+		let nextX = x;
+		for(const dataObject of df.records) {
+			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
+			nextX = xy.x;
 		}
+		return nextX;
 	}
 
 
@@ -1107,10 +1119,13 @@ class MemVisualizerRow extends MemVisualizer {
 	 * @param {Number} y Y coordinate to visualize the stack frame.
 	 * @returns {Number} newY Used to calculate the position of next stack frame.
 	 */
-	vizStackFrame(sf, parent) {
+	vizStackFrame(sf, parent, x){
+		let nextX = x;
 		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted);
-		for (const [_, record] of filteredObjects) {
-			this.memviz.vizRecord(record, this.memviz.root, Memviz.sfX, Memviz.sfY);
+		for(const [_, record] of filteredObjects){
+			const xy = this.memviz.vizRecord(record, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
+			nextX = xy.x;
 		}
+		return nextX;
 	}
 }
