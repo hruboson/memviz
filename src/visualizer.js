@@ -336,8 +336,8 @@ class Memviz {
 			fontFamily: Memviz.fontFamily,
 
 			// overflow
-			whitespace: 'wrap',
-			overflow: 'hidden',
+			whitespace: "wrap",
+			overflow: "visible",
 			editable: true,
 		}
 	}
@@ -526,6 +526,7 @@ class Memviz {
 	 */
 	vizValueCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, cellAddress, cellValue) {
 		if(cellValue == '\\0') cellStyle.fontSize = cellStyle.fontSize/1.5; // make strign terminator smaller
+		if(cellValue == undefined) cellValue = "";
 		const valueBox = this.graph.insertVertex({
 			parent: parent,
 			position: [x, y],
@@ -878,17 +879,20 @@ class MemVisualizerSemantic extends MemVisualizer {
 	 * @returns {Number} newY Used to calculate the position of next stack frame.
 	 */
 	vizStackFrame(sf, y) {
+		let displayName = "";
 		if (sf.emptyObjects() || sf.empty()) { // in case of no names in symtable
 			return y;
 		}
 
 		if (sf.symtable.scopeInfo.type == "stmt") { // in case of compound statement (... {...} ...) keep the function name
-			sf.symtable.scopeInfo.name = sf.parent.symtable.scopeInfo.name + " > " + sf.symtable.scopeInfo.name;
+			displayName = sf.parent.symtable.scopeInfo.name + " > " + sf.symtable.scopeInfo.name;
 		}
 
 		if (sf.symtable.scopeInfo.type == "function params") {
-			sf.symtable.scopeInfo.name = sf.symtable.scopeInfo.name + " > parameters";
+			displayName = sf.symtable.scopeInfo.name + " > parameters";
 		}
+
+		if(displayName == "") displayName = sf.symtable.scopeInfo.name;
 
 		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted);
 
@@ -910,7 +914,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 		const stackFrameRectangle = this.memviz.graph.insertVertex({
 			root,
 			position: [Memviz.sfX, sfY],
-			value: sf.symtable.scopeInfo.name,
+			value: displayName,
 			height: height,
 			width: width,
 			style: {
@@ -1000,17 +1004,17 @@ class MemVisualizerRow extends MemVisualizer {
 			},
 		});
 
-		/*if(!hf.empty()){
-			this.vizHeapFrame(hf);
+		if(!hf.empty()){
+			this.vizHeapFrame(hf, scrollableRectangle);
 		}
 
 		if(!df.empty()){
-			this.vizDataFrame(df);
+			this.vizDataFrame(df, scrollableRectangle);
 		}
 
 		for (const sf of this.memviz.callStack) {
-			this.vizStackFrame(sf);
-		}*/
+			this.vizStackFrame(sf, scrollableRectangle);
+		}
 
 		this.memviz.vizPointers();
 	}
@@ -1019,7 +1023,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 * Visualizes heap part of callstack
 	 * @function
 	 */
-	vizHeapFrame(hf) {
+	vizHeapFrame(hf, parent) {
 		for (const dataObject of hf.records) {
 			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfX, Memviz.sfY);
 		}
@@ -1029,7 +1033,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 * Visualizes data part (mostly strings) of callstack
 	 * @function
 	 */
-	vizDataFrame(df) {
+	vizDataFrame(df, parent) {
 		for (const dataObject of df.records) {
 			this.memviz.vizRecord(dataObject, this.memviz.root, Memviz.sfX, Memviz.sfY);
 		}
@@ -1043,7 +1047,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 * @param {Number} y Y coordinate to visualize the stack frame.
 	 * @returns {Number} newY Used to calculate the position of next stack frame.
 	 */
-	vizStackFrame(sf) {
+	vizStackFrame(sf, parent) {
 		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted);
 		for (const [_, record] of filteredObjects) {
 			this.memviz.vizRecord(record, this.memviz.root, Memviz.sfX, Memviz.sfY);
