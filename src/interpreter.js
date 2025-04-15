@@ -827,7 +827,11 @@ class Interpreter {
 				const value = this.memsim.readRecordValue(arg);
 				args.push(value);
 			}else{
-				args.push(this.evaluateExprArray(arg));
+				let value = this.evaluateExprArray(arg);
+				if(has(value, "address") && value.size.length == 0){
+					value = this.memsim.readRecordValue(value);
+				}
+				args.push(value);
 			}
 		}
 
