@@ -18,7 +18,7 @@ const mxg = window.mxg;
  * @param {mxg.Cell} cell
  */
 class VizCellValue {
-	constructor(address, cell) {
+	constructor(address, cell){
 		this.address = address;
 		this.cell = cell;
 	}
@@ -31,7 +31,7 @@ class VizCellValue {
  * @param {mxg.Cell} cell
  */
 class VizCellPointer {
-	constructor(address, cell) {
+	constructor(address, cell){
 		this.address = address;
 		this.cell = cell;
 	}
@@ -45,7 +45,7 @@ class VizCellPointer {
  * @param {VizCellValue} pointedTo
  */
 class VizPointerPair extends Pair {
-	constructor(from, to) {
+	constructor(from, to){
 		super(from, to);
 
 		// aliases for better clarity
@@ -104,7 +104,7 @@ class MemvizOptions {
  */
 class Memviz {
 
-	constructor(memsim, callStack, container, options) {
+	constructor(memsim, callStack, container, options){
 		if (!(container instanceof Element)) throw new AppError(`Container must be a HTML element!`);
 
 		this.memsim = memsim;
@@ -119,7 +119,7 @@ class Memviz {
 	 * Initializes all structures and sets graph options
 	 * @private
 	 */
-	#init() {
+	#init(){
 		this.container.innerHTML = ""; // init output
 		this.graph = new mxg.Graph(this.container);
 		this.root = this.graph.getDefaultParent();
@@ -132,7 +132,7 @@ class Memviz {
 	 * Sets graph options
 	 * @private
 	 */
-	#setGraphOptions() {
+	#setGraphOptions(){
 		this.graph.setEnabled(false);
 		this.graph.setHtmlLabels(true);
 		mxg.InternalEvent.disableContextMenu(this.container);
@@ -160,7 +160,7 @@ class Memviz {
 	 * Starts visualization. Outputs to container.
 	 * @public
 	 */
-	updateHTML() {
+	updateHTML(){
 		this.#setVisualizer(this.options);
 		if(this.#visualizer){
 			this.#visualizer.vizMemoryRecords();
@@ -201,7 +201,7 @@ class Memviz {
 	 * @returns {Number}
 	 * @static
 	 */
-	static get squareXYlen() {
+	static get squareXYlen(){
 		return 70;
 	}
 
@@ -210,7 +210,7 @@ class Memviz {
 	 * @returns {Number}
 	 * @static
 	 */
-	static get circleXYlen() {
+	static get circleXYlen(){
 		return 20;
 	}
 
@@ -219,7 +219,7 @@ class Memviz {
 	 * @returns {Number}
 	 * @static
 	 */
-	static get squareX() {
+	static get squareX(){
 		return 100;
 	}
 
@@ -228,7 +228,7 @@ class Memviz {
 	 * @returns {Number}
 	 * @static
 	 */
-	static get rowY() {
+	static get rowY(){
 		return 30;
 	}
 
@@ -237,7 +237,7 @@ class Memviz {
 	 * @returns {Number}
 	 * @static
 	 */
-	static get sfX() {
+	static get sfX(){
 		return 30;
 	}
 
@@ -246,7 +246,7 @@ class Memviz {
 	 * @returns {Number}
 	 * @static
 	 */
-	static get sfY() {
+	static get sfY(){
 		return 30;
 	}
 
@@ -255,7 +255,7 @@ class Memviz {
 	 * @returns {Number}
 	 * @static
 	 */
-	static get labelHeight() {
+	static get labelHeight(){
 		return Memviz.squareXYlen / 3;
 	}
 
@@ -264,7 +264,7 @@ class Memviz {
 	 * @returns {string}
 	 * @static
 	 */
-	static get fontFamily() {
+	static get fontFamily(){
 		return "FiraCode";
 	}
 
@@ -273,7 +273,7 @@ class Memviz {
 	 * @returns {string}
 	 * @static
 	 */
-	static get fontColor() {
+	static get fontColor(){
 		return "white";
 	}
 
@@ -291,7 +291,7 @@ class Memviz {
 	 * @returns {Object}
 	 * @static
 	 */
-	static get pointerStyle() {
+	static get pointerStyle(){
 		return {
 			fillColor: "white",
 			strokeColor: "white",
@@ -306,7 +306,7 @@ class Memviz {
 	 * @returns {Object}
 	 * @static
 	 */
-	static get labelAboveStyle() {
+	static get labelAboveStyle(){
 		return {
 			fillColor: "transparent",
 			strokeColor: "transparent",
@@ -331,7 +331,7 @@ class Memviz {
 	 * @returns {Object}
 	 * @static
 	 */
-	static get labelBelowStyle() {
+	static get labelBelowStyle(){
 		return {
 			fillColor: "transparent",
 			strokeColor: "transparent",
@@ -363,15 +363,15 @@ class Memviz {
 	 * @param {Number} x
 	 * @param {Number} y
 	 */
-	vizRecord(record, parent, x, y) {
-		if (!record.address) console.warn(record);
+	vizRecord(record, parent, x, y){
+		if(!record.address) console.warn(record);
 		const style = this.getStyleFromMEMREGION(this.memsim.getMemoryRegion(record.address));
 
-		if (record.size.length > 0) { // array
+		if(record.size.length > 0){ // array
 			return this.vizArrayValue(record, parent, style, x, y);
-		} else if (record.indirection > 0) { // pointer
+		}else if(record.indirection > 0){ // pointer
 			return this.vizPointerRecord(record, parent, style, x, y);
-		} else { // value
+		}else{ // value
 			if(record.memtype == DATATYPE.void){
 				const size = MEMSIZES[record.beingPointedToBy];
 				const len = record.memsize/size;
@@ -396,14 +396,14 @@ class Memviz {
 	 * @param {Number} x
 	 * @param {Number} y
 	 */
-	vizPrimitiveRecord(record, parent, style, x, y) {
+	vizPrimitiveRecord(record, parent, style, x, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 		const labelAbove = record.name ? record.name : "";
 		const labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
 		const ratioToInt = this.options.trueSizes ? MEMSIZES[DATATYPE.int]/record.memsize : 1;
 		const width = Memviz.squareXYlen/ratioToInt;
 		let value;
-		if (record.address) {
+		if(record.address){
 			value = this.memsim.readRecordValue(record);
 		}
 
@@ -426,7 +426,7 @@ class Memviz {
 	 * @param {Object} style
 	 * @param {Number} y
 	 */
-	vizPointerRecord(record, parent, style, x, y) {
+	vizPointerRecord(record, parent, style, x, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 		const labelAbove = record.name ? record.name : "";
 		const labelBelow = '*'.repeat(record.indirection) + record.specifiers.join(' ');
@@ -455,7 +455,7 @@ class Memviz {
 	 * @param {Object} style
 	 * @param {Number} y
 	 */
-	vizArrayValue(record, parent, style, x, y) {
+	vizArrayValue(record, parent, style, x, y){
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
 
 		let arrayValue;
@@ -470,7 +470,7 @@ class Memviz {
 		let totalWidth = 0;
 		arrayValue = arrayValue.flat(Infinity);
 		let n = 0;
-		for (let element of arrayValue) {
+		for(let element of arrayValue){
 			const last =  n == arrayValue.length - 1;
 			if (record.indirection > 0) {
 				let pointingTo = element;
@@ -538,7 +538,7 @@ class Memviz {
 	 * @param {integer} cellAddress
 	 * @param {integer|string} cellValue
 	 */
-	vizValueCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, cellAddress, cellValue) {
+	vizValueCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, cellAddress, cellValue){
 		const copyCellStyle = structuredClone(cellStyle);
 		if(cellValue === '\\0') copyCellStyle.fontSize = cellStyle.fontSize/1.5; // make strign terminator smaller
 		if(cellValue == undefined) cellValue = "";
@@ -583,7 +583,7 @@ class Memviz {
 	 * @param {integer} pointingFrom
 	 * @param {integer} pointingTo
 	 */
-	vizPointerCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, pointingFrom, pointingTo) {
+	vizPointerCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, pointingFrom, pointingTo){
 		const valueBox = this.graph.insertVertex({
 			parent: parent,
 			position: [x, y],
@@ -634,7 +634,7 @@ class Memviz {
 	 * @function
 	 * @public
 	 */
-	vizPointers() {
+	vizPointers(){
 		const root = this.root;
 		const lefts = [];
 		const rights = [];
@@ -725,7 +725,7 @@ class Memviz {
 	 * @param {MEMREGION} memregion
 	 * @return {Object} style Can be used while inserting vertex to the graph.
 	 */
-	getStyleFromMEMREGION(memregion) {
+	getStyleFromMEMREGION(memregion){
 		const fontSize = Memviz.fontSize;
 		const fontColor = Memviz.fontColor;
 		const fontFamily = Memviz.fontFamily;
@@ -838,7 +838,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 	 * Visualizes the whole call stack.
 	 * @function
 	 */
-	vizMemoryRecords() {
+	vizMemoryRecords(){
 		let nextY = 10;
 		const hf = this.memviz.callStack.hFrame;
 		const df = this.memviz.callStack.dFrame;
@@ -862,7 +862,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 	 * Visualizes heap part of callstack
 	 * @function
 	 */
-	vizHeapFrame(hf, y) {
+	vizHeapFrame(hf, y){
 		const nHorizontal = hf.records.length;
 		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
 		let sfY = y + Memviz.labelHeight + 10;
@@ -915,7 +915,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 	 * Visualizes data part (mostly strings) of callstack
 	 * @function
 	 */
-	vizDataFrame(df, y) {
+	vizDataFrame(df, y){
 		const nHorizontal = df.records.length;
 		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
 		let sfY = y + Memviz.labelHeight + 10;
@@ -972,7 +972,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 	 * @param {Number} y Y coordinate to visualize the stack frame.
 	 * @returns {Number} newY Used to calculate the position of next stack frame.
 	 */
-	vizStackFrame(sf, y) {
+	vizStackFrame(sf, y){
 		let displayName = "";
 		if (sf.emptyObjects() || sf.empty()) { // in case of no names in symtable
 			return y;
@@ -1032,7 +1032,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 		});
 
 		let nextY = 30; // first top padding
-		for (const [_, record] of filteredObjects) {
+		for(const [_, record] of filteredObjects){
 			const xy = this.memviz.vizRecord(record, stackFrameRectangle, Memviz.sfX, nextY);
 			nextY = xy.y;
 		}
@@ -1085,7 +1085,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 * Visualizes the whole call stack.
 	 * @function
 	 */
-	vizMemoryRecords() {
+	vizMemoryRecords(){
 		const rectHeight = MemVisualizerRow.memoryRowHeight;
 
 		const hf = this.memviz.callStack.hFrame;
@@ -1194,7 +1194,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 * Visualizes data part (mostly strings) of callstack
 	 * @function
 	 */
-	vizDataFrame(df, parent, x) {
+	vizDataFrame(df, parent, x){
 		let nextX = x;
 		for(const dataObject of df.records) {
 			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
@@ -1207,7 +1207,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 * Visualizes heap part of callstack
 	 * @function
 	 */
-	vizHeapFrame(hf, parent, x) {
+	vizHeapFrame(hf, parent, x){
 		let nextX = x;
 		for(const dataObject of hf.records){
 			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
