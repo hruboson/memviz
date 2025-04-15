@@ -1150,6 +1150,28 @@ class MemVisualizerRow extends MemVisualizer {
 			}
 		});
 
+		// move globals to dataframe and unitialized to bss, also check if there are any stacks
+		let empty = true;
+		for(const sf of this.memviz.callStack){
+			if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){
+				for(const [_, symbol] of sf.symtable.objects){
+					if(symbol.initialized && !symbol.isFunction && !symbol.isNative){
+						df.add(symbol);
+					}
+				}
+				continue;
+			}else{
+
+					console.log(sf);
+				for(const [_, sym] of sf.symtable.objects){
+					if (sym.interpreted) {
+						empty = false;
+						break;
+					}
+				}
+			}
+		}
+
 		let nextX = codeSegmentWidth;
 		if(!df.empty()){
 			const dataSegmentParent = this.memviz.graph.insertVertex({
@@ -1173,18 +1195,25 @@ class MemVisualizerRow extends MemVisualizer {
 			nextX += this.vizHeapFrame(hf, heapParent, 0);
 		}
 
-		const stackParent = this.memviz.graph.insertVertex({
-			parent: scrollableRectangle,
-			position: [nextX, 0],
-			height: rectHeight,
-			value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Stack</div>`,
-			style: MemVisualizerRow.memoryRowSegmentStyle, 
-		});
 
-		nextX = 0;
-		for(let i = this.memviz.callStack.sFrames.length - 1; i >= 0; i--){
-			const sf = this.memviz.callStack.sFrames[i];
-			nextX += this.vizStackFrame(sf, stackParent, nextX);
+		if(!empty){
+			const stackParent = this.memviz.graph.insertVertex({
+				parent: scrollableRectangle,
+				position: [nextX, 0],
+				height: rectHeight,
+				value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Stack</div>`,
+				style: MemVisualizerRow.memoryRowSegmentStyle, 
+			});
+
+
+			nextX = 0;
+			for(let i = this.memviz.callStack.sFrames.length - 1; i >= 0; i--){
+				const sf = this.memviz.callStack.sFrames[i];
+				if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){ // skip global frame
+					continue;
+				}
+				nextX += this.vizStackFrame(sf, stackParent, nextX);
+			}
 		}
 
 		this.memviz.vizPointers();
@@ -1226,7 +1255,6 @@ class MemVisualizerRow extends MemVisualizer {
 	vizStackFrame(sf, parent, x){
 		let nextX = x;
 		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted && sym.initialized);
-		console.log(filteredObjects);
 		for(const [_, record] of filteredObjects){
 			const xy = this.memviz.vizRecord(record, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
 			nextX = xy.x;
