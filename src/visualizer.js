@@ -1155,14 +1155,12 @@ class MemVisualizerRow extends MemVisualizer {
 		for(const sf of this.memviz.callStack){
 			if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){
 				for(const [_, symbol] of sf.symtable.objects){
-					if(symbol.initialized && !symbol.isFunction && !symbol.isNative){
+					if(symbol.initialized && !symbol.isFunction && !symbol.isNative && !df.records.includes(symbol)){
 						df.add(symbol);
 					}
 				}
 				continue;
 			}else{
-
-					console.log(sf);
 				for(const [_, sym] of sf.symtable.objects){
 					if (sym.interpreted) {
 						empty = false;
