@@ -103,6 +103,10 @@ class CallStack{
 	 */
 	#sFrames;
 
+	get sFrames(){
+		return this.#sFrames;
+	}
+
 	/**
 	 * Instance of Memsim, will be used to automatically free stack symbols
 	 * @type {Memsim}

@@ -278,6 +278,15 @@ class Memviz {
 	}
 
 	/**
+	 * Default font size.
+	 * @returns {integer}
+	 * @static
+	 */
+	static get fontSize(){
+		return 30;
+	}
+
+	/**
 	 * Pointer style
 	 * @returns {Object}
 	 * @static
@@ -483,7 +492,7 @@ class Memviz {
 				totalWidth += width;
 			} else {
 				const isChar = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar;
-				const value = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar ? CCharToJsString(element) : element;
+				const value = isChar ? CCharToJsString(element) : element;
 				const indices = flatIndexToDimensionalIndices(n, record.size);
 				const name = record.name ? record.name : ""
 				let labelAbove = name + indices.map(idx => `[${idx}]`).join('');
@@ -530,14 +539,15 @@ class Memviz {
 	 * @param {integer|string} cellValue
 	 */
 	vizValueCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, cellAddress, cellValue) {
-		if(cellValue == '\\0') cellStyle.fontSize = cellStyle.fontSize/1.5; // make strign terminator smaller
+		const copyCellStyle = structuredClone(cellStyle);
+		if(cellValue === '\\0') copyCellStyle.fontSize = cellStyle.fontSize/1.5; // make strign terminator smaller
 		if(cellValue == undefined) cellValue = "";
 		const valueBox = this.graph.insertVertex({
 			parent: parent,
 			position: [x, y],
 			size: [width, height],
 			value: cellValue,
-			style: cellStyle,
+			style: copyCellStyle,
 		});
 
 		const labelAboveCell = this.graph.insertVertex({
@@ -678,7 +688,7 @@ class Memviz {
 	 * @return {Object} style Can be used while inserting vertex to the graph.
 	 */
 	getStyleFromMEMREGION(memregion) {
-		const fontSize = 30;
+		const fontSize = Memviz.fontSize;
 		const fontColor = Memviz.fontColor;
 		const fontFamily = Memviz.fontFamily;
 
@@ -844,7 +854,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 				shape: "rectangle",
 
 				// font style
-				fontSize: 14,
+				fontSize: Memviz.fontSize,
 				fontColor: Memviz.fontColor,
 
 				fontFamily: Memviz.fontFamily,
@@ -896,7 +906,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 				shape: "rectangle",
 
 				// font style
-				fontSize: 14,
+				fontSize: Memviz.fontSize,
 				fontColor: Memviz.fontColor,
 
 				fontFamily: Memviz.fontFamily,
@@ -973,7 +983,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 				shape: "rectangle",
 
 				// font style
-				fontSize: 14,
+				fontSize: Memviz.fontSize,
 				fontColor: Memviz.fontColor,
 
 				fontFamily: Memviz.fontFamily,
@@ -1024,7 +1034,30 @@ class MemVisualizerRow extends MemVisualizer {
 	}
 
 	static get memoryRowHeight(){
-		return 300;
+		return 200;
+	}
+
+	static get memoryRowSegmentStyle(){
+		return {
+			// label style
+			labelPosition: "left",
+			verticalAlign: "bottom",
+			verticalLabelPosition: "top",
+			spacingBottom: 5,
+			align: "right",
+
+			// 
+			fillColor: "transparent",
+			strokeColor: "grey",
+			shape: "rectangle",
+			dashed: true,
+			dashPattern: "5 3", // 5px dash, 3px gap
+
+			// fonts
+			fontSize: 11,
+			fontColor: Memviz.fontColor,
+			fontFamily: Memviz.fontFamily,
+		};
 	}
 
 	/**
@@ -1040,15 +1073,17 @@ class MemVisualizerRow extends MemVisualizer {
 		// calculate center y from container height
 		const graphContainer = this.memviz.graph.container;
 		const containerHeight = graphContainer.clientHeight;
+		const containerWidth = graphContainer.clientWidth;
 		const y = (containerHeight - rectHeight) / 2;
+		const x = Memviz.sfX + 100;
 
 		const root = this.memviz.root;
 		const scrollableRectangle = this.memviz.graph.insertVertex({
 			root,
-			position: [Memviz.sfX, y],
-			value: `<div style="transform: rotate(45deg); transform-origin: center; white-space: nowrap;">main</div>`,
+			position: [x, y],
+			value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Application memory</div>`,
 			height: rectHeight,
-			width: 100,
+			width: containerWidth-50-x,
 			style: {
 				// label style
 				labelPosition: "left",
@@ -1069,20 +1104,82 @@ class MemVisualizerRow extends MemVisualizer {
 			},
 		});
 
-		let nextX = Memviz.sfX;
+		const codeSegmentWidth = 50;
+		const codeSegmentParent = this.memviz.graph.insertVertex({
+			parent: scrollableRectangle,
+			position: [0, 0],
+			height: rectHeight,
+			width: codeSegmentWidth,
+			style: MemVisualizerRow.memoryRowSegmentStyle,
+		});
+
+		const codeSegmentSquare = this.memviz.graph.insertVertex({
+			parent: codeSegmentParent,
+			position: [0, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2)],
+			height: Memviz.squareXYlen,
+			width: codeSegmentWidth,
+			value: `<div style="transform: rotate(45deg); transform-origin: center; white-space: nowrap;">Code segment</div>`,
+			style: {
+				fillColor: "grey",
+				strokeColor: "grey",
+				shape: "rectangle",
+				fontSize: 9,
+				fontColor: Memviz.fontColor,
+				fontFamily: Memviz.fontFamily,
+			}
+		});
+
+		let nextX = codeSegmentWidth;
 		if(!df.empty()){
-			nextX = this.vizDataFrame(df, scrollableRectangle, nextX);
+			const dataSegmentParent = this.memviz.graph.insertVertex({
+				parent: scrollableRectangle,
+				position: [nextX, 0],
+				height: rectHeight,
+				value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Data</div>`,
+				style: MemVisualizerRow.memoryRowSegmentStyle, 
+			});
+			nextX += this.vizDataFrame(df, dataSegmentParent, 0);
 		}
 
 		if(!hf.empty()){
-			nextX = this.vizHeapFrame(hf, scrollableRectangle, nextX);
+			const heapParent = this.memviz.graph.insertVertex({
+				parent: scrollableRectangle,
+				position: [nextX, 0],
+				height: rectHeight,
+				value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Heap</div>`,
+				style: MemVisualizerRow.memoryRowSegmentStyle, 
+			});
+			nextX += this.vizHeapFrame(hf, heapParent, 0);
 		}
 
-		for(const sf of this.memviz.callStack){
-			nextX = this.vizStackFrame(sf, scrollableRectangle, nextX);
+		const stackParent = this.memviz.graph.insertVertex({
+			parent: scrollableRectangle,
+			position: [nextX, 0],
+			height: rectHeight,
+			value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Stack</div>`,
+			style: MemVisualizerRow.memoryRowSegmentStyle, 
+		});
+
+		nextX = 0;
+		for(let i = this.memviz.callStack.sFrames.length - 1; i >= 0; i--){
+			const sf = this.memviz.callStack.sFrames[i];
+			nextX += this.vizStackFrame(sf, stackParent, nextX);
 		}
 
 		this.memviz.vizPointers();
+	}
+
+	/**
+	 * Visualizes data part (mostly strings) of callstack
+	 * @function
+	 */
+	vizDataFrame(df, parent, x) {
+		let nextX = x;
+		for(const dataObject of df.records) {
+			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
+			nextX = xy.x;
+		}
+		return nextX;
 	}
 
 	/**
@@ -1099,20 +1196,6 @@ class MemVisualizerRow extends MemVisualizer {
 	}
 
 	/**
-	 * Visualizes data part (mostly strings) of callstack
-	 * @function
-	 */
-	vizDataFrame(df, parent, x) {
-		let nextX = x;
-		for(const dataObject of df.records) {
-			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
-			nextX = xy.x;
-		}
-		return nextX;
-	}
-
-
-	/**
 	 * Visualizes one stack frame.
 	 * @function
 	 * @param {StackFrame} sf
@@ -1121,7 +1204,8 @@ class MemVisualizerRow extends MemVisualizer {
 	 */
 	vizStackFrame(sf, parent, x){
 		let nextX = x;
-		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted);
+		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted && sym.initialized);
+		console.log(filteredObjects);
 		for(const [_, record] of filteredObjects){
 			const xy = this.memviz.vizRecord(record, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
 			nextX = xy.x;
