@@ -1126,7 +1126,8 @@ class Memsim {
 		let dump = `Addr | Hex Addr | Binary   | Hex | Decimal | Region\n`;
 		dump += "-".repeat(addrWidth + hexAddrWidth + valueWidth + hexValueWidth + regionWidth + 13) + "\n";
 
-		this.memory.forEach((data, addr) => {
+		const sortedByAdress = [...this.memory.entries()].sort(([a], [b]) => a + b);
+		for (const [addr, data] of sortedByAdress) {
 			let hexAddr = "0x" + addr.toString(16).toUpperCase().padStart(4, '0');
 			let binValue = data.value != undefined ? data.value.toString(2).padStart(valueWidth, '0') : " ".repeat(valueWidth);
 			let hexValue = data.value != undefined ? "0x" + data.value.toString(16).toUpperCase().padStart(2, '0') : " ".repeat(hexValueWidth);
@@ -1135,7 +1136,7 @@ class Memsim {
 
 			// add the row with padding
 			dump += addr.toString().padEnd(addrWidth, ' ') + " | " + hexAddr + " | " + binValue + " | " + hexValue + " | " + decValue + " | "  + region + "\n";
-		});
+		};
 
 		return dump;
 	}
