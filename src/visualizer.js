@@ -1104,7 +1104,7 @@ class MemVisualizerRow extends MemVisualizer {
 			position: [x, y],
 			value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Application memory</div>`,
 			height: rectHeight,
-			width: containerWidth-50-x,
+			/*width: containerWidth-50-x,*/
 			style: {
 				// label style
 				labelPosition: "left",
@@ -1252,7 +1252,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 */
 	vizStackFrame(sf, parent, x){
 		let nextX = x;
-		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted && sym.initialized);
+		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted && sym.initialized).reverse();
 		for(const [_, record] of filteredObjects){
 			const xy = this.memviz.vizRecord(record, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
 			nextX = xy.x;
