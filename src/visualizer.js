@@ -1210,7 +1210,7 @@ class MemVisualizerRow extends MemVisualizer {
 				if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){ // skip global frame
 					continue;
 				}
-				nextX += this.vizStackFrame(sf, stackParent, nextX);
+				nextX = this.vizStackFrame(sf, stackParent, nextX);
 			}
 		}
 
@@ -1252,7 +1252,7 @@ class MemVisualizerRow extends MemVisualizer {
 	 */
 	vizStackFrame(sf, parent, x){
 		let nextX = x;
-		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted && sym.initialized).reverse();
+		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted).reverse();
 		for(const [_, record] of filteredObjects){
 			const xy = this.memviz.vizRecord(record, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
 			nextX = xy.x;
