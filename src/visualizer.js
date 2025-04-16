@@ -666,7 +666,6 @@ class Memviz {
 		let pairNo = 0;
 
 		for (let pair of this.pointerPairs) {
-			console.log(pairNo);
 			// first determine where to point
 			const targetCellValue = this.symbols.get(pair.to.address);
 			if (!targetCellValue) { console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); return; };
