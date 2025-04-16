@@ -396,7 +396,11 @@ class Interpreter {
 			rval = this.memsim.readRecordValue(rval); // get the value
 		}
 
-		const newMemregion = record.memregion == MEMREGION.BSS ? MEMREGION.STACK : record.memregion;
+		let newMemregion = record.memregion;
+		if(record.memregion == MEMREGION.BSS){
+			newMemregion = MEMREGION.STACK;
+			record.address = null;
+		}
 
 		// concrete operations
 		switch(expr.op){
