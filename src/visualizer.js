@@ -1023,9 +1023,6 @@ class MemVisualizerSemantic extends MemVisualizer {
 
 		const filteredObjects = Array.from(sf.symtable.objects.entries()).filter(([_, sym]) => sym.type !== "FNC" && sym.interpreted);
 
-		//TODO determine nVertical from largest array size
-		const nHorizontal = 3;
-
 		let height = (Memviz.squareXYlen + Memviz.labelHeight);
 		if (filteredObjects.length > 0) {
 			height += 20; // inner padding for each row inside sf
@@ -1033,7 +1030,7 @@ class MemVisualizerSemantic extends MemVisualizer {
 		}
 		height += 20; // bottom padding
 
-		const width = (Memviz.squareXYlen * 1.6 + Memviz.squareX) * nHorizontal; // 1.6 is perfect for centering (same inner padding on both sides), 0 for auto height
+		const width = (Memviz.squareXYlen + Memviz.squareX/1.5); // 1.5 is perfect for centering (same inner padding on both sides), 0 for auto height
 
 		let sfY = y + Memviz.labelHeight + 10;
 
