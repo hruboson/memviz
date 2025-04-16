@@ -1308,8 +1308,10 @@ class Interpreter {
 	visitFree(free, arg){
 		let addressToFree;
 		const expr = this.evaluateExprArray(arg);
-		
+
+		addressToFree = expr;
 		if(has(expr, "address")) addressToFree = this.memsim.readRecordValue(expr);
+		if(isclass(expr, "PointerValue")) addressToFree = expr.value;
 
 		const memoryToFree = this.#callStack.findMemoryRecord(addressToFree);
 		this.memsim.free(addressToFree, memoryToFree.memsize);
