@@ -1072,13 +1072,34 @@ class MemVisualizerRow extends MemVisualizer {
 			strokeColor: "grey",
 			shape: "rectangle",
 			dashed: true,
-			dashPattern: "5 3", // 5px dash, 3px gap
+			dashPattern: "3 7", // 3px dash, 7px gap
 
 			// fonts
 			fontSize: 11,
 			fontColor: Memviz.fontColor,
 			fontFamily: Memviz.fontFamily,
 		};
+	}
+
+	vizDivider(parent, x, y, width, height){
+		const stripedRectangle = this.memviz.graph.insertVertex({
+			parent,
+			position: [x, y],
+			width: width,
+			height: height,
+			style: {
+				shape: "image",
+				image: "img/diagonal-stripes.svg",
+				imageAlign: "center",
+
+				imageAspect: "true",
+				strokeColor: "none",
+				flipH: false,
+				flipV: false
+			},
+		});
+
+		return {x: x+width, y: y+height};
 	}
 
 	/**
@@ -1096,13 +1117,13 @@ class MemVisualizerRow extends MemVisualizer {
 		const containerHeight = graphContainer.clientHeight;
 		const containerWidth = graphContainer.clientWidth;
 		const y = (containerHeight - rectHeight) / 2;
-		const x = Memviz.sfX + 100;
+		const x = Memviz.sfX;
 
 		const root = this.memviz.root;
 		const scrollableRectangle = this.memviz.graph.insertVertex({
 			root,
 			position: [x, y],
-			value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Application memory</div>`,
+			//value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Application memory</div>`,
 			height: rectHeight,
 			/*width: containerWidth-50-x,*/
 			style: {
@@ -1125,33 +1146,8 @@ class MemVisualizerRow extends MemVisualizer {
 			},
 		});
 
-		const codeSegmentWidth = 50;
-		const codeSegmentParent = this.memviz.graph.insertVertex({
-			parent: scrollableRectangle,
-			position: [0, 0],
-			height: rectHeight,
-			width: codeSegmentWidth,
-			style: MemVisualizerRow.memoryRowSegmentStyle,
-		});
-
-		const codeSegmentSquare = this.memviz.graph.insertVertex({
-			parent: codeSegmentParent,
-			position: [0, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2)],
-			height: Memviz.squareXYlen,
-			width: codeSegmentWidth,
-			value: `<div style="transform: rotate(45deg); transform-origin: center; white-space: nowrap;">Code segment</div>`,
-			style: {
-				fillColor: "grey",
-				strokeColor: "grey",
-				shape: "rectangle",
-				fontSize: 9,
-				fontColor: Memviz.fontColor,
-				fontFamily: Memviz.fontFamily,
-			}
-		});
-
 		// move globals to dataframe and unitialized to bss, also check if there are any stacks
-		let empty = true;
+		let stackEmpty = true;
 		for(const sf of this.memviz.callStack){
 			if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){
 				for(const [_, symbol] of sf.symtable.objects){
@@ -1163,38 +1159,71 @@ class MemVisualizerRow extends MemVisualizer {
 			}else{
 				for(const [_, sym] of sf.symtable.objects){
 					if (sym.interpreted) {
-						empty = false;
+						stackEmpty = false;
 						break;
 					}
 				}
 			}
 		}
 
-		let nextX = codeSegmentWidth;
+		let nextX = 0;
+
+		const codeSegmentWidth = 70;
+		if(!df.empty() || !hf.empty() || !stackEmpty){
+			const firstDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
+			nextX = firstDivXY.x;
+			const codeSegmentParent = this.memviz.graph.insertVertex({
+				parent: scrollableRectangle,
+				value: `<div style="transform: rotate(90deg); transform-origin: center; white-space: nowrap;">Code segment</div>`,
+				position: [nextX, 0],
+				height: rectHeight,
+				width: codeSegmentWidth,
+				style: {
+					fillColor: "grey",
+					strokeColor: "grey",
+					shape: "rectangle",
+					fontSize: 12,
+					fontColor: Memviz.fontColor,
+					fontFamily: Memviz.fontFamily,
+				},
+			});
+			nextX += codeSegmentWidth;
+			const secondDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
+			nextX = secondDivXY.x;
+		}
+
 		if(!df.empty()){
+			const dfStyle = MemVisualizerRow.memoryRowSegmentStyle;
+			dfStyle.dashed = false;
 			const dataSegmentParent = this.memviz.graph.insertVertex({
 				parent: scrollableRectangle,
 				position: [nextX, 0],
 				height: rectHeight,
 				value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Data</div>`,
-				style: MemVisualizerRow.memoryRowSegmentStyle, 
+				style: dfStyle, 
 			});
 			nextX += this.vizDataFrame(df, dataSegmentParent, 0);
 		}
 
+		if(!df.empty() || !hf.empty() || !stackEmpty){
+			const thirdDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
+			nextX = thirdDivXY.x;
+		}
+
 		if(!hf.empty()){
+			const hfStyle = MemVisualizerRow.memoryRowSegmentStyle;
 			const heapParent = this.memviz.graph.insertVertex({
 				parent: scrollableRectangle,
 				position: [nextX, 0],
 				height: rectHeight,
 				value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">Heap</div>`,
-				style: MemVisualizerRow.memoryRowSegmentStyle, 
+				style: hfStyle, 
 			});
 			nextX += this.vizHeapFrame(hf, heapParent, 0);
 		}
 
 
-		if(!empty){
+		if(!stackEmpty){
 			const stackParent = this.memviz.graph.insertVertex({
 				parent: scrollableRectangle,
 				position: [nextX, 0],
