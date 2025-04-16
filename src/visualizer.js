@@ -286,6 +286,10 @@ class Memviz {
 		return 30;
 	}
 
+	static get smallestFontSize(){
+		return 7;
+	}
+
 	/**
 	 * Pointer style
 	 * @returns {Object}
@@ -539,7 +543,30 @@ class Memviz {
 	 * @param {integer|string} cellValue
 	 */
 	vizValueCell(parent, x, y, width, height, labelAbove, labelBelow, cellStyle, cellAddress, cellValue){
+		//Scale text size based on how many digits there are in the value and the width of the cell
+		const baseFontSize = cellStyle.fontSize || 14;
+		let adjustedFontSize = baseFontSize;
+
+		if(cellValue != undefined && cellValue != null){
+			const strValue = cellValue.toString();
+			const charCount = strValue.length;
+
+			// estimate character width (approx. 0.6em per character for many fonts)
+			const approxCharWidth = 0.6 * baseFontSize;
+			const totalTextWidth = charCount * approxCharWidth;
+
+			// inside padding
+			const availableWidth = width * 0.9;
+
+			if (totalTextWidth > availableWidth) {
+				const scaleFactor = availableWidth / totalTextWidth;
+				adjustedFontSize = Math.max(Memviz.smallestFontSize, baseFontSize * scaleFactor); // smallest possible font size is 7
+			}
+		}
+
 		const copyCellStyle = structuredClone(cellStyle);
+		copyCellStyle.fontSize = adjustedFontSize;
+
 		if(cellValue === '\\0') copyCellStyle.fontSize = cellStyle.fontSize/1.5; // make strign terminator smaller
 		if(cellValue == undefined) cellValue = "";
 		const valueBox = this.graph.insertVertex({
