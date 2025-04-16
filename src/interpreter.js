@@ -1388,8 +1388,8 @@ class Interpreter {
 	 * @param {Object|integer|string} result Result of main
 	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
-	updateHTML(result, vizOptions){
-		const resultDiv = document.getElementById("result");
+	updateHTML(result, resultElement, vizElement, vizOptions){
+		const resultDiv = resultElement;
 
 		// reset result element
 		resultDiv.innerHTML = "";
@@ -1425,7 +1425,7 @@ class Interpreter {
 		}
 
 		// memory visualization
-		this.memviz = new Memviz(this.memsim, this.#callStack, document.getElementById("output"), vizOptions); // TODO pass the element id as string parameter for interpreter
+		this.memviz = new Memviz(this.memsim, this.#callStack, vizElement, vizOptions); // TODO pass the element id as string parameter for interpreter
 		this.memviz.updateHTML();
 
 		// other elements

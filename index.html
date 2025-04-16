@@ -265,10 +265,10 @@
     return 0;
 }</div>
 					</div>
-					<div id="split-output" style="overflow: scroll;">
+					<div id="split-output">
 						<pre id="warnings" class="bg-warning text-black rounded p-3 m-3 hide-if-empty"></pre>
 						<pre id="result" class="rounded p-3 m-3 hide-if-empty"></pre>
-						<pre id="output" style="height: 100%"></pre>
+						<pre id="output" style="height: 99.99%"></pre>
 						<script>
 							const scrollContainer = document.getElementById('output');
 
@@ -680,7 +680,7 @@ Split(["#split-ve", "#split-console"], {
 			const memVizShowTrueSizes = document.getElementById("visualizationTrueSizes").value == "true" ? true : false;
 
 			const memVizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
-			interpreter.updateHTML(null, memVizOptions);
+			interpreter.updateHTML(null, document.getElementById("result"), document.getElementById("output"), memVizOptions);
 		}
 	}
 
@@ -748,7 +748,7 @@ Split(["#split-ve", "#split-console"], {
 			console.info("Main result: ", result);
 
 			const vizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
-			interpreter.updateHTML(result, vizOptions);
+			interpreter.updateHTML(result, document.getElementById("result"), document.getElementById("output"), vizOptions);
 		}catch(e){
 			console.error(e);
 		}
