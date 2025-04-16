@@ -1203,9 +1203,6 @@ class MemVisualizerRow extends MemVisualizer {
 				style: dfStyle, 
 			});
 			nextX += this.vizDataFrame(df, dataSegmentParent, 0);
-		}
-
-		if(!df.empty() || !hf.empty() || !stackEmpty){
 			const thirdDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
 			nextX = thirdDivXY.x;
 		}
