@@ -269,6 +269,17 @@
 						<pre id="warnings" class="bg-warning text-black rounded p-3 m-3 hide-if-empty"></pre>
 						<pre id="result" class="rounded p-3 m-3 hide-if-empty"></pre>
 						<pre id="output" style="height: 100%"></pre>
+						<script>
+							const scrollContainer = document.getElementById('output');
+
+							// default to horizontal scrolling if available
+							scrollContainer.addEventListener('wheel', function (e){
+								if(scrollContainer.scrollWidth > scrollContainer.clientWidth){
+									e.preventDefault();
+									scrollContainer.scrollLeft += e.deltaY;
+								}
+							}, { passive: false });
+						</script>
 					</div>
 				</div>
 			</div>
