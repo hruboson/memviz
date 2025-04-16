@@ -771,7 +771,6 @@ class Interpreter {
     visitEnum(enumerator){
 	}
 
-	//TODO FNC is not popping sfParams properly in some cases, no clue why (see the quadratic equation example)
 	visitFnc(fnc, args){
 		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 
