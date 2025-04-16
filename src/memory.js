@@ -551,10 +551,12 @@ class Memsim {
 
 	readVoidValue(size, address){
 		const bytes = [];
+		let undef = true;
 		for(let i = 0; i < size; i++){
 			bytes.push(this.readUCharValue(address+i));
-			if(bytes[i] == undefined) return undefined;
+			if(bytes[i] != undefined) undef = false;
 		}
+		if(undef) return undefined;
 
 		let number = 0;
 		for(let i = 0; i < size; i++){
