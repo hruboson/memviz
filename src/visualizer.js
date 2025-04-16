@@ -636,9 +636,10 @@ class Memviz {
 	 */
 	vizPointers(){
 		const root = this.root;
-		const lefts = [];
-		const rights = [];
+		let pairNo = 0;
+
 		for (let pair of this.pointerPairs) {
+			console.log(pairNo);
 			// first determine where to point
 			const targetCellValue = this.symbols.get(pair.to.address);
 			if (!targetCellValue) { console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); return; };
@@ -660,33 +661,14 @@ class Memviz {
 					},
 				});
 			}else if(this.edgeStyle == "rowEdgeStyle"){
-				/**
-				 * Function defining new edge style for the mxg library
-				 */
-				const RowEdgeStyle = (state, source, target, points, result) => {
-					// creates two points - one above source and one above target, these act as anchors, so the edge must go through them - todo: calculate height based on how many pointers there are
-					if (source && target) {
-						const ptSource = new mxg.Point();
-						const ptTarget = new mxg.Point();
-
-						ptSource.x = source.x + 10;
-						ptSource.y = source.y - 50;
-
-						ptTarget.x = target.x;
-						ptTarget.y = target.y - 25;
-
-						result.push(ptSource);
-						result.push(ptTarget);
-					}
-				};
-
-				mxg.StyleRegistry.putValue("rowEdgeStyle", RowEdgeStyle); // register style with library
+				const styleName = `rowEdgeStyle${pairNo}`;
+				mxg.StyleRegistry.putValue(styleName, this.createRowEdgeStyle(pairNo));
 				const edge = this.graph.insertEdge({
 					parent: root,
 					source: pair.from.cell,
 					target: pair.to.cell,
 					style: {
-						edgeStyle: "rowEdgeStyle",
+						edgeStyle: styleName,
 						strokeColor: "white",
 						rounded: false,
 						entryX: 0, // Left side of value vertex
@@ -712,6 +694,7 @@ class Memviz {
 				});
 			}
 
+			pairNo++;
 			this.graph.refresh();
 		}
 	}
@@ -719,6 +702,30 @@ class Memviz {
 	/********************
 	 * HELPER FUNCTIONS *
 	 ********************/
+
+	/**
+	 * Function generator. Generates different functions depending on the pairNo parameter
+	 * @function
+	 * @public
+	 */
+	createRowEdgeStyle(pairNo){
+		return (state, source, target, points, result) => {
+			// creates two points - one above source and one above target, these act as anchors, so the edge must go through them - todo: calculate height based on how many pointers there are
+			if (source && target) {
+				const ptSource = new mxg.Point();
+				const ptTarget = new mxg.Point();
+
+				ptSource.x = source.x + 10;
+				ptSource.y = source.y - 50 - pairNo*5;
+
+				ptTarget.x = target.x;
+				ptTarget.y = target.y - 25 - pairNo*5;
+
+				result.push(ptSource);
+				result.push(ptTarget);
+			}
+		}
+	};
 
 	/**
 	 * Returns style based on memregion.
@@ -1229,15 +1236,18 @@ class MemVisualizerRow extends MemVisualizer {
 				style: MemVisualizerRow.memoryRowSegmentStyle, 
 			});
 
-
-			nextX = 0;
+			let stackX = 0;
 			for(let i = this.memviz.callStack.sFrames.length - 1; i >= 0; i--){
 				const sf = this.memviz.callStack.sFrames[i];
 				if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){ // skip global frame
 					continue;
 				}
-				nextX = this.vizStackFrame(sf, stackParent, nextX);
+				stackX = this.vizStackFrame(sf, stackParent, stackX);
 			}
+
+			nextX += stackX;
+			const thirdDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
+			nextX = thirdDivXY.x;
 		}
 
 		this.memviz.vizPointers();
