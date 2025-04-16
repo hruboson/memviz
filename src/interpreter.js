@@ -399,6 +399,7 @@ class Interpreter {
 		let newMemregion = record.memregion;
 		if(record.memregion == MEMREGION.BSS){
 			newMemregion = MEMREGION.STACK;
+			this.memsim.free(record.address, record.memsize);
 			record.address = null;
 		}
 
