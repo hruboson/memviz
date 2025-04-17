@@ -1223,7 +1223,6 @@ class MemVisualizerRow extends MemVisualizer {
 		// move globals to dataframe and unitialized to bss, also check if there are any stacks, also move uninitialized variables to bss frame
 		let stackEmpty = true;
 		for(const sf of this.memviz.callStack){
-			console.log(sf.symtable.objects);
 			if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){
 				for(const [_, symbol] of sf.symtable.objects){
 					if(symbol.initialized && !symbol.isFunction && !symbol.isNative && !df.records.includes(symbol)){

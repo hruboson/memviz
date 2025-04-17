@@ -741,7 +741,7 @@ Split(["#split-ve", "#split-console"], {
 				if(flag != EXEOPT.COMPILE){
 					result = interpreter.compile(input);
 				}
-				if(!result instanceof Error){
+				if(!(result instanceof Error)){
 					result = interpreter.interpret(breakEditor);
 				}
 			}
