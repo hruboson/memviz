@@ -321,32 +321,18 @@ class Semantic {
 	}
 
 	visitBArithExpr(expr){
-		let lval;
-		let rval;
-
-		if(expr.left.length){
-			for(const subexpr of expr.left){
-				lval = subexpr.accept(this);
-			}
-		}else{
-			lval = expr.left.accept(this);
-		}
-
-		if(expr.right.length){
-			for(const subexpr of expr.right){
-				rval = subexpr.accept(this);
-			}
-		}else{
-			rval = expr.right.accept(this);
-		}
+		let rval = this.evaluateExprArray(expr.right);
+		let lval = this.evaluateExprArray(expr.left);
 	}
 
     visitBCompExpr(expr){
-
+		let rval = this.evaluateExprArray(expr.right);
+		let lval = this.evaluateExprArray(expr.left);
 	}
 
     visitBLogicExpr(expr){
-
+		let rval = this.evaluateExprArray(expr.right);
+		let lval = this.evaluateExprArray(expr.left);
 	}
 
 	visitBreak(br){
@@ -354,7 +340,7 @@ class Semantic {
 	}
 
     visitCastExpr(expr){
-		return expr.expr.accept(this);
+		return this.evaluateExprArray(expr.expr);
 	}
 
 	visitCExpr(expr){
@@ -632,7 +618,6 @@ class Semantic {
 		return symbol;
 	}
 
-	// TODO ELSE IF
 	visitIfStmt(stmt){
 		if(Array.isArray(stmt.expr)){
 			for(const subexpr of stmt.expr){
