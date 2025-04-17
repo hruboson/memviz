@@ -553,8 +553,12 @@ class Semantic {
 		}
 
 		// type checking
-		for(let [arg, param] of fncCall.arguments.map((el, i) => [el, fncSym.parameters])){
-			this.typeCheck(this.getParameterType(param), arg);
+		for(let [arg, param] of fncCall.arguments.map((arg, i) => [arg, fncSym.parameters[i]])){
+			try{
+				this.typeCheck(this.getParameterType(param), arg);
+			}catch(e){
+				throw e;
+			}
 		}
 
 		this.calledFunctions.push(fncSym);
@@ -940,9 +944,9 @@ class Semantic {
 	 * @param {Declarator} declarator
 	 * @return {string} specifiers
 	 */
-	getParameterType(declarator){
+	getParameterType(declaration){
 		// not sure but for params it should not be longer than 1
-		return declarator[0].type.specifiers;
+		return declaration.type.specifiers;
 	}
 
 	/**
@@ -952,12 +956,12 @@ class Semantic {
 	 * @throws {Error} Throws an error if there is a type mismatch
 	 */
 	typeCheck(specifiers, expression) {
-		// Determine the expression type
+		// determine the expression type
 		let declType = this.normalizeType(specifiers);
 		let exprType = this.inferType(expression);
 
-		// Check if the types match
-		if (declType != exprType) {
+		// check if the types match
+		if(!this.typesAreCompatible(declType, exprType)){
 			throw new SError(`Type mismatch: expected ${declType}, but got ${exprType}`, expression.loc);
 		}
 	}
@@ -967,15 +971,25 @@ class Semantic {
 	 * @param {Array<string>} specifiers
 	 * @return {Arr}
 	 */
-	normalizeType(specifiers) {
-		// omit signed (as it is default)
-		let filteredSpecifiers = specifiers.includes("signed")
-        ? specifiers.filter(s => s != "signed")
-        : specifiers;
+	normalizeType(specifiers){
+		let specs = [...specifiers];
 
-		// sort specifiers for consistency
-		return filteredSpecifiers.sort().join(" ");
+		// Remove "signed" (default) and redundant qualifiers
+		specs = specs.filter(s => s !== "signed");
+
+		// Unify basic types
+		if(specs.includes("_Bool") || specs.includes("char")){
+			return "int";  // char and _Bool behave as int in expressions
+		}
+
+		// Handle floating points
+		if(specs.includes("float")) return "float";
+		if(specs.includes("double")) return "double";
+
+		// Default: sort specifiers alphabetically for consistency
+		return specs.sort().join(" ");
 	}
+
 
 	/**
 	 * Infers the type of an expression.
@@ -993,16 +1007,33 @@ class Semantic {
 					return "int";  // Default to int
 				case "f_constant":
 					if(expression.value.endsWith("f") || expression.value.endsWith("F")) return "float";
-					return "double";  // Default to double
+					return "float";  // Default to double
 				default:
 					throw new AppError(`Unknown expression type: ${expression.type}`);
 			}
 		}else if(expression.cType == "Identifier"){
-			//TODO check variable type
+			return this.symtableStack.top().resolve(expression.name).specifiers;
+		}else{
+			//TODO other expressions
 			return "int";
 		}
+	}
 
-		console.error(expression);
-		throw new AppError(`Invalid expression structure`, expression.loc);
+	/**
+	 * Compares two normalized types for compatibility.
+	 * @param {string} declType
+	 * @param {string} exprType
+	 * @return {boolean}
+	 */
+	typesAreCompatible(declType, exprType) {
+		if (declType == exprType) return true;
+
+		const intTypes = ["int", "long", "long long", "short", "char", "_Bool"];
+		if (intTypes.includes(declType) && intTypes.includes(exprType)) return true;
+
+		const floatTypes = ["float", "double"];
+		if (floatTypes.includes(declType) && floatTypes.includes(exprType)) return true;
+
+		return false;
 	}
 }
