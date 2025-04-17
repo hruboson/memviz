@@ -663,13 +663,34 @@ class Memviz {
 	 */
 	vizPointers(){
 		const root = this.root;
-		let pairNo = 0;
+		let pairsXcoords = [];
 
 		for (let pair of this.pointerPairs) {
 			// first determine where to point
 			const targetCellValue = this.symbols.get(pair.to.address);
 			if (!targetCellValue) { console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); return; };
 			pair.to.cell = targetCellValue.cell;
+
+			// get x coordinates from global perspective
+			const fromCellGlobal = this.graph.view.getState(pair.from.cell);
+			const toCellGlobal = this.graph.view.getState(targetCellValue.cell);
+
+			// count overlaps of already existing edges
+			let overlapCount = 0;
+			for(const existingPair of pairsXcoords){
+				const newStart = Math.min(fromCellGlobal.x, toCellGlobal.x);
+				const newEnd = Math.max(fromCellGlobal.x, toCellGlobal.x);
+				const existingStart = Math.min(existingPair.first, existingPair.second);
+				const existingEnd = Math.max(existingPair.first, existingPair.second);
+
+				const overlap = !(newEnd < existingStart || newStart > existingEnd);
+				if(overlap){
+					overlapCount++;
+				}
+			}
+
+			// add edge to existing edges
+			pairsXcoords.push(new Pair(fromCellGlobal.x, toCellGlobal.x));
 
 			if(this.edgeStyle == "visualizerEdgeStyle"){ // custom edge found
 				const edge = this.graph.insertEdge({
@@ -687,8 +708,8 @@ class Memviz {
 					},
 				});
 			}else if(this.edgeStyle == "rowEdgeStyle"){
-				const styleName = `rowEdgeStyle${pairNo}`;
-				mxg.StyleRegistry.putValue(styleName, this.createRowEdgeStyle(pairNo));
+				const styleName = `rowEdgeStyle${overlapCount+1}`;
+				mxg.StyleRegistry.putValue(styleName, this.createRowEdgeStyle(overlapCount+1)); // get edge function that has offset of overlap count + 1
 				const edge = this.graph.insertEdge({
 					parent: root,
 					source: pair.from.cell,
@@ -720,7 +741,6 @@ class Memviz {
 				});
 			}
 
-			pairNo++;
 			this.graph.refresh();
 		}
 	}
@@ -1123,7 +1143,7 @@ class MemVisualizerRow extends MemVisualizer {
 				imageAlign: "center",
 
 				imageAspect: "true",
-				strokeColor: "none",
+				strokeColor: "grey",
 				flipH: false,
 				flipV: false
 			},
