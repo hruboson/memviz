@@ -19,4 +19,10 @@ describe('printf/console output', () => {
 	it('prints fry\'s lizards', () => {
 		chai.assert.equal(interpretAll(arrays_strings_pointers_test), "I'm gonna buy 500 lizards<br>");
 	});
+	it('prints correct values of binary compare expresssions', () => {
+		chai.assert.equal(interpretAll(bcomp_expressions_test), "102345");
+	});
+	it('prints loop sequence', () => {
+		chai.assert.equal(interpretAll(for_loop_simple), "0123456789");
+	});
 });

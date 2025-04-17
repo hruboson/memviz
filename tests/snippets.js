@@ -560,3 +560,16 @@ const arrays_strings_pointers_test = `int main() {
 	printf("I'm gonna buy %d %s\\n", *p, animals[2]);
 	return 0;
 }`;
+
+const bcomp_expressions_test = `int main(){
+	int x = 1;
+	int y = 0;
+	int val1 = x == 0 ? 3 : 2;
+	int val2 = x > 0 && y == 0 ? 3 : 4;
+	int val3 = val2 == 3 || x == 0 ? 4 : 5;
+	int val4 = x < 2 ? 5 : 6;
+
+	printf("%d%d%d%d%d%d", x, y, val1, val2, val3, val4);
+
+	return 0;
+}`;
