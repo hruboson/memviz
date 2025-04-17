@@ -1217,21 +1217,33 @@ class MemVisualizerRow extends MemVisualizer {
 			},
 		});
 
-		// move globals to dataframe and unitialized to bss, also check if there are any stacks
+		// bss frame
+		const bf = [];
+
+		// move globals to dataframe and unitialized to bss, also check if there are any stacks, also move uninitialized variables to bss frame
 		let stackEmpty = true;
 		for(const sf of this.memviz.callStack){
+			console.log(sf.symtable.objects);
 			if(sf.symtable.scopeInfo.name == "global" && sf.symtable.scopeInfo.type == "global"){
 				for(const [_, symbol] of sf.symtable.objects){
 					if(symbol.initialized && !symbol.isFunction && !symbol.isNative && !df.records.includes(symbol)){
 						df.add(symbol);
 					}
+					if(!symbol.initialized){
+						bf.push(symbol);
+						sf.symtable.objects.delete(symbol.name);
+					}
 				}
 				continue;
 			}else{
 				for(const [_, sym] of sf.symtable.objects){
-					if (sym.interpreted) {
+					if(sym.interpreted){
 						stackEmpty = false;
 						break;
+					}
+					if(!sym.initialized){
+						bf.push(symbol);
+						sf.symtable.objects.delete(symbol.name);
 					}
 				}
 			}
@@ -1274,6 +1286,21 @@ class MemVisualizerRow extends MemVisualizer {
 				style: dfStyle, 
 			});
 			nextX += this.vizDataFrame(df, dataSegmentParent, 0);
+			const thirdDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
+			nextX = thirdDivXY.x;
+		}
+
+		if(bf.length > 0){
+			const bssStyle = MemVisualizerRow.memoryRowSegmentStyle;
+			bssStyle.dashed = false;
+			const bssSegmentParent = this.memviz.graph.insertVertex({
+				parent: scrollableRectangle,
+				position: [nextX, 0],
+				height: rectHeight,
+				value: `<div style="transform: rotate(45deg); transform-origin: top right; white-space: nowrap;">BSS</div>`,
+				style: bssStyle, 
+			});
+			nextX += this.vizBssFrame(bf, bssSegmentParent, 0);
 			const thirdDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
 			nextX = thirdDivXY.x;
 		}
@@ -1327,7 +1354,20 @@ class MemVisualizerRow extends MemVisualizer {
 	 */
 	vizDataFrame(df, parent, x){
 		let nextX = x;
-		for(const dataObject of df.records) {
+		for(const dataObject of df.records){
+			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
+			nextX = xy.x;
+		}
+		return nextX;
+	}
+
+	/**
+	 * Visualized uninitialized symbols
+	 * @function
+	 */
+	vizBssFrame(bf, parent, x){
+		let nextX = x;
+		for(const dataObject of bf){
 			const xy = this.memviz.vizRecord(dataObject, parent, nextX, (MemVisualizerRow.memoryRowHeight/2)-(Memviz.squareXYlen/2));
 			nextX = xy.x;
 		}
