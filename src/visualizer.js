@@ -1231,7 +1231,6 @@ class MemVisualizerRow extends MemVisualizer {
 					}
 					if(!symbol.initialized){
 						bf.push(symbol);
-						sf.symtable.objects.delete(symbol.name);
 					}
 				}
 				continue;
@@ -1240,10 +1239,6 @@ class MemVisualizerRow extends MemVisualizer {
 					if(sym.interpreted){
 						stackEmpty = false;
 						break;
-					}
-					if(!sym.initialized){
-						bf.push(symbol);
-						sf.symtable.objects.delete(symbol.name);
 					}
 				}
 			}
