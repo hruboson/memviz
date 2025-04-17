@@ -242,8 +242,10 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int main() {
-    int arrSize = 8;
+						<div id="editor" onChange="resetEditor();">int arrSize;
+
+int main() {
+    arrSize = 10;
     char* ptr = (char*) malloc(sizeof(char)*arrSize); // allocate memory for eight chars
     if (ptr == 0) {
         return 1;
