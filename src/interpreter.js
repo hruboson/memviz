@@ -259,26 +259,22 @@ class Interpreter {
 	 * @param {AST} ast
 	 */
 	semantic(ast){
-		try{
-			// add native functions to global symtable (global scope)
-			this.#semanticAnalyzer.addNativeFunctions(this.#symtableGlobal);
+		// add native functions to global symtable (global scope)
+		this.#semanticAnalyzer.addNativeFunctions(this.#symtableGlobal);
 
-			// first phase
-			this.#semanticAnalyzer.firstPhase(ast);
+		// first phase
+		this.#semanticAnalyzer.firstPhase(ast);
 
-			// second phase
-			this.#semanticAnalyzer.secondPhase(); // additional semantic checks after creating symbol table
+		// second phase
+		this.#semanticAnalyzer.secondPhase(); // additional semantic checks after creating symbol table
 
-			const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
-			if(mainFnc){
-				if(mainFnc.type != SYMTYPE.FNC){
-					throw new SError("main is not a function");
-				}
-			}else{
-				throw new SError("undefined reference to main()")
+		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
+		if(mainFnc){
+			if(mainFnc.type != SYMTYPE.FNC){
+				throw new SError("main is not a function");
 			}
-		}catch(err){
-			throw err;
+		}else{
+			throw new SError("undefined reference to main()")
 		}
 
 		this.#callStack.pushSFrame(new StackFrame(this.#symtableGlobal), null, null); // add global symtable to call stack
@@ -403,6 +399,11 @@ class Interpreter {
 			record.address = null;
 		}
 		record.initialized = true;
+		
+		if(rval == undefined || rval == null){
+			// this should maybe be in semantic analyzer
+			throw new RTError(`Trying to assign uninitialized value`);
+		}
 
 		// concrete operations
 		switch(expr.op){
@@ -684,6 +685,7 @@ class Interpreter {
 		}
 
 		symbol.interpreted = true;
+		console.log(symbol.name, ": ", value);
 
 		if(this.#callStack.topSFrame().symtable.scopeInfo.type == "global"){
 			if(!initializer){
@@ -752,6 +754,7 @@ class Interpreter {
 					if(isclass(t, "StopFlag")) throw t;
 					if(isclass(t, "BreakThrow")) break;
 					if(isclass(t, "ContinueThrow")) continue;
+					throw t;
 				}
 
 				// check if iteration expression should be interpreted
@@ -876,6 +879,7 @@ class Interpreter {
 					if(isclass(t, "StopFlag")) throw t;
 					if(isclass(t, "BreakThrow")) break;
 					if(isclass(t, "ContinueThrow")) continue;
+					throw t;
 				}
 
 				// check if iteration expression should be interpreted
@@ -935,8 +939,9 @@ class Interpreter {
 		switch(initializer.kind){
 			case INITTYPE.EXPR:
 				val = this.evaluateExprArray(initializer.expr);
-				if(isclass(val, "PointerValue")) return val.value;
 				if(initializer.expr.cType == "CExpr" && initializer.expr.type == "s_literal") return val.address;
+
+				if(isclass(val, "PointerValue")) return val.value;
 				if(has(val, "address")) return this.memsim.readRecordValue(val);
 				return val;
 			case INITTYPE.ARR:
@@ -1215,6 +1220,7 @@ class Interpreter {
 					if(isclass(t, "StopFlag")) throw t;
 					if(isclass(t, "BreakThrow")) break;
 					if(isclass(t, "ContinueThrow")) continue;
+					throw t;
 				}
 
 				// check if iteration expression should be interpreted

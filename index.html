@@ -741,7 +741,7 @@ Split(["#split-ve", "#split-console"], {
 				if(flag != EXEOPT.COMPILE){
 					result = interpreter.compile(input);
 				}
-				if(!isclass(result, "SError")){
+				if(!result instanceof Error){
 					result = interpreter.interpret(breakEditor);
 				}
 			}
@@ -750,7 +750,8 @@ Split(["#split-ve", "#split-console"], {
 			const vizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
 			interpreter.updateHTML(result, document.getElementById("result"), document.getElementById("output"), vizOptions);
 		}catch(e){
-			console.error(e);
+			const vizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
+			interpreter.updateHTML(result, document.getElementById("result"), document.getElementById("output"), vizOptions);
 		}
 	}
 </script>

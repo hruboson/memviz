@@ -554,11 +554,7 @@ class Semantic {
 
 		// type checking
 		for(let [arg, param] of fncCall.arguments.map((arg, i) => [arg, fncSym.parameters[i]])){
-			try{
-				this.typeCheck(this.getParameterType(param), arg);
-			}catch(e){
-				throw e;
-			}
+			this.typeCheck(this.getParameterType(param), arg);
 		}
 
 		this.calledFunctions.push(fncSym);
@@ -749,7 +745,7 @@ class Semantic {
 
 
 		}catch(e){
-			console.error(e);
+			throw e;
 		}
 	}
 
