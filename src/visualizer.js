@@ -1141,9 +1141,30 @@ class MemVisualizerRow extends MemVisualizer {
 				shape: "image",
 				image: "img/diagonal-stripes.svg",
 				imageAlign: "center",
+				imageAspect: true,
 
-				imageAspect: "true",
-				strokeColor: "grey",
+				strokeColor: "gray",
+				flipH: false,
+				flipV: false
+			},
+		});
+
+		return {x: x+width, y: y+height};
+	}
+
+	vizDottedDivider(parent, x, y, width, height){
+		const stripedRectangle = this.memviz.graph.insertVertex({
+			parent,
+			position: [x, y],
+			width: width,
+			height: height,
+			style: {
+				shape: "image",
+				image: "img/white-dots.svg",
+				imageAlign: "center",
+				imageAspect: true,
+
+				strokeColor: "gray",
 				flipH: false,
 				flipV: false
 			},
@@ -1267,6 +1288,10 @@ class MemVisualizerRow extends MemVisualizer {
 				style: hfStyle, 
 			});
 			nextX += this.vizHeapFrame(hf, heapParent, 0);
+			if(!stackEmpty){
+				const variableDivider = this.vizDottedDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
+				nextX = variableDivider.x;
+			}
 		}
 
 
