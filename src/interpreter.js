@@ -398,10 +398,11 @@ class Interpreter {
 
 		let newMemregion = record.memregion;
 		if(record.memregion == MEMREGION.BSS){
-			newMemregion = MEMREGION.STACK;
+			newMemregion = MEMREGION.DATA;
 			this.memsim.free(record.address, record.memsize);
 			record.address = null;
 		}
+		record.initialized = true;
 
 		// concrete operations
 		switch(expr.op){
@@ -692,7 +693,7 @@ class Interpreter {
 			}
 		}else{
 			if(!initializer){
-				this.memsim.setRecordValue(symbol, null, MEMREGION.BSS);
+				this.memsim.setRecordValue(symbol, null, MEMREGION.STACK);
 			}else{
 				this.memsim.setRecordValue(symbol, value, MEMREGION.STACK);
 			}
