@@ -685,7 +685,6 @@ class Interpreter {
 		}
 
 		symbol.interpreted = true;
-		console.log(symbol.name, ": ", value);
 
 		if(this.#callStack.topSFrame().symtable.scopeInfo.type == "global"){
 			if(!initializer){
