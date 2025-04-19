@@ -18,8 +18,8 @@ class Interpreter {
 
 		this.#warningSystem = new WarningSystem();
 		this.#semanticAnalyzer = new Semantic(this.#symtableStack, this.#warningSystem);
-		this.memsim = new Memsim(this.#warningSystem);
-		this.#callStack = new CallStack(this.memsim);
+		this.#memsim = new Memsim(this.#warningSystem);
+		this.#callStack = new CallStack(this.#memsim);
 	}
 
 	/* ATTRIBUTES */
@@ -70,9 +70,9 @@ class Interpreter {
 	/**
 	 * Memory simulator
 	 * @type {Memsim}
-	 * @public
+	 * @private
 	 */
-	memsim;
+	#memsim;
 
 	/**
 	 * Memory dump before final free
@@ -323,7 +323,7 @@ class Interpreter {
 			record.determineSize();
 			record.specifiers = ["char"];
 
-			this.memsim.setRecordValue(record, stringRecord.toCArray(), MEMREGION.DATA);
+			this.#memsim.setRecordValue(record, stringRecord.toCArray(), MEMREGION.DATA);
 
 			this.#callStack.dFrame.add(record);
 
@@ -346,7 +346,7 @@ class Interpreter {
 
 				// .data
 				for(const record of [...this.#callStack.dFrame]){
-					this.memsim.free(record.address, record.memsize, record.region);
+					this.#memsim.free(record.address, record.memsize, record.region);
 					this.#callStack.dFrame.remove(record);
 				}
 			}catch(ret){ // catch return value of main
@@ -354,7 +354,7 @@ class Interpreter {
 			}
 		}
 
-		this.memdump = this.memsim.printMemory();
+		this.memdump = this.#memsim.printMemory();
 		return result;
 	}
 
@@ -380,7 +380,7 @@ class Interpreter {
 
 		if(has(lval, "address")){
 			record = lval;
-			lval = this.memsim.readRecordValue(lval); // get the value
+			lval = this.#memsim.readRecordValue(lval); // get the value
 			if(lval == undefined) lval = 0;
 		}
 
@@ -389,13 +389,13 @@ class Interpreter {
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readRecordValue(rval); // get the value
+			rval = this.#memsim.readRecordValue(rval); // get the value
 		}
 
 		let newMemregion = record.memregion;
 		if(record.memregion == MEMREGION.BSS){
 			newMemregion = MEMREGION.DATA;
-			this.memsim.free(record.address, record.memsize);
+			this.#memsim.free(record.address, record.memsize);
 			record.address = null;
 		}
 		record.initialized = true;
@@ -408,46 +408,46 @@ class Interpreter {
 		// concrete operations
 		switch(expr.op){
 			case '=':
-				this.memsim.setRecordValue(record, rval, newMemregion);
+				this.#memsim.setRecordValue(record, rval, newMemregion);
 				break;
 			case '+=':
-				this.memsim.setRecordValue(record, lval + rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval + rval, newMemregion);
 				break;
 			case '-=':
-				this.memsim.setRecordValue(record, lval - rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval - rval, newMemregion);
 				break;
 			case '*=':
-				this.memsim.setRecordValue(record, lval * rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval * rval, newMemregion);
 				break;
 			case '/=':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				this.memsim.setRecordValue(record, lval / rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval / rval, newMemregion);
 				break;
 			case '%=':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				this.memsim.setRecordValue(record, lval % rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval % rval, newMemregion);
 				break;
 			case '&=':
-				this.memsim.setRecordValue(record, lval & rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval & rval, newMemregion);
 				break;
 			case '|=':
-				this.memsim.setRecordValue(record, lval | rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval | rval, newMemregion);
 				break;
 			case '^=':
-				this.memsim.setRecordValue(record, lval ^ rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval ^ rval, newMemregion);
 				break;
 			case '<<=':
-				this.memsim.setRecordValue(record, lval << rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval << rval, newMemregion);
 				break;
 			case '>>=':
-				this.memsim.setRecordValue(record, lval >> rval, newMemregion);
+				this.#memsim.setRecordValue(record, lval >> rval, newMemregion);
 				break;
 
 			default:
 				throw new AppError(`Unknown operator of expression: ${expr}`, expr.loc);
 		}
 
-		return this.memsim.readRecordValue(record);
+		return this.#memsim.readRecordValue(record);
 	}
 
     visitBArithExpr(expr){
@@ -472,11 +472,11 @@ class Interpreter {
 			if(lval.indirection > 0){
 				coeVar = MEMSIZES[lval.pointsToMemtype];
 			}
-			lval = this.memsim.readRecordValue(lval); // get the value
+			lval = this.#memsim.readRecordValue(lval); // get the value
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readRecordValue(rval); // get the value
+			rval = this.#memsim.readRecordValue(rval); // get the value
 		}
 
 		// concrete operations
@@ -515,7 +515,7 @@ class Interpreter {
 		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
-			lval = this.memsim.readRecordValue(lval); // get the value
+			lval = this.#memsim.readRecordValue(lval); // get the value
 		}
 
 		if(isclass(lval, "PointerValue")){
@@ -523,7 +523,7 @@ class Interpreter {
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readRecordValue(rval); // get the value
+			rval = this.#memsim.readRecordValue(rval); // get the value
 		}
 
 		if(isclass(rval, "PointerValue")){
@@ -556,7 +556,7 @@ class Interpreter {
 		let lval = this.evaluateExprArray(expr.left);
 
 		if(has(lval, "address")){
-			lval = this.memsim.readRecordValue(lval); // get the value
+			lval = this.#memsim.readRecordValue(lval); // get the value
 		}
 
 		if(isclass(lval, "PointerValue")){
@@ -564,7 +564,7 @@ class Interpreter {
 		}
 
 		if(has(rval, "address")){
-			rval = this.memsim.readRecordValue(rval); // get the value
+			rval = this.#memsim.readRecordValue(rval); // get the value
 		}
 
 		if(isclass(rval, "PointerValue")){
@@ -601,7 +601,7 @@ class Interpreter {
 			}
 		}
 		if(has(value, "address")){
-			const record = this.#callStack.findMemoryRecord(this.memsim.readRecordValue(value));
+			const record = this.#callStack.findMemoryRecord(this.#memsim.readRecordValue(value));
 			if(record) record.beingPointedToBy = DATATYPE[type]; // switch view (type punning)
 			value.memtype = type; 
 		}
@@ -680,7 +680,7 @@ class Interpreter {
 			// there could be a better way... tbh I have no idea why this is even allowed
 			if(symbol.indirection < 1 && symbol.size.length > 0 && !Array.isArray(value)){ // non pointer arrays initialized with string (char hello[] = "Hello world";)
 				value = this.#callStack.findMemoryRecord(value);
-				value = this.memsim.readRecordValue(value);
+				value = this.#memsim.readRecordValue(value);
 			}
 		}
 
@@ -689,15 +689,15 @@ class Interpreter {
 
 		if(this.#callStack.topSFrame().symtable.scopeInfo.type == "global"){
 			if(!initializer){
-				this.memsim.setRecordValue(symbol, 0, MEMREGION.BSS);
+				this.#memsim.setRecordValue(symbol, 0, MEMREGION.BSS);
 			}else{
-				this.memsim.setRecordValue(symbol, value, MEMREGION.DATA);
+				this.#memsim.setRecordValue(symbol, value, MEMREGION.DATA);
 			}
 		}else{
 			if(!initializer){
-				this.memsim.setRecordValue(symbol, null, MEMREGION.STACK);
+				this.#memsim.setRecordValue(symbol, null, MEMREGION.STACK);
 			}else{
-				this.memsim.setRecordValue(symbol, value, MEMREGION.STACK);
+				this.#memsim.setRecordValue(symbol, value, MEMREGION.STACK);
 			}
 		}
 	}
@@ -790,8 +790,8 @@ class Interpreter {
 			for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
 				let val = arg;
 				if(isclass(arg, "PointerValue")) val = arg.value;
-				if(has(arg, "address")) val = this.memsim.readRecordValue(arg);
-				this.memsim.setRecordValue(sym, val, MEMREGION.STACK);
+				if(has(arg, "address")) val = this.#memsim.readRecordValue(arg);
+				this.#memsim.setRecordValue(sym, val, MEMREGION.STACK);
 				sym.interpreted = true;
 			}
 		}
@@ -942,7 +942,7 @@ class Interpreter {
 				if(initializer.expr.cType == "CExpr" && initializer.expr.type == "s_literal") return val.address;
 
 				if(isclass(val, "PointerValue")) return val.value;
-				if(has(val, "address")) return this.memsim.readRecordValue(val);
+				if(has(val, "address")) return this.#memsim.readRecordValue(val);
 				return val;
 			case INITTYPE.ARR:
 				let arr = [];
@@ -997,8 +997,8 @@ class Interpreter {
 		if(expr == null) throw new ReturnThrow(new ReturnVoid(ret.loc)); // in case of empty return (void return)
 
 		expr = this.evaluateExprArray(expr); // resolve the expression (last is returned)
-		if(isclass(expr, "PointerValue")) expr = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(expr.value));
-		if(has(expr, "address")) expr = this.memsim.readRecordValue(expr);
+		if(isclass(expr, "PointerValue")) expr = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(expr.value));
+		if(has(expr, "address")) expr = this.#memsim.readRecordValue(expr);
 
 		// this breakstop is causing some weird behavior at the end of main, maybe remove it
 		/*if(this.#_instrNum > this.#breakstop) throw new StopFlag();
@@ -1035,7 +1035,7 @@ class Interpreter {
 				if(has(val, "address")){ 
 					record = val;
 					if(record.indirection > 0 && record.size.length < 1){
-						record = new PointerValue(this.memsim.readRecordValue(record), record.memtype); // the second parameter is correct?
+						record = new PointerValue(this.#memsim.readRecordValue(record), record.memtype); // the second parameter is correct?
 					}
 				}
 				break;
@@ -1069,7 +1069,7 @@ class Interpreter {
 	visitSwitchStmt(stmt){
 		let switchValue = this.evaluateExprArray(stmt.expr);
 		if(isclass(switchValue, "PointerValue")) switchValue = switchValue.value;
-		if(has(switchValue, "address")) switchValue = this.memsim.readRecordValue(switchValue);
+		if(has(switchValue, "address")) switchValue = this.#memsim.readRecordValue(switchValue);
 
 		let foundCase = false;
 
@@ -1135,34 +1135,34 @@ class Interpreter {
 
 		switch(expr.op){
 			case '+':
-				if(has(value, "address")) return this.memsim.readRecordValue(value);
+				if(has(value, "address")) return this.#memsim.readRecordValue(value);
 				return value;
 			case '-':
-				if(has(value, "address")) return -this.memsim.readRecordValue(value);
+				if(has(value, "address")) return -this.#memsim.readRecordValue(value);
 				return -value;
 			case '++':
 				if(has(value, "address")){
-					const currValue = this.memsim.readRecordValue(value);
-					this.memsim.setRecordValue(value, currValue + 1, MEMREGION.STACK); 
+					const currValue = this.#memsim.readRecordValue(value);
+					this.#memsim.setRecordValue(value, currValue + 1, MEMREGION.STACK); 
 					return currValue + 1;
 				}
 				return value + 1;
 			case '--':
 				if(has(value, "address")){
-					const currValue = this.memsim.readRecordValue(value);
-					this.memsim.setRecordValue(value, currValue - 1, MEMREGION.STACK); 
+					const currValue = this.#memsim.readRecordValue(value);
+					this.#memsim.setRecordValue(value, currValue - 1, MEMREGION.STACK); 
 					return currValue - 1;
 				}
 				return value - 1;
 			case '!':
-				if(has(value, "address")) return !this.memsim.readRecordValue(value);
+				if(has(value, "address")) return !this.#memsim.readRecordValue(value);
 				return !value;
 			case '~':
-				if(has(value, "address")) return ~this.memsim.readRecordValue(value);
+				if(has(value, "address")) return ~this.#memsim.readRecordValue(value);
 				return ~value;
 			case '*': {
 				if(has(value, "address")){
-					const pointsToAddress = this.memsim.readRecordValue(value);
+					const pointsToAddress = this.#memsim.readRecordValue(value);
 					const record = this.#callStack.findMemoryRecord(pointsToAddress);
 					record.beingPointedToBy = value.pointsToMemtype;
 					return record;
@@ -1244,7 +1244,7 @@ class Interpreter {
 			throw new RTError("printf requires at least one argument (format string)");
 		}
 
-		let formatString = this.memsim.readRecordValue(args[0]);
+		let formatString = this.#memsim.readRecordValue(args[0]);
 		formatString = CArrayToJsString(formatString);
 		let otherArgs = args.slice(1);
 		let i = 0;
@@ -1261,7 +1261,7 @@ class Interpreter {
 					const record = this.#callStack.findMemoryRecord(value.value);
 					value = record;
 				}
-				if(has(value, "address")) value = this.memsim.readRecordValue(value);
+				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
 				i++;
 
 				return parseInt(value);
@@ -1270,8 +1270,8 @@ class Interpreter {
 			if(match == "%f"){
 				let value;
 				value = otherArgs[i];
-				if(isclass(value, "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
-				if(has(value, "address")) value = this.memsim.readRecordValue(value);
+				if(isclass(value, "PointerValue")) value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
+				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
 				i++;
 				return parseFloat(value);
 			}
@@ -1279,8 +1279,8 @@ class Interpreter {
 			if(match == "%s"){
 				let value;
 				value = otherArgs[i];
-				if(isclass(value, "PointerValue")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
-				if(has(value, "address")) value = this.memsim.readRecordValue(this.#callStack.findMemoryRecord(this.memsim.readRecordValue(value)));
+				if(isclass(value, "PointerValue")) value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
+				if(has(value, "address")) value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(this.#memsim.readRecordValue(value)));
 				i++;
 				return CArrayToJsString(value);
 			}
@@ -1311,7 +1311,7 @@ class Interpreter {
 		record.memtype = DATATYPE.void;
 		record.region = MEMREGION.HEAP;
 
-		this.memsim.setRecordValue(record, null, MEMREGION.HEAP);
+		this.#memsim.setRecordValue(record, null, MEMREGION.HEAP);
 
 		this.#callStack.hFrame.add(record);
 		return new PointerValue(record.address, DATATYPE.void);
@@ -1322,11 +1322,11 @@ class Interpreter {
 		const expr = this.evaluateExprArray(arg);
 
 		addressToFree = expr;
-		if(has(expr, "address")) addressToFree = this.memsim.readRecordValue(expr);
+		if(has(expr, "address")) addressToFree = this.#memsim.readRecordValue(expr);
 		if(isclass(expr, "PointerValue")) addressToFree = expr.value;
 
 		const memoryToFree = this.#callStack.findMemoryRecord(addressToFree);
-		this.memsim.free(addressToFree, memoryToFree.memsize);
+		this.#memsim.free(addressToFree, memoryToFree.memsize);
 		this.#callStack.hFrame.remove(memoryToFree);
 	}
 
@@ -1432,7 +1432,7 @@ class Interpreter {
 		}
 
 		// memory visualization
-		this.memviz = new Memviz(this.memsim, this.#callStack, vizElement, vizOptions); // TODO pass the element id as string parameter for interpreter
+		this.memviz = new Memviz(this.#memsim, this.#callStack, vizElement, vizOptions); // TODO pass the element id as string parameter for interpreter
 		this.memviz.updateHTML();
 
 		// other elements
