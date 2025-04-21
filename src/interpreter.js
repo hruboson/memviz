@@ -402,7 +402,7 @@ class Interpreter {
 		
 		if(rval == undefined || rval == null){
 			// this should maybe be in semantic analyzer
-			throw new RTError(`Trying to assign uninitialized value`);
+			throw new RTError(`Trying to assign uninitialized value`, expr.loc);
 		}
 
 		// concrete operations
@@ -1163,10 +1163,16 @@ class Interpreter {
 				if(has(value, "address")){
 					const pointsToAddress = this.#memsim.readRecordValue(value);
 					const record = this.#callStack.findMemoryRecord(pointsToAddress);
+					if(record == undefined){
+						throw new RTError(`Invalid read or write of address ${pointsToAddress}`, expr.loc);
+					}
 					record.beingPointedToBy = value.pointsToMemtype;
 					return record;
 				}else if(this.#callStack.findMemoryRecord(value)){
 					let record = this.#callStack.findMemoryRecord(value);
+					if(record == undefined){
+						throw new RTError(`Invalid read or write`, expr.loc);
+					}
 					return record;
 				}else{
 					throw new RTError(`Value ${value} is not a valid address`, expr.loc);
