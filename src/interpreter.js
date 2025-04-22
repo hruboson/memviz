@@ -392,6 +392,7 @@ class Interpreter {
 			rval = this.#memsim.readRecordValue(rval); // get the value
 		}
 
+		console.log(record);
 		let newMemregion = record.memregion;
 		if(record.memregion == MEMREGION.BSS){
 			newMemregion = MEMREGION.DATA;
@@ -408,6 +409,7 @@ class Interpreter {
 		// concrete operations
 		switch(expr.op){
 			case '=':
+				console.log(newMemregion);
 				this.#memsim.setRecordValue(record, rval, newMemregion);
 				break;
 			case '+=':
@@ -1067,6 +1069,7 @@ class Interpreter {
 		dummyRecord.indirection = record.indirection;
 		dummyRecord.memtype = record.memtype;
 		dummyRecord.size = [];
+		dummyRecord.memregion = record.memregion;
 
 		return dummyRecord;
 	}
