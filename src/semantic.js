@@ -595,6 +595,8 @@ class Semantic {
 			for(const construct of loop.body.sequence){
 				construct.accept(this);
 			}
+		}else{
+			this.evaluateExprArray(loop.body);
 		}
 
 		this.closeScope();
