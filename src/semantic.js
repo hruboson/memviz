@@ -318,6 +318,17 @@ class Semantic {
 		}else{
 			rval = expr.right.accept(this);
 		}
+
+		switch(expr.op){
+			case '=': {
+				if(lval?.size?.length > 0 && rval?.size?.length > 0){
+					throw new SError(`Assignment to expression with array type`, expr.loc);
+				}
+				break;
+			}
+			default:
+				break;
+		}
 	}
 
 	visitBArithExpr(expr){
