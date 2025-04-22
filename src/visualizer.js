@@ -1246,7 +1246,7 @@ class MemVisualizerRow extends MemVisualizer {
 		let nextX = 0;
 
 		const codeSegmentWidth = 70;
-		if(!df.empty() || !hf.empty() || !stackEmpty){
+		if(!df.empty() || !hf.empty() || !stackEmpty || bf.length != 0){
 			const firstDivXY = this.vizDivider(scrollableRectangle, nextX, 0, 50, MemVisualizerRow.memoryRowHeight);
 			nextX = firstDivXY.x;
 			const codeSegmentParent = this.memviz.graph.insertVertex({
