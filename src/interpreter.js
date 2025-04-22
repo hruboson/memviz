@@ -1020,9 +1020,18 @@ class Interpreter {
 	}
 
     visitSubscriptExpr(expr){
-		let indices = [this.evaluateExprArray(expr.expr)];
+		let indicesRaw = [this.evaluateExprArray(expr.expr)];
+		let indices = [];
 		let exprCopy = expr.pointer;
 		let record;
+
+		for(const element of indicesRaw){
+			if(has(element, "address")){
+				indices.push(this.#memsim.readRecordValue(element));
+			}else{
+				indices.push(element);
+			}
+		}
 
 		while(exprCopy != null){
 			let val;
@@ -1034,7 +1043,7 @@ class Interpreter {
 				if(has(val, "address")){ 
 					record = val;
 					if(record.indirection > 0 && record.size.length < 1){
-						record = new PointerValue(this.#memsim.readRecordValue(record), record.memtype); // the second parameter is correct?
+						record = new PointerValue(this.#memsim.readRecordValue(record), record.pointsToMemtype); // the second parameter is correct?
 					}
 				}
 				break;
@@ -1044,12 +1053,9 @@ class Interpreter {
 			exprCopy = exprCopy.pointer;
 		};
 
-		let flatIndex = 1;
-		if(record.size?.length > 0){
-			flatIndex = this.getFlatIndex(indices, record.size);
-		}else{
-			flatIndex = indices.reduce((res, item) => res *= (item + 1), 1) - 1;
-		}
+		let flatIndex = (record.size?.length > 0)
+		? this.getFlatIndex(indices, record.size)
+		: (indices.length > 0 ? indices.reduce((res, item) => res * (Number(item) + 1), 1) - 1 : 1);
 
 		if(isclass(record, "PointerValue")){ // is this correct? I think it is... probably
 			return new PointerValue(record.value + MEMSIZES[record.memtype]*(flatIndex), record.memtype);
@@ -1175,6 +1181,7 @@ class Interpreter {
 					}
 					return record;
 				}else{
+					console.error(value);
 					throw new RTError(`Value ${value} is not a valid address`, expr.loc);
 				}
 			}
