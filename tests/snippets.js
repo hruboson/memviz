@@ -419,6 +419,18 @@ int main() {
 }
 `;
 
+const for_loop_with_array_test = `
+int main(){
+	int a[5];
+	for(char i = 0; i < 5; i++){
+	    a[i] = i;
+	    printf("%d", a[i]);
+	}
+	
+	return 0;
+}
+`;
+
 const switch_case_simple = `
 void main(){
 	int a = 1;

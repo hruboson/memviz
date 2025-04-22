@@ -25,4 +25,7 @@ describe('printf/console output', () => {
 	it('prints loop sequence', () => {
 		chai.assert.equal(interpretAll(for_loop_simple), "0123456789");
 	});
+	it('prints values of array', () => {
+		chai.assert.equal(interpretAll(for_loop_with_array_test), "01234");
+	});
 });
