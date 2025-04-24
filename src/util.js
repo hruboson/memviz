@@ -45,7 +45,7 @@ class Stack {
 	 * @private
 	 * @type {Array}
 	 */
-	#items;
+	items;
 
 	constructor(){
 		this.items = [];
