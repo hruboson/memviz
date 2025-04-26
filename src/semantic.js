@@ -165,18 +165,22 @@ class Semantic {
 			}
 		}
 
-		// calculate number of brackets from declarator (x[][] = 2, x[][][] = 3, ...)
 		let declCopy = declarator;
+		let fncDeclarator;
 		do{
 			switch(declCopy.kind){
 				case DECLTYPE.ID: 
-				case DECLTYPE.FNC: 
+					break;
+				case DECLTYPE.FNC:
+					fncDeclarator = declCopy; // get the function declarator (for params)
+					break;
 				case DECLTYPE.PTR:
 				case DECLTYPE.STRUCT:
 				case DECLTYPE.NESTED:
 					break;
 				case DECLTYPE.ARR:
-					dimensionBrackets += 1;
+					dimensionBrackets += 1; // calculate number of brackets from declarator (x[][] = 2, x[][][] = 3, ...)
+					break;
 			}
 			declCopy = declCopy.child;
 		}while(declCopy != null);
@@ -197,7 +201,8 @@ class Semantic {
 				if(declChild.kind == DECLTYPE.FNC){
 					isFunction = true;
 					parameters = [];
-					for(const param of declarator.fnc.parameters){
+					console.log(fncDeclarator);
+					for(const param of fncDeclarator.fnc.parameters){
 						if(param.type.specifiers.includes("void")) continue; // don't add void parameter
 						parameters.push(param);
 					}
@@ -488,11 +493,29 @@ class Semantic {
 		//
 		const fncName = this.addSymbol(SYMTYPE.FNC, fnc.declarator, fnc.body, fnc.returnType, fnc); // adds function to global symbol table
 
+		let declCopy = fnc.declarator;
+		let fncDeclarator;
+		do{
+			switch(declCopy.kind){
+				case DECLTYPE.ID: 
+					break;
+				case DECLTYPE.FNC:
+					fncDeclarator = declCopy; // get the function declarator (for params)
+					break;
+				case DECLTYPE.PTR:
+				case DECLTYPE.STRUCT:
+				case DECLTYPE.NESTED:
+				case DECLTYPE.ARR:
+					break;
+			}
+			declCopy = declCopy.child;
+		}while(declCopy != null);
+
 		//
 		let symtableFnc = new Symtable(fncName, "function params", this.symtableStack.peek());
 		this.newScope(symtableFnc, fnc);
 
-		for(const param of fnc.declarator.fnc.parameters){
+		for(const param of fncDeclarator.fnc.parameters){
 			if(param.type.specifiers.includes("void")) continue; // dont add void as parameter to symtable: int f(void){}
 
 			this.addSymbol(SYMTYPE.OBJ, param.declarator, false, param.type.specifiers, param);
