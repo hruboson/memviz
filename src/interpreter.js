@@ -1420,7 +1420,7 @@ class Interpreter {
 	 * @param {Object|integer|string} result Result of main
 	 * @todo If needed, pass the element (HTML) ids as arguments
 	 */
-	updateHTML(result, resultElement, vizElement, vizOptions){
+	updateHTML(result, resultElement, vizElement, editor, vizOptions){
 		const resultDiv = resultElement;
 
 		// reset result element
@@ -1428,15 +1428,18 @@ class Interpreter {
 		const classes = resultDiv.classList;
 		const classesToRemove = Array.from(classes).filter(className => className.startsWith("bg-"));
 		classesToRemove.forEach(className => resultDiv.classList.remove(className))
+		let lineNumber;
 
 		// add result/error depending on type returned from main (result arg)
 		if(result != undefined && result != null && !isclass(result, "StopFlag")){;
 			resultDiv.innerHTML = "Result: \n";
 			// make text "on line x" bold
-			const regex = /on line \d+/g;
+			const regex = /on line (\d+)/;
 			const formattedText = result.message ? result.message.replace(regex, (match) => {
 				return `<kbd class="fw-bolder">${match}</kbd>`;
 			}) : "";
+			const match = result.message ? result.message.match(regex) : null;
+			lineNumber = match ? parseInt(match[1], 10) : null;
 			if(isclass(result, "ReturnVoid")){
 				resultDiv.innerHTML += "void";
 				resultDiv.classList.add("bg-success");
@@ -1480,8 +1483,14 @@ class Interpreter {
 			let rangeJI = new Range(this.pcloclast - 1, 0, this.pcloclast - 1, 1); // just interpreted
 			let markerJI = editor.getSession().addMarker(rangeJI, "rangeJI", "fullLine");
 		}*/
-		let rangeTBI = new Range(this.pcloc - 1, this.pclocColStart, this.pcloc - 1, this.pclocColEnd); // Just interpreted
-		let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeJI", "fullLine"); // "fullLine"/"text" last arg for whole line/part of line being highlighted
+		if(editor){
+			let rangeTBI = new Range(this.pcloc - 1, this.pclocColStart, this.pcloc - 1, this.pclocColEnd); // Just interpreted
+			let markerTBI = editor.getSession().addMarker(rangeTBI, "rangeJI", "fullLine"); // "fullLine"/"text" last arg for whole line/part of line being highlighted
+			if(!isNaN(lineNumber)){
+				let errorRange = new Range(lineNumber - 1, 0, lineNumber - 1, 1);
+				let errorMarker = editor.getSession().addMarker(errorRange, "rangeErr", "fullLine");
+			}
+		}
 	}
 
 	/**
