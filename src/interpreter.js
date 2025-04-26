@@ -1178,12 +1178,14 @@ class Interpreter {
 						throw new RTError(`Invalid read or write of address ${pointsToAddress}`, expr.loc);
 					}
 					record.beingPointedToBy = value.pointsToMemtype;
+
 					return record;
 				}else if(this.#callStack.findMemoryRecord(value)){
 					let record = this.#callStack.findMemoryRecord(value);
 					if(record == undefined){
 						throw new RTError(`Invalid read or write`, expr.loc);
 					}
+
 					return record;
 				}else{
 					console.error(value);

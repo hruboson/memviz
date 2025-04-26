@@ -201,7 +201,6 @@ class Semantic {
 				if(declChild.kind == DECLTYPE.FNC){
 					isFunction = true;
 					parameters = [];
-					console.log(fncDeclarator);
 					for(const param of fncDeclarator.fnc.parameters){
 						if(param.type.specifiers.includes("void")) continue; // don't add void parameter
 						parameters.push(param);

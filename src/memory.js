@@ -521,23 +521,67 @@ class Memsim {
 
 	setVoidValue(record, value, region){
 		const bytes = [];
-		if(value == undefined || value == null){
+		const type = record.beingPointedToBy ? record.beingPointedToBy : DATATYPE.int;
+			if(value == undefined || value == null){
 			for (let i = 0; i < record.memsize; i++) {
 				bytes.push(undefined);
 			}
 		}else{
-			let i = 0;
-			// TODO FIX THIS FOR ALL POSSIBLE NUMBERS, DETERMINE TYPE FROM RECORD.beingPointedToBy
-			while(value > 0 && i < record.memsize){
-				bytes.push(value & 0xFF);
-				value >>= 8;
-				i++;
+			const typeSize = MEMSIZES[type];
+			const buffer = new ArrayBuffer(typeSize);
+			const view = new DataView(buffer);
+
+			switch(record.beingPointedToBy){
+				case DATATYPE.bool:
+				case DATATYPE.char:
+				case DATATYPE.uchar:
+					view.setUint8(0, value);
+					break;
+
+				case DATATYPE.short:
+					view.setInt16(0, value, true);
+					break;
+				case DATATYPE.ushort:
+					view.setUint16(0, value, true);
+					break;
+
+				case DATATYPE.int:
+					view.setInt32(0, value, true);
+					break;
+				case DATATYPE.uint:
+					view.setUint32(0, value, true);
+					break;
+
+				case DATATYPE.long:
+				case DATATYPE.ulong:
+				case DATATYPE.longlong:
+				case DATATYPE.ulonglong:
+					if(typeof view.setBigInt64 == "function" && (typeSize == 8)){ // check if setBigInt64 is supported
+						if(record.beingPointedToBy == DATATYPE.long || record.beingPointedToBy == DATATYPE.longlong){
+							view.setBigInt64(0, BigInt(value), true);
+						}else{
+							view.setBigUint64(0, BigInt(value), true);
+						}
+					}else{
+						throw new AppError("BigInt64 not supported or wrong size");
+					}
+					break;
+
+				case DATATYPE.float:
+					view.setFloat32(0, value, true);
+					break;
+
+				case DATATYPE.double:
+					view.setFloat64(0, value, true);
+					break;
+
+				case DATATYPE.longdouble:
+					view.setFloat64(0, value, true);
+					break;
 			}
 
-			// padding (remanining zeroes)
-			while(i < record.memsize){
-				bytes.push(undefined);
-				i++;
+			for(let i = 0; i < typeSize; i++){
+				bytes.push(view.getUint8(i));
 			}
 		}
 

@@ -144,9 +144,9 @@ class CallStack{
 				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
 				dummyRecord.indirection = record.indirection;
 				dummyRecord.memtype = record.memtype;
-				dummyRecord.memsize = MEMSIZES[record.memtype];
 				dummyRecord.memregion = record.memregion;
 				dummyRecord.beingPointedToBy = record.beingPointedToBy;
+				dummyRecord.memsize = MEMSIZES[record.beingPointedToBy ? record.beingPointedToBy : record.memtype];
 				
 				return dummyRecord;
 			}
@@ -157,9 +157,9 @@ class CallStack{
 				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
 				dummyRecord.indirection = record.indirection;
 				dummyRecord.memtype = record.memtype;
-				dummyRecord.memsize = MEMSIZES[record.memtype]; // this could be substracted from the address
 				dummyRecord.memregion = record.memregion;
 				dummyRecord.beingPointedToBy = record.beingPointedToBy;
+				dummyRecord.memsize = MEMSIZES[record.beingPointedToBy ? record.beingPointedToBy : record.memtype];
 				
 				return dummyRecord;
 			}
@@ -172,9 +172,9 @@ class CallStack{
 				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
 				dummyRecord.indirection = record.indirection;
 				dummyRecord.memtype = record.memtype;
-				dummyRecord.memsize = MEMSIZES[record.memtype];
 				dummyRecord.memregion = record.memregion;
 				dummyRecord.beingPointedToBy = record.beingPointedToBy;
+				dummyRecord.memsize = MEMSIZES[record.beingPointedToBy ? record.beingPointedToBy : record.memtype];
 				
 				return dummyRecord;
 			}
