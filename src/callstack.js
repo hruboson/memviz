@@ -146,6 +146,7 @@ class CallStack{
 				dummyRecord.memtype = record.memtype;
 				dummyRecord.memsize = MEMSIZES[record.memtype];
 				dummyRecord.memregion = record.memregion;
+				dummyRecord.beingPointedToBy = record.beingPointedToBy;
 				
 				return dummyRecord;
 			}
@@ -158,6 +159,7 @@ class CallStack{
 				dummyRecord.memtype = record.memtype;
 				dummyRecord.memsize = MEMSIZES[record.memtype]; // this could be substracted from the address
 				dummyRecord.memregion = record.memregion;
+				dummyRecord.beingPointedToBy = record.beingPointedToBy;
 				
 				return dummyRecord;
 			}
@@ -172,6 +174,7 @@ class CallStack{
 				dummyRecord.memtype = record.memtype;
 				dummyRecord.memsize = MEMSIZES[record.memtype];
 				dummyRecord.memregion = record.memregion;
+				dummyRecord.beingPointedToBy = record.beingPointedToBy;
 				
 				return dummyRecord;
 			}
@@ -187,6 +190,7 @@ class CallStack{
 					dummyRecord.memtype = record.memtype;
 					dummyRecord.memsize = MEMSIZES[record.memtype];
 					dummyRecord.memregion = record.memregion;
+					dummyRecord.beingPointedToBy = record.beingPointedToBy;
 					
 					return dummyRecord;
 				}
