@@ -386,6 +386,8 @@ class Memviz {
 					record.size = [len];
 					return this.vizArrayValue(record, parent, style, x, y);
 				}
+
+				record.specifiers = [record.beingPointedToBy];
 			}
 			return this.vizPrimitiveRecord(record, parent, style, x, y);
 		} // todo struct
