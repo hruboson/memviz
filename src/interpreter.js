@@ -675,12 +675,18 @@ class Interpreter {
 
 		let value = null;
 		if(initializer){
+			let record;
 			value = initializer.accept(this);
 			
 			// there could be a better way... tbh I have no idea why this is even allowed
 			if(symbol.indirection < 1 && symbol.size.length > 0 && !Array.isArray(value)){ // non pointer arrays initialized with string (char hello[] = "Hello world";)
-				value = this.#callStack.findMemoryRecord(value);
+				record = this.#callStack.findMemoryRecord(value);
 				value = this.#memsim.readRecordValue(value);
+			}
+
+			if(symbol.indirection > 0){
+				record = this.#callStack.findMemoryRecord(value);
+				record.beingPointedToBy = symbol.pointsToMemtype;
 			}
 		}
 
