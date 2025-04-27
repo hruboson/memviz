@@ -681,12 +681,14 @@ class Interpreter {
 			// there could be a better way... tbh I have no idea why this is even allowed
 			if(symbol.indirection < 1 && symbol.size.length > 0 && !Array.isArray(value)){ // non pointer arrays initialized with string (char hello[] = "Hello world";)
 				record = this.#callStack.findMemoryRecord(value);
-				value = this.#memsim.readRecordValue(value);
-			}
-
-			if(symbol.indirection > 0){
+				if(record){
+					value = this.#memsim.readRecordValue(record);
+				}
+			}else if(symbol.indirection > 0){
 				record = this.#callStack.findMemoryRecord(value);
-				record.beingPointedToBy = symbol.pointsToMemtype;
+				if(record){
+					record.beingPointedToBy = symbol.pointsToMemtype;
+				}
 			}
 		}
 
