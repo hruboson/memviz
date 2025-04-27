@@ -1230,7 +1230,7 @@ class MemVisualizerRow extends MemVisualizer {
 					if(symbol.initialized && !symbol.isFunction && !symbol.isNative && !df.records.includes(symbol)){
 						df.add(symbol);
 					}
-					if(!symbol.initialized && !symbol.isFunction && !symbol.isNative && !bf.includes(symbol)){
+					if(!symbol.initialized && !symbol.isFunction && !symbol.isNative && !bf.includes(symbol) && !symbol.type == SYMTYPE.OBJ){
 						bf.push(symbol);
 					}
 				}
