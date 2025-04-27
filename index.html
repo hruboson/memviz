@@ -145,6 +145,12 @@
 			background: #24321f;
 			z-index: 42;
 		}
+
+		.rangeErr {
+			position: absolute;
+			background: #3c231e;/*#3b3c33;*/
+			z-index: 42;
+		}
 	</style>
 
 	<!-- Rubber duck CSS -->
@@ -242,7 +248,7 @@
 				<div class="split">
 					<div id="split-editor">
 						<div id="editor" onChange="resetEditor();">int* createArrayOfIntegers(int size){
-    int* ptr = (int*) malloc(sizeof(int)*size); // allocate memory for eight chars
+    int* ptr = malloc(sizeof(int)*size);
     if (ptr == 0) {
         return 1;
     }
@@ -669,7 +675,7 @@ Split(["#split-ve", "#split-console"], {
 			const memVizShowTrueSizes = document.getElementById("visualizationTrueSizes").value == "true" ? true : false;
 
 			const memVizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
-			interpreter.updateHTML(null, document.getElementById("result"), document.getElementById("output"), memVizOptions);
+			interpreter.updateHTML(null, document.getElementById("result"), document.getElementById("output"), editor, memVizOptions);
 		}
 	}
 
@@ -737,10 +743,10 @@ Split(["#split-ve", "#split-console"], {
 			console.info("Main result: ", result);
 
 			const vizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
-			interpreter.updateHTML(result, document.getElementById("result"), document.getElementById("output"), vizOptions);
+			interpreter.updateHTML(result, document.getElementById("result"), document.getElementById("output"), editor, vizOptions);
 		}catch(e){
 			const vizOptions = new MemvizOptions(memVizStyle, memVizShowTrueSizes);
-			interpreter.updateHTML(result, document.getElementById("result"), document.getElementById("output"), vizOptions);
+			interpreter.updateHTML(result, document.getElementById("result"), document.getElementById("output"), editor, vizOptions);
 		}
 	}
 </script>
