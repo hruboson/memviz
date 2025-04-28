@@ -585,3 +585,53 @@ const bcomp_expressions_test = `int main(){
 
 	return 0;
 }`;
+
+const malloc_function_test = `int* createArrayOfIntegers(int size){
+    int* ptr = malloc(sizeof(int)*size);
+    if (ptr == 0) {
+        return 1;
+    }
+
+    // assign values to each address allocated
+    for(int i = 0; i < size; i++){
+        *(ptr+i) = (i+1)*10;
+    }
+    
+    return ptr;
+}
+
+int main() {
+    int* arrayPtr = createArrayOfIntegers(5);
+
+    printf("%d", *arrayPtr);
+
+    free(arrayPtr); // free allocated memory
+
+	printf("done");
+    return 0;
+}`;
+
+const malloc_function_broken_test = `int* createArrayOfIntegers(int size){
+    int* ptr = malloc(sizeof(int)*size);
+    if (ptr == 0) {
+        return 1;
+    }
+
+    // assign values to each address allocated
+    for(int i = 0; i < size+1; i++){
+        *(ptr+i) = (i+1)*10;
+    }
+    
+    return ptr;
+}
+
+int main() {
+    int* arrayPtr = createArrayOfIntegers(5);
+
+    printf("%d", *arrayPtr);
+
+    free(arrayPtr); // free allocated memory
+
+	printf("done");
+    return 0;
+}`;
