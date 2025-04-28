@@ -151,11 +151,11 @@ class Memsim {
 
 		//TODO struct
 		if(record.size.length > 0){ // array
-			this.setArrayValue(record, value, region);
+			this.#setArrayValue(record, value, region);
 		}else if(record.indirection > 0){
-			record.address = this.setPointerValue(record, value, region);
+			record.address = this.#setPointerValue(record, value, region);
 		}else{ 
-			record.address = this.setPrimitiveValue(record, value, region);
+			record.address = this.#setPrimitiveValue(record, value, region);
 		}
 	}
 
@@ -166,52 +166,52 @@ class Memsim {
 	 * @param {MEMREGION} region
 	 * @return {integer} Address of allocated memory
 	 */
-	setPrimitiveValue(record, value, region){
+	#setPrimitiveValue(record, value, region){
 		switch(record.memtype){
 			case DATATYPE.bool:
-				return this.setBoolValue(value, region, record.address);
+				return this.#setBoolValue(value, region, record.address);
 
 			case DATATYPE.char:
-				return this.setCharValue(value, region, record.address);
+				return this.#setCharValue(value, region, record.address);
 
 			case DATATYPE.uchar:
-				return this.setUCharValue(value, region, record.address);
+				return this.#setUCharValue(value, region, record.address);
 
 			case DATATYPE.short:
-				return this.setShortValue(value, region, record.address);
+				return this.#setShortValue(value, region, record.address);
 
 			case DATATYPE.ushort:
-				return this.setUShortValue(value, region, record.address);
+				return this.#setUShortValue(value, region, record.address);
 
 			case DATATYPE.int:
-				return this.setIntValue(value, region, record.address);
+				return this.#setIntValue(value, region, record.address);
 
 			case DATATYPE.uint:
-				return this.setUIntValue(value, region, record.address);
+				return this.#setUIntValue(value, region, record.address);
 
 			case DATATYPE.long:
-				return this.setLongValue(value, region, record.address);
+				return this.#setLongValue(value, region, record.address);
 
 			case DATATYPE.ulong:
-				return this.setULongValue(value, region, record.address);
+				return this.#setULongValue(value, region, record.address);
 
 			case DATATYPE.longlong:
-				return this.setLongLongValue(value, region, record.address);
+				return this.#setLongLongValue(value, region, record.address);
 
 			case DATATYPE.ulonglong:
-				return this.setULongLongValue(value, region, record.address);
+				return this.#setULongLongValue(value, region, record.address);
 
 			case DATATYPE.float:
-				return this.setFloatValue(value, region, record.address);
+				return this.#setFloatValue(value, region, record.address);
 
 			case DATATYPE.double:
-				return this.setDoubleValue(value, region, record.address);
+				return this.#setDoubleValue(value, region, record.address);
 
 			case DATATYPE.longdouble:
-				return this.setLongDoubleValue(value, region, record.address);
+				return this.#setLongDoubleValue(value, region, record.address);
 
 			case DATATYPE.void:{
-				return this.setVoidValue(record, value, region);
+				return this.#setVoidValue(record, value, region);
 			}
 
 			default:
@@ -225,7 +225,7 @@ class Memsim {
 	 * @param {Array} value JS array
 	 * @param {MEMREGION} region
 	 */
-	setArrayValue(record, value, region){
+	#setArrayValue(record, value, region){
 		// determine derived type of array
 		const memtype = record.memtype;
 		const memsize = record.memsize;
@@ -241,7 +241,7 @@ class Memsim {
 			const flatValue = value.flat(Infinity);
 			for(let i = 0; i < flatValue.length; i++){
 				const dummySym = { memtype: memtype, address: record.address + i*MEMSIZES[memtype], identifier: "array" };
-				const address = this.setPrimitiveValue(dummySym, flatValue[i], region);
+				const address = this.#setPrimitiveValue(dummySym, flatValue[i], region);
 			}
 		}
 	}
@@ -254,9 +254,9 @@ class Memsim {
 	 * @param {MEMREGION} region
 	 * @return {integer} address
 	 */
-	setPointerValue(record, value, region){
+	#setPointerValue(record, value, region){
 		// pointer is 32 bits
-		return this.setIntValue(value, region, record.address);
+		return this.#setIntValue(value, region, record.address);
 	}
 
 	/**
@@ -274,57 +274,57 @@ class Memsim {
 
 		//TODO struct
 		if(record.size.length > 0 && record.memtype != DATATYPE.void){ // array
-			return this.readArrayValue(record);
+			return this.#readArrayValue(record);
 		}else if(record.indirection > 0){
-			return this.readPointerValue(record);
+			return this.#readPointerValue(record);
 		}else {
-			return this.readPrimitiveValue(record);
+			return this.#readPrimitiveValue(record);
 		}
 	}
 
-	readPrimitiveValue(record){
+	#readPrimitiveValue(record){
 		switch(record.memtype){
 			case DATATYPE.bool:
-				return this.readBoolValue(record.address);
+				return this.#readBoolValue(record.address);
 
 			case DATATYPE.char:
-				return this.readCharValue(record.address);
+				return this.#readCharValue(record.address);
 
 			case DATATYPE.uchar:
-				return this.readUCharValue(record.address);
+				return this.#readUCharValue(record.address);
 
 			case DATATYPE.short:
-				return this.readShortValue(record.address);
+				return this.#readShortValue(record.address);
 
 			case DATATYPE.ushort:
-				return this.readUShortValue(record.address);
+				return this.#readUShortValue(record.address);
 
 			case DATATYPE.int:
-				return this.readIntValue(record.address);
+				return this.#readIntValue(record.address);
 
 			case DATATYPE.uint:
-				return this.readUIntValue(record.address);
+				return this.#readUIntValue(record.address);
 
 			case DATATYPE.long:
-				return this.readLongValue(record.address);
+				return this.#readLongValue(record.address);
 
 			case DATATYPE.ulong:
-				return this.readULongValue(record.address);
+				return this.#readULongValue(record.address);
 
 			case DATATYPE.longlong:
-				return this.readLongLongValue(record.address);
+				return this.#readLongLongValue(record.address);
 
 			case DATATYPE.ulonglong:
-				return this.readULongLongValue(record.address);
+				return this.#readULongLongValue(record.address);
 
 			case DATATYPE.float:
-				return this.readFloatValue(record.address);
+				return this.#readFloatValue(record.address);
 
 			case DATATYPE.double:
-				return this.readDoubleValue(record.address);
+				return this.#readDoubleValue(record.address);
 
 			case DATATYPE.longdouble:
-				return this.readLongDoubleValue(record.address);
+				return this.#readLongDoubleValue(record.address);
 
 			case DATATYPE.void:{
 				let size = record.memsize;
@@ -339,16 +339,16 @@ class Memsim {
 						dummyRecord.memtype = record.beingPointedToBy;
 						dummyRecord.dimesion = 1;
 
-						return this.readArrayValue(dummyRecord);
+						return this.#readArrayValue(dummyRecord);
 					}
 				}
-				return this.readVoidValue(size, record.address);
+				return this.#readVoidValue(size, record.address);
 			}
 		}
 
 	}
 
-	readArrayValue(record){
+	#readArrayValue(record){
 		let arr = [];
 
 		const noElements = record.size.reduce((res, item) => res *= item);
@@ -357,7 +357,7 @@ class Memsim {
 		for(let i = 0; i < noElements; i++){
 			const addr = record.address + i * MEMSIZES[record.memtype];
 			const dummyrecord = { memtype: record.memtype, address: addr };
-			const value = this.readPrimitiveValue(dummyrecord);
+			const value = this.#readPrimitiveValue(dummyrecord);
 			arr.push(value);
 		}
 
@@ -368,8 +368,8 @@ class Memsim {
 		return arr;
 	}
 
-	readPointerValue(record){
-		return this.readIntValue(record.address);
+	#readPointerValue(record){
+		return this.#readIntValue(record.address);
 	}
 
 	/******************************
@@ -519,7 +519,7 @@ class Memsim {
 	// VOID // (for void pointers)
 	//////////
 
-	setVoidValue(record, value, region){
+	#setVoidValue(record, value, region){
 		const bytes = [];
 		const type = record.beingPointedToBy ? record.beingPointedToBy : DATATYPE.int;
 			if(value == undefined || value == null){
@@ -587,17 +587,17 @@ class Memsim {
 
 		let firstAddress;
 		for(let i = 0; i < record.memsize; i++){
-			const newAddress = this.setUCharValue(bytes[i], region, record.address+i);
+			const newAddress = this.#setUCharValue(bytes[i], region, record.address+i);
 			firstAddress = firstAddress ? firstAddress : newAddress;
 		}
 		return firstAddress;
 	}
 
-	readVoidValue(size, address){
+	#readVoidValue(size, address){
 		const bytes = [];
 		let undef = true;
 		for(let i = 0; i < size; i++){
-			bytes.push(this.readUCharValue(address+i));
+			bytes.push(this.#readUCharValue(address+i));
 			if(bytes[i] != undefined) undef = false;
 		}
 		if(undef) return undefined;
@@ -614,20 +614,20 @@ class Memsim {
 	//////////
 	// _Bool has size of char
 
-	setBoolValue(value, region, address){
-		return this.setCharValue(value, region, address);
+	#setBoolValue(value, region, address){
+		return this.#setCharValue(value, region, address);
 	}
 
-	readBoolValue(address){
-		return this.readCharValue(address);
+	#readBoolValue(address){
+		return this.#readCharValue(address);
 	}
 
 	//////////
 	// CHAR //
 	//////////
 
-	setCharValue(value, region, address) {
-		value = this.checkValueOverflow(value, CHAR_MIN, CHAR_MAX, 0xFF, "Char");
+	#setCharValue(value, region, address) {
+		value = this.#checkValueOverflow(value, CHAR_MIN, CHAR_MAX, 0xFF, "Char");
 
 		const size = CHARSIZE;
 
@@ -651,7 +651,7 @@ class Memsim {
 		return addr;
 	}
 
-	readCharValue(address){
+	#readCharValue(address){
 		const s = CHARSIZE;
 		const buffer = new ArrayBuffer(s);
 		const view = new DataView(buffer);
@@ -669,8 +669,8 @@ class Memsim {
 	// UCHAR //
 	///////////
 
-	setUCharValue(value, region, address) {
-		value = this.checkValueOverflow(value, 0, UCHAR_MAX, 0xFF, "UChar");
+	#setUCharValue(value, region, address) {
+		value = this.#checkValueOverflow(value, 0, UCHAR_MAX, 0xFF, "UChar");
 
 		const size = CHARSIZE;
 
@@ -694,7 +694,7 @@ class Memsim {
 		return addr;
 	}
 
-	readUCharValue(address){
+	#readUCharValue(address){
 		const s = CHARSIZE;
 		const buffer = new ArrayBuffer(s);
 		const view = new DataView(buffer);
@@ -712,8 +712,8 @@ class Memsim {
 	// SHORT //
 	///////////
 
-	setShortValue(value, region, address){
-		value = this.checkValueOverflow(value, SHORT_MIN, SHORT_MAX, 0xFFFF, "Integer");
+	#setShortValue(value, region, address){
+		value = this.#checkValueOverflow(value, SHORT_MIN, SHORT_MAX, 0xFFFF, "Integer");
 
 		const size = SHORTSIZE;
 
@@ -737,7 +737,7 @@ class Memsim {
 		return addr;
 	}
 
-	readShortValue(address){
+	#readShortValue(address){
 		const size = SHORTSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -756,8 +756,8 @@ class Memsim {
 	// USHORT //
 	////////////
 
-	setUShortValue(value, region, address){
-		value = this.checkValueOverflow(value, 0, USHORT_MAX, 0xFFFF, "Integer");
+	#setUShortValue(value, region, address){
+		value = this.#checkValueOverflow(value, 0, USHORT_MAX, 0xFFFF, "Integer");
 
 		const size = SHORTSIZE;
 
@@ -781,7 +781,7 @@ class Memsim {
 		return addr;
 	}
 
-	readUShortValue(address){
+	#readUShortValue(address){
 		const size = SHORTSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -799,8 +799,8 @@ class Memsim {
 	// INT //
 	/////////
 
-	setIntValue(value, region, address){
-		value = this.checkValueOverflow(value, INT_MIN, INT_MAX, 0xFFFFFFFF, "Integer");
+	#setIntValue(value, region, address){
+		value = this.#checkValueOverflow(value, INT_MIN, INT_MAX, 0xFFFFFFFF, "Integer");
 
 		const size = INTSIZE;
 
@@ -824,7 +824,7 @@ class Memsim {
 		return addr;
 	}
 
-	readIntValue(address) {
+	#readIntValue(address) {
 		const size = INTSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -842,8 +842,8 @@ class Memsim {
 	// UINT //
 	//////////
 
-	setUIntValue(value, region, address){
-		value = this.checkValueOverflow(value, 0, UINT_MAX, 0xFFFFFFFF, "Integer");
+	#setUIntValue(value, region, address){
+		value = this.#checkValueOverflow(value, 0, UINT_MAX, 0xFFFFFFFF, "Integer");
 
 		const size = INTSIZE;
 
@@ -867,7 +867,7 @@ class Memsim {
 		return addr;
 	}
 
-	readUIntValue(address) {
+	#readUIntValue(address) {
 		const size = INTSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -885,32 +885,32 @@ class Memsim {
 	// LONG //
 	//////////
 
-	setLongValue(value, region, address){
-		return this.setIntValue(value, region, address);
+	#setLongValue(value, region, address){
+		return this.#setIntValue(value, region, address);
 	}
 
-	readLongValue(address){
-		return this.readIntValue(address);
+	#readLongValue(address){
+		return this.#readIntValue(address);
 	}
 
 	///////////
 	// ULONG //
 	///////////
 
-	setULongValue(value, region, address){
-		return this.setUIntValue(value, region, address);
+	#setULongValue(value, region, address){
+		return this.#setUIntValue(value, region, address);
 	}
 
-	readULongValue(address){
-		return this.readUIntValue(address);
+	#readULongValue(address){
+		return this.#readUIntValue(address);
 	}
 
 	///////////////
 	// LONG LONG //
 	///////////////
 
-	setLongLongValue(value, region, address){
-		value = this.checkValueOverflow(value, LLONG_MIN, LLONG_MAX, 0xFFFFFFFFFFFFFFFFn, "Integer");
+	#setLongLongValue(value, region, address){
+		value = this.#checkValueOverflow(value, LLONG_MIN, LLONG_MAX, 0xFFFFFFFFFFFFFFFFn, "Integer");
 
 		const size = LONGLONGSIZE;
 
@@ -934,7 +934,7 @@ class Memsim {
 		return addr;
 	}
 
-	readLongLongValue(address){
+	#readLongLongValue(address){
 		const size = LONGLONGSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -952,8 +952,8 @@ class Memsim {
 	// U LONG LONG //
 	/////////////////
 
-	setULongLongValue(value, region, address){
-		value = this.checkValueOverflow(value, 0n, ULLONG_MAX, 0xFFFFFFFFFFFFFFFFn, "Integer");
+	#setULongLongValue(value, region, address){
+		value = this.#checkValueOverflow(value, 0n, ULLONG_MAX, 0xFFFFFFFFFFFFFFFFn, "Integer");
 
 		const size = LONGLONGSIZE;
 
@@ -977,7 +977,7 @@ class Memsim {
 		return addr;
 	}
 
-	readULongLongValue(address){
+	#readULongLongValue(address){
 		const size = LONGLONGSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -995,7 +995,7 @@ class Memsim {
 	// FLOAT //
 	///////////
 
-	setFloatValue(value, region, address){
+	#setFloatValue(value, region, address){
 		const size = FLOATSIZE;
 
 		let addr = address;
@@ -1018,7 +1018,7 @@ class Memsim {
 		return addr;
 	}
 
-	readFloatValue(address){
+	#readFloatValue(address){
 		const size = FLOATSIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -1036,7 +1036,7 @@ class Memsim {
 	// DOUBLE //
 	////////////
 
-	setDoubleValue(value, region, address){
+	#setDoubleValue(value, region, address){
 		const size = DOUBLESIZE;
 
 		let addr = address;
@@ -1059,7 +1059,7 @@ class Memsim {
 		return addr;
 	}
 
-	readDoubleValue(address){
+	#readDoubleValue(address){
 		const size = DOUBLESIZE;
 		const buffer = new ArrayBuffer(size);
 		const view = new DataView(buffer);
@@ -1077,14 +1077,14 @@ class Memsim {
 	// LONG DOUBLE //
 	/////////////////
 
-	setLongDoubleValue(value, region, address){
+	#setLongDoubleValue(value, region, address){
 		// according to standard, the long double has to be AT LEAST as precise as double
 		// (ISO/IEC 9899:1999), Section 6.2.5 — Types
-		return this.setDoubleValue(value, region, address);
+		return this.#setDoubleValue(value, region, address);
 	}
 
-	readLongDoubleValue(address){
-		return this.readDoubleValue(address);
+	#readLongDoubleValue(address){
+		return this.#readDoubleValue(address);
 	}
 
 	/************************************
@@ -1100,7 +1100,7 @@ class Memsim {
 	 * @param {string} type Only for messaging purposes
 	 * @param {Object} loc
 	 */
-	checkValueOverflow(value, min, max, mask, type, loc=undefined){
+	#checkValueOverflow(value, min, max, mask, type, loc=undefined){
 		if(value < min || value > max){
 			this.#warningSystem.add(`${type} overflow, truncating value!`, WTYPE.OVERFLOW, loc); // loc unknown - maybe pass it as argument??
 			return value = value & mask; // truncate to n bits

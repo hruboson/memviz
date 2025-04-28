@@ -105,7 +105,7 @@ class MemvizOptions {
 class Memviz {
 
 	constructor(memsim, callStack, container, options){
-		if (!(container instanceof Element)) throw new AppError(`Container must be a HTML element!`);
+		if(!(container instanceof Element)) throw new AppError(`Container must be a HTML element!`);
 
 		this.memsim = memsim;
 		this.callStack = callStack;
