@@ -1510,7 +1510,7 @@ class Interpreter {
 
 			}else if(isclass(result, "AppError") || result instanceof Error){
 				resultDiv.classList.add("bg-secondary");
-				resultDiv.innerHTML += "App Error. Who shot himself in the foot? The developer.\nTry sending him this message: \n<kbd>" + result + "</kbd>";
+				resultDiv.innerHTML += "Application error. This is not your fault.\n<kbd>" + result + "</kbd>";
 			}else{
 				resultDiv.innerHTML += result;
 				resultDiv.classList.add("bg-success");
