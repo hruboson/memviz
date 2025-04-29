@@ -354,8 +354,6 @@ class Interpreter {
 	 * @return {integer} result of main function
 	 */
 	interpret(breakstop){
-		this.resetHTML(); // resets console output
-
 		this.#breakstop = breakstop; // get breakstop from user (HTML)
 
 		const mainFnc = this.#symtableGlobal.lookup(NAMESPACE.ORDS, "main");
