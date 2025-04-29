@@ -1363,7 +1363,10 @@ class Interpreter {
 				let value;
 				value = otherArgs[i];
 				if(isclass(value, "PointerValue")) value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
-				if(has(value, "address")) value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(this.#memsim.readRecordValue(value)));
+				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
+				if(!isNaN(value)){
+					value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(value));
+				}
 				i++;
 				return CArrayToJsString(value);
 			}
