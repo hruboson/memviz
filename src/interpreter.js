@@ -4,6 +4,58 @@
  */
 
 /**
+ * Global array of visitor functions, will aply to interpreter and semantic analyzer
+ * @global
+ * @const
+ */
+const ASTVISITORFUNCTIONS = [
+	"visitArr",
+	"visitBAssignExpr",
+	"visitBArithExpr",
+	"visitBCompExpr",
+	"visitBLogicExpr",
+	"visitBreak",
+	"visitCExpr",
+	"visitCStmt",
+	"visitCaseStmt",
+	"visitCastExpr",
+	"visitCondExpr",
+	"visitContinue",
+	"visitDeclarator",
+	"visitDeclaration",
+	"visitDesignator",
+	"visitDoWhileLoop",
+	"visitEnum",
+	"visitEnumerator",
+	"visitFnc",
+	"visitFncCallExpr",
+	"visitForLoop",
+	"visitGoto",
+	"visitIStmt",
+	"visitIdentifier",
+	"visitIfStmt",
+	"visitInitializer",
+	"visitJStmt",
+	"visitLabelName",
+	"visitLStmt",
+	"visitMemberAccessExpr",
+	"visitNOP",
+	"visitPtrMemberAccessExpr",
+	"visitPointer",
+	"visitReturn",
+	"visitSizeOfExpr",
+	"visitSStmt",
+	"visitStruct",
+	"visitSubscriptExpr",
+	"visitSwitchStmt",
+	"visitTagname",
+	"visitTypedef",
+	"visitUExpr",
+	"visitUnion",
+	"visitWhileLoop",
+];
+
+/**
  * Interpreter class, acts as a Visitor for AST
  * @description We are pretending to be "compiling" to target machine code. The interpreter first analyses the code using the Semantic analyzer and either throws
  * 				an error or allows for further interpretation of AST.
@@ -12,6 +64,8 @@
 class Interpreter {
 
 	constructor(){ // todo move memviz to updateHTML only, I dont want any parameters here
+		interfaces(this, ASTVISITORFUNCTIONS);
+
 		this.#symtableGlobal = new Symtable("global", "global");
 		this.#symtableStack = new Stack(); // only for semantic analyzer
 		this.#symtableStack.push(this.#symtableGlobal);
@@ -785,6 +839,10 @@ class Interpreter {
 	}
 
     visitEnum(enumerator){
+	}
+
+	visitEnumerator(enumerator){
+
 	}
 
 	visitFnc(fnc, args){

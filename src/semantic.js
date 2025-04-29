@@ -95,6 +95,8 @@ class StringTable{
  */
 class Semantic {
 	constructor(symtableStack, warningSystem){
+		interfaces(this, ASTVISITORFUNCTIONS);
+
 		this.symtableStack = symtableStack;
 		this.warningSystem = warningSystem;
 	}
@@ -486,6 +488,10 @@ class Semantic {
 			i = value + 1;
 		}
 		this.addEnum(name, list);
+	}
+
+	visitEnumerator(enumerator){
+
 	}
 
 	visitFnc(fnc){

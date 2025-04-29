@@ -35,6 +35,21 @@ function intfc(obj, function_name, parameters = []){
 }
 
 /**
+ * Declares function set a class must implement. Call this function in class constructor to get the effect.
+ * @param {Object} obj Instance of class (it will always be `this`)
+ * @param {Array.<string>} functions Array of names of functions the class will have to implement.
+ * @param {Array.<Array.<string>>} [parameters=[]] Array of array of parameters for functions.
+ */
+function interfaces(obj, functions, parameters = []){
+	let i = 0;
+	for(fnc of functions){
+		let params = [];
+		if(parameters[i]) params = parameters[i];
+		intfc(obj, fnc, params);
+	}
+}
+
+/**
  * Implementation of simple stack
  * @description JS array stack functions don't include peek(), which is what I ultimately need the most.
  * @class Stack
