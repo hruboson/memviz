@@ -403,14 +403,16 @@ class Memviz {
 	 * @param {Number} y
 	 */
 	vizPrimitiveRecord(record, parent, style, x, y){
+		const isChar = record.memtype == DATATYPE.char || record.memtype == DATATYPE.uchar;
 		const height = Memviz.squareXYlen + Memviz.labelHeight * 2;
-		const labelAbove = record.name ? record.name : "";
-		const labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
+		const name = record.name ? record.name : ""
+		const labelAbove = name;
+		let labelBelow = record.specifiers ? record.specifiers.join(' ') : record.memtype;
 		const ratioToInt = this.options.trueSizes ? MEMSIZES[DATATYPE.int]/record.memsize : 1;
 		const width = Memviz.squareXYlen/ratioToInt;
 		let value;
 		if(record.address){
-			value = this.memsim.readRecordValue(record);
+			value = isChar ? CCharToJsString(this.memsim.readRecordValue(record)) : this.memsim.readRecordValue(record);
 		}
 
 		this.vizValueCell(
@@ -548,6 +550,8 @@ class Memviz {
 		//Scale text size based on how many digits there are in the value and the width of the cell
 		const baseFontSize = cellStyle.fontSize || 14;
 		let adjustedFontSize = baseFontSize;
+		let adjustedFontSizeAbove = Memviz.labelAboveStyle.fontSize;
+		let adjustedFontSizeBelow = Memviz.labelBelowStyle.fontSize;
 
 		if(cellValue != undefined && cellValue != null){
 			const strValue = cellValue.toString();
@@ -560,9 +564,33 @@ class Memviz {
 			// inside padding
 			const availableWidth = width * 0.9;
 
-			if (totalTextWidth > availableWidth) {
+			if(totalTextWidth > availableWidth){
 				const scaleFactor = availableWidth / totalTextWidth;
 				adjustedFontSize = Math.max(Memviz.smallestFontSize, baseFontSize * scaleFactor); // smallest possible font size is 7
+			}
+		}
+
+		if(labelAbove != undefined){
+			const strLabel = labelAbove.toString();
+			const approxCharWidth = 0.6 * adjustedFontSizeAbove;
+			const totalTextWidth = strLabel.length * approxCharWidth;
+			const availableWidth = width * 0.9;
+
+			if (totalTextWidth > availableWidth) {
+				const scaleFactor = availableWidth / totalTextWidth;
+				adjustedFontSizeAbove = Math.max(Memviz.smallestFontSize, adjustedFontSizeAbove * scaleFactor);
+			}
+		}
+
+		if(labelBelow != undefined){
+			const strLabel = labelBelow.toString();
+			const approxCharWidth = 0.6 * adjustedFontSizeBelow;
+			const totalTextWidth = strLabel.length * approxCharWidth;
+			const availableWidth = width * 0.9;
+
+			if (totalTextWidth > availableWidth) {
+				const scaleFactor = availableWidth / totalTextWidth;
+				adjustedFontSizeBelow = Math.max(Memviz.smallestFontSize, adjustedFontSizeBelow * scaleFactor);
 			}
 		}
 
@@ -579,20 +607,24 @@ class Memviz {
 			style: copyCellStyle,
 		});
 
+		const copyLabelAboveStyle = Memviz.labelAboveStyle;
+		copyLabelAboveStyle.fontSize = adjustedFontSizeAbove;
 		const labelAboveCell = this.graph.insertVertex({
 			parent: parent,
 			position: [x, y - Memviz.labelHeight],
 			size: [width, Memviz.labelHeight],
 			value: labelAbove,
-			style: Memviz.labelAboveStyle,
+			style: copyLabelAboveStyle,
 		});
 
+		const copyLabelBelowStyle = Memviz.labelBelowStyle;
+		copyLabelBelowStyle.fontSize = adjustedFontSizeBelow;
 		const labelBelowCell = this.graph.insertVertex({
 			parent: parent,
 			position: [x, y + height], // Position below the square
 			size: [width, Memviz.labelHeight],
 			value: labelBelow,
-			style: Memviz.labelBelowStyle,
+			style: copyLabelBelowStyle,
 		});
 
 		this.symbols.set(cellAddress, new VizCellValue(cellAddress, valueBox));
