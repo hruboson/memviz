@@ -193,6 +193,9 @@
 			</div>
 			<div class="col-6 text-end">
 				<span id="debugInfo" style="visibility: visible"> <!-- on release change to hidden -->
+					<input type="number" class="form-control" style="width: 80px; display: inline-block;" 
+															  onchange="breakEditor = parseInt(this.value) || 0;" 
+															  placeholder="Break line" title="Set breakpoint line number">
 					<button class="btn btn-primary" onclick="execute(editor.getValue(), EXEOPT.PARSE)">PARSE</button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#astOffcanvas" aria-controls="astOffcanvas">AST</button>
 					<button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#symtableOffcanvas" aria-controls="symtableOffcanvas">SYMTAB</button>
@@ -234,6 +237,7 @@
 						<button class="dropdown-item" type="button" onclick="setExample(if_example)">if statement</button>
 						<button class="dropdown-item" type="button" onclick="setExample(switch_example)">switch statement</button>
 						<div class="dropdown-divider"></div>
+						<button class="dropdown-item" type="button" onclick="setExample(ackermann_example)">ackermann function</button>
 						<button class="dropdown-item" type="button" onclick="setExample(tree_example)">tree</button>
 						<button class="dropdown-item" type="button" onclick="setExample(infinite_recursion_example)">infinite recursion</button>
 						<button class="dropdown-item" type="button" onclick="setExample(different_memory_regions_example)">memory regions</button>
@@ -581,7 +585,7 @@ Split(["#split-ve", "#split-console"], {
 	 * @global
 	 * @type {integer}
 	 */
-	var breaklineEditor = 0;
+	var breaklineEditor;
 
 	/**
 	 * @description Removes editor highlights
