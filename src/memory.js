@@ -483,10 +483,7 @@ class Memsim {
 
 		// move memory pointer
 		if(region == MEMREGION.STACK){
-			if (address == this.stackPointer){
-				this.stackPointer += size;
-			}
-			// Note: We don't handle "holes" in stack memory - that would require more complex management
+			this.stackPointer += size;
 		}
 	}
 
