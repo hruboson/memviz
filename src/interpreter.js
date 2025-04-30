@@ -521,6 +521,9 @@ class Interpreter {
 		}
 
 		if(has(rval, "address")){
+			if(rval.indirection > 0){
+				coeVar = MEMSIZES[rval.pointsToMemtype];
+			}
 			if(rval.size.length > 0){
 				coeVar = MEMSIZES[rval.memtype];
 				coeSide = "right";
