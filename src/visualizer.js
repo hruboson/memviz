@@ -667,7 +667,8 @@ class Memviz {
 		const root = this.root;
 		let pairsXcoords = [];
 
-		for (let pair of this.pointerPairs) {
+		const reversedPointerPairs = this.pointerPairs.reverse(); // by reversing there is smaller chance of edges being intercepted by other edges
+		for (let pair of reversedPointerPairs) {
 			// first determine where to point
 			const targetCellValue = this.symbols.get(pair.to.address);
 			if (!targetCellValue) { console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); return; };
