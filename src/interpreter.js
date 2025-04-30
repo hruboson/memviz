@@ -507,6 +507,21 @@ class Interpreter {
 		let lval = this.evaluateExprArray(expr.left);
 		let coeVar = 1; // for pointer arithmetic
 
+		if(has(lval, "address")){
+			if(lval.indirection > 0){
+				coeVar = MEMSIZES[lval.pointsToMemtype];
+			}
+			if(lval.size.length > 0){
+				lval = new PointerValue(lval.address, lval.memtype);
+			}else{
+				lval = this.#memsim.readRecordValue(lval); // get the value
+			}
+		}
+
+		if(has(rval, "address")){
+			rval = this.#memsim.readRecordValue(rval); // get the value
+		}
+
 		// special case for pointer arithmetic
 		// ! known bug with pointer arithmetic: after casting to different sized type, the new address is not calculated correctly
 		if(isclass(lval, "PointerValue")){
@@ -518,17 +533,6 @@ class Interpreter {
 				default:
 					throw new AppError("This should have been handled in semantic!");
 			}
-		}
-
-		if(has(lval, "address")){
-			if(lval.indirection > 0){
-				coeVar = MEMSIZES[lval.pointsToMemtype];
-			}
-			lval = this.#memsim.readRecordValue(lval); // get the value
-		}
-
-		if(has(rval, "address")){
-			rval = this.#memsim.readRecordValue(rval); // get the value
 		}
 
 		// concrete operations
