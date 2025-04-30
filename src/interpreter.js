@@ -512,26 +512,17 @@ class Interpreter {
 				coeVar = MEMSIZES[lval.pointsToMemtype];
 			}
 			if(lval.size.length > 0){
-				lval = new PointerValue(lval.address, lval.memtype);
+				lval = lval.address;
 			}else{
 				lval = this.#memsim.readRecordValue(lval); // get the value
 			}
 		}
 
 		if(has(rval, "address")){
-			rval = this.#memsim.readRecordValue(rval); // get the value
-		}
-
-		// special case for pointer arithmetic
-		// ! known bug with pointer arithmetic: after casting to different sized type, the new address is not calculated correctly
-		if(isclass(lval, "PointerValue")){
-			switch(expr.op){
-				case '+':
-					return lval.value + MEMSIZES[lval.memtype];
-				case '-':
-					return lval.value - MEMSIZES[lval.memtype];
-				default:
-					throw new AppError("This should have been handled in semantic!");
+			if(rval.size.length > 0){
+				rval = rval.address;
+			}else{
+				rval = this.#memsim.readRecordValue(rval); // get the value
 			}
 		}
 
