@@ -1172,7 +1172,8 @@ class Memsim {
 		let dump = `Addr | Hex Addr | Binary   | Hex | Decimal | Region\n`;
 		dump += "-".repeat(addrWidth + hexAddrWidth + valueWidth + hexValueWidth + regionWidth + 13) + "\n";
 
-		const sortedByAdress = [...this.memory.entries()].sort(([a], [b]) => a + b);
+		const sortedByAdressTmp = [...this.memory.entries()].sort(([a], [b]) => a - b);
+		const sortedByAdress = [...sortedByAdressTmp].reverse();
 		for (const [addr, data] of sortedByAdress) {
 			let hexAddr = "0x" + addr.toString(16).toUpperCase().padStart(4, '0');
 			let binValue = data.value != undefined ? data.value.toString(2).padStart(valueWidth, '0') : " ".repeat(valueWidth);
