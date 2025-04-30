@@ -506,6 +506,7 @@ class Interpreter {
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
 		let coeVar = 1; // for pointer arithmetic
+		let coeSide = "left";
 
 		if(has(lval, "address")){
 			if(lval.indirection > 0){
@@ -522,6 +523,7 @@ class Interpreter {
 		if(has(rval, "address")){
 			if(rval.size.length > 0){
 				coeVar = MEMSIZES[rval.memtype];
+				coeSide = "right";
 				rval = rval.address;
 			}else{
 				rval = this.#memsim.readRecordValue(rval); // get the value
@@ -532,9 +534,17 @@ class Interpreter {
 		switch(expr.op){
 			case '+':
 				if(Array.isArray(lval)) return lval[rval];
-				return lval + rval*coeVar;
+				if(coeSide == "left"){
+					return lval + rval*coeVar;
+				}else{
+					return lval*coeVar + rval;
+				}
 			case '-':
-				return lval - rval*coeVar;
+				if(coeSide == "left"){
+					return lval - rval*coeVar;
+				}else{
+					return lval*coeVar - rval;
+				}
 			case '*':
 				return lval * rval;
 			case '/':
