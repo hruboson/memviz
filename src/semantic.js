@@ -219,6 +219,9 @@ class Semantic {
 				if(declChild.kind == DECLTYPE.ARR){
 					if(declChild.arrSizeExp){ // get size from expression in brackets
 						const exprValue = declChild.arrSizeExp.accept(this);
+						if(isNaN(exprValue)){
+							throw new NSError(`variable array length`, declarator.loc);
+						}
 						if(exprValue < 0){
 							throw new SError(`Invalid array size`, declarator.loc);
 						}
