@@ -415,11 +415,17 @@ class Memsim {
 		switch(region){
 			case MEMREGION.STACK:
 				this.stackPointer -= size;
+				if(this.stackPointer < this.heapPointer){
+					throw new RTError("Stack overflow!");
+				}
 				this.#storeMemory(this.stackPointer, size, MEMREGION.STACK);
 				addr = this.stackPointer;
 				break;
 			case MEMREGION.HEAP:
 				addr = this.heapPointer;
+				if(this.heapPointer > this.stackPointer){
+					throw new RTError("Memory corruption!");
+				}
 				this.#storeMemory(this.heapPointer, size, MEMREGION.HEAP);
 				this.heapPointer += size;
 				break;
