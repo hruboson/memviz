@@ -552,6 +552,7 @@ class Interpreter {
 				return lval * rval;
 			case '/':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
+				if(isFloat(lval) || isFloat(rval)) return lval / rval;
 				return Math.floor(lval / rval);
 			case '%':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
