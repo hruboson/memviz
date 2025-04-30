@@ -149,6 +149,15 @@ function has(obj, field){
 }
 
 /**
+ * Checks if number is a float
+ * @param {number} num
+ * @return {boolean}
+ */
+function isFloat(num){
+    return Number(num) == num && num % 1 != 0;
+}
+
+/**
  * Zips any number of iterables. It will always zip() the largest Iterable returning undefined for shorter arrays.
  * @param  {...Iterable<any>} iterables
  * @see {@link https://stackoverflow.com/questions/22015684/zip-arrays-in-javascript#72221748}
