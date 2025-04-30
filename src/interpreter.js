@@ -512,6 +512,7 @@ class Interpreter {
 				coeVar = MEMSIZES[lval.pointsToMemtype];
 			}
 			if(lval.size.length > 0){
+				coeVar = MEMSIZES[lval.memtype];
 				lval = lval.address;
 			}else{
 				lval = this.#memsim.readRecordValue(lval); // get the value
@@ -520,6 +521,7 @@ class Interpreter {
 
 		if(has(rval, "address")){
 			if(rval.size.length > 0){
+				coeVar = MEMSIZES[rval.memtype];
 				rval = rval.address;
 			}else{
 				rval = this.#memsim.readRecordValue(rval); // get the value
