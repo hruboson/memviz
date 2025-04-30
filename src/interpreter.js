@@ -272,6 +272,13 @@ class Interpreter {
 	#breakstop = 0;
 
 	/**
+	 * Map of user typedefs
+	 * @type {Map.<string, string>}
+	 * @public
+	 */
+	userTypesMap;
+
+	/**
 	 * Returns types defined by user (typedefs)
 	 * @return {Array.<string>} User-defined types
 	 */
@@ -304,6 +311,8 @@ class Interpreter {
 		}catch(e){
 			throw new PError(e.message);
 		}
+		this.userTypesMap = this.#parser.Parser.prototype.yy.userTypesMap;
+		this.#semanticAnalyzer.attachUserTypesMap(this.userTypesMap);
 		return this;
 	}
 

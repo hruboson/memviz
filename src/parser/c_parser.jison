@@ -35,6 +35,7 @@
 	
 	parser.yy.symbols = { types: [], enums: [] };
 	parser.yy.lastSymbols = { types: [], enums: [] }; // typedefs of last parsing (gets cached)
+	parser.yy.userTypesMap = new Map();
 
 	function getDeclarations(typeSpecifiers, declaratorList, loc){
 		var r = [];
@@ -51,6 +52,8 @@
 					declTmp = declTmp.child;
 				}
 				parser.yy.symbols.types.push(declTmp.identifier.name); // add typedef name to types so lexer can work with them
+				if(!parser.yy.userTypesMap) parser.yy.userTypesMap = new Map();
+				parser.yy.userTypesMap.set(declTmp.identifier.name, new Typedef(type, declarator, loc));
 				//! move this to Typedef constructor
 			}else{
 				r.push(new Declaration(type, declarator, initializer, loc)); // basic variable declaration

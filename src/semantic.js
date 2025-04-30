@@ -102,6 +102,15 @@ class Semantic {
 	}
 
 	/**
+	 * Introduces typedefs from parsing to semantic analysis
+	 * @function
+	 * @param {Map.<string, string>} userTypesMap
+	 */
+	attachUserTypesMap(userTypesMap){
+		this.userTypesMap = userTypesMap;
+	}
+
+	/**
 	 * First phase of semantic which checks every construct for semantic rules.
 	 * @param {AST} ast
 	 * @throws {SError}
@@ -157,6 +166,17 @@ class Semantic {
 		var initialized = initializer ? true : false;
 		var indirection = 0;
 
+		// handle typedef aliases
+		specifiers = specifiers.flatMap(spec => {
+			if(this.userTypesMap?.has(spec)){
+				const typedef = this.userTypesMap.get(spec);
+				let declCopy = structuredClone(declarator);
+				declChild = typedef.declarator;
+				declChild.child = declCopy;
+				return this.userTypesMap.get(spec).type.specifiers; // expand typedef to real specifiers
+			}
+			return spec;
+		});
 
 		if(isclass(initializer, "Initializer")){
 			if(isFunction){
