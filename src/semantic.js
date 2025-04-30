@@ -170,9 +170,28 @@ class Semantic {
 		specifiers = specifiers.flatMap(spec => {
 			if(this.userTypesMap?.has(spec)){
 				const typedef = this.userTypesMap.get(spec);
-				let declCopy = structuredClone(declarator);
-				declChild = typedef.declarator;
+				let declCopy = declarator;
+				let typedefWithoutID = typedef.declarator;
+
+				let typedefDeclCopy = typedef.declarator;
+				let idLevel = 0;
+				while(typedefDeclCopy.kind != DECLTYPE.ID){
+					idLevel++;
+					typedefDeclCopy = typedefDeclCopy.child;
+				}
+
+				let typedefWithoutIDChild = typedefWithoutID;
+				for(let i = 0; i <= idLevel; i++){
+					if(i == idLevel){
+						typedefWithoutIDChild.child = null;
+						break;
+					}
+					typedefWithoutIDChild = typedefWithoutIDChild.child;
+				}
+
+				declChild = typedefWithoutID;
 				declChild.child = declCopy;
+
 				return this.userTypesMap.get(spec).type.specifiers; // expand typedef to real specifiers
 			}
 			return spec;
@@ -187,7 +206,7 @@ class Semantic {
 			}
 		}
 
-		let declCopy = declarator;
+		let declCopy = declChild;
 		let fncDeclarator;
 		do{
 			switch(declCopy.kind){
@@ -249,13 +268,17 @@ class Semantic {
 						size[dimension] = exprValue; // should always be constant expression
 					}else{ // calculate (only for the outer-most array)
 						if(dimension != dimensionBrackets - 1) throw new SError(`Array type has incomplete element type '${specifiers}[]'`, declarator.loc);
-						if(initializer.arr){
-							size[dimension] = initializer.arr.length;
-						}else{
-							// automatic size of array from string
-							if(initializer.expr?.type == "s_literal"){
-								size[dimension] = initializer.expr.value.length - 1;
+						if(initializer != null){
+							if(initializer.arr){
+								size[dimension] = initializer.arr.length;
+							}else{
+								// automatic size of array from string
+								if(initializer.expr?.type == "s_literal"){
+									size[dimension] = initializer.expr.value.length - 1;
+								}
 							}
+						}else{
+							throw new SError(`Array size missing`, declarator.loc);
 						}
 					}
 					dimension += 1;

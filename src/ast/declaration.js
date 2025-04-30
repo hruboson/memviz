@@ -288,6 +288,11 @@ class Declarator extends Construct {
 	fnc;
 
 	/**
+	 * Data
+	 */
+	data;
+
+	/**
 	 * Line of code
 	 * @type {Object}
 	 */
@@ -296,6 +301,7 @@ class Declarator extends Construct {
 	constructor(kind, child=null, data, loc){
 		super();
 		this.kind = kind;
+		this.data = data;
 		switch(kind){
 			case DECLTYPE.ID:
 				this.identifier = data;
