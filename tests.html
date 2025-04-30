@@ -87,6 +87,7 @@
 
 	<script class="mocha-init">
 		mocha.setup('bdd');
+		mocha.setup({globals: ['fnc']});
 		mocha.checkLeaks();
 	</script>
 	<script src="tests/test.util.js"></script>
