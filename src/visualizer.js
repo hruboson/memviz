@@ -124,7 +124,6 @@ class Memviz {
 		this.graph = new mxg.Graph(this.container);
 		this.root = this.graph.getDefaultParent();
 
-		//this.graph.getStylesheet().styles.set("smoothCurveEdge", smoothCurveEdge); TODO different edge style
 		this.#setGraphOptions();
 	}
 
@@ -576,7 +575,7 @@ class Memviz {
 			const totalTextWidth = strLabel.length * approxCharWidth;
 			const availableWidth = width * 0.9;
 
-			if (totalTextWidth > availableWidth) {
+			if(totalTextWidth > availableWidth){
 				const scaleFactor = availableWidth / totalTextWidth;
 				adjustedFontSizeAbove = Math.max(Memviz.smallestFontSize, adjustedFontSizeAbove * scaleFactor);
 			}
@@ -588,7 +587,7 @@ class Memviz {
 			const totalTextWidth = strLabel.length * approxCharWidth;
 			const availableWidth = width * 0.9;
 
-			if (totalTextWidth > availableWidth) {
+			if(totalTextWidth > availableWidth){
 				const scaleFactor = availableWidth / totalTextWidth;
 				adjustedFontSizeBelow = Math.max(Memviz.smallestFontSize, adjustedFontSizeBelow * scaleFactor);
 			}
