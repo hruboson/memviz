@@ -311,7 +311,7 @@ class StackFrame {
 				break;
 				//TODO return this.membersSpaces.get(name);
 			case NAMESPACE.LABELS:
-				return this.symtablelabels.get(name);
+				return this.symtable.labels.get(name);
 			default:
 				throw new AppError("Wrong namespace type while looking up symbol!");
 		}
@@ -341,12 +341,7 @@ class StackFrame {
 				return this.parent.resolve(name);
 			}
 		}else if(this.symtable.labels.get(name)){
-			const symbol = this.symtable.labels.get(name);
-			if (symbol.interpreted){
-				return symbol;
-			}else{
-				return this.parent.resolve(name);
-			}
+			return this.symtable.labels.get(name);
 		}else{
 			if(this.parent){
 				return this.parent.resolve(name);

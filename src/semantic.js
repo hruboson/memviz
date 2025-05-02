@@ -304,6 +304,24 @@ class Semantic {
 		currSymtable.insertTAG(NAMESPACE.TAGS, name, values);
 	}
 
+	addLabel(name, astPtr){
+		const currSymtable = this.symtableStack.peek();
+
+		// find the function symtable and its name
+		let fncSymtable = this.symtableStack.peek();
+		let fncName = undefined;
+		do{
+			if(fncSymtable.scopeInfo.type == "body"){
+				fncName = fncSymtable.scopeInfo.name;
+				break;
+			}else{
+				fncSymtable = fncSymtable.parent;
+			}
+		}while(fncName == undefined);
+		
+		currSymtable.insertLABEL(NAMESPACE.LABELS, name, fncName, astPtr);
+	}
+
 	/**
 	 * Pushes new scope onto stack. Attaches the scope to AST node.
 	 * @param {Symtable} symtable
@@ -688,7 +706,9 @@ class Semantic {
 	}
 
 	visitGoto(gt){
+		if(!gt.label) throw new SError(`No label specified for goto`, gt.loc);
 
+		gt.label.accept(this);
 	}
 
     visitIStmt(stmt){
@@ -785,7 +805,12 @@ class Semantic {
 	}
 
 	visitLStmt(label){
+		// SYMTYPE.LABEL
+		this.addLabel(label.name, label);
 
+		for(let stmt of label.stmt){
+			stmt.accept(this);
+		}
 	}
 
     visitMemberAccessExpr(expr){

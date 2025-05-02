@@ -346,7 +346,7 @@ case 181:
  this.$ = new Designator(new Identifier($$[$0], this._$)); 
 break;
 case 188:
- this.$ = new LStmt($$[$0-2], $$[$0]); 
+ this.$ = new LStmt($$[$0-2], $$[$0], this._$); 
 break;
 case 189:
  this.$ = new CaseStmt($$[$0-2], $$[$0], this._$); 
@@ -391,7 +391,7 @@ case 205: case 207:
  this.$ = new ForLoop($$[$0-4], $$[$0-3], $$[$0-2], $$[$0], this._$); 
 break;
 case 208:
- this.$ = new Goto(new LabelName($$[$0-1]), this._$); 
+ this.$ = new Goto(new Identifier($$[$0-1], this._$), this._$); 
 break;
 case 209:
  this.$ = new Continue(this._$); 

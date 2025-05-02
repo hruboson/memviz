@@ -988,7 +988,8 @@ class Interpreter {
 	}
 
 	visitGoto(gt){
-
+		const label = gt.label.accept(this);
+		console.log(label);
 	}
 
     visitIStmt(stmt){
@@ -1006,7 +1007,6 @@ class Interpreter {
 		return sym;
 	}
 
-	// TODO ELSE IF
 	visitIfStmt(stmt){
 		let decision = this.evaluateExprArray(stmt.expr);
 		if(decision == false){
@@ -1054,8 +1054,18 @@ class Interpreter {
 
 	}
 
-	visitLStmt(stmt){
+	visitLStmt(label){
+		for(let stmt of label.stmt){
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.pc = stmt;
 
+			try{
+				stmt.accept(this);
+			}catch(t){ // construct can return prematurely
+				if(isclass(t, "StopFlag")) throw t; // if it is just stop flag, throw it immediately, otherwise pop frame and throw result
+				throw t;
+			}
+		}
 	}
 
     visitMemberAccessExpr(expr){

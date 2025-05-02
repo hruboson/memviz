@@ -588,7 +588,7 @@ statement
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement { $$ = new LStmt($1, $3); }
+	: IDENTIFIER ':' statement { $$ = new LStmt($1, $3, @$); }
 	| CASE constant_expression ':' statement  { $$ = new CaseStmt($2, $4, @$); }
 	| DEFAULT ':' statement { $$ = new CaseStmt(null, $3, @$); }
 	;
@@ -629,7 +629,7 @@ iteration_statement
 	;
 
 jump_statement
-	: GOTO IDENTIFIER ';' { $$ = new Goto(new LabelName($2), @$); }
+	: GOTO IDENTIFIER ';' { $$ = new Goto(new Identifier($2, @$), @$); }
 	| CONTINUE ';' { $$ = new Continue(@$); }
 	| BREAK ';' { $$ = new Break(@$); }
 	| RETURN ';' { $$ = new Return(null, @$); }

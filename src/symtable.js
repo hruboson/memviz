@@ -246,6 +246,29 @@ class Sym extends MemoryRecord{
 }
 
 /**
+ * @class Label
+ */
+class Label{
+	name;
+
+	/**
+	 * Name of the function this label belongs to
+	 */
+	fncName;
+
+	/**
+	 * Pointer to the AST node
+	 */
+	astPtr;
+	
+	constructor(name, fncName, astPtr){
+		this.name = name;
+		this.fncName = fncName;
+		this.astPtr = astPtr;
+	}
+}
+
+/**
  * Types of name spaces
  * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.3}
  * @typedef NAMESPACE
@@ -303,7 +326,7 @@ class Symtable {
 	/**
 	 * Labels namespace
 	 * @see {@link http://port70.net/~nsz/c/c99/n1256.html#6.2.3}
-	 * @type {Map<string, Sym>}
+	 * @type {Map<string, Label>}
 	 */
 	labels;
 
@@ -372,6 +395,11 @@ class Symtable {
 		const tag = this.lookup(namespace, tagname);
 		if(tag) throw new SError(`redefinition of ${tagname}`, astPtr.loc);
 		this.tags.set(tagname, new Sym());
+	}
+
+	insertLABEL(namespace, labelname, fncName, astPtr){
+		const label = this.lookup(namespace, labelname)
+		this.labels.set(labelname, new Label(labelname, fncName, astPtr));
 	}
 
 	/**
@@ -451,6 +479,15 @@ ${indent}${spacing}init: ${symbol.initialized}
 					objectsString += `${indent}\t`;
 				});*/
 			}
+		});
+		this.labels.forEach(function(label, name){
+			const spacing = ` `.repeat(name + 3);
+
+			//${indent}${spacing}addr: 0x${(+symbol.address).toString(16)}
+
+			objectsString += `${indent}(LABEL) ${name}
+${indent}${spacing}fncName: ${label.fncName}
+`;
 		});
 
 
