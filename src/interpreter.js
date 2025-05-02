@@ -1055,16 +1055,21 @@ class Interpreter {
 	}
 
 	visitLStmt(label){
-		for(let stmt of label.stmt){
-			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-			this.pc = stmt;
-
-			try{
-				stmt.accept(this);
-			}catch(t){ // construct can return prematurely
-				if(isclass(t, "StopFlag")) throw t; // if it is just stop flag, throw it immediately, otherwise pop frame and throw result
-				throw t;
+		if(Array.isArray(label.stmt)){
+			for(let stmt of label.stmt){
+				try{
+					if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+					this.pc = stmt;
+					stmt.accept(this);
+				}catch(t){ // construct can return prematurely
+					if(isclass(t, "StopFlag")) throw t; // if it is just stop flag, throw it immediately, otherwise pop frame and throw result
+					throw t;
+				}
 			}
+		}else{
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.pc = label.stmt;
+			label.stmt.accept(this);
 		}
 	}
 

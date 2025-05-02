@@ -399,6 +399,9 @@ class Symtable {
 
 	insertLABEL(namespace, labelname, fncName, astPtr){
 		const label = this.lookup(namespace, labelname)
+		if(label){
+			throw new SError(`redefinition of ${labelname}`, astPtr.loc);
+		}
 		this.labels.set(labelname, new Label(labelname, fncName, astPtr));
 	}
 

@@ -808,8 +808,12 @@ class Semantic {
 		// SYMTYPE.LABEL
 		this.addLabel(label.name, label);
 
-		for(let stmt of label.stmt){
-			stmt.accept(this);
+		if(Array.isArray(label.stmt)){
+			for(let stmt of label.stmt){
+				stmt.accept(this);
+			}
+		}else{
+			label.stmt.accept(this);
 		}
 	}
 
