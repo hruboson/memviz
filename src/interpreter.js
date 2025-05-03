@@ -720,6 +720,19 @@ class Interpreter {
 
 	visitCStmt(stmt){
 		if(this.#lookingForLabel){ // goto block
+			/**
+			 * Now a bit of info on this goto shenanigans... as we all know goto in
+			 * tree-walking interpret is super whacky. My solution is also kind of
+			 * whacky but it works for small examples.
+			 *
+			 * How I solved this is I basically search every statement from top of
+			 * function. If the label is found, the code continues from there.
+			 * The global var #lookingForLabel is set when goto is first encountered
+			 * and GotoThrow is thrown (which is handled in function body).
+			 *
+			 * This solution gets very slow with complex code structure, but that's
+			 * not what this tool is for.
+			 */
 			for(const construct of stmt.sequence){
 				try{
 					if(isclass(construct, "LStmt")){
