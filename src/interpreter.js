@@ -720,14 +720,11 @@ class Interpreter {
 
 	visitCStmt(stmt){
 		if(this.#lookingForLabel){ // goto block
-			console.log("to find: ", this.#lookingForLabel);
 			for(const construct of stmt.sequence){
 				try{
-					console.log("construct: ", construct);
 					if(isclass(construct, "LStmt")){
 						if(construct.name != this.#lookingForLabel.name) continue;
 						this.#lookingForLabel = false;
-						console.log("found label");
 
 						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 						this.pc = construct;
@@ -1027,7 +1024,6 @@ class Interpreter {
 			do{
 				if(isclass(ret, "GotoThrow")){
 					try{
-						console.log("fnc finding label");
 						fnc.body.accept(this);
 					}catch(t){
 						gtRet = t;	
@@ -1176,7 +1172,6 @@ class Interpreter {
 		const label = gt.label.accept(this);
 		this.#lookingForLabel = label;
 
-		console.log("throwing goto");
 		throw new GotoThrow(label);
 	}
 
@@ -1199,7 +1194,6 @@ class Interpreter {
 		if(this.#lookingForLabel){ // this whole if is for goto
 			if(isclass(stmt.sfalse, "CStmt")){
 				for(const construct of stmt.sfalse.sequence){
-					console.log("construct: ", construct);
 					try{
 						if(isclass(construct, "LStmt")){
 							if(construct.name != this.#lookingForLabel.name) continue;
@@ -1236,7 +1230,6 @@ class Interpreter {
 
 			if(isclass(stmt.strue, "CStmt")){ // in case of brackets around statement (...if(true){...}...)
 				for(const construct of stmt.strue.sequence){
-					console.log("construct: ", construct);
 					try{
 						if(isclass(construct, "LStmt")){
 							if(construct.name != this.#lookingForLabel.name) continue;
