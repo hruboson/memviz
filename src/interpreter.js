@@ -279,6 +279,13 @@ class Interpreter {
 	userTypesMap;
 
 	/**
+	 * Flag symbolising whether the interpreter is looking for a label
+	 * @type {boolean}
+	 * @private
+	 */
+	#lookingForLabel = false;
+
+	/**
 	 * Returns types defined by user (typedefs)
 	 * @return {Array.<string>} User-defined types
 	 */
@@ -712,6 +719,49 @@ class Interpreter {
 	}
 
 	visitCStmt(stmt){
+		if(this.#lookingForLabel){ // goto block
+			console.log("to find: ", this.#lookingForLabel);
+			for(const construct of stmt.sequence){
+				try{
+					console.log("construct: ", construct);
+					if(isclass(construct, "LStmt")){
+						if(construct.name != this.#lookingForLabel.name) continue;
+						this.#lookingForLabel = false;
+						console.log("found label");
+
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+						this.pc = construct;
+						construct.accept(this);
+					}else{
+						if(this.#lookingForLabel){
+							if(isclass(construct, "Stmt")
+							|| isclass(construct, "CStmt")
+							|| isclass(construct, "CaseStmt")
+							|| isclass(construct, "SStmt")
+							|| isclass(construct, "IfStmt")
+							|| isclass(construct, "SwitchStmt")
+							|| isclass(construct, "IStmt")
+							|| isclass(construct, "ForLoop")
+							|| isclass(construct, "WhileLoop")
+							|| isclass(construct, "DoWhileLoop")){
+								construct.accept(this);
+							}
+						}else{
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}
+				}catch(t){
+					throw t;
+				}
+			}
+
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame();
+			return;
+		}
+
 		let sf = new StackFrame(stmt.symtbptr, stmt, this.#callStack.getParentSF(stmt.symtbptr)); // StackFrame creates deep copy of symbol table
 		this.#callStack.pushSFrame(sf);
 
@@ -723,6 +773,7 @@ class Interpreter {
 				construct.accept(this);
 			}catch(t){ // construct can return prematurely
 				if(isclass(t, "StopFlag")) throw t; // if it is just stop flag, throw it immediately, otherwise pop frame and throw result
+				if(isclass(t, "GotoThrow")) throw t; // will be handled in fnc
 				this.#callStack.popSFrame();
 				throw t;
 			}
@@ -733,6 +784,46 @@ class Interpreter {
 	}
 
 	visitCaseStmt(stmt){
+		if(this.#lookingForLabel){ // goto if
+			for(const construct of stmt.stmt){
+				try{
+					if(isclass(construct, "LStmt")){
+						if(construct.name != this.#lookingForLabel.name) continue;
+						this.#lookingForLabel = false;
+
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+						this.pc = construct;
+						construct.accept(this);
+					}else{
+						if(this.#lookingForLabel){
+							if(isclass(construct, "Stmt")
+							|| isclass(construct, "CStmt")
+							|| isclass(construct, "CaseStmt")
+							|| isclass(construct, "SStmt")
+							|| isclass(construct, "IfStmt")
+							|| isclass(construct, "SwitchStmt")
+							|| isclass(construct, "IStmt")
+							|| isclass(construct, "ForLoop")
+							|| isclass(construct, "WhileLoop")
+							|| isclass(construct, "DoWhileLoop")){
+								construct.accept(this);
+							}
+						}else{
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}
+				}catch(t){
+					throw t;
+				}
+			}
+
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame();
+			return;
+		}
+
 		for(const construct of stmt.stmt){
 			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.pc = construct;
@@ -811,6 +902,46 @@ class Interpreter {
 	}
 
     visitDoWhileLoop(loop){
+		if(this.#lookingForLabel){ // goto block
+			for(const construct of loop.body.sequence){
+				try{
+					if(isclass(construct, "LStmt")){
+						if(construct.name != this.#lookingForLabel.name) continue;
+						this.#lookingForLabel = false;
+
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+						this.pc = construct;
+						construct.accept(this);
+					}else{
+						if(this.#lookingForLabel){
+							if(isclass(construct, "Stmt")
+							|| isclass(construct, "CStmt")
+							|| isclass(construct, "CaseStmt")
+							|| isclass(construct, "SStmt")
+							|| isclass(construct, "IfStmt")
+							|| isclass(construct, "SwitchStmt")
+							|| isclass(construct, "IStmt")
+							|| isclass(construct, "ForLoop")
+							|| isclass(construct, "WhileLoop")
+							|| isclass(construct, "DoWhileLoop")){
+								construct.accept(this);
+							}
+						}else{
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}
+				}catch(t){
+					throw t;
+				}
+			}
+
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame();
+			return;
+		}
+
 		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
 		this.#callStack.pushSFrame(sf);
 
@@ -887,10 +1018,24 @@ class Interpreter {
 			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
 			this.#callStack.popSFrame(); // pop param symtable
 			return null;
-		}catch(ret){ // catch return
+		}catch(ret){ // catch return or goto
 			if(ret instanceof Error){ // in case of too much recursion, run-time errors, ...
 				throw ret;
 			}
+
+			let gtRet = undefined;
+			do{
+				if(isclass(ret, "GotoThrow")){
+					try{
+						console.log("fnc finding label");
+						fnc.body.accept(this);
+					}catch(t){
+						gtRet = t;	
+					}
+				}
+			}while(isclass(gtRet, "GotoThrow"));
+
+			if(gtRet) ret = gtRet;
 
 			// TODO fix function returning pointer to void function e.g. void (*getFunction())(void)
 			//if(this.#_instrNum > this.#breakstop) throw new StopFlag();
@@ -932,6 +1077,46 @@ class Interpreter {
 	}
 
 	visitForLoop(loop){
+		if(this.#lookingForLabel){ // goto block
+			for(const construct of loop.body.sequence){
+				try{
+					if(isclass(construct, "LStmt")){
+						if(construct.name != this.#lookingForLabel.name) continue;
+						this.#lookingForLabel = false;
+
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+						this.pc = construct;
+						construct.accept(this);
+					}else{
+						if(this.#lookingForLabel){
+							if(isclass(construct, "Stmt")
+							|| isclass(construct, "CStmt")
+							|| isclass(construct, "CaseStmt")
+							|| isclass(construct, "SStmt")
+							|| isclass(construct, "IfStmt")
+							|| isclass(construct, "SwitchStmt")
+							|| isclass(construct, "IStmt")
+							|| isclass(construct, "ForLoop")
+							|| isclass(construct, "WhileLoop")
+							|| isclass(construct, "DoWhileLoop")){
+								construct.accept(this);
+							}
+						}else{
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}
+				}catch(t){
+					throw t;
+				}
+			}
+
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame();
+			return;
+		}
+
 		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
 		this.#callStack.pushSFrame(sf);
 
@@ -989,7 +1174,10 @@ class Interpreter {
 
 	visitGoto(gt){
 		const label = gt.label.accept(this);
-		console.log(label);
+		this.#lookingForLabel = label;
+
+		console.log("throwing goto");
+		throw new GotoThrow(label);
 	}
 
     visitIStmt(stmt){
@@ -1008,6 +1196,121 @@ class Interpreter {
 	}
 
 	visitIfStmt(stmt){
+		if(this.#lookingForLabel){ // this whole if is for goto
+			if(isclass(stmt.sfalse, "CStmt")){
+				for(const construct of stmt.sfalse.sequence){
+					console.log("construct: ", construct);
+					try{
+						if(isclass(construct, "LStmt")){
+							if(construct.name != this.#lookingForLabel.name) continue;
+							this.#lookingForLabel = false;
+
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}else{
+							if(this.#lookingForLabel){
+								if(isclass(construct, "Stmt")
+									|| isclass(construct, "CStmt")
+									|| isclass(construct, "CaseStmt")
+									|| isclass(construct, "SStmt")
+									|| isclass(construct, "IfStmt")
+									|| isclass(construct, "SwitchStmt")
+									|| isclass(construct, "IStmt")
+									|| isclass(construct, "ForLoop")
+									|| isclass(construct, "WhileLoop")
+									|| isclass(construct, "DoWhileLoop")){
+									construct.accept(this);
+								}
+							}else{
+								if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+								this.pc = construct;
+								construct.accept(this);
+							}
+						}
+					}catch(t){
+						throw t;
+					}
+				}
+			}
+
+			if(isclass(stmt.strue, "CStmt")){ // in case of brackets around statement (...if(true){...}...)
+				for(const construct of stmt.strue.sequence){
+					console.log("construct: ", construct);
+					try{
+						if(isclass(construct, "LStmt")){
+							if(construct.name != this.#lookingForLabel.name) continue;
+							this.#lookingForLabel = false;
+
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}else{
+							if(this.#lookingForLabel){
+								if(isclass(construct, "Stmt")
+									|| isclass(construct, "CStmt")
+									|| isclass(construct, "CaseStmt")
+									|| isclass(construct, "SStmt")
+									|| isclass(construct, "IfStmt")
+									|| isclass(construct, "SwitchStmt")
+									|| isclass(construct, "IStmt")
+									|| isclass(construct, "ForLoop")
+									|| isclass(construct, "WhileLoop")
+									|| isclass(construct, "DoWhileLoop")){
+									construct.accept(this);
+								}
+							}else{
+								if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+								this.pc = construct;
+								construct.accept(this);
+							}
+						}
+					}catch(t){
+						throw t;
+					}
+				}
+			}else{ // in case of no brackets (...if(true) printf()...)
+				findingLabel:{
+					try{
+						if(isclass(stmt.strue, "LStmt")){
+							if(stmt.strue.name != this.#lookingForLabel.name) break findingLabel;
+							this.#lookingForLabel = false;
+
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = stmt.strue;
+							stmt.strue.accept(this);
+						}else{
+							if(this.#lookingForLabel){
+								if(isclass(stmt.strue, "Stmt")
+									|| isclass(stmt.strue, "CStmt")
+									|| isclass(stmt.strue, "CaseStmt")
+									|| isclass(stmt.strue, "SStmt")
+									|| isclass(stmt.strue, "IfStmt")
+									|| isclass(stmt.strue, "SwitchStmt")
+									|| isclass(stmt.strue, "IStmt")
+									|| isclass(stmt.strue, "ForLoop")
+									|| isclass(stmt.strue, "WhileLoop")
+									|| isclass(stmt.strue, "DoWhileLoop")){
+									stmt.strue.accept(this);
+								}
+							}else{
+								if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+								this.pc = stmt.strue;
+								stmt.strue.accept(this);
+							}
+						}
+					}catch(t){
+						throw t;
+					}
+				}
+			}
+
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame();
+			return;
+		}
+
+
 		let decision = this.evaluateExprArray(stmt.expr);
 		if(decision == false){
 			if(stmt.sfalse){ // it can be null in case of no else
@@ -1177,6 +1480,46 @@ class Interpreter {
 	}
 
 	visitSwitchStmt(stmt){
+		if(this.#lookingForLabel){ // goto block
+			for(const construct of stmt.body.sequence){
+				try{
+					if(isclass(construct, "LStmt")){
+						if(construct.name != this.#lookingForLabel.name) continue;
+						this.#lookingForLabel = false;
+
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+						this.pc = construct;
+						construct.accept(this);
+					}else{
+						if(this.#lookingForLabel){
+							if(isclass(construct, "Stmt")
+							|| isclass(construct, "CStmt")
+							|| isclass(construct, "CaseStmt")
+							|| isclass(construct, "SStmt")
+							|| isclass(construct, "IfStmt")
+							|| isclass(construct, "SwitchStmt")
+							|| isclass(construct, "IStmt")
+							|| isclass(construct, "ForLoop")
+							|| isclass(construct, "WhileLoop")
+							|| isclass(construct, "DoWhileLoop")){
+								construct.accept(this);
+							}
+						}else{
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}
+				}catch(t){
+					throw t;
+				}
+			}
+
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame();
+			return;
+		}
+
 		let switchValue = this.evaluateExprArray(stmt.expr);
 		if(isclass(switchValue, "PointerValue")) switchValue = switchValue.value;
 		if(has(switchValue, "address")) switchValue = this.#memsim.readRecordValue(switchValue);
@@ -1311,6 +1654,46 @@ class Interpreter {
 	}
 
 	visitWhileLoop(loop){
+		if(this.#lookingForLabel){ // goto block
+			for(const construct of loop.body.sequence){
+				try{
+					if(isclass(construct, "LStmt")){
+						if(construct.name != this.#lookingForLabel.name) continue;
+						this.#lookingForLabel = false;
+
+						if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+						this.pc = construct;
+						construct.accept(this);
+					}else{
+						if(this.#lookingForLabel){
+							if(isclass(construct, "Stmt")
+							|| isclass(construct, "CStmt")
+							|| isclass(construct, "CaseStmt")
+							|| isclass(construct, "SStmt")
+							|| isclass(construct, "IfStmt")
+							|| isclass(construct, "SwitchStmt")
+							|| isclass(construct, "IStmt")
+							|| isclass(construct, "ForLoop")
+							|| isclass(construct, "WhileLoop")
+							|| isclass(construct, "DoWhileLoop")){
+								construct.accept(this);
+							}
+						}else{
+							if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+							this.pc = construct;
+							construct.accept(this);
+						}
+					}
+				}catch(t){
+					throw t;
+				}
+			}
+
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.#callStack.popSFrame();
+			return;
+		}
+
 		let sf = new StackFrame(loop.symtbptr, loop, this.#callStack.getParentSF(loop.symtbptr)); // StackFrame creates deep copy of symbol table
 		this.#callStack.pushSFrame(sf);
 
@@ -1648,6 +2031,17 @@ class ReturnVoid {
 		this.loc = loc;
 	}
 	// this could maybe be the NOP class from expr.js?
+}
+
+/**
+ * @class GotoThrow
+ * @description Will be thrown in goto and handled in function body CStmt
+ * @param {Label} label
+ */
+class GotoThrow {
+	constructor(label){
+		this.label = label;
+	}
 }
 
 /**
