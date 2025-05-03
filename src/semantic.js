@@ -129,14 +129,34 @@ class Semantic {
 	calledFunctions = [];
 
 	/**
+	 * List of used labels, array of label names
+	 * @type {Array.<string>}
+	 */
+	usedLabels = [];
+
+	/**
+	 * List of existing labels, array of label names
+	 */
+	existingLabels = [];
+
+	/**
 	 * Second phase of semantic which checks declarations of functions.
 	 * @throws {SError}
 	 */
 	secondPhase(){
-		for (const symbol of this.calledFunctions) {
-			if (symbol.isFunction && !symbol.initialized) {
+		for(const symbol of this.calledFunctions){
+			if(symbol.isFunction && !symbol.initialized){
 				throw new SError(`Function '${symbol.name}' declared but never defined`, symbol.astPtr.loc);
 			}
+		}
+
+		used: for(const gotoLabel of this.usedLabels){
+			existing: for(const existingLabel of this.existingLabels){
+				if(gotoLabel == existingLabel){
+					break used;
+				}
+			}
+			throw new SError(`Label ${gotoLabel} does not exist`);
 		}
 	}
 
@@ -708,7 +728,7 @@ class Semantic {
 	visitGoto(gt){
 		if(!gt.label) throw new SError(`No label specified for goto`, gt.loc);
 
-		gt.label.accept(this);
+		this.usedLabels.push(gt.label.name);
 	}
 
     visitIStmt(stmt){
@@ -807,6 +827,7 @@ class Semantic {
 	visitLStmt(label){
 		// SYMTYPE.LABEL
 		this.addLabel(label.name, label);
+		this.existingLabels.push(label.name);
 
 		if(Array.isArray(label.stmt)){
 			for(let stmt of label.stmt){
