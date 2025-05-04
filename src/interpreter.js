@@ -851,7 +851,7 @@ class Interpreter {
 		if(initializer){
 			let record;
 			value = initializer.accept(this);
-			
+
 			// there could be a better way... tbh I have no idea why this is even allowed
 			if(symbol.indirection < 1 && symbol.size.length > 0 && !Array.isArray(value)){ // non pointer arrays initialized with string (char hello[] = "Hello world";)
 				record = this.#callStack.findMemoryRecord(value);
@@ -1340,7 +1340,12 @@ class Interpreter {
 				if(initializer.expr.cType == "CExpr" && initializer.expr.type == "s_literal") return val.address;
 
 				if(isclass(val, "PointerValue")) return val.value;
-				if(has(val, "address")) return this.#memsim.readRecordValue(val);
+				if(has(val, "address")){
+					if(val.size.length > 0){
+						return val.address;
+					}
+					return this.#memsim.readRecordValue(val);
+				}
 				return val;
 			case INITTYPE.ARR:
 				let arr = [];
@@ -1422,6 +1427,9 @@ class Interpreter {
 
 	visitSizeOfExpr(call){
 		const e = this.evaluateExprArray(call.expr);
+		if(has(e, "address")){
+			return e.memsize;
+		}
 		return MEMSIZES[e];
 	}
 
@@ -1482,6 +1490,7 @@ class Interpreter {
 		dummyRecord.memtype = record.memtype;
 		dummyRecord.size = [];
 		dummyRecord.memregion = record.memregion;
+		dummyRecord.memsize = MEMSIZES[record.memtype];
 
 		return dummyRecord;
 	}

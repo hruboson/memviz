@@ -677,6 +677,9 @@ class Semantic {
 
 		// type checking
 		for(let [arg, param] of fncCall.arguments.map((arg, i) => [arg, fncSym.parameters[i]])){
+			if(param.declarator && param.declarator.kind == DECLTYPE.PTR){
+				continue;
+			}
 			this.typeCheck(this.getParameterType(param), arg);
 		}
 
@@ -888,7 +891,6 @@ class Semantic {
 
 	visitSizeOfExpr(call){
 		const e = this.evaluateExprArray(call.expr);
-		if(!(e in MEMSIZES)) throw new SError(`Unknown type: ${e}`, call.loc);
 	}
 
     visitSStmt(stmt){
