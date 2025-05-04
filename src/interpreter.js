@@ -1029,22 +1029,23 @@ class Interpreter {
 			this.#callStack.popSFrame(); // pop param symtable
 			return null;
 		}catch(ret){ // catch return or goto
-			if(ret instanceof Error){ // in case of too much recursion, run-time errors, ...
-				throw ret;
-			}
-
 			let gtRet = undefined;
 			do{
 				if(isclass(ret, "GotoThrow")){
 					try{
 						fnc.body.accept(this);
 					}catch(t){
-						gtRet = t;	
+						gtRet = t;
 					}
 				}
 			}while(isclass(gtRet, "GotoThrow"));
 
 			if(gtRet) ret = gtRet;
+
+			if(ret instanceof Error){ // in case of too much recursion, run-time errors, ...
+				throw ret;
+			}
+
 
 			// TODO fix function returning pointer to void function e.g. void (*getFunction())(void)
 			//if(this.#_instrNum > this.#breakstop) throw new StopFlag();
