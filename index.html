@@ -192,7 +192,7 @@
 				<button class="btn btn-primary disabled" id="programCounter">Step: ?</button>
 			</div>
 			<div class="col-6 text-end">
-				<span id="debugInfo" style="visibility: visible"> <!-- on release change to hidden -->
+				<span id="debugInfo" style="visibility: hidden">
 					<input type="number" class="form-control" style="width: 80px; display: inline-block;" 
 															  onchange="breakEditor = parseInt(this.value) || 0;" 
 															  placeholder="Break line" title="Set breakpoint line number">
@@ -251,27 +251,9 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int* createArrayOfIntegers(int size){
-    int* ptr = malloc(sizeof(int)*size);
-    if (ptr == 0) {
-        return 1;
-    }
-
-    // assign values to each address allocated
-    for(int i = 0; i < size; i++){
-        *(ptr+i) = (i+1)*10;
-    }
+						<div id="editor" onChange="resetEditor();">int main() {
+	printf("Hello world!");
     
-    return ptr;
-}
-
-int main() {
-    int* arrayPtr = createArrayOfIntegers(5);
-    
-    printf("%d", *arrayPtr);
-
-    free(arrayPtr); // free allocated memory
-
     return 0;
 }</div>
 					</div>
