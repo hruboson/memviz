@@ -1262,7 +1262,7 @@ class MemVisualizerRow extends MemVisualizer {
 					if(symbol.initialized && !symbol.isFunction && !symbol.isNative && !df.records.includes(symbol)){
 						df.add(symbol);
 					}
-					if(!symbol.initialized && !symbol.isFunction && !symbol.isNative && !bf.includes(symbol) && !symbol.type == SYMTYPE.OBJ){
+					if(symbol.type == SYMTYPE.OBJ && symbol.memregion == MEMREGION.BSS && !bf.includes(symbol)){
 						bf.push(symbol);
 					}
 				}
