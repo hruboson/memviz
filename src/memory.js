@@ -151,6 +151,7 @@ class Memsim {
 
 		//TODO struct
 		if(record.size.length > 0){ // array
+			console.log(record);
 			this.#setArrayValue(record, value, region);
 		}else if(record.indirection > 0){
 			record.address = this.#setPointerValue(record, value, region);

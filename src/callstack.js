@@ -137,7 +137,17 @@ class CallStack{
 	findMemoryRecord(address){
 		let record;
 		for(record of this.hFrame){
-			if(record.address == address ) return record;
+			if(record.address == address){
+				const dummyRecord = new MemoryRecord();
+				dummyRecord.address = address;
+				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+				dummyRecord.indirection = record.indirection;
+				dummyRecord.memtype = record.memtype;
+				dummyRecord.memsize = MEMSIZES[record.memtype];
+				dummyRecord.memregion = record.memregion;
+				dummyRecord.beingPointedToBy = record.beingPointedToBy;
+				return dummyRecord;
+			}
 			if(record.addresses.includes(address)){
 				const dummyRecord = new MemoryRecord();
 				dummyRecord.address = address;
@@ -181,7 +191,17 @@ class CallStack{
 		}
 		for(const frame of this.#sFrames){
 			for(record of frame.symtable.objects.values().filter(obj => obj.type == SYMTYPE.OBJ)){
-				if(record.address == address) return record;
+				if(record.address == address){
+					const dummyRecord = new MemoryRecord();
+					dummyRecord.address = address;
+					dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+					dummyRecord.indirection = record.indirection;
+					dummyRecord.memtype = record.memtype;
+					dummyRecord.memsize = MEMSIZES[record.memtype];
+					dummyRecord.memregion = record.memregion;
+					dummyRecord.beingPointedToBy = record.beingPointedToBy;
+					return dummyRecord;
+				}
 				if(record.addresses.includes(address)){
 					const dummyRecord = new MemoryRecord();
 					dummyRecord.address = address;
