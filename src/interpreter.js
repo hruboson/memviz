@@ -1481,6 +1481,10 @@ class Interpreter {
 			exprCopy = exprCopy.pointer;
 		};
 
+		indices = indices.map(value => {
+			return has(value, "address") ? this.#memsim.readRecordValue(value) : value;
+		});
+
 		let flatIndex = (record.size?.length > 0)
 		? this.getFlatIndex(indices, record.size)
 		: (indices.length > 0 ? indices.reduce((res, item) => res * (Number(item) + 1), 1) - 1 : 1);
@@ -1599,10 +1603,7 @@ class Interpreter {
 	}
 
     visitUExpr(expr){
-		//TODO POSTFIX AND PREFIX DIFFERENTIATION
 		let value = this.evaluateExprArray(expr.expr);
-
-		// TODO add pointer coeff just like in BArithExpr
 
 		if(isclass(value, "PointerValue")){
 			value = value.value;
@@ -1653,6 +1654,7 @@ class Interpreter {
 
 					return record;
 				}else{
+					console.log(this.#callStack);
 					console.error(value);
 					throw new RTError(`Value ${value} is not a valid address`, expr.loc);
 				}
