@@ -552,7 +552,7 @@ class Memviz {
 		let adjustedFontSizeAbove = Memviz.labelAboveStyle.fontSize;
 		let adjustedFontSizeBelow = Memviz.labelBelowStyle.fontSize;
 
-		if(cellValue.charCodeAt){
+		if(cellValue?.charCodeAt){
 			let ascii = cellValue.charCodeAt(0);
 			if(ascii < 32) cellValue = ascii;
 		};
