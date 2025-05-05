@@ -557,12 +557,14 @@ class Memviz {
 			if(ascii < 32) cellValue = ascii;
 		};
 
-		function shortenType(typeStr) {
-			return typeStr
-				.replace(/\bunsigned\b/g, 'u')
-				.replace(/\blong\b/g, 'l');
+		if(this.options.trueSizes){
+			function shortenType(typeStr) {
+				return typeStr
+					.replace(/\bunsigned\b/g, 'u')
+					.replace(/\blong\b/g, 'l');
+			}
+			labelBelow = shortenType(labelBelow);
 		}
-		labelBelow = shortenType(labelBelow);
 
 
 		if(cellValue != undefined && cellValue != null){
