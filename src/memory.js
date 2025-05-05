@@ -238,10 +238,15 @@ class Memsim {
 		}
 
 		if(value){
-			const flatValue = value.flat(Infinity);
-			for(let i = 0; i < flatValue.length; i++){
-				const dummySym = { memtype: memtype, address: record.address + i*MEMSIZES[memtype], identifier: "array" };
-				const address = this.#setPrimitiveValue(dummySym, flatValue[i], region);
+			if(Array.isArray(value)){
+				const flatValue = value.flat(Infinity);
+				for(let i = 0; i < flatValue.length; i++){
+					const dummySym = { memtype: memtype, address: record.address + i*MEMSIZES[memtype], identifier: "array" };
+					const address = this.#setPrimitiveValue(dummySym, flatValue[i], region);
+				}
+			}else{
+				const dummySym = { memtype: memtype, address: record.address, identifier: "array" };
+				const address = this.#setPrimitiveValue(dummySym, value, region);
 			}
 		}
 	}
