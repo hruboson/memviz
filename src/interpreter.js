@@ -1659,7 +1659,6 @@ class Interpreter {
 
 					return record;
 				}else{
-					console.log(this.#callStack);
 					console.error(value);
 					throw new RTError(`Value ${value} is not a valid address`, expr.loc);
 				}
