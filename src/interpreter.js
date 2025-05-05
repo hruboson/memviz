@@ -528,6 +528,11 @@ class Interpreter {
 		let lval = this.evaluateExprArray(expr.left);
 		let coeVar = 1; // for pointer arithmetic
 		let coeSide = "left";
+		let isFloatOperation = false;
+
+		isFloatOperation = 
+			(typeof lval == "number" && !Number.isInteger(lval)) || 
+			(typeof rval == "number" && !Number.isInteger(rval));
 
 		if(has(lval, "address")){
 			if(lval.indirection > 0){
@@ -537,6 +542,8 @@ class Interpreter {
 				coeVar = MEMSIZES[lval.memtype];
 				lval = lval.address;
 			}else{
+				if(lval.memtype == DATATYPE.double || lval.memtype == DATATYPE.float || lval.memtype == DATATYPE.longdouble ||
+				   lval.casttype == DATATYPE.double || lval.casttype == DATATYPE.float || lval.casttype == DATATYPE.longdouble) isFloatOperation = true;
 				lval = this.#memsim.readRecordValue(lval); // get the value
 			}
 		}
@@ -550,6 +557,9 @@ class Interpreter {
 				coeSide = "right";
 				rval = rval.address;
 			}else{
+				if(rval.memtype == DATATYPE.double || rval.memtype == DATATYPE.float || rval.memtype == DATATYPE.longdouble ||
+				   rval.casttype == DATATYPE.double || rval.casttype == DATATYPE.float || rval.casttype == DATATYPE.longdouble) isFloatOperation = true;
+
 				rval = this.#memsim.readRecordValue(rval); // get the value
 			}
 		}
@@ -573,7 +583,8 @@ class Interpreter {
 				return lval * rval;
 			case '/':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				return lval / rval;
+				if(isFloatOperation) return lval / rval;
+				return Math.floor(lval / rval);
 			case '%':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				return lval % rval;
@@ -686,6 +697,7 @@ class Interpreter {
 		if(has(value, "address")){
 			const record = this.#callStack.findMemoryRecord(this.#memsim.readRecordValue(value));
 			if(record) record.beingPointedToBy = DATATYPE[type]; // switch view (type punning)
+			value.casttype = DATATYPE[type];
 		}
 		return value;
 	}
@@ -1025,7 +1037,13 @@ class Interpreter {
 			for(const [[name, sym], arg] of zip(sfParams.symtable.objects, args)){
 				let val = arg;
 				if(isclass(arg, "PointerValue")) val = arg.value;
-				if(has(arg, "address")) val = this.#memsim.readRecordValue(arg);
+				if(has(arg, "address")){ 
+					if(arg.size.length < 1){
+						val = this.#memsim.readRecordValue(arg);
+					}else{ // arrays
+						console.log(sym, arg);
+					}
+				}
 				this.#memsim.setRecordValue(sym, val, MEMREGION.STACK);
 				sym.interpreted = true;
 			}
@@ -1659,7 +1677,7 @@ class Interpreter {
 					return record;
 				}else{
 					console.error(value);
-					throw new RTError(`Value ${value} is not a valid address`, expr.loc);
+					throw new RTError(`Address ${value} is not a valid address`, expr.loc);
 				}
 			}
 			case '&': {
@@ -1668,7 +1686,7 @@ class Interpreter {
 				}else if(this.#callStack.findMemoryRecord(value)){
 					return this.#callStack.findMemoryRecord(value);
 				}else{
-					throw new RTError(`Value ${value} does not have an address`, expr.loc);
+					throw new RTError(`Address ${value} does not have an address`, expr.loc);
 				}
 			} 
 			default:
@@ -2085,5 +2103,12 @@ class PointerValue {
 	constructor(value, memtype){
 		this.value = value;
 		this.memtype = memtype;
+	}
+}
+
+class NumberValue { 
+	constructor(value, type){
+		this.value = value;
+		this.type = type;
 	}
 }

@@ -61,6 +61,12 @@ class MemoryRecord{
 	beingPointedToBy;
 
 	/**
+	 * If record is cast, this field will be set
+	 * @type {DATATYPE}
+	 */
+	casttype;
+
+	/**
 	 * Size of memory object in BYTES (the whole size allocated)
 	 * @type {integer}
 	 */
