@@ -3,93 +3,54 @@
  * @author Ondřej Hruboš
  */
 
-const simple_variables_example = `int a = 42;
-int b = 42;
+const variables_example = `// Simple variable example
+/* This example shows the basic types of variables
+ * you can have in a C program. */
 
-void main(){
-	int a = 73;
-	int b = 37;
-}`
+int global = 1; // global variable - we can use this variable anywhere in the program
 
-const simple_array_example = `int arr2d[10][10] = { {0, 1, 2, [5]=5 }, [10]={90, 91, [10]=100} };
+int main(){
+	/* Variables declared inside of a scope (between { } brackets) 
+	 * cannot be used outside of the scope. Advanced example of scopes
+	 * can be found in the 'Scopes' example. */
+	
+    int integer = 42; // int can only hold integers
+	double pi = 3.14f; // floating point number
+    char letter = 'A'; // character value is converted to ASCII value (https://www.asciitable.com/)
+	unsigned char overflow = 256; // unsigned char can only store values up to 255
 
-void main(){
-	arr2d[5][5] = 55;
+	// floating points assigned to integers are rounded down
+	int truncated = 2.7; 
+
+	return 0;
+}`;
+
+const functions_example = `// Function and string example
+/* This example shows how to define and call a function,
+ * and how to work with string literals using pointers. */
+
+// Functions printing message
+void hello(void){
+	char* a = "Hello"; // 'a' is a pointer to string in data segment
+	printf("%s", a);
+
+	return;
 }
-`;
 
+int main(){
+	// Calls function 'hello' defined above
+	hello();
 
-/*
-typedef struct String {
-	char* data;
-	size_t length, capacity;
-} String;
-*/
-const struct_example = `typedef struct Employee {
-	int employee_number;
-	float salary;
-} Employee;
+	return 0;
+}`;
 
-void main(){
-	Employee e;
-	e.employee_number = 1;
-	e.salary = 999999;
-}
+const scopes_example = `// Scope shadowing and visibility example
+/* This example demonstrates how variable shadowing works
+ * and how variables are hidden depending on the scope.
+ * For this example it is recommended to use the 'Semantic'
+ * visualization style. You can change this in settings. */
 
-`;
-
-const union_example = `union number_holder {
-	int i;
-	float f;
-	double d;
-};
-
-void main(){
-	union number_holder num = 42;
-
-	num.f = 4.2f;
-	num.d = 3.7;
-}
-`;
-
-const enum_example = `enum weekdays { 
-	MONDAY = 1, 
-	TUESDAY = 2, 
-	WEDNESDAY = 3, 
-	THURSDAY = 4, 
-	FRIDAY = 5, 
-	SATURDAY = 6, 
-	SUNDAY = 7
-};
-
-enum year {
-	Jan, Feb, Mar, Apr, 
-	May, Jun, Jul, Aug, 
-	Sep, Oct, Nov, Dec
-};
-`;
-
-const anonymous_example = `//source: https://en.cppreference.com/w/c/language/struct
-
-struct v
-{
-   union // anonymous union
-   {
-      struct { int i, j; }; // anonymous structure
-      struct { long k, l; } w;
-   };
-   int m;
-} v1;
-`;
-
-const typedef_example = `typedef long long int lli;
-
-void main(){
-	lli big_number = 9223372036854775807; // long long int maximum
-}
-`;
-
-const scopes_example = `int a = 1; // initialize symbol a with value 1 (global scope)
+int a; // uninitialized global variable
 
 void foo(int a){ // global scope is hidden
     int a = a;
@@ -101,7 +62,9 @@ void baz(){
 	printf("%d", a); // prints global a
 }
 
-void main(){
+int main(){
+	a = 1; // initialize global a
+
 	int a = 2; // scope of new inner a, global a is hidden
 	printf("%d", a);
 	
@@ -125,26 +88,673 @@ void main(){
 	baz();
 
 	// int a = 2; //<-- ERROR, cannot reinitialize variable of the same name
+	
+	return 0;
 }`;
 
-const declaration_example = `void foo();
+const expressions_example = `// Expressions and operator precedence
+/* This example demonstrates how expressions are evaluated and 
+ * how operator precedence and associativity affect the result. */
 
-void main(){
-	foo();
-	// bar(); // Error - undeclared function
+int main(){
+	int x = 10, y = 5, z = 2, a;
+
+	a = x + y * z; 	// multiplication has higher precedence
+	a = -x + y; 	// unary minus is applied first
+	a += y *= z; 	// compound assignments, right to left
+	a = y % 3;		// remainder operator
+
+	a = (x+y) / (y-z); // parentheses change evaluation order
+
+	int guess;
+	guess = guess + (guess = 420, 69 + (guess = 666, 20 + 30)); // comma operator
+
+	return 0;
+}`;
+
+const typedef_example = `// Typedef - custom type aliases
+/* This example demonstrates how to use typedef to create type aliases.
+ * Aliases can make code more readable or easier to change later. */
+
+typedef int integer; // alias for the type int
+typedef unsigned char uchar; // alias for type unsigned char
+typedef int* integerPtr; // alias for int*
+
+int main(){
+	
+	// now we can use the aliases as types
+	integer i = 42;
+	uchar answer = '*';
+
+	integerPtr ptr = &i;
+
+	return 0;
+}`;
+
+const if_else_example = `// Conditional statements and ternary operator
+/* This example demonstrates the use of if-else 
+ * and the ternary operator. */
+
+int main(){
+	int number = 9;
+
+	if(number % 2 == 0){
+		printf("Even");
+	}else{
+		printf("Odd");
+	}
+
+	// Same check but using the tertiary operator
+	char isEven = number % 2 == 0 ? 'Y' : 'N';
+
+	return 0;
+}`;
+
+const for_loop_example = `// Simple for loop
+/* Adds numbers from 1 to 10 using a loop. Demonstrates 
+ * summation of an arithmetic series: 1 + 2 + ... + 10. */
+
+int main(){
+    int result = 0;
+    
+	// Basic for loop
+    for(int i = 1; i <= 10; i++){
+        result += i;
+    }
+    
+    return 0;
+}`;
+
+const for_loop_advanced_example = `// Advanced for loop example
+/* This example demonstrates a nested loop pattern that prints
+ * an 'X' border with empty space in the center. The outer loop
+ * controls rows, while the inner loop controls columns. */
+
+int main(){
+	for(int x = 0; x < 5; x++){ // outer loop
+    	for(int y = 0; y < 5; y++){ // inner loop
+    	    if((y < 1 || y > 3) || (x < 1 || x > 3)){ // check border
+    		    printf("X");
+    	    }else{
+    	        printf(" ");
+    	    }
+    	}
+
+    	printf("\\n");
+	}
+
+	return 0;
+}`;
+
+const while_loop_example = `// While loop example
+/* This example demonstrates a nested while loop. This
+ * example does the exact same thing the for loop example
+ * does. It shows that every for loop can be written as 
+ * while loop. */
+
+int main(){
+	int x = 0;
+	while(x < 5){ // outer loop
+		int y = 0;
+		while(y < 5){ // inner loop
+			if((y < 1 || y > 3) || (x < 1 || x > 3)){ // check border
+				printf("X");
+			}else{
+				printf(" ");
+			}
+			y++;
+		}
+
+		printf("\\n");
+		x++;
+	}
+
+	return 0;
+}`;
+
+const do_while_loop_example = `// Do-while loop example
+/* This example calculates powers of 2 starting from 1 (2^0),
+ * and continues multiplying by 2 until the value exceeds 1000. */
+
+int main(){
+	int value = 1;
+
+	do{
+		printf("%d\\n", value);
+		value *= 2;
+	}while(value <= 1000);
+
+	return 0;
+}`;
+
+const switch_example = `// Switch statement for basic arithmetic operations
+/* Demonstrates use of switch-case for evaluating 
+ * a character-based operation on two integers. */
+
+int main(){
+	int a = 21, b = 3;
+	char operand = '+'; // can be +, -, *, /, %
+	int result;
+
+	switch(operand){
+		case '+':
+			result = a + b;
+			break;
+		case '-':
+			result = a - b;
+			break;
+		case '*':
+			result = a * b;
+			break;
+		case '/':
+			result = a / b;
+			break;
+		case '%':
+			result = a % b;
+			break;
+		default:
+			return 1; // error - unknown operator
+	}
+
+	return 0;
+}`;
+
+const pointers_example = `// Pointer example using the swap function
+/* Demonstrates use of pointers to manipulate 
+ * and exchange variable values directly in memory. */
+
+void swap(int *a, int *b){
+	int temp = *a; 	// dereference to get value
+	*a = *b; 		// assign value pointed to by b to a
+	*b = temp;		// assign original a to b
 }
 
-void foo(){
-	printf("foo");
+int main(){
+	int x = 5;
+	int y = 10;
+
+	// Swap value of x and y using their addresses
+	swap(&x, &y);
+
+	return 0;
+}`;
+
+const array_example = `// Arrays and pointers
+/* This example shows how to work with arrays and pointers.
+ * It demonstrates how to access elements using indexing and how
+ * pointer arithmetic can be used as an alternative. */
+
+int main(){
+	int a[3] = { 0, 1, 2 }; // array of size 3
+	int i = a[0]; // first element is on index 0
+	
+	int* ptr = &a[1]; // pointer pointing to the middle of the array
+	int* ptr2 = a+1; // same pointer using pointer arithmetic
+
+	// filling array using for loop
+	int arr[5];
+	for(int i = 0; i < 5; i++){
+		arr[i] = i;
+	}
+
+	return 0;
+}`;
+
+const strings_example = `
+int main(){
+	char* hello2 = "Hello"; // string allocated in data segment 
+	char hello1[] = "Hello"; // string allocated on stack
+ 
+	char* animals[3] = { // strings allocated in data segment
+		"ABC",
+		"DEF",
+		"GHI"
+	};
+ 
+	return 0;
+}`;
+
+const type_sizes_example = `// Variable types and memory layout demonstration
+/* This example shows memory addresses of variables of different types
+ * and their sizes in bytes. It demonstrates how various data types
+ * are allocated in memory and their typical storage sizes. 
+ * Note that on different architecture the sizes can vary. */
+
+/* For this example turn on 'Show true sizes' in settings */
+
+int main() {
+    _Bool b = 1; 				// size 1 byte
+
+	char c = 2; 				// size 1 byte
+	unsigned char uc = 3; 		// size 1 byte
+
+	short s = 4; 				// size 2 bytes
+	unsigned short us = 5;		// size 2 bytes
+
+	int i = 6;					// size 4 bytes
+	unsigned int ui = 7;		// size 4 bytes
+
+	long l = 8;					// size 4 bytes
+	unsigned long ul = 9;		// size 4 bytes
+	long long ll = 10;			// size 8 bytes
+	unsigned long long ull = 11;// size 8 bytes
+
+	float f = 3.14;				// size 4 bytes
+	double d = 1.414;			// size 8 bytes
+	long double ld = 6.28318;	// size 8 bytes (or 16 depending on architecture)
+
+    return 0;
+}`;
+
+const pointer_arithmetic_example = `// Pointer arithmetic and address printing
+/* This example prints memory addresses of variables and shows
+ * how pointer arithmetic can be used to access adjacent values.
+ * It demonstrates how arrays and variables are laid out in memory. */
+
+int main(){
+	int q = 10;
+	int s = 5;
+
+	int* p = &q;      // pointer to variable q
+	int a[3];         // uninitialized array of 3 integers
+
+	// Prints addresses of array elements
+	printf("%p\\n",    a);       // address of a[0]
+	printf("%p\\n", &a[1]);      // address of a[1]
+	printf("%p\\n", &a[2]);      // address of a[2]
+
+	// Prints addresses of variables
+	printf("%p\\n",    &q);      // address of q
+	printf("%p\\n",    p);       // same as &q
+	printf("%p\\n",    &s);      // address of s
+
+	// Accessing values directly and via pointer arithmetic
+	int value = s;              // direct value access
+	int pvalue = *(p-1);      	// access to s using pointer arithmetic (depends on implementation)
+
+	return 0;
+}`;
+
+const malloc_example = `// Memory allocation without freeing (memory leak)
+/* Demonstrates dynamic memory allocation using malloc without
+ * proper deallocation, resulting in a memory leak. */
+
+int main() {
+    int* ptr = (int*) malloc(sizeof(int)); // allocate memory and cast pointer to int pointer
+    if(ptr == NULL){
+        return 1;
+    }
+
+    *ptr = 42; // assign value to allocated memory
+    printf("%d", *ptr);
+
+    // No call to free(ptr) — memory leak
+
+    return 0;
+}`;
+
+const free_example = `// Proper memory allocation and deallocation
+/* Demonstrates dynamic memory allocation using malloc and 
+ * proper cleanup using free to avoid memory leaks. */
+
+int main() {
+    int* ptr = (int*) malloc(sizeof(int)); // allocate memory for one int
+    if(ptr == NULL){
+        return 1;
+    }
+
+    *ptr = 42; // assign value to allocated memory
+    printf("%d", *ptr);
+
+    free(ptr); // free allocated memory
+
+    return 0;
+}`;
+
+const multidimensional_arrays_example = `// 2D arrays (matrices)
+/* This example shows how to declare and manipulate a 2D array (matrix),
+ * use pointers to access its data, and how to modify specific rows and columns. */
+
+int main() {
+	// 3x3 matrix
+    int matrix[3][3] = {
+        {00, 01, 02},
+        {10, 11, 12},
+        {20, 21, 22}
+    };
+    
+    int *ptr  = &matrix[0][0]; 	// pointer to first element
+	int *ptr2 = matrix; 		// same pointer
+    
+    matrix[1][1] = 99;  // direct access to element in the middle
+    
+    // Set last column of each row to 0
+    for(int i = 0; i < 3; i++){
+        matrix[i][2] = 0; 
+    }
+    
+    // Set all elements of last row to -1
+    for(int j = 0; j < 3; j++){
+        matrix[2][j] = -1;
+    }
+    
+    return 0;
+}`;
+
+const pointer_arrays_example = `// Arrays of pointers
+/* This example demonstrates how to store addresses in an array of pointers
+ * and modify the values of multiple variables through indirect access. */
+
+int main(){
+    int x = 10;
+    int y = 20;
+    int z = 30;
+    
+    int *ptr_arr[3]; // array of integer pointers
+    
+    // Assign addresses to pointer array
+    ptr_arr[0] = &x;  // first element points to x
+    ptr_arr[1] = &y;  // second points to y
+    ptr_arr[2] = &z;  // third points to z
+    
+    // Modify values through pointers
+    for(int i = 0; i < 3; i++){
+        *ptr_arr[i] *= 2; // multiply each value by 2
+    }
+    
+    return 0;
+}`;
+
+const array_search_example = `// Search in an array (linear) 
+/* This example shows how to search for a specific value
+ * in a simple integer array using a linear search algorithm.
+ * For more advanced algorithm see 'Binary search' example. */
+
+int main(){
+    int numbers[] = {10, 33, 11, 111, 256, 42, 123}; // simple array of numbers
+	int length = sizeof(numbers) / sizeof(int);
+    int search_for = 42; // number to find
+    int found = -1;      // flag if found
+    
+    // Basic linear search
+    for(int i = 0; i < length; i++){
+        if(numbers[i] == search_for){
+            found = 0;  // set flag if found
+            break;      // exit loop early
+        }
+    }
+    
+    return found;  // returns 0 if found, -1 if not
+}`;
+
+const string_reversal_example = `// String reversal
+/* This example demonstrates how to calculate the length of a string
+ * and then reverse it in place by swapping characters using a loop. */
+
+int main() {
+    char str[] = "hello";
+    int length = 0;
+    
+    // Calculate string length
+    while (str[length] != '\0') {
+        length++;
+    }
+    
+    // Reverse the string by swapping characters
+    for (int i = 0, j = length - 1; i < j; i++, j--) { // two variables: i,j
+        // Swap characters at positions i and j
+        char temp = str[i];
+        str[i] = str[j];
+        str[j] = temp;
+    }
+    
+    return 0;
+}`;
+
+const advanced_malloc = `int* createArrayOfIntegers(int size){
+    int* ptr = malloc(sizeof(int)*size);
+    if (ptr == 0) {
+        return 1;
+    }
+
+    // assign values to each address allocated
+    for(int i = 0; i < size; i++){
+        *(ptr+i) = (i+1)*10;
+    }
+    
+    return ptr; // pass pointer to main function
 }
 
-void bar(){
-	printf("bar");
+int main() {
+	int size = 5;
+    int* arr = createArrayOfIntegers(size);
+    
+    printf("%d", arr[size-1]);
+
+    // free allocated memory
+    free(arr);
+
+    return 0;
+}`;
+
+const min_max_example = `// Finds min and max of integer array
+/* Demonstrates how to find the minimum and maximum values
+ * in a static integer array using a simple linear scan. */
+
+int main() {
+    int array[] = {10, 152, 300, -11, -150, 42, 188};
+    int size = sizeof(array) / sizeof(array[0]);
+    
+    int min = array[0];
+    int max = array[0];
+
+    for(int i = 1; i < size; i++){
+        if(array[i] < min){
+            min = array[i];
+        }
+        if(array[i] > max){
+            max = array[i];
+        }
+    }
+
+    return 0;
+}`;
+
+const array_average_example = `// Average of integer array
+/* Demonstrates how to compute the average value
+ * of a static integer array using simple iteration
+ * and type conversion for floating-point result. */
+
+int main() {
+    int numbers[] = {1, 2, 3, 4, 5, 6};
+    int sum = 0;
+    int size = sizeof(numbers) / sizeof(numbers[0]);
+
+    for(int i = 0; i < size; i++){
+        sum += numbers[i];
+    }
+
+    float average = (float)sum / size;
+    
+    return 0;
+}`;
+
+const recursive_factorial_example = `// Calculates factorial using recursion
+/* Demonstrates basic recursion by breaking down
+ * factorial problem into smaller subproblems
+ * until reaching base case (1! = 1) */
+
+// Recursive function to calculate factorial
+int factorial(int n){
+    if(n <= 1) return 1;
+
+    return n * factorial(n - 1);
 }
-`;
+
+int main(){
+    int number = 5;
+    int result = factorial(number);
+
+    return 0;
+}`;
+
+const ackermann_example = `// Ackermann function example
+/* Demonstrates a recursive implementation of the Ackermann function,
+ * a well-known example of a function that is not primitive recursive
+ * and grows very rapidly even for small inputs. 
+ * See more at https://en.wikipedia.org/wiki/Ackermann_function */
+
+int ackermann(int m, int n){
+    if(m == 0){
+        return n + 1;
+    }else if((m > 0) && (n == 0)){
+        return ackermann(m - 1, 1);
+    }else if((m > 0) && (n > 0)){
+        return ackermann(m - 1, ackermann(m, n - 1));
+    }
+}
+
+int main(){
+    int result;
+    result = ackermann(1, 2); // try changing inputs
+    printf("%d", result);
+
+    return 0;
+}`;
+
+const fibonacci_example = `// Fibonacci sequence example
+/* Demonstrates a recursive implementation of the Fibonacci sequence,
+ * where each number is the sum of the two preceding ones.
+ * The sequence is defined as:
+ * Fib(0) = 0, Fib(1) = 1, Fib(n) = Fib(n-1) + Fib(n-2)
+ * See more at https://en.wikipedia.org/wiki/Fibonacci_sequence */
+
+int fibonacci(int n){
+	if(n == 0){
+		return 0;
+	}else if(n == 1){
+		return 1;
+	}else{
+		return fibonacci(n-1) + fibonacci(n-2);
+	}
+}
+
+int main(){
+	int result = fibonacci(8);
+
+	return 0;
+}`;
+
+const binary_search_example = `// Binary search
+/* Demonstrates an iterative implementation of binary search,
+ * an efficient O(log n) algorithm for finding elements in a
+ * sorted array by repeatedly dividing the search interval in half. */
+
+int binarySearch(int array[], int size, int target) {
+    int low = 0;
+    int high = size - 1;
+    
+    while (low <= high) {
+        int mid = low + (high - low) / 2; // avoids overflow
+        
+        if (array[mid] == target) {
+            return mid; // target found
+        }
+        else if (array[mid] < target) {
+            low = mid + 1; // search right half
+        }
+        else {
+            high = mid - 1; // search left half
+        }
+    }
+    
+    return -1; // target not found
+}
+
+int main() {
+    int sorted_array[] = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+    int size = sizeof(sorted_array) / sizeof(sorted_array[0]);
+    int target = 23;
+    
+    int result = binarySearch(sorted_array, size, target);
+    
+    return 0;
+}`;
+
+const exponation_example = `// Power function example
+/* This example shows three different ways to compute
+ * power of a number: iterative, recursive, and using
+ * pointers. */
+
+// Iterative version of power calculation
+int powIterative(int base, int exponent){
+    int result = 1;
+    for(int i = 0; i < exponent; i++){
+        result *= base;
+    }
+    return result;
+}
+
+// Recursive version of power calculation
+int powRecursive(int base, int exponent){
+    if(exponent == 0) return 1;
+    return base * powRecursive(base, exponent - 1);
+}
+
+// Power calculation using a pointer to store the result
+void powPointer(int base, int exponent, int *result){
+    *result = 1;
+    for(int i = 0; i < exponent; i++){
+        *result *= base;
+    }
+}
+
+int main(void){
+    int base = 2;
+    int exponent = 5;
+
+    // 1. Iterative approach
+    int result1 = powIterative(base, exponent);
+
+    // 2. Recursive approach
+    int result2 = powRecursive(base, exponent);
+
+    // 3. Pointer-based approach
+    int result3;
+    powPointer(base, exponent, &result3);
+
+    // Print the results
+    printf("%d\\n", result1); // iterative
+    printf("%d\\n", result2); // recursive
+    printf("%d\\n", result3); // pointer
+
+    return 0;
+}`;
+
+/****************
+ * OLD EXAMPLES *
+ ****************/
+
+const magnum_opus_example = `int main() {
+	int x[][2][3] = {{{1, 2, 3}, {4, 5, 6}}, {{7, 8, 9}, {10, 11, 12}}};
+	int* p = &x[0][1][1]; // pointer into array x
+
+	int** pp = &p; // pointer to pointer
+	int* arr_p[] = {p, *pp}; // array of pointers
+
+	char hello[] = "Hello"; // string allocated on stack
+ 
+	char* animals[3] = { // strings allocated in data segment
+		"cats",
+		"dogs",
+		"lizards"
+	};
+ 
+	printf("I have %d %s\\n", *p, animals[2]);
+	return 0;
+}`;
 
 // this one is mostly for debugging
-// commented errors are working
 const errors_example = `void foo(int x);
 void bar();
 int fnc();
@@ -181,57 +791,20 @@ void foo(int x){
   
 }`;
 
-const expressions_example = `int main(){
-	int i;
-	i = +10;
-	i += 10;
-	i++;
-	++i;
-	i = i + (10 + (20 + 30));
-	i = -i;
-
-	int guess;
-	guess = guess + (guess = 420, 69 + (guess = 666, 20 + 30));
-	return i;
-}`;
-
-const pointer_dereferencing_example = `int main(){
-	int x = 10; // value
-	
-	int *p; // pointer to value
-	p = &x;
-	
-	int **pp = &p; // pointer to pointer to value
-}`;
-
-const function_pointer_example = `int a(){
-	return 1;
-}
-
-void main() {
-	int (*b)() = &a;
-	return (*b)();
-}`;
-
 const function_returning_function_example = `void a(){
+	printf("A");
+
     return;
 }
 
 void (*getFunction())(void) {
-    return a(), a;
+    return a(), a; // first calls a function, then returns pointer to the function
 }
 
-void main(){
-	getFunction()();
-}`;
+int main(){
+	getFunction()(); // calls getFunction and then calls the 
 
-const function_simple_example = `void hello(){
-	char a[] = "Hello world";
-	return;
-}
-
-void main(){
-	hello();
+	return 0;
 }`;
 
 const tree_example = `int main(){
@@ -259,168 +832,4 @@ int c = 1;
 
 int main(){
 	int x = 42;
-}`;
-
-const different_memory_sizes_example = `int main() {
-    _Bool b = 1; 				// size 1 byte
-
-	char c = 2; 				// size 1 byte
-	unsigned char uc = 3; 		// size 1 byte
-
-	short s = 4; 				// size 2 bytes
-	unsigned short us = 5;		// size 2 bytes
-
-	int i = 6;					// size 4 bytes
-	unsigned int ui = 7;		// size 4 bytes
-
-	long l = 8;					// size 4 bytes
-	unsigned long ul = 9;		// size 4 bytes
-	long long ll = 10;			// size 8 bytes
-	unsigned long long ull = 11;// size 8 bytes
-
-	float f = 3.14;				// size 4 bytes
-	double d = 1.414;			// size 8 bytes
-	long double ld = 6.28318;	// size 8 bytes
-
-    return 0;
-}`;
-
-const if_example = `int main(){
-	if(1){
-		printf("Yay");
-	}else{
-		printf("Nope");
-	}
-
-	if(0){
-		printf("Nope");
-	}else{
-		printf("Yay");
-	}
-}`;
-
-const switch_example = `int main(){
-	enum DAYS { monday, tuesday, wednesday, thursday, friday, saturday, sunday };
-    enum DAYS day = friday;
-
-    switch (day) {
-        case monday:
-            printf("Monday\\n");
-            break;
-        case tuesday:
-            printf("Tuesday\\n");
-            break;
-        case wednesday:
-            printf("Wednesday\\n");
-            break;
-        case thursday:
-            printf("Thursday\\n");
-            break;
-        case friday:
-            printf("Friday\\n");
-            break;
-        case saturday:
-            printf("Saturday\\n");
-            break;
-        case sunday:
-            printf("Sunday\\n");
-            break;
-        default:
-            printf("Invalid input! Please enter a number between 1 and 7.\\n");
-            break;
-    }
-
-    return 0;
-}`;
-
-
-
-const for_loop_example = `int main(){
-	for(int x = 0; x < 5; x++){
-    	for(int y = 0; y < 5; y++){
-    	    if((y < 1 || y > 3) || (x < 1 || x > 3)){
-    		    printf("X");
-    	    }else{
-    	        printf(" ");
-    	    }
-    	}
-    	printf("\\n");
-	}
-}`;
-
-const while_loop_example = `int main(){
-	int x = 0;
-	while(x < 5){
-		printf("%d", x);
-		x++;
-	}
-	
-	int y = 0;
-	do{
-		printf("%d", y);
-		y++;
-	}while(y < 5);
-}`;
-
-const pointer_arithmetic_example = `int main(){
-	int q = 10;
-	int s = 5;
-	int* p = &q;
-	int a[3];
-
-	printf("Address of a: %p\\n",    a);
-	printf("Address of a[1]: %p\\n", &a[1]);
-	printf("Address of a[2]: %p\\n", &a[2]);
-	printf("Address of q: %p\\n",    &q);
-	printf("Address of s: %p\\n",    &s);
-
-	printf("s: %d\\n",    s);
-	printf("s using q pointer: %d\\n ", *(p-1));
-}`;
-
-const malloc_no_free_example = `int main() {
-    int* ptr = (int*) malloc(sizeof(int)); // allocate memory
-    if (ptr == NULL) {
-        return 1;
-    }
-
-    *ptr = 99;
-    printf("%d", *ptr);
-
-    // No call to free(ptr) — memory leak
-
-    return 0;
-}`;
-
-const malloc_free_example = `int main() {
-    int* ptr = (int*) malloc(sizeof(int)); // allocate memory for one int
-    if (ptr == NULL) {
-        return 1;
-    }
-
-    *ptr = 42; // assign value
-    printf("%d", *ptr);
-
-    free(ptr); // free allocated memory
-
-    return 0;
-}`;
-
-const magnum_opus_example = `int main() {
-	int x[][2][3] = {{{100, 200, 300}, {400, 500, 600}}, {{700, 800, 9000}, {1000, 1100, 1200}}};
-	int* p = &x[0][1][1]; // pointer into array x
-
-	int** pp = &p; // pointer to pointer
-	int* arr_p[] = {p, *pp}; // array of pointers
-
-	char hello[] = "Hello world"; // string allocated on stack
- 
-	char* animals[3] = { // strings allocated in data segment
-		"cats",
-		"dogs",
-		"lizards"
-	};
- 
-	printf("I'm gonna buy %d %s\\n", *p, animals[2]);
-	return 0;
 }`;
