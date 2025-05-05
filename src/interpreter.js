@@ -442,6 +442,7 @@ class Interpreter {
 		rval = this.evaluateExprArray(expr.right);
 		lval = this.evaluateExprArray(expr.left);
 
+
 		if(isclass(lval, "PointerValue")){
 			lval = this.#callStack.findMemoryRecord(lval.value);
 		}
@@ -457,7 +458,11 @@ class Interpreter {
 		}
 
 		if(has(rval, "address")){
-			rval = this.#memsim.readRecordValue(rval); // get the value
+			if(rval.size.length < 1){
+				rval = this.#memsim.readRecordValue(rval); // get the value
+			}else{ // arrays
+				rval = rval.address;
+			}
 		}
 
 		let newMemregion = record.memregion;
