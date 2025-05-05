@@ -487,8 +487,12 @@ class Semantic {
 		// TODO add enum check
 		if(caseValue && !Number.isInteger(caseValue)) throw new SError(`Case label does not reduce to an integer constant`, stmt.loc);
 
-		for(const construct of stmt.stmt){
-			construct.accept(this);
+		if(Array.isArray(stmt.stmt)){
+			for(const construct of stmt.stmt){
+				construct.accept(this);
+			}
+		}else{
+			stmt.stmt.accept(this);
 		}
 	}
 

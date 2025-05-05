@@ -834,10 +834,16 @@ class Interpreter {
 			return;
 		}
 
-		for(const construct of stmt.stmt){
+		if(Array.isArray(stmt.stmt)){
+			for(const construct of stmt.stmt){
+				if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+				this.pc = construct;
+				construct.accept(this);
+			}
+		}else{
 			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-			this.pc = construct;
-			construct.accept(this);
+			this.pc = stmt.stmt;
+			stmt.stmt.accept(this);
 		}
 	}
 
