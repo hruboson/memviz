@@ -650,20 +650,18 @@ const binary_search_example = `// Binary search
  * an efficient O(log n) algorithm for finding elements in a
  * sorted array by repeatedly dividing the search interval in half. */
 
-int binarySearch(int array[], int size, int target) {
+int binarySearch(int array[], int size, int target){
     int low = 0;
     int high = size - 1;
     
-    while (low <= high) {
+    while(low <= high){
         int mid = low + (high - low) / 2; // avoids overflow
         
-        if (array[mid] == target) {
+        if(array[mid] == target){
             return mid; // target found
-        }
-        else if (array[mid] < target) {
+        }else if(array[mid] < target){
             low = mid + 1; // search right half
-        }
-        else {
+        }else{
             high = mid - 1; // search left half
         }
     }
@@ -672,9 +670,9 @@ int binarySearch(int array[], int size, int target) {
 }
 
 int main() {
-    int sorted_array[] = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+    int sorted_array[] = {1, 5, 9, 18, 27, 30, 35, 44, 56, 71, 99, 123, 159, 270};
     int size = sizeof(sorted_array) / sizeof(sorted_array[0]);
-    int target = 23;
+    int target = 123;
     
     int result = binarySearch(sorted_array, size, target);
     
