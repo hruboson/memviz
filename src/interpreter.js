@@ -1962,7 +1962,7 @@ class Interpreter {
 				resultDiv.classList.add("bg-secondary");
 				resultDiv.innerHTML += "Application error. This is not your fault.\n<kbd>" + result + "</kbd>";
 			}else{
-				resultDiv.innerHTML += result;
+				resultDiv.innerHTML += +result;
 				resultDiv.classList.add("bg-success");
 			}
 		}
