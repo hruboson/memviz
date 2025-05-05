@@ -573,8 +573,7 @@ class Interpreter {
 				return lval * rval;
 			case '/':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
-				if(isFloat(lval) || isFloat(rval)) return lval / rval;
-				return Math.floor(lval / rval);
+				return lval / rval;
 			case '%':
 				if(rval == 0) throw new RTError("Division by zero is undefined", expr.loc);
 				return lval % rval;
@@ -687,7 +686,6 @@ class Interpreter {
 		if(has(value, "address")){
 			const record = this.#callStack.findMemoryRecord(this.#memsim.readRecordValue(value));
 			if(record) record.beingPointedToBy = DATATYPE[type]; // switch view (type punning)
-			value.memtype = type; 
 		}
 		return value;
 	}
