@@ -286,7 +286,7 @@ class Memviz {
 	}
 
 	static get smallestFontSize(){
-		return 7;
+		return 6;
 	}
 
 	/**
@@ -552,6 +552,19 @@ class Memviz {
 		let adjustedFontSizeAbove = Memviz.labelAboveStyle.fontSize;
 		let adjustedFontSizeBelow = Memviz.labelBelowStyle.fontSize;
 
+		if(cellValue.charCodeAt){
+			let ascii = cellValue.charCodeAt(0);
+			if(ascii < 32) cellValue = ascii;
+		};
+
+		function shortenType(typeStr) {
+			return typeStr
+				.replace(/\bunsigned\b/g, 'u')
+				.replace(/\blong\b/g, 'l');
+		}
+		labelBelow = shortenType(labelBelow);
+
+
 		if(cellValue != undefined && cellValue != null){
 			const strValue = cellValue.toString();
 			const charCount = strValue.length;
@@ -565,7 +578,7 @@ class Memviz {
 
 			if(totalTextWidth > availableWidth){
 				const scaleFactor = availableWidth / totalTextWidth;
-				adjustedFontSize = Math.max(Memviz.smallestFontSize, baseFontSize * scaleFactor); // smallest possible font size is 7
+				adjustedFontSize = Math.max(Memviz.smallestFontSize, baseFontSize * scaleFactor);
 			}
 		}
 
