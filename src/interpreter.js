@@ -702,6 +702,7 @@ class Interpreter {
 			case "i_constant":
 				if(expr.value == "NULL") return 0;
 				if(expr.value.startsWith("'") && expr.value.endsWith("'") && expr.value.length == 3) return expr.value.charCodeAt(1);
+				if(expr.value == "'\\0'") return 0;
 				return parseInt(expr.value);
 			case "f_constant":
 				return parseFloat(expr.value);

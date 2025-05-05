@@ -388,9 +388,9 @@ class Memsim {
 	 * @param {integer} address
 	 * @parma {integer} size Size in bytes
 	 * @param {MEMREGION} region
-	 * @param {DataView} view DataView with the actual data. They should be stored as Uint8.
+	 * @param {DataView} [view=undefined] DataView with the actual data. They should be stored as Uint8.
 	 */
-	#storeMemory(address, size, region, view){
+	#storeMemory(address, size, region, view=undefined){
 		for (let i = 0; i < size; i++) {
 			if(view == undefined || view == null){ // in case of no initializer, set address but no value (not even 0)
 				this.memory.set(address + i, { 
