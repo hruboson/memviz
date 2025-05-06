@@ -11,7 +11,7 @@
 class StringRecord{
 	constructor(str){
 		this.str = str;
-		this.encoded = btoa(str);
+		this.encoded = btoa(unescape(encodeURIComponent(str)));
 		this.address = null;
 		this.addresses = [];
 		this.region = MEMREGION.DATA;
