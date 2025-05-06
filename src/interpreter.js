@@ -608,20 +608,20 @@ class Interpreter {
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
 
+		if(isclass(lval, "PointerValue")){
+			lval = this.#callStack.findMemoryRecord(lval.value);
+		}
+
 		if(has(lval, "address")){
 			lval = this.#memsim.readRecordValue(lval); // get the value
 		}
 
-		if(isclass(lval, "PointerValue")){
-			lval = lval.value;
+		if(isclass(rval, "PointerValue")){
+			lval = this.#callStack.findMemoryRecord(rval.value);
 		}
 
 		if(has(rval, "address")){
 			rval = this.#memsim.readRecordValue(rval); // get the value
-		}
-
-		if(isclass(rval, "PointerValue")){
-			rval = rval.value;
 		}
 
 		// concrete operations
@@ -1041,7 +1041,12 @@ class Interpreter {
 					if(arg.size.length < 1){
 						val = this.#memsim.readRecordValue(arg);
 					}else{ // arrays
-						console.log(sym, arg);
+						// array to pointer
+						sym.indirection += 1;
+						sym.dimension = 0;
+						sym.pointer = true;
+						sym.pointsToMemtype = arg.memtype;
+						val = arg.address;
 					}
 				}
 				this.#memsim.setRecordValue(sym, val, MEMREGION.STACK);
@@ -1102,12 +1107,8 @@ class Interpreter {
 		const fncPtr = this.#symtableGlobal.lookup(NAMESPACE.ORDS, callee.name);
 		let args = [];
 		for(let arg of callExpr.arguments){
-			if(has(arg, "address") && arg.size.length == 0){
-				args.push(value);
-			}else{
-				let value = this.evaluateExprArray(arg);
-				args.push(value);
-			}
+			let value = this.evaluateExprArray(arg);
+			args.push(value);
 		}
 
 		const ret = fncPtr.astPtr.accept(this, args);
@@ -1344,7 +1345,6 @@ class Interpreter {
 			this.#callStack.popSFrame();
 			return;
 		}
-
 
 		let decision = this.evaluateExprArray(stmt.expr);
 		if(decision == false){
