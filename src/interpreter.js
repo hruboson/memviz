@@ -448,6 +448,9 @@ class Interpreter {
 		}
 
 		if(has(lval, "address")){
+			if(lval.memregion == MEMREGION.DATA){
+				throw new RTError(`Bad permissions for mapped region at address ${lval.address}`, expr.loc);
+			}
 			record = lval;
 			lval = this.#memsim.readRecordValue(lval); // get the value
 			if(lval == undefined) lval = 0;
