@@ -300,16 +300,21 @@ int main(){
 	return 0;
 }`;
 
-const strings_example = `
+const strings_example = `// String storage and pointer manipulation
+/* This example demonstrates different ways to store strings in memory
+ * and how to work with pointers to access string elements. */
+
 int main(){
 	char* hello2 = "Hello"; // string allocated in data segment 
 	char hello1[] = "Hello"; // string allocated on stack
  
-	char* animals[3] = { // strings allocated in data segment
+	char* alph[3] = { // strings allocated in data segment
 		"ABC",
 		"DEF",
 		"GHI"
 	};
+
+	char** middle = &alph[1]; // pointer to middle of alph
  
 	return 0;
 }`;
