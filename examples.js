@@ -670,11 +670,11 @@ int binarySearch(int array[], int size, int target){
 }
 
 int main() {
-    int sorted_array[] = {1, 5, 9, 18, 27, 30, 35, 44, 56, 71, 99, 123, 159, 270};
-    int size = sizeof(sorted_array) / sizeof(sorted_array[0]);
+    int sortedArray[] = {1, 5, 9, 18, 27, 30, 35, 44, 56, 71, 99, 123, 159, 270};
+    int size = sizeof(sortedArray) / sizeof(sortedArray[0]);
     int target = 123;
     
-    int result = binarySearch(sorted_array, size, target);
+    int index = binarySearch(sortedArray, size, target);
     
     return 0;
 }`;
