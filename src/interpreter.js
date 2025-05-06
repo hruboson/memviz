@@ -611,20 +611,20 @@ class Interpreter {
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
 
-		if(isclass(lval, "PointerValue")){
-			lval = this.#callStack.findMemoryRecord(lval.value);
-		}
-
 		if(has(lval, "address")){
 			lval = this.#memsim.readRecordValue(lval); // get the value
 		}
 
-		if(isclass(rval, "PointerValue")){
-			lval = this.#callStack.findMemoryRecord(rval.value);
+		if(isclass(lval, "PointerValue")){
+			lval = lval.value;
 		}
 
 		if(has(rval, "address")){
 			rval = this.#memsim.readRecordValue(rval); // get the value
+		}
+
+		if(isclass(rval, "PointerValue")){
+			rval = rval.value;
 		}
 
 		// concrete operations
@@ -1515,7 +1515,6 @@ class Interpreter {
 		: (indices.length > 0 ? indices.reduce((res, item) => res * (Number(item) + 1), 1) - 1 : 1);
 
 		if(isclass(record, "PointerValue")){ // is this correct? I think it is... probably
-			console.log(this.#callStack.findMemoryRecord(record.value + MEMSIZES[record.memtype]*(flatIndex), false));
 			return this.#callStack.findMemoryRecord(record.value + MEMSIZES[record.memtype]*(flatIndex), false);
 			return new PointerValue(record.value + MEMSIZES[record.memtype]*(flatIndex), record.memtype);
 		}
