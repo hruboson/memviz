@@ -138,22 +138,29 @@ class CallStack{
 
 	/**
 	 * Finds memory record by its address
+	 * @param {integer} address
+	 * @param {boolean} [whole=true] If it should retrieve the whole record or only part
 	 * @returns {MemoryRecord|undefined}
 	 */
-	findMemoryRecord(address){
+	findMemoryRecord(address, whole=true){
 		let record;
 		for(record of this.hFrame){
-			if(record.address == address){
-				const dummyRecord = new MemoryRecord();
-				dummyRecord.address = address;
-				dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
-				dummyRecord.indirection = record.indirection;
-				dummyRecord.memtype = record.memtype;
-				dummyRecord.memsize = MEMSIZES[record.memtype];
-				dummyRecord.memregion = record.memregion;
-				dummyRecord.beingPointedToBy = record.beingPointedToBy;
-				return dummyRecord;
+			if(whole){
+				if(record.address == address) return record;
+			}else{
+				if(record.address == address){
+					const dummyRecord = new MemoryRecord();
+					dummyRecord.address = address;
+					dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+					dummyRecord.indirection = record.indirection;
+					dummyRecord.memtype = record.memtype;
+					dummyRecord.memsize = MEMSIZES[record.memtype];
+					dummyRecord.memregion = record.memregion;
+					dummyRecord.beingPointedToBy = record.beingPointedToBy;
+					return dummyRecord;
+				}
 			}
+
 			if(record.addresses.includes(address)){
 				const dummyRecord = new MemoryRecord();
 				dummyRecord.address = address;
@@ -181,7 +188,21 @@ class CallStack{
 			}
 		}
 		for(record of this.dFrame){
-			if(record.address == address ) return record;
+			if(whole){
+				if(record.address == address) return record;
+			}else{
+				if(record.address == address){
+					const dummyRecord = new MemoryRecord();
+					dummyRecord.address = address;
+					dummyRecord.size = []; // when reading from one address it cannot return array (it can only return pointer)
+					dummyRecord.indirection = record.indirection;
+					dummyRecord.memtype = record.memtype;
+					dummyRecord.memsize = MEMSIZES[record.memtype];
+					dummyRecord.memregion = record.memregion;
+					dummyRecord.beingPointedToBy = record.beingPointedToBy;
+					return dummyRecord;
+				}
+			}
 			if(record.addresses.includes(address)){
 				const dummyRecord = new MemoryRecord();
 				dummyRecord.address = address;

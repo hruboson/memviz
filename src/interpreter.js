@@ -1515,6 +1515,8 @@ class Interpreter {
 		: (indices.length > 0 ? indices.reduce((res, item) => res * (Number(item) + 1), 1) - 1 : 1);
 
 		if(isclass(record, "PointerValue")){ // is this correct? I think it is... probably
+			console.log(this.#callStack.findMemoryRecord(record.value + MEMSIZES[record.memtype]*(flatIndex), false));
+			return this.#callStack.findMemoryRecord(record.value + MEMSIZES[record.memtype]*(flatIndex), false);
 			return new PointerValue(record.value + MEMSIZES[record.memtype]*(flatIndex), record.memtype);
 		}
 
