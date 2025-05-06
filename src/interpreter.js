@@ -671,9 +671,9 @@ class Interpreter {
 		// concrete operations
 		switch(expr.op){
 			case '||':
-				return lval || rval;
+				return Boolean(lval || rval);
 			case '&&':
-				return lval && rval;
+				return Boolean(lval && rval);
 
 			default:
 				throw new AppError(`Unknown operator of expression: ${expr.op}`, expr.loc);

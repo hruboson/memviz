@@ -393,7 +393,7 @@ class StackFrame {
 			if(this.parent){
 				return this.parent.resolve(name);
 			}else{
-				throw new RTError(`undeclared symbol ${name}`);
+				throw new RTError(`Undefined value of symbol ${name}, undefined behavior!`);
 			}
 		}
 	}
