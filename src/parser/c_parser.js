@@ -186,17 +186,17 @@ case 96: case 128:
 break;
 case 111:
  // anonymous struct or union
-		this.$ = ($$[$0-3] == "STRUCT") ? new Struct($$[$0-1], new Unnamed(this._$), this._$) : new Union($$[$0-1], new Unnamed(this._$), this._$); 
+		this.$ = ($$[$0-3] == "struct") ? new Struct($$[$0-1], new Unnamed(this._$), this._$) : new Union($$[$0-1], new Unnamed(this._$), this._$); 
 	
 break;
 case 112:
  // struct variable initialization and struct definition 
-		this.$ = ($$[$0-4] == "STRUCT") ? new Struct($$[$0-1], new Tagname($$[$0-3], this._$), this._$) : new Union($$[$0-1], new Tagname($$[$0-3], this._$), this._$); 
+		this.$ = ($$[$0-4] == "struct") ? new Struct($$[$0-1], new Tagname($$[$0-3], this._$), this._$) : new Union($$[$0-1], new Tagname($$[$0-3], this._$), this._$); 
 	
 break;
 case 113:
  // struct variable declaration
-		this.$ = ($$[$0-1] == "STRUCT") ? new Struct(null, new Tagname($$[$0], this._$), this._$) : new Union(null, new Tagname($$[$0], this._$), this._$); 
+		this.$ = ($$[$0-1] == "struct") ? new Struct(null, new Tagname($$[$0], this._$), this._$) : new Union(null, new Tagname($$[$0], this._$), this._$); 
 	
 break;
 case 116: case 195: case 196: case 216:

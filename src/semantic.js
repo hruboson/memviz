@@ -521,6 +521,9 @@ class Semantic {
 			}
 		}
 
+		if(isclass(declaration.type.specifiers[0], "Struct")) throw new NSError("structs", declaration.loc);
+		if(isclass(declaration.type.specifiers[0], "Union")) throw new NSError("unions", declaration.loc);
+
 		this.addSymbol(SYMTYPE.OBJ, declaration.declarator, declaration.initializer, declaration.type.specifiers, declaration);
 	}
 
@@ -540,7 +543,7 @@ class Semantic {
 	}
 
     visitDesignator(designator){
-
+		return designator;
 	}
 
 	visitDoWhileLoop(loop){
@@ -566,6 +569,7 @@ class Semantic {
 	}
 
     visitEnum(enm){
+		throw new NSError("enum", enm.loc);
 		const name = enm.tagname;
 		let list = [];
 		let i = 0;
@@ -579,7 +583,7 @@ class Semantic {
 	}
 
 	visitEnumerator(enumerator){
-
+		throw new NSError("enumerator", enm.loc);
 	}
 
 	visitFnc(fnc){
@@ -816,6 +820,7 @@ class Semantic {
 				return INITTYPE.ARR;
 			}
 			case INITTYPE.STRUCT:
+				throw new NSError("struct", initializer.loc);
 				return INITTYPE.STRUCT;
 			// no more nested, was taken care of while creating the AST
 			default:
@@ -902,7 +907,7 @@ class Semantic {
 	}
 
     visitStruct(struct){
-
+		throw new NSError("structs", struct.loc);
 	}
 
     visitSubscriptExpr(expr){
@@ -952,7 +957,7 @@ class Semantic {
 	}
 
     visitUnion(union){
-
+		throw new NSError("unions", union.loc);
 	}
 
 	visitWhileLoop(loop){

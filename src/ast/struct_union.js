@@ -49,7 +49,7 @@ class Struct {
 class Union {
 
 	/**
-	 * Struct's body
+	 * Union's body
 	 * @type {Array.<Declaration>}
 	 */
 	declarations;

@@ -339,15 +339,15 @@ type_specifier
 struct_or_union_specifier
 	: struct_or_union '{' struct_declaration_list '}'
 	{ // anonymous struct or union
-		$$ = ($1 == "STRUCT") ? new Struct($3, new Unnamed(@$), @$) : new Union($3, new Unnamed(@$), @$); 
+		$$ = ($1 == "struct") ? new Struct($3, new Unnamed(@$), @$) : new Union($3, new Unnamed(@$), @$); 
 	}
 	| struct_or_union IDENTIFIER '{' struct_declaration_list '}' 
 	{ // struct variable initialization and struct definition 
-		$$ = ($1 == "STRUCT") ? new Struct($4, new Tagname($2, @$), @$) : new Union($4, new Tagname($2, @$), @$); 
+		$$ = ($1 == "struct") ? new Struct($4, new Tagname($2, @$), @$) : new Union($4, new Tagname($2, @$), @$); 
 	}
 	| struct_or_union IDENTIFIER 
 	{ // struct variable declaration
-		$$ = ($1 == "STRUCT") ? new Struct(null, new Tagname($2, @$), @$) : new Union(null, new Tagname($2, @$), @$); 
+		$$ = ($1 == "struct") ? new Struct(null, new Tagname($2, @$), @$) : new Union(null, new Tagname($2, @$), @$); 
 	}
 	;
 
