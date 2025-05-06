@@ -1645,14 +1645,26 @@ class Interpreter {
 			case '++':
 				if(has(value, "address")){
 					const currValue = this.#memsim.readRecordValue(value);
-					this.#memsim.setRecordValue(value, currValue + 1, MEMREGION.STACK); 
+					let newMemregion = value.memregion;
+					if(value.memregion == MEMREGION.BSS){
+						newMemregion = MEMREGION.DATA;
+						this.#memsim.free(value.address, value.memsize);
+						value.address = null;
+					}
+					this.#memsim.setRecordValue(value, currValue + 1, newMemregion); 
 					return currValue + 1;
 				}
 				return value + 1;
 			case '--':
 				if(has(value, "address")){
 					const currValue = this.#memsim.readRecordValue(value);
-					this.#memsim.setRecordValue(value, currValue - 1, MEMREGION.STACK); 
+					let newMemregion = value.memregion;
+					if(value.memregion == MEMREGION.BSS){
+						newMemregion = MEMREGION.DATA;
+						this.#memsim.free(value.address, value.memsize);
+						value.address = null;
+					}
+					this.#memsim.setRecordValue(value, currValue - 1, newMemregion);
 					return currValue - 1;
 				}
 				return value - 1;

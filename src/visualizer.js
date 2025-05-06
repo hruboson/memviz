@@ -561,6 +561,7 @@ class Memviz {
 			function shortenType(typeStr) {
 				return typeStr
 					.replace(/\bunsigned\b/g, 'u')
+					.replace(/\bsigned\b/g, '')
 			}
 			labelBelow = shortenType(labelBelow);
 		}

@@ -80,10 +80,10 @@ class AppError extends Error {
 class NSError extends Error {
 	constructor(what, loc=null){
 		if(!loc){
-			super(`Sorry, we currently do not support ${what}`);
+			super(`Sorry, ${what} are currently not supported`);
 		}else{
 			const line = loc.first_line;
-			super(`Sorry, we currently do not support ${what} (on line ${loc.first_line})`);
+			super(`Sorry, ${what} are currently not supported (on line ${loc.first_line})`);
 		}
 		console.error(`NS:${what}`);
 		this.name = "Not supported error";

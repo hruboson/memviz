@@ -931,6 +931,9 @@ class Semantic {
 	}
 
 	visitTypedef(typedef){
+		if(isclass(typedef.type.specifiers[0], "Struct")) throw new NSError("structs", typedef.loc);
+		if(isclass(typedef.type.specifiers[0], "Union")) throw new NSError("unions", typedef.loc);
+
 		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, false, typedef.type.specifiers);
 	}
 
