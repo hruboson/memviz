@@ -1845,7 +1845,9 @@ class Interpreter {
 				if(isclass(value, "PointerValue")) value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
 				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
 				if(!isNaN(value)){
-					value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(value));
+					const record = this.#callStack.findMemoryRecord(value);
+					if(!record) throw new RTError("Argument passed to 'printf' is not a string");
+					value = this.#memsim.readRecordValue(record);
 				}
 				i++;
 				return CArrayToJsString(value);

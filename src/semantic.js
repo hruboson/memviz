@@ -685,7 +685,7 @@ class Semantic {
 
 		// type checking
 		for(let [arg, param] of fncCall.arguments.map((arg, i) => [arg, fncSym.parameters[i]])){
-			if(param.declarator && (param.declarator.kind == DECLTYPE.PTR || param.declarator.kind == DECLTYPE.ARR)){
+			if(param.declarator && (param.declarator.kind == DECLTYPE.PTR || param.declarator.kind == DECLTYPE.ARR)){ // !fix params of pointer and array types
 				continue;
 			}
 			this.typeCheck(this.getParameterType(param), arg);
