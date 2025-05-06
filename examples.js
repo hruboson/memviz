@@ -496,7 +496,7 @@ int main() {
     int length = 0;
     
     // Calculate string length
-    while (str[length] != '\0') {
+    while (str[length] != '\\0') {
         length++;
     }
     
@@ -511,18 +511,22 @@ int main() {
     return 0;
 }`;
 
-const advanced_malloc = `int* createArrayOfIntegers(int size){
-    int* ptr = malloc(sizeof(int)*size);
-    if (ptr == 0) {
-        return 1;
-    }
+const advanced_malloc = `// Advanced malloc example
+/* This example demonstrates how to dynamically allocate memory for an array,
+ * initialize its values, and properly free the allocated memory when done. */
 
-    // assign values to each address allocated
-    for(int i = 0; i < size; i++){
-        *(ptr+i) = (i+1)*10;
-    }
+int* createArrayOfIntegers(int size){
+	int* ptr = malloc(sizeof(int)*size);
+	if (ptr == 0) {
+		return 1;
+	}
+
+	// assign values to each address allocated
+	for(int i = 0; i < size; i++){
+		*(ptr+i) = (i+1)*10;
+	}
     
-    return ptr; // pass pointer to main function
+	return ptr; // pass pointer to main function
 }
 
 int main() {
