@@ -11,7 +11,6 @@
 class StringRecord{
 	constructor(str){
 		this.str = str;
-		this.encoded = btoa(unescape(encodeURIComponent(str)));
 		this.address = null;
 		this.addresses = [];
 		this.region = MEMREGION.DATA;
@@ -42,7 +41,7 @@ class StringTable{
 	 */
 	add(sr){
 		if(!this.has(sr)){
-			this.strings.set(sr.encoded, sr);
+			this.strings.set(sr.str, sr);
 		}
 	}
 
@@ -51,7 +50,7 @@ class StringTable{
 	 * @param {StringRecord} sr
 	 */
 	has(sr){
-		if(this.strings.has(sr.encoded)) return true;
+		if(this.strings.has(sr.str)) return true;
 		return false;
 	}
 
@@ -60,7 +59,7 @@ class StringTable{
 	 * @param {string} str
 	 */
 	get(str){
-		return this.strings.get(btoa(str));
+		return this.strings.get(str);
 	}
 
     /**
