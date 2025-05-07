@@ -608,6 +608,26 @@ Split(["#split-ve", "#split-console"], {
 		}
 	}
 
+	function toggleBackButton(disable){
+		if(disable){
+			var btn = document.getElementById("prevInstr");
+			btn.classList.add("disabled");
+		}else{
+			var btn = document.getElementById("prevInstr");
+			btn.classList.remove("disabled");
+		}
+	}
+
+	function toggleForwardButton(disable){
+		if(disable){
+			var btn = document.getElementById("nextInstr");
+			btn.classList.add("disabled");
+		}else{
+			var btn = document.getElementById("nextInstr");
+			btn.classList.remove("disabled");
+		}
+	}
+
 	/**
 	 * Resets state of editor and action buttons
 	 * @global
@@ -692,6 +712,8 @@ Split(["#split-ve", "#split-console"], {
 
 				case EXEOPT.EXECUTEALL:
 					breakEditor = Infinity;
+					toggleBackButton(true);
+					toggleForwardButton(true);
 					break;
 
 				case EXEOPT.EXECUTENEXT:
@@ -711,6 +733,8 @@ Split(["#split-ve", "#split-console"], {
 						return;
 					}
 
+					toggleBackButton(false);
+					toggleForwardButton(false);
 					breakEditor = 0;
 					break;
 			}
