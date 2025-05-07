@@ -154,6 +154,12 @@ class Sym extends MemoryRecord{
 	 */
 	isNative;
 
+	/**
+	 * If object is not undefined, the symbol is a structure. This field holds its members
+	 * @type {object}
+	 */
+	object = undefined;
+
 	constructor(name, type, initialized, specifiers, pointer, dimension=0, size=[], indirection=0, parameters=null, isFunction=false, astPtr=null, isNative=false){
 		super();
 		this.name = name;

@@ -48,7 +48,7 @@ class Enum extends Construct {
  * @param {CExpr} [constantExpression=null] Optional constant expression 
  * @param {Object} loc
  */
-class Enumerator {
+class Enumerator extends Construct {
 	
 	/**
 	 * Name (identifier) of enumerator
@@ -69,9 +69,14 @@ class Enumerator {
 	loc;
 
 	constructor(identifier, constantExpression = null, loc){
+		super();
 		this.identifier = identifier;
 		this.constantExpression = constantExpression;
 		this.loc = loc;
+	}
+
+	accept(visitor){
+		return visitor.visitEnumerator(this);
 	}
 }
 

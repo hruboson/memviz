@@ -407,7 +407,7 @@ enum_specifier
 	| ENUM '{' enumerator_list ',' '}' { $$ = new Enum(new Unnamed(@$), $3, @$); }
 	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = new Enum($2, $4, @$); }
 	| ENUM IDENTIFIER '{' enumerator_list ',' '}' { $$ = new Enum($2, $4, @$); }
-	| ENUM IDENTIFIER { $$ = new Tagname($2, @$); }
+	| ENUM IDENTIFIER { $$ = new Enum($2, null, @$); }
 	;
 
 enumerator_list

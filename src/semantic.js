@@ -380,7 +380,6 @@ class Semantic {
 		const currSymtable = this.symtableStack.peek();
 
 		// check rval type
-		// todo
 		if(Array.isArray(expr.left)){
 			for(const subexpr of expr.left){
 				if(isclass(subexpr, "Identifier")){
@@ -397,7 +396,7 @@ class Semantic {
 
 		// check lval type
 		if(symbol?.isFunction){
-			
+			throw new SError("Cannot assign function to a variable", expr.loc);
 		}
 		
 		if(expr.right.length){
@@ -512,7 +511,6 @@ class Semantic {
 		if(declaration.initializer && declaration.initializer.kind == INITTYPE.EXPR){
 			if(declaration.declarator.kind == DECLTYPE.ARR){
 				// string allocated on stack
-				//TODO just make a note of it and then read from the address
 				if(typeof initKind == "string"){
 					let sr = this.stringTable.get(initKind);
 					sr.region = MEMREGION.STACK;
@@ -568,7 +566,7 @@ class Semantic {
 	}
 
     visitEnum(enm){
-		throw new NSError("enum", enm.loc);
+		throw new NSError("enums", enm.loc);
 		const name = enm.tagname;
 		let list = [];
 		let i = 0;
@@ -582,7 +580,7 @@ class Semantic {
 	}
 
 	visitEnumerator(enumerator){
-		throw new NSError("enumerator", enm.loc);
+		throw new NSError("enumerators", enm.loc);
 	}
 
 	visitFnc(fnc){
@@ -927,6 +925,13 @@ class Semantic {
 
     visitTagname(tagname){
 
+	}
+
+	visitType(type){
+		if(typeof type.specifiers[0] == "string"){
+			return;
+		}
+		throw new NSError("structs and unions", type.loc);
 	}
 
 	visitTypedef(typedef){

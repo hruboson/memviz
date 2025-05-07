@@ -1620,7 +1620,12 @@ class Interpreter {
 		this.#callStack.popSFrame();
 	}
 
+	// these three are mostly correct, on their own they don't do anything
     visitTagname(tagname){
+
+	}
+
+	visitType(type){
 
 	}
 

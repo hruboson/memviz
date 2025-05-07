@@ -6,7 +6,7 @@
 /**
  * @class Type
  * @decription Allowed (built-in) types: void  char  short  int  long  float  double  signed  unsigned, _Bool
- * @param {Array.<string>} [specifiers=[]]
+ * @param {Array.<string|Declaration>} [specifiers=[]] Specifiers or struct/union body
  * @param {Object} loc
  */
 class Type {
@@ -32,6 +32,10 @@ class Type {
 				return without !== "typedef"; // remove "typedef" as that is not needed in the specifiers 
 			});
 		}
+	}
+
+	accept(visitor){ // this is only for struct/union
+		visitor.visitType(this);
 	}
 }
 

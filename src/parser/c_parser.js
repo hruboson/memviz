@@ -207,7 +207,7 @@ case 117: case 215:
 break;
 case 118:
  
-		this.$ = new Type($$[$0-1], this._$); 
+		this.$ = new Struct($$[$0-1], this._$); 
 	
 break;
 case 119:
@@ -244,7 +244,7 @@ case 132:
  this.$ = new Enum($$[$0-4], $$[$0-2], this._$); 
 break;
 case 133:
- this.$ = new Tagname($$[$0], this._$); 
+ this.$ = new Enum($$[$0], null, this._$); 
 break;
 case 136:
  this.$ = new Enumerator($$[$0-2], $$[$0], this._$); 
