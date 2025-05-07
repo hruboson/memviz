@@ -1115,6 +1115,10 @@ class Interpreter {
 		}
 
 		const ret = fncPtr.astPtr.accept(this, args);
+
+		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+		this.pc = callExpr;
+
 		return ret;
 	}
 
@@ -1436,9 +1440,6 @@ class Interpreter {
 	}
 
 	visitReturn(ret){
-		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-		this.pc = ret;
-
 		// return only most right-hand expression, evaluate rest
 		// when expression is returned get the right-most operand to return and evaluate the left-hand operand
 		var expr = ret.expr;
