@@ -1116,9 +1116,6 @@ class Interpreter {
 
 		const ret = fncPtr.astPtr.accept(this, args);
 
-		if(this.#_instrNum > this.#breakstop) throw new StopFlag();
-		this.pc = callExpr;
-
 		return ret;
 	}
 
