@@ -97,14 +97,14 @@ const MEMSIZES = {
  * @class Memsim
  * @description Memory simulation class, handles calls from interpreter
  * @param {WarningSystem} warningSystem
- * @param {integer} [heapSize=1024]
- * @param {integer} [heapPointer=1000]
- * @param {integer} [stackSize=1024]
- * @param {integer} [stackPointer=5000]
- * @param {integer} [dataSize=512]
- * @param {integer} [dataPointer=2000]
- * @param {integer} [bssSize=512]
- * @param {integer} [bssPointer=3000]
+ * @param {integer} [heapSize=8192]
+ * @param {integer} [heapPointer=5120]
+ * @param {integer} [stackSize=8192]
+ * @param {integer} [stackPointer=21504]
+ * @param {integer} [dataSize=2048]
+ * @param {integer} [dataPointer=1024]
+ * @param {integer} [bssSize=2048]
+ * @param {integer} [bssPointer=3072]
  */
 class Memsim {
 
@@ -115,7 +115,7 @@ class Memsim {
 	 */
 	#warningSystem;
 
-	constructor(warningSystem, heapSize = 3000, heapPointer = 2000, stackSize = 3000, stackPointer = 5000, dataSize = 500, dataPointer = 500, bssSize = 500, bssPointer = 1000){
+	constructor(warningSystem, heapSize = 8192, heapPointer = 5120, stackSize = 8192, stackPointer = 21504, dataSize = 2048, dataPointer = 1024, bssSize = 2048, bssPointer = 3072){
 		this.#warningSystem = warningSystem;
 		this.memory = new Map(); // Simulated memory
 		this.references = new Map(); // Reference counter
