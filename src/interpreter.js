@@ -873,6 +873,7 @@ class Interpreter {
 		const symbol = declarator.accept(this);
 
 		let value = null;
+		let breakstop = false;
 		if(initializer){
 			let record;
 			value = initializer.accept(this);
@@ -887,6 +888,13 @@ class Interpreter {
 				record = this.#callStack.findMemoryRecord(value);
 				if(record){
 					record.beingPointedToBy = symbol.pointsToMemtype;
+				}
+			}
+
+			const fncInitializer = initializer.expr?.expr?.name;
+			if(fncInitializer){
+				if(initializer.expr?.cType == "FncCallExpr" && !this.#symtableGlobal.lookup(NAMESPACE.ORDS, fncInitializer).isNative){
+					breakstop = true;
 				}
 			}
 		}
@@ -905,6 +913,11 @@ class Interpreter {
 			}else{
 				this.#memsim.setRecordValue(symbol, value, MEMREGION.STACK);
 			}
+		}
+
+		if(breakstop){
+			if(this.#_instrNum > this.#breakstop) throw new StopFlag();
+			this.pc = declaration;
 		}
 	}
 
