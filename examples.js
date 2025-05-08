@@ -693,18 +693,18 @@ const binary_search_example = `// Binary search
  * sorted array by repeatedly dividing the search interval in half. */
 
 int binarySearch(int array[], int size, int target){
-    int low = 0;
-    int high = size - 1;
+    int lowIndex = 0;
+    int highIndex = size - 1;
     
-    while(low <= high){
-        int mid = low + (high - low) / 2; // avoids overflow
+    while(lowIndex <= highIndex){
+        int mid = lowIndex + (highIndex - lowIndex) / 2; // avoids overflowIndex
         
         if(array[mid] == target){
             return mid; // target found
         }else if(array[mid] < target){
-            low = mid + 1; // search right half
+            lowIndex = mid + 1; // search right half
         }else{
-            high = mid - 1; // search left half
+            highIndex = mid - 1; // search left half
         }
     }
     
