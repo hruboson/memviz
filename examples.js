@@ -29,17 +29,37 @@ const functions_example = `// Function and string example
 /* This example shows how to define and call a function,
  * and how to work with string literals using pointers. */
 
-// Functions printing message
-void hello(void){
-	char* a = "Hello"; // 'a' is a pointer to string in data segment
-	printf("%s", a);
+/**
+ * Defines function 'hello'
+ * with parameter 'name' of type 'pointer to char' 
+ * returning 'void'
+ */
+void hello(char* name){
+	// Calls function 'printf' with argument 'name'
+	printf("Hello %s", name);
 
 	return;
 }
 
+/**
+ * Defines function 'sum'
+ * with parameters:
+ * 		'x' of type 'int'
+ * 		'y' of type 'int'
+ * returning 'int'
+ */
+int sum(int x, int y){
+	return x + y;
+}
+
 int main(){
-	// Calls function 'hello' defined above
-	hello();
+	// Calls function 'hello' defined above with argument "world"
+	hello("world");
+
+	// Defines variable 'result'
+	// Its value is the result of 
+	// function 'sum' with arguments 7 and 4
+	int result = sum(7, 4);
 
 	return 0;
 }`;
@@ -106,11 +126,13 @@ int main(){
 
 	a = (x+y) / (y-z); // parentheses change evaluation order
 
-	_Bool logic = 0xF0 && 0x88;
-	int binary = 0xF0 & 0x88;
+	_Bool logic = 0xF0 && 0x88; // logic operator
+	int binary = 0xF0 & 0x88; 	// binary operator
 
 	int guess;
 	guess = guess + (guess = 420, 69 + (guess = 666, 20 + 30)); // comma operator
+
+	int *ptr = &guess; // address-of operator
 
 	return 0;
 }`;
@@ -220,12 +242,17 @@ const do_while_loop_example = `// Do-while loop example
  * and continues multiplying by 2 until the value exceeds 1000. */
 
 int main(){
-	int value = 1;
+	int number = 1;
+	
+	// do block runs always at least once
+	do{ 
+		printf("%d\\n", number);
+		number *= 2;
+	}while(number <= 1000); // condition is checked at the end of do block
 
-	do{
-		printf("%d\\n", value);
-		value *= 2;
-	}while(value <= 1000);
+	/*
+	 * Notice, at the end of the loop the value of 'number' is 1024
+	 */
 
 	return 0;
 }`;
@@ -268,8 +295,8 @@ const pointers_example = `// Pointer example using the swap function
 
 void swap(int *a, int *b){
 	int temp = *a; 	// dereference to get value
-	*a = *b; 		// assign value pointed to by b to a
-	*b = temp;		// assign original a to b
+	*a = *b; 		// assign value pointed to by b to symbol pointed to by a
+	*b = temp;		// assign original a to symbol pointed to by b
 }
 
 int main(){
@@ -288,11 +315,12 @@ const array_example = `// Arrays and pointers
  * pointer arithmetic can be used as an alternative. */
 
 int main(){
-	int a[3] = { 0, 1, 2 }; // array of size 3
-	int i = a[0]; // first element is on index 0
+	int a[3] = { 0, 1, 2 }; 				// array of size 3
+	int aSize = sizeof(a) / sizeof(a[0]); 	// sizeof operator
+	int i = a[0]; 							// first element is on index 0
 	
-	int* ptr = &a[1]; // pointer pointing to the middle of the array
-	int* ptr2 = a+1; // same pointer using pointer arithmetic
+	int* ptr = &a[1]; 	// pointer pointing to the middle of the array
+	int* ptr2 = a+1; 	// same pointer using pointer arithmetic
 
 	// filling array using for loop
 	int arr[5];
@@ -308,10 +336,12 @@ const strings_example = `// String storage and pointer manipulation
  * and how to work with pointers to access string elements. */
 
 int main(){
-	char* hello2 = "Hello"; // string allocated in data segment 
-	char hello1[] = "Hello"; // string allocated on stack
+	char* strPtr = "Hi!"; 		// string allocated in data segment 
+	char strArray[] = "Hi!"; 	// string allocated on stack
  
-	char* alph[3] = { // strings allocated in data segment
+	/* strings allocated in data segment 
+	   but array of pointers allocated on stack */
+	char* alph[3] = {
 		"ABC",
 		"DEF",
 		"GHI"
@@ -600,12 +630,12 @@ const recursive_factorial_example = `// Calculates factorial using recursion
 int factorial(int n){
     if(n <= 1) return 1;
 
-    return n * factorial(n - 1);
+	n = n * factorial(n-1);
+	return n;
 }
 
 int main(){
-    int number = 5;
-    int result = factorial(number);
+    int result = factorial(5);
 
     return 0;
 }`;
