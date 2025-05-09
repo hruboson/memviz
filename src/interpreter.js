@@ -714,6 +714,7 @@ class Interpreter {
 				return record;
 			case "i_constant":
 				if(expr.value == "NULL") return 0;
+				if(expr.value.startsWith("0b")) return parseInt(expr.value.slice(2), 2);
 				if(expr.value.startsWith("'") && expr.value.endsWith("'") && expr.value.length == 3) return expr.value.charCodeAt(1);
 				if(expr.value == "'\\0'") return 0;
 				return parseInt(expr.value);
