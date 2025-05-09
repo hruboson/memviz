@@ -2134,16 +2134,13 @@ class StopFlag {
 	}
 }
 
+/**
+ * @class PointerValue
+ * @description Class representing pointer, used for pointer arithmetics. Is created when '&' operator is used.
+ */
 class PointerValue {
 	constructor(value, memtype){
 		this.value = value;
 		this.memtype = memtype;
-	}
-}
-
-class NumberValue { 
-	constructor(value, type){
-		this.value = value;
-		this.type = type;
 	}
 }
