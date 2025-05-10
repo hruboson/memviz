@@ -1930,6 +1930,7 @@ class Interpreter {
 		if(isclass(expr, "PointerValue")) addressToFree = expr.value;
 
 		const memoryToFree = this.#callStack.findMemoryRecord(addressToFree);
+		if(!memoryToFree) throw new RTError(`Invalid free`);
 		this.#memsim.free(addressToFree, memoryToFree.memsize);
 		this.#callStack.hFrame.remove(memoryToFree);
 	}
