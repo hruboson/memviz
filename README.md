@@ -12,6 +12,7 @@ It was built for beginners, who are just starting with the C language. There are
 - `printf`,
 - `malloc`,
 - `free`.
+
 The version of the C language is the ISO/IEC 9899:1999 (also known as **C99**) with some advanced keywords omitted. The exact
 grammar can be found in the `src/parser/` folder.
 
