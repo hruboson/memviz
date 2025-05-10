@@ -530,8 +530,8 @@ class Memsim {
 	#setVoidValue(record, value, region){
 		const bytes = [];
 		const type = record.beingPointedToBy ? record.beingPointedToBy : DATATYPE.int;
-			if(value == undefined || value == null){
-			for (let i = 0; i < record.memsize; i++) {
+		if(value == undefined || value == null){
+			for(let i = 0; i < record.memsize; i++){
 				bytes.push(undefined);
 			}
 		}else{

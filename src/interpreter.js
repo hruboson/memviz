@@ -1902,6 +1902,23 @@ class Interpreter {
 		return new PointerValue(record.address, DATATYPE.void);
 	}
 
+	visitCalloc(calloc, arg){
+		const s = this.evaluateExprArray(arg); // size to allocate
+		const record = new MemoryRecord();
+		record.memsize = s;
+		record.memtype = DATATYPE.void;
+		record.region = MEMREGION.HEAP;
+
+		this.#memsim.setRecordValue(record, null, MEMREGION.HEAP);
+		this.#callStack.hFrame.add(record);
+		
+		for(let i = 0; i < s; i++){
+			this.#memsim.setRecordValue(this.#callStack.findMemoryRecord(record.address+i), 0, MEMREGION.HEAP);
+		}
+
+		return new PointerValue(record.address, DATATYPE.void);
+	}
+
 	visitFree(free, arg){
 		let addressToFree;
 		const expr = this.evaluateExprArray(arg);

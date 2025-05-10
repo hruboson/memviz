@@ -24,6 +24,18 @@ class NATIVE_malloc{
 }
 
 /**
+ * @class NATIVE_calloc
+ * @description Custom "node" for built-in calloc function. Is visitable by visitor.
+ */
+class NATIVE_calloc{
+	accept(visitor, arg){
+		return visitor.visitCalloc(this, arg);
+	}
+}
+
+
+
+/**
  * @class NATIVE_free
  * @description Custom "node" for built-in free function. Is visitable by visitor.
  */

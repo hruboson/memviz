@@ -370,7 +370,7 @@ class Semantic {
 	 *******************************/
 
 	visitArr(arr){
-
+		return arr;
 	}
 
 	visitBAssignExpr(expr){
@@ -417,21 +417,26 @@ class Semantic {
 			default:
 				break;
 		}
+
+		return expr;
 	}
 
 	visitBArithExpr(expr){
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
+		return expr;
 	}
 
     visitBCompExpr(expr){
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
+		return expr;
 	}
 
     visitBLogicExpr(expr){
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
+		return expr;
 	}
 
 	visitBreak(br){
@@ -461,6 +466,8 @@ class Semantic {
 		this.evaluateExprArray(expr.condition);
 		this.evaluateExprArray(expr.texpr);
 		this.evaluateExprArray(expr.fexpr);
+
+		return expr;
 	}
 
 	visitContinue(cont){
@@ -522,6 +529,8 @@ class Semantic {
 		if(isclass(declaration.type.specifiers[0], "Union")) throw new NSError("unions", declaration.loc);
 
 		this.addSymbol(SYMTYPE.OBJ, declaration.declarator, declaration.initializer, declaration.type.specifiers, declaration);
+
+		return declaration;
 	}
 
 	visitDeclarator(declarator){
@@ -584,6 +593,7 @@ class Semantic {
 	}
 
 	visitFnc(fnc){
+		if(fnc.isNative) return; // skip built-in functions, will be handled separately
 		//
 		const fncName = this.addSymbol(SYMTYPE.FNC, fnc.declarator, fnc.body, fnc.returnType, fnc); // adds function to global symbol table
 
@@ -666,11 +676,13 @@ class Semantic {
 		}
 
 		// semantic checks for each subtree of argument
+		const args = [];
 		for(let arg of fncCall.arguments){
-			arg.accept(this);
+			args.push(arg.accept(this));
 		}
 
 		if(fncSym.isNative){
+			fncSym.astPtr.accept(this, args);
 			return;
 		}
 
@@ -689,6 +701,8 @@ class Semantic {
 		}
 
 		this.calledFunctions.push(fncSym);
+
+		return fncCall;
 	}
 
 	visitForLoop(loop){
@@ -830,7 +844,7 @@ class Semantic {
 	}
 
 	visitLabelName(label){
-
+		
 	}
 
 	visitLStmt(label){
@@ -848,15 +862,15 @@ class Semantic {
 	}
 
     visitMemberAccessExpr(expr){
-
+		return expr;
 	}
 
 	visitNOP(nop){
-
+		return nop;
 	}
 
     visitPointer(ptr){
-
+		return ptr;
 	}
 
     visitPtrMemberAccessExpr(expr){
@@ -897,6 +911,7 @@ class Semantic {
 
 	visitSizeOfExpr(call){
 		const e = this.evaluateExprArray(call.expr);
+		return e;
 	}
 
     visitSStmt(stmt){
@@ -908,7 +923,7 @@ class Semantic {
 	}
 
     visitSubscriptExpr(expr){
-
+		return expr;
 	}
 
 	visitSwitchStmt(stmt){
@@ -924,7 +939,7 @@ class Semantic {
 	}
 
     visitTagname(tagname){
-
+		return tagname;
 	}
 
 	visitType(type){
@@ -932,6 +947,8 @@ class Semantic {
 			return;
 		}
 		throw new NSError("structs and unions", type.loc);
+
+		return type;
 	}
 
 	visitTypedef(typedef){
@@ -939,11 +956,11 @@ class Semantic {
 		if(isclass(typedef.type.specifiers[0], "Union")) throw new NSError("unions", typedef.loc);
 
 		this.addSymbol(SYMTYPE.TYPEDEF, typedef.declarator, false, typedef.type.specifiers);
+		return typedef;
 	}
 
 
     visitUExpr(expr){
-		// TODO
 		switch(expr.op){
 			case '+':
 			case '-':
@@ -961,6 +978,7 @@ class Semantic {
 				break;
 			} 
 		}
+		return expr;
 	}
 
     visitUnion(union){
@@ -989,12 +1007,21 @@ class Semantic {
 		this.closeScope();
 	}
 
-	visitPrintF(printf, formatstr){ // todo variable length of arguments
+	visitPrintF(printf, formatstr){
 
 	}
 
 	visitMalloc(malloc, arg){
+		console.log(arg);
+		if(arg.length > 1) throw new SError(`Wrong number of arguments to function malloc`);
+		const s = this.evaluateExprArray(arg[0]); // size to allocate
+		if(!s) throw new SError(`Wrong argument to malloc function`);
+	}
 
+	visitCalloc(calloc, arg){
+		if(arg.length > 1) throw new SError(`Wrong number of arguments to function calloc`);
+		const s = this.evaluateExprArray(arg[0]); // size to allocate
+		if(!s) throw new SError(`Wrong argument to calloc function`);
 	}
 
 	visitFree(free, arg){
@@ -1070,6 +1097,22 @@ class Semantic {
 			[new Declarator(DECLTYPE.ID, null, {name: "size"})],
 			true,                      // isFunction
 			new NATIVE_malloc(),       // no AST, built-in function pointer
+			true                       // isNative
+		);
+
+		symtableGlobal.insertORD(
+			NAMESPACE.ORDS,
+			SYMTYPE.FNC,
+			true,                      // initialized
+			"calloc",                  // function name
+			["void*"],                   // return type
+			true,
+			0,                         // not an array
+			0,						   // not an array so 0 size
+			1,
+			[new Declarator(DECLTYPE.ID, null, {name: "size"})],
+			true,                      // isFunction
+			new NATIVE_calloc(),       // no AST, built-in function pointer
 			true                       // isNative
 		);
 
