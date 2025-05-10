@@ -30,7 +30,7 @@ The application requires no special installation. To run it:
 
 The main interface consists of three sections:
 
-![UI Description](doc/ui-info.png)  
+![UI Description](doc/ui-info.drawio-en.png)  
 *Application interface layout*
 
 1. **Code Editor** (left panel)
