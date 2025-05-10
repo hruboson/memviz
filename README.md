@@ -11,6 +11,7 @@ This tool is capable of interpreting simple C constructs (excluding `structs`, `
 It was built for beginners, who are just starting with the C language. There are no macros, built-in functions include:
 - `printf`,
 - `malloc`,
+- `calloc`,
 - `free`.
 
 The version of the C language is the ISO/IEC 9899:1999 (also known as **C99**) with some advanced keywords omitted. The exact
