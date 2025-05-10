@@ -127,7 +127,7 @@ int main(){
 	a = (x+y) / (y-z); // parentheses change evaluation order
 
 	_Bool logic = 0xF0 && 0x88; // logic operator
-	int binary = 0xF0 & 0x88; 	// binary operator
+	int binary = 0b010 | 0b101; // binary operator
 
 	int guess;
 	guess = guess + (guess = 420, 69 + (guess = 666, 20 + 30)); // comma operator
