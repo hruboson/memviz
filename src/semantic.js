@@ -1012,16 +1012,17 @@ class Semantic {
 	}
 
 	visitMalloc(malloc, arg){
-		console.log(arg);
-		if(arg.length > 1) throw new SError(`Wrong number of arguments to function malloc`);
+		if(arg.length != 1) throw new SError(`Wrong number of arguments to function malloc`);
 		const s = this.evaluateExprArray(arg[0]); // size to allocate
-		if(!s) throw new SError(`Wrong argument to malloc function`);
+		if(!s) throw new SError(`Argument size must be an integer (malloc)`);
 	}
 
-	visitCalloc(calloc, arg){
-		if(arg.length > 1) throw new SError(`Wrong number of arguments to function calloc`);
-		const s = this.evaluateExprArray(arg[0]); // size to allocate
-		if(!s) throw new SError(`Wrong argument to calloc function`);
+	visitCalloc(calloc, args){
+		if(args.length != 2) throw new SError(`Wrong number of arguments to function calloc`);
+		const num = this.evaluateExprArray(args[0]);
+		if(!num) throw new SError(`Argument num must be an integer (calloc)`);
+		const size = this.evaluateExprArray(args[1]);
+		if(!size) throw new SError(`Argument size must be an integer (calloc)`);
 	}
 
 	visitFree(free, arg){

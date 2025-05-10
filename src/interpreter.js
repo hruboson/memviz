@@ -1891,6 +1891,7 @@ class Interpreter {
 
 	visitMalloc(malloc, arg){
 		const s = this.evaluateExprArray(arg); // size to allocate
+		if(isNaN(s)) throw new RTError(`Wrong argument to malloc function`); // this should be in semantic
 		const record = new MemoryRecord();
 		record.memsize = s;
 		record.memtype = DATATYPE.void;
@@ -1902,8 +1903,9 @@ class Interpreter {
 		return new PointerValue(record.address, DATATYPE.void);
 	}
 
-	visitCalloc(calloc, arg){
-		const s = this.evaluateExprArray(arg); // size to allocate
+	visitCalloc(calloc, args){
+		const s = this.evaluateExprArray(args[0]) * this.evaluateExprArray(args[1]); // size to allocate
+		if(isNaN(s)) throw new RTError(`Wrong argument to calloc function`); // this should be in semantic
 		const record = new MemoryRecord();
 		record.memsize = s;
 		record.memtype = DATATYPE.void;
