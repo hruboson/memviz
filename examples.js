@@ -360,7 +360,7 @@ const type_sizes_example = `// Variable types and memory layout demonstration
 
 /* For this example turn on 'Show true sizes' in settings */
 
-int main() {
+int main(){
     _Bool b = 1; 				// size 1 byte
 
 	char c = 2; 				// size 1 byte
@@ -417,7 +417,7 @@ const malloc_example = `// Memory allocation without freeing (memory leak)
 /* Demonstrates dynamic memory allocation using malloc without
  * proper deallocation, resulting in a memory leak. */
 
-int main() {
+int main(){
     int* ptr = (int*) malloc(sizeof(int)); // allocate memory and cast pointer to int pointer
     if(ptr == NULL){
         return 1;
@@ -431,11 +431,29 @@ int main() {
     return 0;
 }`;
 
+const calloc_example = `// Memory allocation with zero initialization
+/* Demonstrates dynamic memory allocation using calloc which
+ * automatically initializes all bytes to zero, unlike malloc. */
+
+int main(){
+    int* ptr = (int*) calloc(1, sizeof(int)); // allocate and zero-initialize memory
+    if(ptr == NULL) {
+        return 1;
+    }
+
+    printf("%d", *ptr); // prints 0 (unlike malloc which would print garbage)
+
+    *ptr = 42; // can still assign new values after initialization
+    printf("%d", *ptr);
+
+    return 0;
+}`;
+
 const free_example = `// Proper memory allocation and deallocation
 /* Demonstrates dynamic memory allocation using malloc and 
  * proper cleanup using free to avoid memory leaks. */
 
-int main() {
+int main(){
     int* ptr = (int*) malloc(sizeof(int)); // allocate memory for one int
     if(ptr == NULL){
         return 1;
@@ -453,7 +471,7 @@ const multidimensional_arrays_example = `// 2D arrays (matrices)
 /* This example shows how to declare and manipulate a 2D array (matrix),
  * use pointers to access its data, and how to modify specific rows and columns. */
 
-int main() {
+int main(){
 	// 3x3 matrix
     int matrix[3][3] = {
         {00, 01, 02},
@@ -503,33 +521,11 @@ int main(){
     return 0;
 }`;
 
-const array_search_example = `// Search in an array (linear) 
-/* This example shows how to search for a specific value
- * in a simple integer array using a linear search algorithm.
- * For more advanced algorithm see 'Binary search' example. */
-
-int main(){
-    int numbers[] = {10, 33, 11, 111, 256, 42, 123}; // simple array of numbers
-	int length = sizeof(numbers) / sizeof(int);
-    int search_for = 42; // number to find
-    int found = -1;      // flag if found
-    
-    // Basic linear search
-    for(int i = 0; i < length; i++){
-        if(numbers[i] == search_for){
-            found = 0;  // set flag if found
-            break;      // exit loop early
-        }
-    }
-    
-    return found;  // returns 0 if found, -1 if not
-}`;
-
 const string_reversal_example = `// String reversal
 /* This example demonstrates how to calculate the length of a string
  * and then reverse it in place by swapping characters using a loop. */
 
-int main() {
+int main(){
     char str[] = "hello";
     int length = 0;
     
@@ -567,7 +563,7 @@ int* createArrayOfIntegers(int size){
 	return ptr; // pass pointer to main function
 }
 
-int main() {
+int main(){
 	int size = 5;
     int* arr = createArrayOfIntegers(size);
     
@@ -583,7 +579,7 @@ const min_max_example = `// Finds min and max of integer array
 /* Demonstrates how to find the minimum and maximum values
  * in a static integer array using a simple linear scan. */
 
-int main() {
+int main(){
     int array[] = {10, 152, 300, -11, -150, 42, 188};
     int size = sizeof(array) / sizeof(array[0]);
     
@@ -607,7 +603,7 @@ const array_average_example = `// Average of integer array
  * of a static integer array using simple iteration
  * and type conversion for floating-point result. */
 
-int main() {
+int main(){
     int numbers[] = {1, 2, 3, 4, 5, 6};
     int sum = 0;
     int size = sizeof(numbers) / sizeof(numbers[0]);
@@ -711,7 +707,7 @@ int binarySearch(int array[], int size, int target){
     return -1; // target not found
 }
 
-int main() {
+int main(){
     int sortedArray[] = {1, 5, 9, 18, 27, 30, 35, 44, 56, 71, 99, 123, 159, 270};
     int size = sizeof(sortedArray) / sizeof(sortedArray[0]);
     int target = 123;
@@ -775,7 +771,7 @@ int main(void){
  * OLD EXAMPLES *
  ****************/
 
-const magnum_opus_example = `int main() {
+const magnum_opus_example = `int main(){
 	int x[][2][3] = {{{1, 2, 3}, {4, 5, 6}}, {{7, 8, 9}, {10, 11, 12}}};
 	int* p = &x[0][1][1]; // pointer into array x
 
@@ -800,7 +796,7 @@ void bar();
 int fnc();
 int fnc = 10; // semantic error
 
-void main() {
+void main(){
 	int z = 1/0; // runtime error
   
 	int *p;

@@ -120,8 +120,8 @@ describe("examples", () => {
 		chai.expect(interpretAll(pointer_arrays_example).main).to.equal(0);
 	});
 
-	it("array_search_example", () => {
-		chai.expect(interpretAll(array_search_example).main).to.be.equal(0);
+	it("calloc_example", () => {
+		chai.expect(interpretAll(calloc_example).main).to.be.equal(0);
 	});
 
 	it("string_reversal_example", () => {
