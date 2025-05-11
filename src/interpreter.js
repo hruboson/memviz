@@ -1844,6 +1844,7 @@ class Interpreter {
 				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
 				i++;
 
+				if(isNaN(value)) return Math.floor(Math.random() * 900000000000000) + 100000000000000; // simulating random memory
 				return parseInt(value);
 			}
 
@@ -1853,6 +1854,8 @@ class Interpreter {
 				if(isclass(value, "PointerValue")) value = this.#memsim.readRecordValue(this.#callStack.findMemoryRecord(value.value));
 				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
 				i++;
+
+				if(isNaN(value)) return Math.floor(Math.random() * 900000000000000) + 100000000000000; // simulating random memory
 				return parseFloat(value);
 			}
 
@@ -1876,6 +1879,8 @@ class Interpreter {
 				if(isclass(otherArgs[i], "PointerValue")) value = otherArgs[i].value;
 				if(has(otherArgs[i], "address")) value = otherArgs[i].address;
 				i++;
+
+				if(isNaN(value)) return Math.floor(Math.random() * 900000000000000) + 100000000000000; // simulating random memory
 				return "0x" + value.toString(16);
 			}
 
