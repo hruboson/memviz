@@ -258,11 +258,11 @@
 					<div id="split-output">
 						<pre id="warnings" class="bg-warning text-black rounded p-3 m-3 hide-if-empty"></pre>
 						<pre id="result" class="rounded p-3 m-3 hide-if-empty"></pre>
-						<pre id="output" style="height: 99.99%"></pre>
+						<pre id="output"></pre>
 					</div>
 				</div>
 			</div>
-			<div id="split-console">
+			<div id="split-console" style="z-index: 100">
 				<div class="console">
 					<pre id="console-output">$&gt;</pre>
 				</div>
@@ -634,6 +634,31 @@ Split(["#split-ve", "#split-console"], {
 			execute(editor.getValue(), EXEOPT.COMPILE);
 		}
 	});
+</script>
+
+<script>
+	// output height dynamic calculation (due to result and warnings banner)
+	function adjustOutputHeight(){
+		const output = document.getElementById("output");
+		const warnings = document.getElementById("warnings");
+		const result = document.getElementById("result");
+
+		// get heights (only if element is visible)
+		const warningsHeight = warnings.offsetHeight > 0 ? warnings.offsetHeight : 0;
+		const resultHeight = result.offsetHeight > 0 ? result.offsetHeight : 0;
+
+		// calculate new height (subtract warnings + result + their margins)
+		const margins = 24;
+		const newHeight = `calc(100% - ${warningsHeight + resultHeight + margins}px - 30px)`; // 30px magical constant that makes it work :-)
+
+		output.style.height = newHeight;
+	}
+
+	// auto update
+	window.addEventListener("load", adjustOutputHeight);
+	const observer = new MutationObserver(adjustOutputHeight);
+	observer.observe(document.getElementById("warnings"), { childList: true, subtree: true });
+	observer.observe(document.getElementById("result"), { childList: true, subtree: true });
 </script>
 
 <!-- Helpers -->
