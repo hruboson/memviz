@@ -627,6 +627,15 @@ Split(["#split-ve", "#split-console"], {
 	}
 </script>
 
+<script>
+	// SHORTCUTS
+	document.addEventListener("keydown", (event) => {
+		if(event.key == "Enter" || event.key == "c"){
+			execute(editor.getValue(), EXEOPT.COMPILE);
+		}
+	});
+</script>
+
 <!-- Helpers -->
 <script>
 	/**
