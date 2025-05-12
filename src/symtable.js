@@ -205,6 +205,11 @@ class Sym extends MemoryRecord{
 		// Default type is 'int' if unspecified - but this should never happen
 		if(specSet.size === 0) return DATATYPE.int;
 
+		if(specSet.has("void")){ 
+			if(this.type != SYMTYPE.FNC) throw new SError(`Variable ${this.name} declared void`, this.astPtr.loc);
+			return DATATYPE.void;
+		}
+
 		if(specSet.has("_Bool")) return DATATYPE.bool;
 		if(specSet.has("char")) return specSet.has("unsigned") ? DATATYPE.uchar : DATATYPE.char;
 		if(specSet.has("short")) return specSet.has("unsigned") ? DATATYPE.ushort : DATATYPE.short;
