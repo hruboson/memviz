@@ -276,15 +276,15 @@ class Semantic {
 				}
 				if(declChild.kind == DECLTYPE.ARR){
 					if(declChild.arrSizeExp){ // get size from expression in brackets
-						const exprValue = declChild.arrSizeExp.accept(this);
-						if(isNaN(exprValue)){
+						const expr = declChild.arrSizeExp.accept(this);
+						if(!expr.isConstant){
 							throw new NSError(`variable array size (VLA)`, declarator.loc);
 						}
-						if(exprValue < 0){
+						if(expr.value < 0){
 							throw new SError(`Invalid array size`, declarator.loc);
 						}
 
-						size[dimension] = exprValue; // should always be constant expression
+						size[dimension] = expr.value; // should always be constant expression
 					}else{ // calculate (only for the outer-most array)
 						if(dimension != dimensionBrackets - 1) throw new SError(`Array type has incomplete element type '${specifiers}[]'`, declarator.loc);
 						if(initializer != null){
@@ -399,13 +399,12 @@ class Semantic {
 			throw new SError("Cannot assign function to a variable", expr.loc);
 		}
 		
-		if(expr.right.length){
-			for(const subexpr of expr.right){
-				rval = subexpr.accept(this);
-			}
-		}else{
-			rval = expr.right.accept(this);
+		rval = this.evaluateExprArray(expr.right);
+		if(symbol){
+			lval = new SValue(symbol.memtype, symbol.indirection, symbol.dimension, false, null, null); // todo fix for structs
 		}
+
+		this.sValueCompatibility(lval, rval, expr.loc);
 
 		switch(expr.op){
 			case '=': {
@@ -418,25 +417,54 @@ class Semantic {
 				break;
 		}
 
-		return expr;
+		return lval;
 	}
 
 	visitBArithExpr(expr){
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
-		return expr;
+
+		if(lval.dimension > 0){
+			lval.indirection = 0;
+			if(rval.isConstant){
+				rval.type = lval.type;
+				rval.indirection = lval.indirection;
+			}
+		}
+		if(rval.dimension > 0){
+			rval.indirection = 0;
+			if(lval.isConstant){
+				lval.type = rval.type;
+				lval.indirection = rval.indirection;
+			}
+		}
+
+		if(lval.indirection > 0 && rval.isConstant){
+			rval.type = lval.type;
+			rval.indirection = lval.indirection;
+		}
+
+		if(rval.indirection > 0 && lval.isConstant){
+			lval.type = rval.type;
+			lval.indirection = rval.indirection;
+		}
+
+		this.sValueCompatibility(lval, rval, expr.loc);
+		return new SValue(lval.type, lval.indirection, lval.dimension, null, false, null, null);
 	}
 
     visitBCompExpr(expr){
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
-		return expr;
+		this.sValueCompatibility(lval, rval, expr.loc);
+		return new SValue(lval.type, lval.indirection, lval.dimension, null, false, null, null);
 	}
 
     visitBLogicExpr(expr){
 		let rval = this.evaluateExprArray(expr.right);
 		let lval = this.evaluateExprArray(expr.left);
-		return expr;
+		this.sValueCompatibility(lval, rval);
+		return new SValue(lval.type, lval.indirection, lval.dimension, null, false, null, null);
 	}
 
 	visitBreak(br){
@@ -444,7 +472,9 @@ class Semantic {
 	}
 
     visitCastExpr(expr){
-		return this.evaluateExprArray(expr.expr);
+		const operand = this.evaluateExprArray(expr.expr);
+		const type = determineMemtype(expr.type);
+		return new SValue(type, operand.indirection, operand.dimension, null, null);
 	}
 
 	visitCExpr(expr){
@@ -452,11 +482,21 @@ class Semantic {
 			case "s_literal":
 				const sr = new StringRecord(expr.value.slice(1, -1));
 				this.stringTable.add(sr);
-				return sr.str;
+				return new SValue(DATATYPE.char, 1, 1, null, true, sr.str, null);
 			case "i_constant":
-				return parseInt(expr.value);
+				let value;
+				let indirection = 0;
+				if(expr.value == "NULL"){
+					value = 0;
+					indirection = 1;
+				}
+				if(expr.value.startsWith("0b")) value = parseInt(expr.value.slice(2), 2);
+				if(expr.value.startsWith("'") && expr.value.endsWith("'") && expr.value.length == 3) value = expr.value.charCodeAt(1);
+				if(expr.value == "'\\0'") value = 0;
+				if(!value) value = parseInt(expr.value);
+				return new SValue(DATATYPE.int, indirection, 0, null, true, value, null);
 			case "f_constant":
-				return parseFloat(expr.value);
+				return new SValue(DATATYPE.float, 0, 0, null, true, parseFloat(expr.value), null);
 			default:
 				throw new AppError("wrong expr.type format while analyzing semantics");
 		}
@@ -490,7 +530,7 @@ class Semantic {
 		const caseValue = this.evaluateExprArray(stmt.expr);
 
 		// TODO add enum check
-		if(caseValue && !Number.isInteger(caseValue)) throw new SError(`Case label does not reduce to an integer constant`, stmt.loc);
+		if(caseValue && !Number.isInteger(caseValue.value)) throw new SError(`Case label does not reduce to an integer constant`, stmt.loc);
 
 		if(Array.isArray(stmt.stmt)){
 			for(const construct of stmt.stmt){
@@ -504,12 +544,14 @@ class Semantic {
 	visitDeclaration(declaration){
 		const declKind = declaration.declarator.accept(this);
 
-		let initKind = null;
+		let init;
+		let expr;
 		if(declaration.initializer){
-			initKind = declaration.initializer.accept(this);
+			init = declaration.initializer.accept(this);
+			expr = init.expr;
 
-			if( ((declKind == DECLTYPE.ARR && initKind != INITTYPE.ARR) || (declKind != DECLTYPE.ARR && initKind == INITTYPE.ARR))
-				&& (typeof initKind != "string" && declKind != DECLTYPE.ARR)){
+			if( ((declKind == DECLTYPE.ARR && init.kind != INITTYPE.ARR) || (declKind != DECLTYPE.ARR && init.kind == INITTYPE.ARR))
+				&& (typeof init.kind != "string" && declKind != DECLTYPE.ARR)){
 				throw new SError(`Invalid initializer`, declaration.loc);
 			}
 		}
@@ -518,8 +560,8 @@ class Semantic {
 		if(declaration.initializer && declaration.initializer.kind == INITTYPE.EXPR){
 			if(declaration.declarator.kind == DECLTYPE.ARR){
 				// string allocated on stack
-				if(typeof initKind == "string"){
-					let sr = this.stringTable.get(initKind);
+				if(typeof init.expr == "string"){
+					let sr = this.stringTable.get(init.expr);
 					sr.region = MEMREGION.STACK;
 				}
 			}
@@ -528,9 +570,20 @@ class Semantic {
 		if(isclass(declaration.type.specifiers[0], "Struct")) throw new NSError("structs", declaration.loc);
 		if(isclass(declaration.type.specifiers[0], "Union")) throw new NSError("unions", declaration.loc);
 
-		this.addSymbol(SYMTYPE.OBJ, declaration.declarator, declaration.initializer, declaration.type.specifiers, declaration);
+		const name = this.addSymbol(SYMTYPE.OBJ, declaration.declarator, declaration.initializer, declaration.type.specifiers, declaration);
+		const symbol = this.symtableStack.peek().resolve(name);
+		
+		const type = symbol.pointsToMemtype && symbol.indirection > 0 ? symbol.pointsToMemtype : symbol.memtype;
+		const lval = new SValue(type, symbol.indirection, symbol.dimension, false, null, null);
+		if(declaration.initializer && symbol.type != SYMTYPE.FNC && expr != undefined && symbol.size.length < 1){
+			const rval = new SValue(expr.type, expr.indirection, expr.dimension, expr.isConstant, expr.value, expr.object);
+			if(rval.dimension > 0){
+				rval.indirection += 1;
+			}
+			this.sValueCompatibility(lval, rval, declaration.loc);
+		}
 
-		return declaration;
+		return lval;
 	}
 
 	visitDeclarator(declarator){
@@ -682,8 +735,7 @@ class Semantic {
 		}
 
 		if(fncSym.isNative){
-			fncSym.astPtr.accept(this, args);
-			return;
+			return fncSym.astPtr.accept(this, args);
 		}
 
 		if(fncCall.arguments.length > fncSym.parameters.length){
@@ -702,7 +754,7 @@ class Semantic {
 
 		this.calledFunctions.push(fncSym);
 
-		return fncCall;
+		return new SValue(fncSym.memtype, fncSym.indirection, 0, fncSym.returnType, false, null, null);
 	}
 
 	visitForLoop(loop){
@@ -764,7 +816,9 @@ class Semantic {
 		}catch(e){
 			throw new SError(e.details, identifier.loc);
 		}
-		return symbol;
+
+		const type = symbol.pointsToMemtype && symbol.indirection > 0 ? symbol.pointsToMemtype : symbol.memtype;
+		return new SValue(type, symbol.indirection, symbol.dimension, false, null, null);
 	}
 
 	visitIfStmt(stmt){
@@ -796,7 +850,7 @@ class Semantic {
 	visitInitializer(initializer){
 		switch(initializer.kind){
 			case INITTYPE.EXPR:
-				return initializer.expr.accept(this);
+				return { kind: INITTYPE.EXPR, expr: initializer.expr.accept(this) };
 			case INITTYPE.ARR:{
 				const jsArr = initializer.toJSArray(this);
 
@@ -828,7 +882,7 @@ class Semantic {
 
 				// throws SError
 				checkDimensions(jsArr);
-				return INITTYPE.ARR;
+				return { kind: INITTYPE.ARR, expr: jsArr};
 			}
 			case INITTYPE.STRUCT:
 				throw new NSError("struct", initializer.loc);
@@ -911,7 +965,7 @@ class Semantic {
 
 	visitSizeOfExpr(call){
 		const e = this.evaluateExprArray(call.expr);
-		return e;
+		return new SValue(DATATYPE.int, 0, 0, null, false, null, null);
 	}
 
     visitSStmt(stmt){
@@ -923,7 +977,21 @@ class Semantic {
 	}
 
     visitSubscriptExpr(expr){
-		return expr;
+		let value;
+
+		let exprCopy = expr.pointer;
+		while(exprCopy != null){
+			if(exprCopy.expr){
+				value = this.evaluateExprArray(exprCopy.expr);
+			}else{  // last in the chain is identifier
+				value = this.evaluateExprArray(exprCopy);
+				break;
+			}
+
+			exprCopy = exprCopy.pointer;
+		};
+
+		return new SValue(value.type, value.indirection, 0, null, false, null, null);
 	}
 
 	visitSwitchStmt(stmt){
@@ -961,6 +1029,7 @@ class Semantic {
 
 
     visitUExpr(expr){
+		let val;
 		switch(expr.op){
 			case '+':
 			case '-':
@@ -968,17 +1037,20 @@ class Semantic {
 			case '--':
 			case '!':
 			case '~':
+				val = this.evaluateExprArray(expr.expr);
+				return new SValue(val.type, val.indirection, val.dimension, null, null, null);
 			case '*':
-				//expr.expr.accept(this);
-				break;
+				val = this.evaluateExprArray(expr.expr);
+				return new SValue(val.type, val.indirection-1, 0, null, null, null);
 			case '&': {
-				const lvalue = this.evaluateExprArray(expr.expr);
-				if(isclass(lvalue, "Sym") && lvalue.isFunction) throw new NSError(`function pointers`, expr.loc);
-				//if(!isclass(expr.expr, "Identifier")) throw new SError("Lvalue (object, variable, ...) required for '&' operand", expr.loc);
-				break;
+				val = this.evaluateExprArray(expr.expr);
+				if(isclass(val, "Sym") && val.isFunction) throw new NSError(`function pointers`, expr.loc);
+				//if(!isclass(expr.expr, "Identifier")) throw new SError("value (object, variable, ...) required for '&' operand", expr.loc);
+				return new SValue(val.type, val.indirection+1, val.dimension, val.returnType, false, null, val.object);
 			} 
+			default:
+				throw new AppError(`Uknown operator ${expr.op} in semantic UExpr`);
 		}
-		return expr;
 	}
 
     visitUnion(union){
@@ -1008,13 +1080,14 @@ class Semantic {
 	}
 
 	visitPrintF(printf, formatstr){
-
+		return new SValue(null, 0, 0, DATATYPE.int, false, null, null)
 	}
 
 	visitMalloc(malloc, arg){
 		if(arg.length != 1) throw new SError(`Wrong number of arguments to function malloc`);
 		const s = this.evaluateExprArray(arg[0]); // size to allocate
 		if(!s) throw new SError(`Argument size must be an integer (malloc)`);
+		return new SValue(null, 1, 0, DATATYPE.void, false, null, null);
 	}
 
 	visitCalloc(calloc, args){
@@ -1023,10 +1096,11 @@ class Semantic {
 		if(!num) throw new SError(`Argument num must be an integer (calloc)`);
 		const size = this.evaluateExprArray(args[1]);
 		if(!size) throw new SError(`Argument size must be an integer (calloc)`);
+		return new SValue(null, 1, 0, DATATYPE.void, false, null, null);
 	}
 
 	visitFree(free, arg){
-
+		return new SValue(null, 0, 0, DATATYPE.void, false, null, null);
 	}
 
 	/**********************
@@ -1231,4 +1305,123 @@ class Semantic {
 
 		return false;
 	}
+
+	/**
+	 * Compares operands of binary expression
+	 * @param {SValue} lval
+	 * @param {SValue} rval
+	 * @param {Object} loc Line of code object
+	 * @throws {SError}
+	 */
+	sValueCompatibility(lval, rval, loc){
+		/*if(lval.indirection > 0 || rval.indirection > 0){
+			if(lval.indirection != rval.indirection || lval.type != rval.type && (!lval.isConstant && !rval.isConstant && !lval.returnType && !rval.returnType)){
+				this.warningSystem.new(`Initialization of '${lval.type}${"*".repeat(lval.indirection)}' from '${rval.type}${"*".repeat(rval.indirection)}' without cast`, WTYPE.CONVERSION, loc);
+			}
+		} man this is more difficult than I thought*/
+		if(lval.type == DATATYPE.void || rval.type == DATATYPE.void) throw new SError(`Variable declared void`, loc);
+	}
 }
+
+class SValue {
+	/**
+	 * @type {DATATYPE}
+	 */
+	type;
+
+	/**
+	 * @type integer
+	 */
+	indirection;
+
+	/**
+	 * @type integer
+	 */
+	dimension;
+
+	/**
+	 * @type {DATATYPE}
+	 */
+	returnType;
+
+	/**
+	 * @type {Object}
+	 */
+	object;
+
+	/**
+	 * @type {boolean}
+	 */
+	isConstant;
+
+	/**
+	 * @type {Object|integer|string}
+	 */
+	value;
+
+	/**
+	 * @param {DATATYPE} type - The data type of the value
+	 * @param {integer} indirection - The level of indirection (pointer depth)
+	 * @param {integer} dimension - The array dimension (0 for non-arrays)
+	 * @param {DATATYPE} [returnType=DATATYPE.void] - The return type for functions
+	 * @param {boolean} isConstant
+	 * @param {Object|integer|string} value - In case of constant
+	 * @param {Object} [object=null] - Whether this is an object, if yes set it here
+	 */
+	constructor(type, indirection=0, dimension=0, returnType=DATATYPE.void, isConstant=false, value, object=null){
+		this.type = type;
+		this.indirection = indirection;
+		this.dimension = dimension;
+		this.returnType = returnType;
+		this.isConstant = isConstant;
+		this.value = value;
+		this.object = object;
+	}
+}
+
+/**
+ * Determines the memory type based on the specifiers
+ * @return {DATATYPE}
+ * @note Determined in constructor
+ */
+function determineMemtype(specifiers){
+	let specArr = specifiers;
+	if(!Array.isArray(specifiers)){
+		console.warn("Wrong type of Semantic.specifiers, expected Array, got ", getclass(specifiers));
+		specArr = specifiers.split(',').filter(s => s.length > 0); 
+	}
+
+	let specSet = new Set(specArr);
+
+	// Default type is 'int' if unspecified - but this should never happen
+	if(specSet.size === 0) return DATATYPE.int;
+
+	if(specSet.has("void")){ 
+		return DATATYPE.void;
+	}
+
+	if(specSet.has("_Bool")) return DATATYPE.bool;
+	if(specSet.has("char")) return specSet.has("unsigned") ? DATATYPE.uchar : DATATYPE.char;
+	if(specSet.has("short")) return specSet.has("unsigned") ? DATATYPE.ushort : DATATYPE.short;
+	if(specSet.has("int")) return specSet.has("unsigned") ? DATATYPE.uint : DATATYPE.int;
+
+	// Floating-point types
+	if(specSet.has("float")) return DATATYPE.float;
+	if(specSet.has("double")) return specSet.has("long") ? DATATYPE.longdouble : DATATYPE.double;
+
+	// Handling 'long', 'long long', and unsigned variations
+	if(specSet.has("long")){
+		let longCount = 0;
+		if(specSet.has("long")) longCount = specArr.filter(x => x === "long").length;
+
+		if(longCount == 2){
+			return specSet.has("unsigned") ? DATATYPE.ulonglong : DATATYPE.longlong;
+		}
+		if(longCount == 1){
+			return specSet.has("unsigned") ? DATATYPE.ulong : DATATYPE.long;
+		}
+	}
+
+	// Default to int
+	return DATATYPE.int;
+};
