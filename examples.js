@@ -438,8 +438,13 @@ const calloc_example = `// Memory allocation with zero initialization
  * automatically initializes all bytes to zero, unlike malloc. */
 
 int main(){
-    int* ptr = (int*) calloc(1, sizeof(int)); // allocate and zero-initialize memory
-    if(ptr == NULL){
+
+	// allocate and zero-initialize memory
+	// calloc has different parameters than malloc
+	// 1st param.: number of objects
+	// 2nd param.: size of object
+    int* ptr = (int*) calloc(1, sizeof(int)); 
+	if(ptr == NULL){
         return 1;
     }
 
