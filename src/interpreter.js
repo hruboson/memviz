@@ -1848,7 +1848,8 @@ class Interpreter {
 				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
 				i++;
 
-				if(isNaN(value)) return Math.floor(Math.random() * 900000000000000) + 100000000000000; // simulating random memory
+				if(isNaN(value) && !Array.isArray(value)) return Math.floor(Math.random() * 900000000000000) + 100000000000000; // simulating random memory
+
 				return parseInt(value);
 			}
 
@@ -1859,7 +1860,8 @@ class Interpreter {
 				if(has(value, "address")) value = this.#memsim.readRecordValue(value);
 				i++;
 
-				if(isNaN(value)) return Math.floor(Math.random() * 900000000000000) + 100000000000000; // simulating random memory
+				if(isNaN(value) && !Array.isArray(value)) return Math.floor(Math.random() * 900000000000000) + 100000000000000; // simulating random memory
+
 				return parseFloat(value);
 			}
 

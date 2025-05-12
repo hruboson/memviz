@@ -595,7 +595,16 @@ class Memsim {
 
 		let firstAddress;
 		for(let i = 0; i < record.memsize; i++){
-			const newAddress = this.#setUCharValue(bytes[i], region, record.address+i);
+			let newAddress;
+			if(bytes[i] == undefined || bytes[i] == null){
+				if(record.address+i == undefined || isNaN(record.address+i)){
+					newAddress = this.#setUCharValue(bytes[i], region, record.address+i);
+				}else{
+					newAddress = this.#setUCharValue(this.#readUCharValue(record.address+i), region, record.address+i);
+				}
+			}else{
+				newAddress = this.#setUCharValue(bytes[i], region, record.address+i);
+			}
 			firstAddress = firstAddress ? firstAddress : newAddress;
 		}
 		return firstAddress;
