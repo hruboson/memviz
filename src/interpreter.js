@@ -417,6 +417,14 @@ class Interpreter {
 					this.#memsim.free(record.address, record.memsize, record.region);
 					this.#callStack.dFrame.remove(record);
 				}
+
+				if(!this.#callStack.hFrame.empty()){
+					let leaking = 0;
+					for(const record of this.#callStack.hFrame){
+						leaking += record.memsize;
+					}
+					this.#warningSystem.add(`Dynamically allocated memory not properly freed. ${leaking} bytes in use at exit!`, WTYPE.MEMLEAK);
+				}
 			}catch(ret){ // catch return value of main
 				result = ret;
 			}
