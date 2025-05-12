@@ -323,7 +323,7 @@
 	</div>
 
 	<!-- infoModal -->
-	<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+	<div class="modal fade modal-lg" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -336,6 +336,70 @@
 						<li><a href="doc.html">Documentation</a></li>
 						<li><a href="tests.html" target="_blank">Tests</a></li>
 					</ul>
+
+					<h1>About</h1>
+
+					<p>This tool is capable of interpreting simple C constructs (excluding <code>structs</code>, <code>unions</code>, <code>enums</code>) and then visualize the memory space.</p>
+					<p>Macros are not supported, built-in functions include:</p>
+					<ul>
+						<li><code>printf</code>,</li>
+						<li><code>malloc</code>,</li>
+						<li><code>calloc</code>,</li>
+						<li><code>free</code>.</li>
+					</ul>
+
+					<p>The version of the C language is the ISO/IEC 9899:1999 (also known as <strong>C99</strong>) with some advanced keywords omitted.</p>
+
+					<h2>User Interface Overview</h2>
+
+					<p>The main interface consists of three sections:</p>
+
+					<p><img class="img img-fluid" src="doc/ui-info.drawio-en.png" alt="UI Description"><br>
+					<em>Application interface layout</em></p>
+
+					<ol>
+						<li><strong>Code Editor</strong> (left panel)</li>
+						<li><strong>Memory Visualization</strong> (right panel)</li>
+						<li><strong>Control Panel</strong> (top menu bar)</li>
+					</ol>
+
+					<h2>Control Panel Functions</h2>
+
+					<p>The control panel contains these buttons (left to right):</p>
+
+					<div class="table-responsive">
+						<table class="table table-hover table-bordered">
+							<thead class="table-light">
+								<tr>
+									<th scope="col" class="col-3">Button</th>
+									<th scope="col" class="col-9">Functionality</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><strong>Compile</strong></td>
+									<td>Compiles code and prepares for execution</td>
+								</tr>
+								<tr>
+									<td><strong>Step Forward</strong></td>
+									<td>Executes one program step</td>
+								</tr>
+								<tr>
+									<td><strong>Step Back</strong></td>
+									<td>Returns one step backward</td>
+								</tr>
+								<tr>
+									<td><strong>Reset</strong></td>
+									<td>Returns interpretation to program start</td>
+								</tr>
+								<tr>
+									<td><strong>Run</strong></td>
+									<td>Executes the entire program</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
