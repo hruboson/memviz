@@ -1668,8 +1668,10 @@ class Interpreter {
 						this.#memsim.free(value.address, value.memsize);
 						value.address = null;
 					}
-					this.#memsim.setRecordValue(value, currValue + 1, newMemregion); 
-					return currValue + 1;
+
+					const result = value.indirection > 0 ? currValue + 1*value.memsize : currValue + 1;
+					this.#memsim.setRecordValue(value, result, newMemregion);
+					return result;
 				}
 				return value + 1;
 			case '--':
@@ -1681,8 +1683,10 @@ class Interpreter {
 						this.#memsim.free(value.address, value.memsize);
 						value.address = null;
 					}
-					this.#memsim.setRecordValue(value, currValue - 1, newMemregion);
-					return currValue - 1;
+
+					const result = value.indirection > 0 ? currValue - 1*value.memsize : currValue - 1;
+					this.#memsim.setRecordValue(value, result, newMemregion);
+					return result;
 				}
 				return value - 1;
 			case '!':
