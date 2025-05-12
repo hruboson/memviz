@@ -717,7 +717,7 @@ class Memviz {
 		for (let pair of reversedPointerPairs) {
 			// first determine where to point
 			const targetCellValue = this.symbols.get(pair.to.address);
-			if (!targetCellValue) { console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); return; };
+			if (!targetCellValue) { console.warn(`Cannot visualize pointer from ${pair.from.address} to ${pair.to.address}`); continue; };
 			pair.to.cell = targetCellValue.cell;
 
 			// get x coordinates from global perspective
