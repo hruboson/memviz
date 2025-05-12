@@ -321,6 +321,8 @@ int main(){
 	
 	int* ptr = &a[1]; 	// pointer pointing to the middle of the array
 	int* ptr2 = a+1; 	// same pointer using pointer arithmetic
+	ptr++;				// moving pointer forward
+	ptr--;				// moving pointer backward
 
 	// filling array using for loop
 	int arr[5];
