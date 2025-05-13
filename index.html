@@ -249,8 +249,38 @@
 			<div id="split-ve">
 				<div class="split">
 					<div id="split-editor">
-						<div id="editor" onChange="resetEditor();">int main() {
-	printf("Hello world!");
+						<div id="editor" onChange="resetEditor();">
+/****************************************
+* ==About==								*
+*										*
+* This tool is capable of interpreting  *
+* simple C constructs (excluding 		*
+* structs, unions, enums) and then 		*
+* visualize the memory space.			*
+*										*
+* Macros are not supported.				*
+* Built-in functions include:			*
+*										*
+*    printf,							*
+*    malloc,							*
+*    calloc,							*
+*    free.								*
+*										*
+* The version of the C language 		*
+* is the ISO/IEC 9899:1999 				*
+* (also known as C99) with some 		*
+* advanced keywords omitted.			*
+*										*
+* See the examples for sample C			*
+* programs, or write your own code!		*
+*										*
+****************************************/
+
+int global, initialized = 1;
+
+int main() {
+	char* world = "world";
+	printf("Hello %s!", world);
     
     return 0;
 }</div>
