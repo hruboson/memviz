@@ -95,6 +95,31 @@
 			display: none;
 		}
 
+		.btn-with-shortcut {
+			position: relative;
+			overflow: hidden;
+			padding-right: 1.5rem;
+			border-width: 0px !important;
+		}
+
+		.btn-with-shortcut .btn-shortcut {
+			position: absolute;
+			top: 0;
+			right: 0;
+			height: 100%;
+			background-color: grey;
+			color: #d7dadd;
+			padding-left: 0.2rem;
+			padding-right: 0.2rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-top-right-radius: var(--bs-border-radius);
+			border-bottom-right-radius: var(--bs-border-radius);
+			font-size: 0.8rem;
+			pointer-events: none;
+		}
+
 		body{
 			background-color: #272822;
 			overflow: hidden;
@@ -184,11 +209,11 @@
 		<div class="row pb-2 pt-1">
 			<div class="col-6">
 				<div style="left: 10px;"> </div>
-				<button class="btn btn-primary" 		 onclick="execute(editor.getValue(), EXEOPT.COMPILE);" id="execute"><i class="bx bx-sm bx-play"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEPREV);" id="prevInstr"><i class="bx bx-sm bx-chevron-left"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTENEXT);" id="nextInstr"><i class="bx bx-sm bx-chevron-right"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEBEG);" id="begInstr"><i class="bx bx-sm bx-arrow-to-left"></i></button>
-				<button class="btn btn-primary disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEALL);" id="endInstr"><i class="bx bx-sm bx-arrow-to-right"></i></button>
+				<button class="btn btn-primary btn-with-shortcut" 		   onclick="execute(editor.getValue(), EXEOPT.COMPILE);" id="execute"><span class="btn-icon"><i class="bx bx-sm bx-play"></i></span><span class="btn-shortcut">F5</span></button>
+				<button class="btn btn-primary btn-with-shortcut disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEPREV);" id="prevInstr"><span class="btn-icon"><i class="bx bx-sm bx-chevron-left"></i></span><span class="btn-shortcut">F6</span></button>
+				<button class="btn btn-primary btn-with-shortcut disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTENEXT);" id="nextInstr"><span class="btn-icon"><i class="bx bx-sm bx-chevron-right"></i></span><span class="btn-shortcut">F7</span></button>
+				<button class="btn btn-primary btn-with-shortcut disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEBEG);" id="begInstr"><span class="btn-icon"><i class="bx bx-sm bx-arrow-to-left"></i></span><span class="btn-shortcut">F8</span></button>
+				<button class="btn btn-primary btn-with-shortcut disabled" onclick="execute(editor.getValue(), EXEOPT.EXECUTEALL);" id="endInstr"><span class="btn-icon"><i class="bx bx-sm bx-arrow-to-right"></i></span><span class="btn-shortcut">F9</span></button>
 				<button class="btn btn-primary disabled" id="programCounter">Step: ?</button>
 			</div>
 			<div class="col-6 text-end">
@@ -230,7 +255,6 @@
 						<button class="dropdown-item" type="button" onclick="setExample(free_example)">Free</button>
 						<button class="dropdown-item" type="button" onclick="setExample(multidimensional_arrays_example)">2D arrays</button>
 						<button class="dropdown-item" type="button" onclick="setExample(pointer_arrays_example)">Pointer arrays</button>
-						<button class="dropdown-item" type="button" onclick="setExample(array_search_example)">Array search</button>
 						<button class="dropdown-item" type="button" onclick="setExample(string_reversal_example)">String reversal</button>
 						<button class="dropdown-item" type="button" onclick="setExample(min_max_example)">Max/min function</button>
 						<button class="dropdown-item" type="button" onclick="setExample(array_average_example)">Average of integer array</button>
@@ -278,7 +302,7 @@
 
 int global, initialized = 1;
 
-int main() {
+int main(){
 	char* world = "world";
 	printf("Hello %s!", world);
     
@@ -659,11 +683,42 @@ Split(["#split-ve", "#split-console"], {
 
 <script>
 	// SHORTCUTS
+
 	document.addEventListener("keydown", (event) => {
-		if(event.key == "Enter"){
+		if(event.key == "F5"){
+	        event.preventDefault(); // prevent default browser shortcut
 			execute(editor.getValue(), EXEOPT.COMPILE);
 		}
 	});
+
+	document.addEventListener("keydown", (event) => {
+		if(event.key == "F6"){
+	        event.preventDefault();
+			execute(editor.getValue(), EXEOPT.EXECUTEPREV);
+		}
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if(event.key == "F7"){
+	        event.preventDefault();
+			execute(editor.getValue(), EXEOPT.EXECUTENEXT);
+		}
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if(event.key == "F8"){
+	        event.preventDefault();
+			execute(editor.getValue(), EXEOPT.EXECUTEBEG);
+		}
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if(event.key == "F9"){
+	        event.preventDefault();
+			execute(editor.getValue(), EXEOPT.EXECUTEALL);
+		}
+	});
+
 </script>
 
 <script>
