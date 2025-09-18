@@ -635,3 +635,21 @@ int main() {
 	printf("done");
     return 0;
 }`;
+
+const brackets_test = `
+int main(){
+	int a = (1 + 1) * 2;	// 4
+	int b = 1 * ((3*2)/3);	// 2
+	int c = (2/2);			// 1
+	
+	if( a - (1/1) == (6/2)){
+		printf("A");
+	}
+
+	if( b + (0.5*2) == (4-1)){
+		printf("B");
+	}
+
+	return (1 + (1 * 0)) / (2 - (4/4));
+}
+`

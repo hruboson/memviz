@@ -88,7 +88,7 @@
 
 	<script class="mocha-init">
 		mocha.setup('bdd');
-		mocha.setup({globals: ['fnc']});
+		mocha.setup({globals: ['fnc', 'testHost']}); // fnc is correct, testHost I have no idea what is (probably a library thing)
 		mocha.checkLeaks();
 	</script>
 	<script src="tests/test.util.js"></script>

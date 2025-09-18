@@ -25,6 +25,9 @@ describe("printf/console output", () => {
 	it("prints values of array", () => {
 		chai.assert.equal(interpretAll(for_loop_with_array_test).output, "01234");
 	});
+	it("prints AB", () => {
+		chai.assert.equal(interpretAll(brackets_test).output, "AB");
+	})
 });
 
 describe("interprets fully", () => {

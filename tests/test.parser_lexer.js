@@ -81,6 +81,9 @@ describe('parser correct', () => {
 	it('hello world', () => {
 		chai.expect(function() { parse(hello_world); }).to.not.throw()
 	});
+	it('brackets', () => {
+		chai.expect(function() { parse(brackets_test); }).to.not.throw()
+	});
 });
 
 /*
